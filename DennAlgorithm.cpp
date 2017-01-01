@@ -194,6 +194,8 @@ namespace Denn
 	}
 	void DennAlgorithm::execute_update_restart(size_t pass, const BestContext& ctx_best, RestartContext& ctx)
 	{
+		//if not enabled then not reset
+		if(!*m_params.m_restart_enable) return ;
 		//inc count
 		if ((ctx_best.m_eval - ctx.m_last_eval) <= (Scalar)m_params.m_restart_delta)
 		{
