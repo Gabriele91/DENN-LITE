@@ -151,6 +151,7 @@ namespace Denn
             case VariantType::VR_ULONGLONG:return std::to_string(value.get<unsigned long long>()); break;
             case VariantType::VR_FLOAT:    return std::to_string(value.get<float>());  break;
             case VariantType::VR_DOUBLE:   return std::to_string(value.get<double>());  break;
+            case VariantType::VR_LONG_DOUBLE:   return std::to_string(value.get<long double>());  break;
 
             case VariantType::VR_FLOAT_MATRIX:        return to_string_matrix<MatrixF>(value.get<MatrixF>()); break;
             case VariantType::VR_DOUBLE_MATRIX:       return to_string_matrix<MatrixD>(value.get<MatrixD>()); break;
@@ -296,6 +297,7 @@ namespace Denn
             case VariantType::VR_ULONGLONG:return std::to_string(value.get<unsigned long long>()); break;
             case VariantType::VR_FLOAT:    return std::to_string(value.get<float>());  break;
             case VariantType::VR_DOUBLE:   return std::to_string(value.get<double>());  break;
+            case VariantType::VR_LONG_DOUBLE:   return std::to_string(value.get<long double>());  break;
 
             case VariantType::VR_FLOAT_MATRIX:        return to_string_matrix<MatrixF>(value.get<MatrixF>()); break;
             case VariantType::VR_DOUBLE_MATRIX:       return to_string_matrix<MatrixD>(value.get<MatrixD>()); break;

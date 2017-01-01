@@ -32,6 +32,7 @@ namespace Denn
 
 		VR_FLOAT,
 		VR_DOUBLE,
+		VR_LONG_DOUBLE,
 
 
 
@@ -76,6 +77,7 @@ namespace Denn
 
 	template <> inline VariantType static_variant_type<float>() { return VR_FLOAT; };
 	template <> inline VariantType static_variant_type<double>() { return VR_DOUBLE; };
+	template <> inline VariantType static_variant_type<long double>() { return VR_LONG_DOUBLE; };
 
 	template <> inline VariantType static_variant_type<MatrixF>() { return VR_FLOAT_MATRIX; };
 	template <> inline VariantType static_variant_type<MatrixD>() { return VR_DOUBLE_MATRIX; };
@@ -192,6 +194,12 @@ namespace Denn
 		{
 			set_type(VR_DOUBLE);
 			m_d = d;
+		}
+		
+		Variant(long double ld)
+		{
+			set_type(VR_LONG_DOUBLE);
+			m_ld = ld;
 		}
 
 		Variant(const MatrixF& fm)
@@ -447,6 +455,7 @@ namespace Denn
 
 			float  m_f;
 			double m_d;
+			long double m_ld;
 
 			void* m_ptr;
 		};
@@ -586,6 +595,12 @@ namespace Denn
 		{
 			m_ptr = (void*)&d;
 			m_type = VR_DOUBLE;
+		}
+
+		VariantRef(const long double& ld)
+		{
+			m_ptr = (void*)&ld;
+			m_type = VR_LONG_DOUBLE;
 		}
 
 		VariantRef(const MatrixF& fm)
@@ -751,6 +766,7 @@ namespace Denn
 		case VariantType::VR_ULONGLONG:(*this) = ref.get<unsigned long long>(); break;
 		case VariantType::VR_FLOAT:    (*this) = ref.get<float>(); break;
 		case VariantType::VR_DOUBLE:   (*this) = ref.get<double>();  break;
+		case VariantType::VR_LONG_DOUBLE:   (*this) = ref.get<long double>();  break;
 
 		case VariantType::VR_FLOAT_MATRIX:      (*this)  = ref.get<MatrixF>(); break;
 		case VariantType::VR_DOUBLE_MATRIX:     (*this)  = ref.get<MatrixD>(); break;
