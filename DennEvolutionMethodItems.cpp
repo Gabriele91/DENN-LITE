@@ -152,8 +152,8 @@ namespace Denn
 				}
 			}
 			//
-			m_mutation_f  = Denn::lerp(m_mutation_cr, sum_cr / n_discarded, m_c_adapt);
-			m_mutation_cr = Denn::lerp(m_mutation_f,  sum_f2 / sum_f, m_c_adapt);
+			m_mutation_cr  = Denn::lerp(m_mutation_cr, sum_cr / n_discarded, m_c_adapt);
+			m_mutation_f   = Denn::lerp(m_mutation_f,  sum_f2 / sum_f, m_c_adapt);
 		}
 
 		virtual const VariantRef get_context_data() const override
