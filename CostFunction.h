@@ -46,9 +46,9 @@ namespace CostFunction
 		//output
 		Matrix output(x.rows(), 1);
 		////values
-		typename Matrix::Index  max_index;
+		typename Matrix::Index  max_index, i;
 		//max-max
-		for (Matrix::Index j = 0; j < x.rows(); ++j)
+		for (typename Matrix::Index j = 0; j < x.rows(); ++j)
 		{
 			x.row(j).maxCoeff(&i, &max_index);
 			output(j) = Matrix::Scalar(max_index);
@@ -65,11 +65,11 @@ namespace CostFunction
 		////values
 		typename Matrix::Index  max_index_x, max_index_y, i;
 		//max-max
-		for (Matrix::Index j = 0; j < x.rows(); ++j)
+		for (typename Matrix::Index j = 0; j < x.rows(); ++j)
 		{
 			x.row(j).maxCoeff(&i, &max_index_x);
 			y.row(j).maxCoeff(&i, &max_index_y);
-			output(j) = Matrix::Scalar(max_index_x == max_index_y);
+			output(j) = typename Matrix::Scalar(max_index_x == max_index_y);
 		}
 		//
 		return output;

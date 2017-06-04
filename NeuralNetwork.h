@@ -9,7 +9,7 @@ class NeuralNetwork
 {
 public:
 	///////////////////////////////////////
-	using LayerType		     = typename Layer;
+	using LayerType		     = Layer;
 	using MatrixType		 = typename Layer::MatrixType;
 	using ScalarType		 = typename Layer::ScalarType;
 	using LayerList			 = std::vector < Layer >;
@@ -46,11 +46,11 @@ public:
 		//no layer?
 		assert(m_layers.size());
 		//input layer
-		MatrixType output = m_layers[0].typename apply(input);
+		MatrixType output = m_layers[0].apply(input);
 		//hidden layers
 		for (size_t i = 1; i < m_layers.size(); ++i)
 		{
-			output = m_layers[i].typename apply(output);
+			output = m_layers[i].apply(output);
 		}
 		//return
 		return output;
@@ -74,22 +74,22 @@ public:
 
 	LayerIterator begin()
 	{
-		return m_layers.typename begin();
+		return m_layers.begin();
 	}	
 
 	LayerIterator end()
 	{
-		return m_layers.typename end();
+		return m_layers.end();
 	}
 
 	LayerConstIterator begin() const
 	{
-		return m_layers.typename begin();
+		return m_layers.begin();
 	}
 
 	LayerConstIterator end() const
 	{
-		return m_layers.typename end();
+		return m_layers.end();
 	}
 	/////////////////////////////////////////////////////////////////////////
 
@@ -100,7 +100,7 @@ protected:
 };
 
 //////////////////////////////////////////////////////ALIAS
-using PerceptronNetworkD = NeuralNetwork< typename PerceptronLayerD >;
-using PerceptronNetworkF = NeuralNetwork< typename PerceptronLayerF >;
+using PerceptronNetworkD = NeuralNetwork< PerceptronLayerD >;
+using PerceptronNetworkF = NeuralNetwork< PerceptronLayerF >;
 
 }
