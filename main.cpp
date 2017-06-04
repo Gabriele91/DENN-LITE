@@ -17,14 +17,14 @@ int main()
 	using namespace Denn;
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	//parallel
-	int    n_openMP_threads = 2;
-	size_t n_denn_threads = 2;
+	int    n_openMP_threads = 4;
+	size_t n_denn_threads = 8;
 	omp_set_num_threads(n_openMP_threads);
 	Eigen::setNbThreads(n_openMP_threads);
 	Eigen::initParallel();
 	ThreadPool thpool(n_denn_threads);
 	////////////////////////////////////////////////////////////////////////////////////////////////
-#if 1
+#if 0
 	auto str_attributes =
 	STR_PRINT_ATTRIBUTES(
 	using Scalar   = float;

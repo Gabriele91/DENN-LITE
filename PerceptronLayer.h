@@ -9,7 +9,7 @@ namespace Denn
 	{
 	public:
 		///////////////////////////////////////
-		using MatrixType    = typename Matrix;
+		using MatrixType    = Matrix;
 		using ScalarType    = typename Matrix::Scalar;
 		using RowVectorType = typename Eigen::Matrix<ScalarType, 1, Eigen::Dynamic>;
 		///////////////////////////////////////
@@ -44,8 +44,11 @@ namespace Denn
 		//////////////////////////////////////////////////
 		Matrix apply(const Matrix& input)
 		{
-			if (m_active_function) return m_active_function(apply_input(input));
-			else                   return apply_input(input);
+			//get output
+			Matrix layer_output = (input * m_weights).rowwise() + m_baias;
+			//activation function?
+			if (m_active_function) return m_active_function(layer_output);
+			else                   return layer_output;
 		}
 		//////////////////////////////////////////////////
 		struct WrapperArray
@@ -94,24 +97,18 @@ namespace Denn
 		
 		WrapperArray operator[](size_t i)
 		{
-			if (i & 0x1) return  WrapperArray(weights().array().data(), weights().array().size());
-			else		 return  WrapperArray(baias().array().data(), baias().array().size());
+			if (i & 0x1) return  WrapperArray(baias().array().data(), baias().array().size());
+			else		 return  WrapperArray(weights().array().data(), weights().array().size());
 		}
 
 		const WrapperArray operator[](size_t i) const
 		{
-			if (i & 0x1) return  WrapperArray(weights().array().data(), weights().array().size());
-			else		 return  WrapperArray(baias().array().data(), baias().array().size());
+			if (i & 0x1) return  WrapperArray(baias().array().data(), baias().array().size());
+			else		 return  WrapperArray(weights().array().data(), weights().array().size());
 		}
 		//////////////////////////////////////////////////
 
 	protected:
-
-		inline Matrix apply_input(const Matrix& input)
-		{
-			return (input * m_weights).rowwise() + m_baias;
-		}
-
 
 		MatrixType    m_weights;
 		RowVectorType m_baias;

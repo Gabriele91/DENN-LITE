@@ -17,7 +17,7 @@ namespace Time
 		QueryPerformanceCounter((LARGE_INTEGER *)&val);
 #else 
 		timeval time_val;
-		gettimeofday(&time_val, NULL);
+		gettimeofday(&time_val, nullptr);
 		val = (unsigned long long)time_val.tv_sec * (1000 * 1000) + (unsigned long long)time_val.tv_usec;
 #endif
 		return val;

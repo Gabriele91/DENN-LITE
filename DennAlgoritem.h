@@ -45,7 +45,7 @@ public:
 	using MatrixType   = typename Network::MatrixType;
 	using ScalarType   = typename Network::ScalarType;
 	using LayerList    = typename Network::LayerList;
-	using DataSet	   = typename DataSetRaw< ScalarType >;
+	using DataSet	   = DataSetRaw< ScalarType >;
 	using CostFunction = std::function < ScalarType (const MatrixType&, const MatrixType&) >;
 	using PromiseList  = std::vector< std::future<void> >;
 	////////////////////////////////////////////////////////////////////////

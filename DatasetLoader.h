@@ -43,7 +43,7 @@ namespace Denn
 		//get type
 		static int get_type_id() { return -1;  }
 	};
-	template<> static int DataSetRaw< float >::get_type_id()  { return 1; };
+	template<> inline int DataSetRaw< float >::get_type_id()  { return 1; };
 	template<> inline int DataSetRaw< double >::get_type_id() { return 2; };
 
 	template < class IO >
