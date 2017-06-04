@@ -27,12 +27,12 @@
 //alias
 namespace Denn
 {
-	using RowVectorD = Eigen::Matrix<double, 1, Eigen::Dynamic>;
-	using RowVectorF = Eigen::Matrix<float,  1, Eigen::Dynamic>;
-	using ColVectorD = Eigen::Matrix<double, Eigen::Dynamic, 1>;
-	using ColVectorF = Eigen::Matrix<float,  Eigen::Dynamic, 1>;
-	using MatrixD = Eigen::MatrixXd;
-	using MatrixF = Eigen::MatrixXf;
+	using RowVectorD = typename Eigen::Matrix<double, 1, Eigen::Dynamic>;
+	using RowVectorF = typename Eigen::Matrix<float,  1, Eigen::Dynamic>;
+	using ColVectorD = typename Eigen::Matrix<double, Eigen::Dynamic, 1>;
+	using ColVectorF = typename Eigen::Matrix<float,  Eigen::Dynamic, 1>;
+	using MatrixD	 = typename Eigen::MatrixXd;
+	using MatrixF	 = typename Eigen::MatrixXf;
 }
 //utilities
 namespace Denn

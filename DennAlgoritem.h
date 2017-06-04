@@ -100,7 +100,7 @@ public:
 		{
 			return [this](ScalarType x) -> ScalarType
 			{
-				return (((x + 1)*0.5) * range()) + m_min;
+				return (((x + ScalarType(1))*ScalarType(0.5)) * range()) + m_min;
 			};
 		}
 	};

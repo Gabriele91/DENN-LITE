@@ -25,7 +25,7 @@ namespace Denn
 
 		PerceptronLayer
 		(
-			  ActiveFunction< ScalarType > active_function
+			  ActiveFunction::Ptr<MatrixType> active_function
 			, size_t features
 			, size_t clazz
 		)
@@ -44,8 +44,8 @@ namespace Denn
 		//////////////////////////////////////////////////
 		Matrix apply(const Matrix& input)
 		{
-			if (m_active_function) return apply_function(apply_input(input));
-			else                  return apply_input(input);
+			if (m_active_function) return m_active_function(apply_input(input));
+			else                   return apply_input(input);
 		}
 		//////////////////////////////////////////////////
 		struct WrapperArray
@@ -112,14 +112,10 @@ namespace Denn
 			return (input * m_weights).rowwise() + m_baias;
 		}
 
-		inline Matrix apply_function(const Matrix& to_eval)
-		{
-			return to_eval.unaryExpr(m_active_function);
-		}
 
 		MatrixType    m_weights;
 		RowVectorType m_baias;
-		ActiveFunction< ScalarType > m_active_function{ nullptr };
+		ActiveFunction::Ptr<MatrixType> m_active_function{ nullptr };
 	};
 	//////////////////////////////////////////////////////ALIAS
 	using PerceptronLayerD = PerceptronLayer< MatrixD >;
