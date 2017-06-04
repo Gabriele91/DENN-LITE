@@ -17,7 +17,7 @@ int main()
 	using namespace Denn;
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	//parallel
-	size_t n_openMP_threads = 2;
+	int    n_openMP_threads = 2;
 	size_t n_denn_threads = 2;
 	omp_set_num_threads(n_openMP_threads);
 	Eigen::setNbThreads(n_openMP_threads);
@@ -42,7 +42,7 @@ int main()
 	Scalar clamp_min  = -30.0;
 	Scalar range_max  = 2.0;
 	Scalar range_min  = -2.0;
-	auto   cost_function = CostFunction::softmax_cross_entropy<MLP::MatrixType>;
+	auto   cost_function = CostFunction::softmax_cross_entropy_with_logit<MLP::MatrixType>;
 	)
 #else
 	auto str_attributes =
@@ -55,16 +55,16 @@ int main()
 	//DATASET
 	DSLoader dataset("assets/iris_105x6_5s.gz");
 	//info
-	size_t gen_tot		= 10000;
+	size_t gen_tot		= 5000;
 	size_t gen_step		= 40;
-	size_t pop_size		= 20;
+	size_t pop_size		= 30;
 	Scalar f_default	= 0.6;
 	Scalar cr_default	= 0.8;
 	Scalar clamp_max     =  15.0;
 	Scalar clamp_min     = -15.0;
-	Scalar range_max     =  1.0;
-	Scalar range_min     = -1.0;
-	auto   cost_function = CostFunction::softmax_cross_entropy<MLP::MatrixType>;
+	Scalar range_max     =  2.0;
+	Scalar range_min     = -2.0;
+	auto   cost_function = CostFunction::softmax_cross_entropy_with_logit<MLP::MatrixType>;
 	)
 #endif	
 	// NETWORK

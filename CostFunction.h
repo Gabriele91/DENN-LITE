@@ -11,7 +11,7 @@ namespace CostFunction
 	Matrix cross_entropy_by_rows(const Matrix& x, const Matrix& y)
 	{
 		const typename Matrix::Scalar const_ep = 1e-10;
-		Matrix log_y = (y.array() + const_ep).matrix().unaryExpr(&Denn::log<typename Matrix::Scalar>);
+		Matrix log_y = (y.array() + const_ep).matrix().unaryExpr(&Denn::PointFunction::log<typename Matrix::Scalar>);
 		return -((x.array() * log_y.array()).matrix().rowwise()).sum();
 	}	
 
@@ -19,7 +19,7 @@ namespace CostFunction
 	typename Matrix::Scalar cross_entropy(const Matrix& x, const Matrix& y)
 	{
 		const typename Matrix::Scalar const_ep = 1e-10 ;
-		Matrix log_y = (y.array() + const_ep).matrix().unaryExpr(&Denn::log<typename Matrix::Scalar>);
+		Matrix log_y = (y.array() + const_ep).matrix().unaryExpr(&Denn::PointFunction::log<typename Matrix::Scalar>);
 		return -(x.array() * log_y.array()).sum() / (typename Matrix::Scalar)y.rows();
 	}
 
@@ -27,8 +27,17 @@ namespace CostFunction
 	typename Matrix::Scalar softmax_cross_entropy(const Matrix& x, const Matrix& y)
 	{
 		Matrix y_softmax(y);
-		softmax(y_softmax);
+		ActiveFunction::softmax(y_softmax);
 		return cross_entropy(x, y_softmax);
+	}
+
+	template < typename Matrix >
+	typename Matrix::Scalar softmax_cross_entropy_with_logit(const Matrix& x, const Matrix& y)
+	{
+		Matrix y_softmax_logistic(y);
+		ActiveFunction::logit(y_softmax_logistic);
+		ActiveFunction::softmax(y_softmax_logistic);
+		return cross_entropy(x, y_softmax_logistic);
 	}
 
 	template < typename Matrix >

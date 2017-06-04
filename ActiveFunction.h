@@ -4,8 +4,10 @@
 
 namespace Denn
 {
+namespace PointFunction
+{
 	template < typename ScalarType >
-	using ActiveFunction = std::function< ScalarType(const ScalarType& value) >;
+	using Ptr = std::function< ScalarType(const ScalarType& input) >;
 
 	template < typename ScalarType = double >
 	inline ScalarType identity(const ScalarType& a)
@@ -22,9 +24,9 @@ namespace Denn
 	template < typename ScalarType = double >
 	inline ScalarType logistic(const ScalarType& a)
 	{
-		return ScalarType(1.0) / (ScalarType(1.0) + std::pow(Constants::e<ScalarType>(), -2 * a));
-	}
-
+		return ScalarType(1.0) / (ScalarType(1.0) + std::exp(-a));
+	}	
+	
 	template < typename ScalarType = double >
 	inline ScalarType log(const ScalarType& a)
 	{
@@ -32,9 +34,55 @@ namespace Denn
 	}
 
 	template < typename ScalarType = double >
+	inline ScalarType logit(const ScalarType& a)
+	{
+		return log<ScalarType>(a / (ScalarType(1.0) + a));
+	}
+
+	template < typename ScalarType = double >
 	inline ScalarType tanh(const ScalarType& a)
 	{
 		return std::tanh(a);
+	}
+}
+
+namespace ActiveFunction
+{
+	template < typename Matrix >
+	using Ptr = std::function< Matrix& (Matrix& input) >;
+
+	template < typename Matrix >
+	inline Matrix& identity(Matrix& inout_matrix)
+	{
+		return inout_matrix;
+	}
+
+	template < typename Matrix >
+	inline Matrix& sigmoid(Matrix& inout_matrix)
+	{
+		inout_matrix.unaryExpr(&Denn::PointFunction::sigmoid<typename Matrix::Scalar>);
+		return inout_matrix;
+	}
+
+	template < typename Matrix >
+	inline Matrix& logistic(Matrix& inout_matrix)
+	{
+		inout_matrix.unaryExpr(&Denn::PointFunction::logistic<typename Matrix::Scalar>);
+		return inout_matrix;
+	}
+
+	template < typename Matrix >
+	inline Matrix& log(Matrix& inout_matrix)
+	{
+		inout_matrix.unaryExpr(&Denn::PointFunction::log<typename Matrix::Scalar>);
+		return inout_matrix;
+	}
+
+	template < typename Matrix >
+	inline Matrix& logit(Matrix& inout_matrix)
+	{
+		inout_matrix.unaryExpr(&Denn::PointFunction::logit<typename Matrix::Scalar>);
+		return inout_matrix;
 	}
 
 	template < typename Matrix >
@@ -51,12 +99,18 @@ namespace Denn
 	}
 
 	//////////////////////////////////////////////////////ALIAS
-	static ActiveFunction<double> identityD = &identity<double>;
-	static ActiveFunction<float>  identityF = &identity<float>;
-	static ActiveFunction<double> sigmoidD  = &sigmoid <double>;
-	static ActiveFunction<float>  sigmoidF  = &sigmoid <float>;
-	static ActiveFunction<double> logisticD = &logistic<double>;
-	static ActiveFunction<float>  logisticF = &logistic<float>;
-	static ActiveFunction<double> logD		= &log<double>;
-	static ActiveFunction<float>  logF	    = &log<float>;
+	static Ptr<MatrixD>  identityD = &identity<MatrixD>;
+	static Ptr<MatrixF>  identityF = &identity<MatrixF>;
+	static Ptr<MatrixD>  sigmoidD  = &sigmoid <MatrixD>;
+	static Ptr<MatrixF>  sigmoidF  = &sigmoid <MatrixF>;
+	static Ptr<MatrixD>  logisticD = &logistic<MatrixD>;
+	static Ptr<MatrixF>  logisticF = &logistic<MatrixF>;
+	static Ptr<MatrixD>  logD	   = &log     <MatrixD>;
+	static Ptr<MatrixF>  logF	   = &log     <MatrixF>;
+	static Ptr<MatrixD>  logitD	   = &logit   <MatrixD>;
+	static Ptr<MatrixF>  logitF	   = &logit   <MatrixF>;
+	static Ptr<MatrixD>  softmaxD  = &softmax <MatrixD>;
+	static Ptr<MatrixF>  softmaxF  = &softmax <MatrixF>;
+}
+	
 }
