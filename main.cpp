@@ -34,7 +34,7 @@ int main()
 	using MLP	   = PerceptronNetworkF;
 	using LP	   = PerceptronLayerF;
 	using DSLoader = Denn::DataSetLoader< Denn::IOFileWrapper::zlib_file<> >;
-	using DennAlgo = DennAlgoritem< MLP, DSLoader >;
+	using DennAlgo = DennAlgorithm< MLP, DSLoader >;
 	DSLoader dataset("assets/ARTICLE_MNIST_5_12x4000_1s.gz");
 	size_t gen_tot    = 7000;
 	size_t gen_step   = 1000;
@@ -54,7 +54,7 @@ int main()
 	using MLP      = PerceptronNetworkD;
 	using LP	   = PerceptronLayerD;
 	using DSLoader = Denn::DataSetLoader< Denn::IOFileWrapper::zlib_file<> >;
-	using DennAlgo = DennAlgoritem< MLP, DSLoader >;
+	using DennAlgo = DennAlgorithm< MLP, DSLoader >;
 	//DATASET
 	DSLoader dataset("assets/iris_105x6_5s.gz");
 	//info

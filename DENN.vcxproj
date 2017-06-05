@@ -25,7 +25,7 @@
     <ClInclude Include="CostFunction.h" />
     <ClInclude Include="DatasetLoader.h" />
     <ClInclude Include="Denn.h" />
-    <ClInclude Include="DennAlgoritem.h" />
+    <ClInclude Include="DennAlgorithm.h" />
     <ClInclude Include="IOFileWrapper.h" />
     <ClInclude Include="NeuralNetwork.h" />
     <ClInclude Include="PerceptronLayer.h" />
