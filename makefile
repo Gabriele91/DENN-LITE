@@ -20,7 +20,7 @@ SOURCE_DEBUG_OBJS = $(addprefix $(O_DEBUG_DIR)/,$(notdir $(SOURCE_FILES:.cpp=.o)
 SOURCE_RELEASE_OBJS = $(addprefix $(O_RELEASE_DIR)/,$(notdir $(SOURCE_FILES:.cpp=.o)))
 
 # C FLAGS
-C_FLAGS = -Wall -fPIC -pthread -D_FORCE_INLINES -Ofast
+C_FLAGS = -Wall -fPIC -D_FORCE_INLINES -Ofast
 # CPP FLAGS
 CC_FLAGS = -lstdc++ -std=c++14 -I $(DIPS_INCLUDE)
 # RELEASE_FLAGS
@@ -28,11 +28,11 @@ RELEASE_FLAGS = -Ofast
 # DEBUG_FLAGS
 DEBUG_FLAGS = -g -D_DEBUG
 # Linker
-LDFLAGS += -lz -lm -lpthread -lutil 
+LDFLAGS += -lz -lm -lutil 
 
 # Linux flags
 ifeq ($(shell uname -s),Linux)
-C_FLAGS += -fopenmp -D_OPEN_MP_SUPPORTED_
+C_FLAGS += -fopenmp -D_OPEN_MP_SUPPORTED_ -lpthread 
 endif
 
 # MacOS flags
