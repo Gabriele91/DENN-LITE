@@ -3,6 +3,7 @@
         "chrono": "cpp",
         "limits": "cpp",
         "array": "cpp",
-        "core": "cpp"
+        "core": "cpp",
+        "cstddef": "cpp"
     }
 }
