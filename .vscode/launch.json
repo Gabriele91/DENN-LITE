@@ -5,7 +5,7 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceRoot}/DENN",
+            "program": "${workspaceRoot}/Debug/DENN",
             "args": [],
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}",

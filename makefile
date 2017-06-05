@@ -1,26 +1,32 @@
 #Input
 MKDIR_P       ?=mkdir -p
-CC            ?=g++
+COMPILER      ?=g++
 TOP           ?=$(shell pwd)
 
 #program name
 S_DIR  = $(TOP)/
 S_INC  = $(TOP)/
-O_DIR  = $(TOP)/obj/
-O_PROG = $(TOP)/DENN
+O_DEBUG_DIR    = $(TOP)/Debug/obj
+O_RELEASE_DIR  = $(TOP)/Release/obj
+O_DEBUG_PROG   = $(TOP)/Debug/DENN
+O_RELEASE_PROG = $(TOP)/Release/DENN
 
 #global include
 DIPS_INCLUDE = $(TOP)/dips/include/
 
 # C++ files
-SOURCE_FILES = $(S_DIR)/main.cpp TicksTime.cpp
-SOURCE_OBJS = $(addprefix $(O_DIR)/,$(notdir $(SOURCE_FILES:.cpp=.o)))
+SOURCE_FILES = $(S_DIR)/main.cpp $(S_DIR)/TicksTime.cpp
+SOURCE_DEBUG_OBJS = $(addprefix $(O_DEBUG_DIR)/,$(notdir $(SOURCE_FILES:.cpp=.o)))
+SOURCE_RELEASE_OBJS = $(addprefix $(O_RELEASE_DIR)/,$(notdir $(SOURCE_FILES:.cpp=.o)))
 
 # C FLAGS
 C_FLAGS = -Wall -fPIC -pthread -D_FORCE_INLINES -fopenmp -Ofast
 # CPP FLAGS
 CC_FLAGS = -lstdc++ -std=c++14 -I $(DIPS_INCLUDE)
-
+# RELEASE_FLAGS
+RELEASE_FLAGS = -Ofast
+# DEBUG_FLAGS
+DEBUG_FLAGS = -g -D_DEBUG
 # Linker
 LDFLAGS += -lz -lm -lpthread -lutil 
 
@@ -34,26 +40,45 @@ COLOR_MAGENTA = 5
 COLOR_CYAN = 6
 COLOR_WHITE = 7
 
-all: directories denn
+all: directories debug release
 
-directories: ${O_DIR}
+directories: ${O_DEBUG_DIR} ${O_RELEASE_DIR}
 
-denn: directories $(SOURCE_OBJS)
-	$(CC) $(C_FLAGS) $(CC_FLAGS) $(SOURCE_OBJS) -o $(O_PROG) $(LDFLAGS)
+debug: directories $(SOURCE_DEBUG_OBJS)
+	$(COMPILER) $(C_FLAGS) $(CC_FLAGS) $(SOURCE_DEBUG_OBJS) $(LDFLAGS) -o $(O_DEBUG_PROG)
 	
-# makedir
-${O_DIR}:
-	$(call colorecho,$(COLOR_GREEN),"[ Create $(O_DIR) directory ]")
-	@${MKDIR_P} ${O_DIR}
+release: directories $(SOURCE_RELEASE_OBJS)
+	$(COMPILER) $(C_FLAGS) $(CC_FLAGS) $(SOURCE_RELEASE_OBJS) $(LDFLAGS) -o $(O_RELEASE_PROG)
 
-$(O_DIR)/%.o: $(S_DIR)/%.cpp
-	$(call colorecho,$(COLOR_GREEN),"[ Make object $(@) ]")
-	$(CC) $(C_FLAGS) $(CC_FLAGS) -c $< -o $@
+# makedir
+${O_DEBUG_DIR}:
+	$(call colorecho,$(COLOR_GREEN),"[ Create $(O_DEBUG_DIR) directory ]")
+	@${MKDIR_P} ${O_DEBUG_DIR}
+
+# makedir
+${O_RELEASE_DIR}:
+	$(call colorecho,$(COLOR_GREEN),"[ Create $(O_RELEASE_DIR) directory ]")
+	@${MKDIR_P} ${O_RELEASE_DIR}
+
+$(O_DEBUG_DIR)/%.o: $(S_DIR)/%.cpp
+	$(call colorecho,$(COLOR_GREEN),"[ Make debug object $(@) ]")
+	$(COMPILER) $(C_FLAGS) $(CC_FLAGS) $(DEBUG_FLAGS) -c $< -o $@
+
+$(O_RELEASE_DIR)/%.o: $(S_DIR)/%.cpp
+	$(call colorecho,$(COLOR_GREEN),"[ Make release object $(@) ]")
+	$(COMPILER) $(C_FLAGS) $(CC_FLAGS) $(RELEASE_FLAGS) -c $< -o $@
 
 # Clean
-clean:
-	$(call colorecho,$(COLOR_MAGENTA),"[ Delete obj files ]")
-	@rm -f -R $(O_DIR)
-	$(call colorecho,$(COLOR_MAGENTA),"[ Delete executable files ]")
-	@rm -f $(O_PROG)
+clean: clean_debug clean_release
 
+clean_debug:
+	$(call colorecho,$(COLOR_MAGENTA),"[ Delete debug obj files ]")
+	@rm -f -R $(O_DEBUG_DIR)
+	$(call colorecho,$(COLOR_MAGENTA),"[ Delete debug executable files ]")
+	@rm -f $(O_DEBUG_PROG)
+	
+clean_release:
+	$(call colorecho,$(COLOR_MAGENTA),"[ Delete release obj files ]")
+	@rm -f -R $(O_RELEASE_DIR)
+	$(call colorecho,$(COLOR_MAGENTA),"[ Delete release executable files ]")
+	@rm -f $(O_RELEASE_PROG)
