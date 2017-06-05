@@ -5,6 +5,13 @@
 
 namespace Denn
 {
+	enum DataSetType
+	{
+		DS_UNKNOWN = -1,
+		DS_FLOAT   = 1,
+		DS_DOUBLE  = 2
+	};
+
 	ASPACKED(struct DataSetHeader
 	{
 		unsigned short m_version;
@@ -41,10 +48,10 @@ namespace Denn
 		Eigen::Matrix< ScalarType, Eigen::Dynamic, Eigen::Dynamic > m_features;
 		Eigen::Matrix< ScalarType, Eigen::Dynamic, Eigen::Dynamic > m_labels;
 		//get type
-		static int get_type_id() { return -1;  }
+		static int get_type_id() { return DataSetType::DS_UNKNOWN;  }
 	};
-	template<> inline int DataSetRaw< float >::get_type_id()  { return 1; };
-	template<> inline int DataSetRaw< double >::get_type_id() { return 2; };
+	template<> inline int DataSetRaw< float >::get_type_id()  { return DataSetType::DS_FLOAT; };
+	template<> inline int DataSetRaw< double >::get_type_id() { return DataSetType::DS_DOUBLE; };
 
 	template < class IO >
 	class DataSetLoader
