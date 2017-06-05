@@ -43,9 +43,9 @@ namespace Denn
 			using return_type = typename std::result_of<function(arguments...)>::type;
 			//make task
 			auto task = std::make_shared< std::packaged_task<return_type()> >
-				(
-					std::bind(std::forward<function>(f), std::forward<arguments>(args)...)
-					);
+			(
+				std::bind(std::forward<function>(f), std::forward<arguments>(args)...)
+			);
 			//return future result
 			std::future<return_type> res = task->get_future();
 			{
