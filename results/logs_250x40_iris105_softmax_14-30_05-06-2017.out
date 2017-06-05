@@ -10006,7 +10006,7 @@ Attributes:
  using MLP = PerceptronNetworkD;
  using LP = PerceptronLayerD;
  using DSLoader = Denn::DataSetLoader< Denn::IOFileWrapper::zlib_file<> >;
- using DennAlgo = DennAlgoritem< MLP, DSLoader >;
+ using DennAlgo = DennAlgorithm< MLP, DSLoader >;
  DSLoader dataset("assets/iris_105x6_5s.gz");
  size_t gen_tot = 10000;
  size_t gen_step = 40;

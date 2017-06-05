@@ -17,4 +17,4 @@
 #include  "DatasetLoader.h"
 
 //Denn
-#include  "DennAlgoritem.h"
+#include  "DennAlgorithm.h"

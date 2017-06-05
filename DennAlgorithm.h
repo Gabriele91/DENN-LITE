@@ -37,7 +37,7 @@ protected:
 };
 
 template< typename Network, typename DataSetLoader >
-class DennAlgoritem
+class DennAlgorithm
 {
 public:
 	////////////////////////////////////////////////////////////////////////
@@ -241,7 +241,7 @@ public:
 		}
 	};
 	////////////////////////////////////////////////////////////////////////
-	DennAlgoritem
+	DennAlgorithm
 	(
 		  DataSetLoader* dataset_loader
 		, size_t np

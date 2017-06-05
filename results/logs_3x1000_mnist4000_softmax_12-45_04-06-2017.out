@@ -3004,7 +3004,7 @@ Attributes:
 	using MLP	   = PerceptronNetworkF;
 	using LP	   = PerceptronLayerF;
 	using DSLoader = Denn::DataSetLoader< Denn::IOFileWrapper::zlib_file<> >;
-	using DennAlgo = DennAlgoritem< MLP, DSLoader >;
+	using DennAlgo = DennAlgorithm< MLP, DSLoader >;
 	//DATASET
 	DSLoader dataset("assets/ARTICLE_MNIST_5_12x4000_1s.gz");
 	//info

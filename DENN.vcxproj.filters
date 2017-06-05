@@ -48,7 +48,7 @@
     <ClInclude Include="ThreadPool.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="DennAlgoritem.h">
+    <ClInclude Include="DennAlgorithm.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="Denn.h">
