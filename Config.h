@@ -33,6 +33,9 @@ namespace Denn
 	using ColVectorF = typename Eigen::Matrix<float,  Eigen::Dynamic, 1>;
 	using MatrixD	 = typename Eigen::MatrixXd;
 	using MatrixF	 = typename Eigen::MatrixXf;
+
+	template < typename Scalar >
+	using Matrix = typename Eigen::Matrix< Scalar, Eigen::Dynamic, Eigen::Dynamic > ;
 }
 //utilities
 namespace Denn

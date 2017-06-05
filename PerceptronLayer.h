@@ -68,13 +68,31 @@ namespace Denn
 			{
 				return m_data[i];
 			}
-
-			ScalarType operator()(size_t i) const
+			
+			ScalarType& operator[](size_t i)
 			{
 				return m_data[i];
 			}
 
-			ScalarType& operator[](size_t i)
+		protected:
+
+			ScalarType* m_data{ nullptr };
+			size_t		m_size{ 0       };
+		};
+		struct ConstWrapperArray
+		{
+			ConstWrapperArray(const ScalarType* ptr_array, size_t size)
+			{
+				m_data = ptr_array;
+				m_size = size;
+			}
+
+			size_t size() const
+			{
+				return m_size;
+			}
+
+			ScalarType operator()(size_t i) const
 			{
 				return m_data[i];
 			}
@@ -86,8 +104,8 @@ namespace Denn
 
 		protected:
 
-			ScalarType* m_data{ nullptr };
-			size_t		m_size{ 0       };
+			const ScalarType* m_data{ nullptr };
+			size_t		m_size{ 0 };
 		};
 
 		constexpr size_t size() const
@@ -101,10 +119,10 @@ namespace Denn
 			else		 return  WrapperArray(weights().array().data(), weights().array().size());
 		}
 
-		const WrapperArray operator[](size_t i) const
+		const ConstWrapperArray operator[](size_t i) const
 		{
-			if (i & 0x1) return  WrapperArray(baias().array().data(), baias().array().size());
-			else		 return  WrapperArray(weights().array().data(), weights().array().size());
+			if (i & 0x1) return  ConstWrapperArray(baias().array().data(), baias().array().size());
+			else		 return  ConstWrapperArray(weights().array().data(), weights().array().size());
 		}
 		//////////////////////////////////////////////////
 

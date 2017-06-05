@@ -102,5 +102,7 @@ protected:
 //////////////////////////////////////////////////////ALIAS
 using PerceptronNetworkD = NeuralNetwork< PerceptronLayerD >;
 using PerceptronNetworkF = NeuralNetwork< PerceptronLayerF >;
+template < typename Matrix >
+using PerceptronNetwork = NeuralNetwork< PerceptronLayer< Matrix > >;
 
 }

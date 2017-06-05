@@ -36,6 +36,23 @@ protected:
 
 };
 
+class RuntimeOutput : public std::enable_shared_from_this< RuntimeOutput >
+{
+public:
+	using SPtr = std::shared_ptr<RuntimeOutput>;
+
+	RuntimeOutput() {}
+
+	SPtr get_ptr(){ return shared_from_this(); }
+
+	virtual bool is_enable()	   { return true;     }
+	virtual std::ostream& output() { return std::cerr; }
+
+
+};
+
+#define DENN_RUNTIME_OUTPUT(x,y) if((x)->is_enable()){ (x)->output() << y << std::endl; }
+
 template< typename Network, typename DataSetLoader >
 class DennAlgorithm
 {
@@ -134,6 +151,10 @@ public:
 		{
 			return m_network[i];
 		}
+		const LayerType& operator[](size_t i) const
+		{
+			return m_network[i];
+		}
 		size_t size() const
 		{
 			return m_network.size();
@@ -188,10 +209,18 @@ public:
 		{
 			return m_pop_buffer[m_current];
 		}
+		const Population& current() const
+		{
+			return m_pop_buffer[m_current];
+		}
 		//next
 		Population& next()
 		{
 			return m_pop_buffer[(m_current+1)%2];
+		}
+		const Population& next() const
+		{
+			return m_pop_buffer[(m_current + 1) % 2];
 		}
 		//swap
 		void swap()
@@ -252,16 +281,18 @@ public:
 		, RestartInfo     restart_info		 = RestartInfo()
 		, RandomRangeInfo random_range_info  = RandomRangeInfo()
 		, CostFunction    target_function	 = Denn::CostFunction::cross_entropy<MatrixType>
+		, RuntimeOutput::SPtr      output    = std::make_shared<RuntimeOutput>()
 	) 
 	{
 		m_dataset_loader    = dataset_loader;
 		m_np			    = np;
-		m_default		    = Individual( f_cr_jde.m_f, f_cr_jde.m_cr, nn_default );
+		m_default		    = Individual(f_cr_default.m_f, f_cr_default.m_cr, nn_default );
 		m_f_cr_jde_info     = f_cr_jde;
 		m_clamp_info	    = clamp_info;
 		m_restart_info      = restart_info;
 		m_random_range_info = random_range_info;
 		m_target_function   = target_function;
+		m_output			= output;
 	}	
 	
 	//init
@@ -294,6 +325,7 @@ public:
 		{
 			Individual new_individual = m_default;
 			//compute
+			jde(i, new_individual);
 			rand_one_bin(i, new_individual);
 			//eval
 			auto y                = new_individual.m_network.apply(m_dataset_batch.m_features);
@@ -329,6 +361,7 @@ public:
 			{ 
 				Individual new_individual = m_default;
 				//compute
+				jde(i, new_individual);
 				rand_one_bin(i, new_individual);
 				//eval
 				auto y				  = new_individual.m_network.apply(m_dataset_batch.m_features);
@@ -371,8 +404,14 @@ public:
 		{
 			for (size_t sub_pass = 0; sub_pass != n_sub_pass; ++sub_pass)
 			{
-				if (thpool) parallel_pass(*thpool); else serial_pass();
-				MESSAGE("pass: " << pass << ", sub_pass: " << sub_pass << " -> " << (n_sub_pass * pass + sub_pass))
+				if (thpool)	  parallel_pass(*thpool); else serial_pass();
+				//output
+				DENN_RUNTIME_OUTPUT(m_output, 
+				"pass: "       << pass <<
+				", sub_pass: " << sub_pass <<
+				" -> "         << (n_sub_pass * pass + sub_pass) 
+				)
+
 			}
 			//find best
 			ScalarType curr_eval;
@@ -476,22 +515,34 @@ public:
 protected:
 
 	/////////////////////////////////////////////////////////////////
-	ScalarType f_clamp(ScalarType value)
+	ScalarType f_clamp(ScalarType value) const
 	{
 		return clamp(value, m_clamp_info.m_min, m_clamp_info.m_max);
 	}
 	/////////////////////////////////////////////////////////////////
-	bool rand_one_bin(int target, Individual& i_final)
+	bool jde(int target, Individual& i_final) const
 	{
 		//vectors
-		Population& population = m_population.current();
-		Individual& i_target   = population[target];
+		const Population& population = m_population.current();
+		const Individual& i_target = population[target];
 		//f JDE
-		if (RandomIndices::random_0_to_1() < m_f_cr_jde_info.m_f)    i_final.m_f  = ScalarType(RandomIndices::random_0_to_1() * 2.0);
-		else														 i_final.m_f  = i_target.m_f;
+		if (RandomIndices::random_0_to_1() < m_f_cr_jde_info.m_f)   
+			i_final.m_f = ScalarType(RandomIndices::random_0_to_1() * 2.0);
+		else														
+			i_final.m_f = i_target.m_f;
 		//cr JDE
-		if (RandomIndices::random_0_to_1() < m_f_cr_jde_info.m_cr)   i_final.m_cr = ScalarType(RandomIndices::random_0_to_1());
-		else														 i_final.m_cr = i_target.m_cr;
+		if (RandomIndices::random_0_to_1() < m_f_cr_jde_info.m_cr)   
+			i_final.m_cr = ScalarType(RandomIndices::random_0_to_1());
+		else														
+			i_final.m_cr = i_target.m_cr;
+
+		return true;
+	}
+	bool rand_one_bin(int target, Individual& i_final) const
+	{
+		//vectors
+		const Population& population = m_population.current();
+		const Individual& i_target   = population[target];
 		//alias
 		const auto& f  = i_final.m_f;
 		const auto& cr = i_final.m_cr;
@@ -506,9 +557,9 @@ protected:
 				//do rand
 				generator.DoRand(target);
 				//do cross + mutation
-				Individual& nn_a = population[generator[0]];
-				Individual& nn_b = population[generator[1]];
-				Individual& nn_c = population[generator[2]];
+				const Individual& nn_a = population[generator[0]];
+				const Individual& nn_b = population[generator[1]];
+				const Individual& nn_c = population[generator[2]];
 				//
 				auto w_target = i_target[i_layer][m];
 				auto w_final  = i_final[i_layer][m];
@@ -541,15 +592,16 @@ protected:
 	DoubleBufferPopulation  m_population;
 	PromiseList			    m_promises;
 	//info
-	Individual		 m_default;
-	DataSetLoader*   m_dataset_loader;
-	DataSet			 m_dataset_batch;
-	size_t			 m_np;
-	JDEFCrInfo       m_f_cr_jde_info;
-	ClampInfo        m_clamp_info;
-	RestartInfo	     m_restart_info;
-	RandomRangeInfo  m_random_range_info;
-	CostFunction     m_target_function;
+	Individual				m_default;
+	DataSetLoader*		    m_dataset_loader;
+	DataSet				    m_dataset_batch;
+	size_t					m_np;
+	JDEFCrInfo			    m_f_cr_jde_info;
+	ClampInfo			    m_clamp_info;
+	RestartInfo			    m_restart_info;
+	RandomRangeInfo		    m_random_range_info;
+	CostFunction			m_target_function;
+	RuntimeOutput::SPtr     m_output;
 };
 
 }
