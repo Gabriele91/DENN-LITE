@@ -109,7 +109,11 @@ public:
 			//compute size
 			compute_size();
 			//gz file
-			m_file = gzdopen(::fileno(m_file_raw), mode_cptr);
+            #ifdef __APPLE__
+            m_file = gzopen(pathfile_cptr, mode_cptr); 
+            #else 
+			m_file = gzdopen(::fileno(m_file_raw), mode_cptr); 
+            #endif
 			//test
 			if (!m_file)
 			{
@@ -194,6 +198,8 @@ protected:
 		m_file_size = 0;
 		//test
 		if (!m_file_raw) return;
+        //return pos
+        size_t pos = std::ftell(m_file_raw);
 		//move
 		std::fseek(m_file_raw, -4, SEEK_END);
 		//read
@@ -203,8 +209,8 @@ protected:
 			//return
 			m_file_size = (unsigned int)((buf_size[3] << 24) | (buf_size[2] << 16) | (buf_size[1] << 8) | buf_size[0]);
 		}
-		//reset pos
-		std::fseek(m_file_raw, 0, SEEK_SET);
+		//move
+		std::fseek(m_file_raw, pos, SEEK_SET);
 	}
 
 };

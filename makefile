@@ -20,7 +20,7 @@ SOURCE_DEBUG_OBJS = $(addprefix $(O_DEBUG_DIR)/,$(notdir $(SOURCE_FILES:.cpp=.o)
 SOURCE_RELEASE_OBJS = $(addprefix $(O_RELEASE_DIR)/,$(notdir $(SOURCE_FILES:.cpp=.o)))
 
 # C FLAGS
-C_FLAGS = -Wall -fPIC -D_FORCE_INLINES -Ofast
+C_FLAGS = -Wall -fPIC -D_FORCE_INLINES
 # CPP FLAGS
 CC_FLAGS = -lstdc++ -std=c++14 -I $(DIPS_INCLUDE)
 # RELEASE_FLAGS
