@@ -17,7 +17,7 @@ int main()
 	using namespace Denn;
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	//parallel (OpenMP)
-	#ifdef D_OPEN_MP_SUPPORTED_
+	#ifdef _OPEN_MP_SUPPORTED_
 	int    n_openMP_threads = 4;
 	omp_set_num_threads(n_openMP_threads);
 	Eigen::setNbThreads(n_openMP_threads);
@@ -27,7 +27,7 @@ int main()
 	size_t n_denn_threads = 8;
 	ThreadPool thpool(n_denn_threads);
 	////////////////////////////////////////////////////////////////////////////////////////////////
-#if 0
+#if 1
 	auto str_attributes =
 	STR_PRINT_ATTRIBUTES(
 	using Scalar   = float;
