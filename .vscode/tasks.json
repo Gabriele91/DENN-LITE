@@ -56,5 +56,60 @@
                 ]
             }
         ]
+    },    
+    "osx": {
+        "command": "bash",
+        "args": ["-c"],
+        "isShellCommand": true,
+        "showOutput": "always",
+        "suppressTaskName": true,
+        "options": {
+            "cwd": "${workspaceRoot}"
+        },
+        "tasks": [
+            {
+                "taskName": "make",
+                "args": [
+                    "make"
+                ],
+                "isBuildCommand": true
+            },
+            {
+                "taskName": "release",
+                "args": [
+                    "make release"
+                ]
+            },
+            {
+                "taskName": "debug",
+                "args": [
+                    "make debug"
+                ]
+            },
+            {
+                "taskName": "rebuild",
+                "args": [
+                    "make clean && make"
+                ]
+            },
+            {
+                "taskName": "rebuild release",
+                "args": [
+                    "make clean_release && make release"
+                ]
+            },
+            {
+                "taskName": "rebuild debug",
+                "args": [
+                    "make clean_debug && make debug"
+                ]
+            },
+            {
+                "taskName": "clean",
+                "args": [
+                    "make clean"
+                ]
+            }
+        ]
     }
 }
