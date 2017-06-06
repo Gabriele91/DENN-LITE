@@ -15,24 +15,24 @@ O_RELEASE_PROG = $(TOP)/Release/DENN
 DIPS_INCLUDE = $(TOP)/dips/include/
 
 # C++ files
-SOURCE_FILES = $(S_DIR)/main.cpp $(S_DIR)/TicksTime.cpp
+SOURCE_FILES = $(S_DIR)/main.cpp $(S_DIR)/TicksTime.cpp $(S_DIR)/RandomIndices.cpp
 SOURCE_DEBUG_OBJS = $(addprefix $(O_DEBUG_DIR)/,$(notdir $(SOURCE_FILES:.cpp=.o)))
 SOURCE_RELEASE_OBJS = $(addprefix $(O_RELEASE_DIR)/,$(notdir $(SOURCE_FILES:.cpp=.o)))
 
 # C FLAGS
-C_FLAGS = -Wall -fPIC -D_FORCE_INLINES
+C_FLAGS = -fPIC -D_FORCE_INLINES
 # CPP FLAGS
 CC_FLAGS = -lstdc++ -std=c++14 -I $(DIPS_INCLUDE)
 # RELEASE_FLAGS
 RELEASE_FLAGS = -Ofast
 # DEBUG_FLAGS
-DEBUG_FLAGS = -g -D_DEBUG
+DEBUG_FLAGS = -g -D_DEBUG -Wall 
 # Linker
 LDFLAGS += -lz -lm -lutil 
 
 # Linux flags
 ifeq ($(shell uname -s),Linux)
-C_FLAGS += -fopenmp -D_OPEN_MP_SUPPORTED_ -lpthread 
+C_FLAGS += -fopenmp -lpthread 
 endif
 
 # MacOS flags
@@ -55,6 +55,12 @@ COLOR_WHITE = 7
 all: directories debug release
 
 directories: ${O_DEBUG_DIR} ${O_RELEASE_DIR}
+
+rebuild: directories clean debug release
+
+rebuild_debug: directories clean_debug debug
+
+rebuild_debug: directories clean_release release
 
 debug: directories $(SOURCE_DEBUG_OBJS)
 	$(COMPILER) $(C_FLAGS) $(CC_FLAGS) $(SOURCE_DEBUG_OBJS) $(LDFLAGS) -o $(O_DEBUG_PROG)
