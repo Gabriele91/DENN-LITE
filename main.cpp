@@ -440,7 +440,7 @@ int main(int argc,const char** argv)
 		-jcr 0.1 \
 		-cmin -15 \
 		-cmax 15 \
-		-rmin -2.0 \ 
+		-rmin -2.0 \
 		-rmax 2.0 \
 		-i "assets/iris_105x6_5s.gz" \
 		-o "iris_105x6_5s.json" \

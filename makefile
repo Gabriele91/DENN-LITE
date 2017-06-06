@@ -32,7 +32,8 @@ LDFLAGS += -lz -lm -lutil
 
 # Linux flags
 ifeq ($(shell uname -s),Linux)
-C_FLAGS += -fopenmp -lpthread 
+# too slow -fopenmp 
+C_FLAGS += -lpthread -pthread 
 endif
 
 # MacOS flags
