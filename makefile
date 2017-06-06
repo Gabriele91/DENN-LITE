@@ -56,11 +56,11 @@ all: directories debug release
 
 directories: ${O_DEBUG_DIR} ${O_RELEASE_DIR}
 
-rebuild: directories clean debug release
+rebuild: clean directories debug release
 
-rebuild_debug: directories clean_debug debug
+rebuild_debug: clean_debug directories debug
 
-rebuild_debug: directories clean_release release
+rebuild_debug: clean_release directories release
 
 debug: directories $(SOURCE_DEBUG_OBJS)
 	$(COMPILER) $(C_FLAGS) $(CC_FLAGS) $(SOURCE_DEBUG_OBJS) $(LDFLAGS) -o $(O_DEBUG_PROG)
