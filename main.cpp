@@ -445,7 +445,7 @@ int main(int argc,const char** argv)
 		-i "assets/iris_105x6_5s.gz" \
 		-o "iris_105x6_5s.json" \
 		-omp 2 \
-		-tp 8
+		-tp 4
 		///////////////////////////////////////////////////////////MNIST
 		-t 7000 \
 		-s 1000 \
@@ -454,14 +454,14 @@ int main(int argc,const char** argv)
 		-cr 0.9 \
 		-jf 0.1 \
 		-jcr 0.1 \
-		-cmin -30.0 \ 
+		-cmin -30.0 \
 		-cmax 30.0 \
 		-rmin -2.0 \
 		-rmax 2.0 \
 		-i "assets/ARTICLE_MNIST_5_12x4000_1s.gz" \
 		-o "ARTICLE_MNIST_5_12x4000_1s.json" \
 		-omp 4 \
-		-tp 8
+		-tp 4
 	*/
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	using ScalarArgument = double;
@@ -491,10 +491,10 @@ int main(int argc,const char** argv)
 	std::ofstream		  ofile((const std::string&)arguments.m_output_filename);
 	LineInput::OutputData output(ofile);
 	////////////////////////////////////////////////////////////////////////////////////////////////
-	//auto runtime_out = std::make_shared<Denn::RuntimeOutput>(); //default std::cerr
+	auto runtime_out = std::make_shared<Denn::RuntimeOutput>(); //default std::cerr
 	//auto runtime_out = std::make_shared<LineInput::FileRuntimeOutput>("runtime.log")->get_ptr(); //file
 	//auto runtime_out = std::make_shared<LineInput::CoutRuntimeOutput>()->get_ptr(); //cout
-	auto runtime_out = std::make_shared<LineInput::VoidRuntimeOutput>()->get_ptr(); //none
+	//auto runtime_out = std::make_shared<LineInput::VoidRuntimeOutput>()->get_ptr(); //none
 	//double or float?
 	switch (dataset.get_main_header_info().m_type)
 	{
