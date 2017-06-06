@@ -303,7 +303,7 @@ namespace LineInput
 			m_ostream << "\t\t \"restart_delta\" : " << *args.m_restart_delta << "," << std::endl;
 			m_ostream << "\t\t \"threads_omp\" : "   << *args.m_threads_omp   << "," << std::endl;
 			m_ostream << "\t\t \"threads_pop\" : "   << *args.m_threads_pop   <<		std::endl;
-			m_ostream << "\t}" << std::endl;
+			m_ostream << "\t}," << std::endl;
 		}
 
 		template < typename ScalarType >
