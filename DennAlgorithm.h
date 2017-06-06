@@ -122,8 +122,19 @@ public:
 		}
 	};
 	////////////////////////////////////////////////////////////////////////
-	struct Individual
+	class Individual : public std::enable_shared_from_this< Individual >
 	{
+	public:
+		//ref to individual
+		using SPtr = std::shared_ptr<Individual>;
+		//return ptr
+		SPtr get_ptr(){ return this->shared_from_this(); }
+		//shared copy
+		SPtr copy() const
+		{
+			return std::make_shared<Individual>(*this);
+		}
+		//attributes
 		ScalarType m_eval{ std::numeric_limits<ScalarType>::max() };
 		ScalarType m_f   { 1.0 };
 		ScalarType m_cr  { 1.0 };
@@ -161,7 +172,7 @@ public:
 		}
 	};
 	//types
-	using Population = std::vector < Individual >;
+	using Population = std::vector < typename Individual::SPtr >;
 	//population pass
 	struct DoubleBufferPopulation
 	{
@@ -170,7 +181,7 @@ public:
 		//init population
 		void init(
 			  size_t np
-			, Individual& i_default
+			, const typename Individual::SPtr& i_default
 			, const DataSet& dataset
 			, const RandomRangeInfo& random_range_info
 			, CostFunction target_function
@@ -179,17 +190,23 @@ public:
 			//init counter
 			m_current = 0;
 			//init pop
-			for (Population& pop : m_pop_buffer)
+			for (Population& population : m_pop_buffer)
 			{
-				pop = Population(np, i_default);
+				//size
+				population.resize(np);
+				//init
+				for (typename Individual::SPtr& i_individual : population)
+				{
+					i_individual = i_default->copy();
+				}
 			}
 			//ref to current
 			Population& population = current();
 			//random exp
 			auto random_exp = random_range_info.get_unary_expr();
 			//random init
-			for (Individual& individual : population)
-			for (LayerType& layer : individual.m_network)
+			for (typename Individual::SPtr& individual : population)
+			for (LayerType& layer : individual->m_network)
 			{
 				layer.weights().setRandom();
 				layer.baias().setRandom();
@@ -200,8 +217,8 @@ public:
 			//eval
 			for (size_t i = 0; i != population.size(); ++i)
 			{
-				auto y = population[i].m_network.apply(dataset.m_features);
-				population[i].m_eval = target_function(dataset.m_labels, y);
+				auto y = population[i]->m_network.apply(dataset.m_features);
+				population[i]->m_eval = target_function(dataset.m_labels, y);
 			}
 		}
 		//current
@@ -230,42 +247,43 @@ public:
 		//restart
 		void restart
 		(
-			  const Individual& best
-			, const Individual& i_default
+			  typename Individual::SPtr best
+			, const typename Individual::SPtr& i_default
 			, const DataSet& dataset
 			, const RandomRangeInfo& random_range_info
 			, CostFunction target_function
 		)
 		{
-			//get np
-			size_t np = current().size();
-			//init pop
-			for (Population& pop : m_pop_buffer)
-			{
-				pop = Population(np, i_default);
-			}
 			//ref to current
 			Population& population = current();
 			//random exp
 			auto random_exp = random_range_info.get_unary_expr();
 			//random init
-			for (Individual& individual : population)
-			for (LayerType& layer : individual.m_network)
+			for (typename Individual::SPtr& individual : population)
 			{
-				layer.weights().setRandom();
-				layer.baias().setRandom();
+				//Copy default params
+				individual->m_f=i_default->m_f;
+				individual->m_cr=i_default->m_cr;
+				individual->m_eval=i_default->m_eval;
+				//Reinit layers
+				for (LayerType& layer : individual->m_network)
+				{
+					layer.weights().setRandom();
+					layer.baias().setRandom();
 
-				layer.weights() = layer.weights().unaryExpr(random_exp);
-				layer.baias()   = layer.baias().unaryExpr(random_exp);
+					layer.weights() = layer.weights().unaryExpr(random_exp);
+					layer.baias()   = layer.baias().unaryExpr(random_exp);
+				}
 			}
 			//add best
-			size_t rand_i = RandomIndices::irand(np);
-			current()[rand_i] = best;
+			size_t rand_i = RandomIndices::irand(int(population.size()));
+			//must copy, The Best Individual can't to be changed during the DE process
+			population[rand_i] = best->copy();
 			//eval
 			for (size_t i = 0; i != population.size(); ++i)
 			{
-				auto y = population[i].m_network.apply(dataset.m_features);
-				population[i].m_eval = target_function(dataset.m_labels, y);
+				auto y = population[i]->m_network.apply(dataset.m_features);
+				population[i]->m_eval = target_function(dataset.m_labels, y);
 			}
 		}
 	};
@@ -286,7 +304,7 @@ public:
 	{
 		m_dataset_loader    = dataset_loader;
 		m_np			    = np;
-		m_default		    = Individual(f_cr_default.m_f, f_cr_default.m_cr, nn_default );
+		m_default		    = std::make_shared<Individual>(f_cr_default.m_f, f_cr_default.m_cr, nn_default );
 		m_f_cr_jde_info     = f_cr_jde;
 		m_clamp_info	    = clamp_info;
 		m_restart_info      = restart_info;
@@ -323,15 +341,15 @@ public:
 		//for all
 		for(size_t i = 0; i!= population.size(); ++i)
 		{
-			Individual new_individual = m_default;
+			auto new_individual = m_default->copy();
 			//compute
-			jde(i, new_individual);
-			rand_one_bin(i, new_individual);
+			jde(i, *new_individual);
+			rand_one_bin(i, *new_individual);
 			//eval
-			auto y                = new_individual.m_network.apply(m_dataset_batch.m_features);
-			new_individual.m_eval = m_target_function(m_dataset_batch.m_labels, y);
+			auto y                 = new_individual->m_network.apply(m_dataset_batch.m_features);
+			new_individual->m_eval = m_target_function(m_dataset_batch.m_labels, y);
 			//minimixe (cross_entropy)
-			if (new_individual.m_eval < population[i].m_eval)
+			if (new_individual->m_eval < population[i]->m_eval)
 			{
 				population_next[i] = new_individual;
 			}
@@ -359,15 +377,15 @@ public:
 			//add
 			m_promises[i] = thpool.push_task([this,i,&population,&population_next]()
 			{ 
-				Individual new_individual = m_default;
+				auto new_individual = m_default->copy();
 				//compute
-				jde(i, new_individual);
-				rand_one_bin(i, new_individual);
+				jde(i, *new_individual);
+				rand_one_bin(i, *new_individual);
 				//eval
-				auto y				  = new_individual.m_network.apply(m_dataset_batch.m_features);
-				new_individual.m_eval = m_target_function(m_dataset_batch.m_labels, y);
+				auto y                 = new_individual->m_network.apply(m_dataset_batch.m_features);
+				new_individual->m_eval = m_target_function(m_dataset_batch.m_labels, y);
 				//minimixe (cross_entropy)
-				if (new_individual.m_eval < population[i].m_eval)
+				if (new_individual->m_eval < population[i]->m_eval)
 				{
 					population_next[i] = new_individual;
 				}
@@ -390,15 +408,15 @@ public:
 	}
 
 	//big loop
-	Individual execute(const size_t n_pass, const size_t n_sub_pass, ThreadPool* thpool = nullptr)
+	typename Individual::SPtr execute(const size_t n_pass, const size_t n_sub_pass, ThreadPool* thpool = nullptr)
 	{
 		const size_t n_global_pass = (n_pass / n_sub_pass);
 		//restart init
 		ScalarType restart_last_eval = 0;
 		size_t	   restart_count = 0;
 		//best
-		Individual best      = m_default;
-		ScalarType best_eval = 0;
+		typename Individual::SPtr best = m_default->copy();
+		ScalarType best_eval  = 0;
 		//main loop
 		for (size_t pass = 0; pass != n_global_pass; ++pass)
 		{
@@ -415,11 +433,15 @@ public:
 			}
 			//find best
 			ScalarType curr_eval;
-			Individual curr = find_best(curr_eval);
+			typename Individual::SPtr curr = find_best(curr_eval);
 			//maximize (accuracy)
 			if (best_eval < curr_eval)
 			{
-				best	  = curr;
+				//must copy because "restart" 
+				//not copy element then 
+				//it can change the values of the best individual
+				best	  = curr->copy();
+				//save eval (on validation) of best
 				best_eval = curr_eval;
 			}
 			//restart
@@ -473,7 +495,7 @@ public:
 		//find best
 		for (size_t i = 0; i != population.size(); ++i)
 		{
-			auto y = population[i].m_network.apply(validation.m_features);
+			auto y          = population[i]->m_network.apply(validation.m_features);
 			ScalarType eval = Denn::CostFunction::accuracy(validation.m_labels, y);
 			//maximize (accuracy)
 			if (!i || best_eval < eval)
@@ -489,7 +511,7 @@ public:
 	}
 	
 	//find best individual (validation test)
-	Individual find_best(ScalarType& out_eval)
+	typename Individual::SPtr find_best(ScalarType& out_eval)
 	{
 		//best 
 		size_t best_i;
@@ -524,7 +546,7 @@ protected:
 	{
 		//vectors
 		const Population& population = m_population.current();
-		const Individual& i_target = population[target];
+		const Individual& i_target   = *population[target];
 		//f JDE
 		if (RandomIndices::random_0_to_1() < m_f_cr_jde_info.m_f)   
 			i_final.m_f = ScalarType(RandomIndices::random_0_to_1() * 2.0);
@@ -542,7 +564,7 @@ protected:
 	{
 		//vectors
 		const Population& population = m_population.current();
-		const Individual& i_target   = population[target];
+		const Individual& i_target   = *population[target];
 		//alias
 		const auto& f  = i_final.m_f;
 		const auto& cr = i_final.m_cr;
@@ -557,9 +579,9 @@ protected:
 				//do rand
 				generator.DoRand(target);
 				//do cross + mutation
-				const Individual& nn_a = population[generator[0]];
-				const Individual& nn_b = population[generator[1]];
-				const Individual& nn_c = population[generator[2]];
+				const Individual& nn_a = *population[generator[0]];
+				const Individual& nn_b = *population[generator[1]];
+				const Individual& nn_c = *population[generator[2]];
 				//
 				auto w_target = i_target[i_layer][m];
 				auto w_final  = i_final[i_layer][m];
@@ -592,16 +614,16 @@ protected:
 	DoubleBufferPopulation  m_population;
 	PromiseList			    m_promises;
 	//info
-	Individual				m_default;
-	DataSetLoader*		    m_dataset_loader;
-	DataSet				    m_dataset_batch;
-	size_t					m_np;
-	JDEFCrInfo			    m_f_cr_jde_info;
-	ClampInfo			    m_clamp_info;
-	RestartInfo			    m_restart_info;
-	RandomRangeInfo		    m_random_range_info;
-	CostFunction			m_target_function;
-	RuntimeOutput::SPtr     m_output;
+	typename Individual::SPtr m_default;
+	DataSetLoader*		      m_dataset_loader;
+	DataSet				      m_dataset_batch;
+	size_t					  m_np;
+	JDEFCrInfo			      m_f_cr_jde_info;
+	ClampInfo			      m_clamp_info;
+	RestartInfo			      m_restart_info;
+	RandomRangeInfo		      m_random_range_info;
+	CostFunction			  m_target_function;
+	RuntimeOutput::SPtr       m_output;
 };
 
 }
