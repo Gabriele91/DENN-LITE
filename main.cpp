@@ -106,7 +106,7 @@ namespace LineInput
 								
 			ArgumentAndAction{ "Probability of change of F (JDE)", { "--f_jde",    "-jf"  }, 
 								[this](Arguments& args) { m_f_jde = args.get_double() ; } },
-			ArgumentAndAction{ "Probability of change of CR (JDE)", { "--f_jde",    "-jf"  }, 
+			ArgumentAndAction{ "Probability of change of CR (JDE)", { "--cr_jde",    "-jcr"  }, 
 								[this](Arguments& args) { m_cr_jde = args.get_double() ; } },
 
 			ArgumentAndAction{ "Minimum size of weight", { "--clamp_min",    "-cmin"  }, 
@@ -419,10 +419,10 @@ namespace BuildTest
 		output.serialize_a_individual< ScalarType >
 		(
 		  execute_time
-		, denn.execute_test(result)
-		, result.m_f
-		, result.m_cr
-		, result.m_network
+		, denn.execute_test(*result)
+		, result->m_f
+		, result->m_cr
+		, result->m_network
 		);
 	}
 }
@@ -431,36 +431,36 @@ int main(int argc,const char** argv)
 {
 	/*input example
 		///////////////////////////////////////////////////////////IRIS
-		-t 5000 
-		-s 40
-		-p 42 
-		-f 0.6 
-		-cr 0.8
-		-jf 0.1 
-		-jcr 0.1
-		-cmin -15 
-		-cmax 15 
-		-rmin -2.0 
-		-rmax 2.0 
-		-i "assets/iris_105x6_5s.gz"
-		-o "iris_105x6_5s.json"
-		-omp 2 
+		-t 5000 \
+		-s 40 \
+		-p 42 \
+		-f 0.6 \
+		-cr 0.8 \
+		-jf 0.1 \
+		-jcr 0.1 \
+		-cmin -15 \
+		-cmax 15 \
+		-rmin -2.0 \ 
+		-rmax 2.0 \
+		-i "assets/iris_105x6_5s.gz" \
+		-o "iris_105x6_5s.json" \
+		-omp 2 \
 		-tp 8
 		///////////////////////////////////////////////////////////MNIST
-		-t 7000 
-		-s 1000
-		-p 96 
-		-f 0.9 
-		-cr 0.9
-		-jf 0.1 
-		-jcr 0.1
-		-cmin -30.0 
-		-cmax 30.0 
-		-rmin -2.0 
-		-rmax 2.0 
-		-i "assets/ARTICLE_MNIST_5_12x4000_1s.gz"
-		-o "ARTICLE_MNIST_5_12x4000_1s.json"
-		-omp 4 
+		-t 7000 \
+		-s 1000 \
+		-p 96 \
+		-f 0.9 \
+		-cr 0.9 \
+		-jf 0.1 \
+		-jcr 0.1 \
+		-cmin -30.0 \ 
+		-cmax 30.0 \
+		-rmin -2.0 \
+		-rmax 2.0 \
+		-i "assets/ARTICLE_MNIST_5_12x4000_1s.gz" \
+		-o "ARTICLE_MNIST_5_12x4000_1s.json" \
+		-omp 4 \
 		-tp 8
 	*/
 	////////////////////////////////////////////////////////////////////////////////////////////////
