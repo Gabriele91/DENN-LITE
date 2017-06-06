@@ -132,7 +132,7 @@ namespace LineInput
 			ArgumentAndAction{ "Number of threads using by OpenMP", { "--threads_omp",    "-omp"  }, 
 								[this](Arguments& args) { m_threads_omp = args.get_int() ; } },
 			ArgumentAndAction{ "Number of threads using for  generate a new population", { "--threads_pop",    "-tp"  }, 
-								[this](Arguments& args) { m_threads_omp = args.get_int() ; } },
+								[this](Arguments& args) { m_threads_pop = args.get_int() ; } },
 
 			ArgumentAndAction{ "Print the help", { "--help",    "-h"  }, 
 								[this](Arguments& args) { std::cout << make_help(); } },
