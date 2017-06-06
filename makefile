@@ -38,6 +38,7 @@ endif
 # MacOS flags
 ifeq ($(shell uname -s),Darwin)
 #No OpenMP 
+RELEASE_FLAGS += -march=native -ffast-math
 endif
 
 
