@@ -352,7 +352,7 @@ namespace BuildTest
 		  const LineInput::ReadArguments<ScalarArgument>& arguments
 		, DSLoader& dataset
 		, LineInput::OutputData& output
-		, Denn::ThreadPool& thpool
+		, Denn::ThreadPool* ptr_thpool
 		, Denn::RuntimeOutput::SPtr runtime_output
 	)
 	{
@@ -411,7 +411,7 @@ namespace BuildTest
 		denn.init();
 		//execute
 		double execute_time = Time::get_time();
-		auto result = denn.execute(arguments.m_gen_tot, arguments.m_gen_step, &thpool);
+		auto result = denn.execute(arguments.m_gen_tot, arguments.m_gen_step, ptr_thpool);
 		execute_time = Time::get_time() - execute_time;
 
 		//output
@@ -482,8 +482,13 @@ int main(int argc,const char** argv)
 	}
 	#endif
 	//parallel (Thread Pool)
-	size_t n_denn_threads = arguments.m_threads_pop;
-	ThreadPool thpool(n_denn_threads);
+	//ptr
+	std::unique_ptr<ThreadPool> uptr_thpool;
+	//alloc new ThreadPool
+	if(arguments.m_threads_pop)
+	{
+		uptr_thpool = std::make_unique<ThreadPool>(size_t(arguments.m_threads_pop));
+	}
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	using DataSetLoader = Denn::DataSetLoader< Denn::IOFileWrapper::zlib_file<> >;
 	DataSetLoader dataset((const std::string&)arguments.m_dataset_filename);
@@ -498,8 +503,8 @@ int main(int argc,const char** argv)
 	//double or float?
 	switch (dataset.get_main_header_info().m_type)
 	{
-		case DataSetType::DS_FLOAT:  BuildTest::execute<float, ScalarArgument, DataSetLoader> (arguments, dataset, output, thpool, runtime_out); break;
-		case DataSetType::DS_DOUBLE: BuildTest::execute<double, ScalarArgument, DataSetLoader>(arguments, dataset, output, thpool, runtime_out); break;
+		case DataSetType::DS_FLOAT:  BuildTest::execute<float, ScalarArgument, DataSetLoader> (arguments, dataset, output, uptr_thpool.get(), runtime_out); break;
+		case DataSetType::DS_DOUBLE: BuildTest::execute<double, ScalarArgument, DataSetLoader>(arguments, dataset, output, uptr_thpool.get(), runtime_out); break;
 		default: break;
 	} 
 

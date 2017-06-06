@@ -422,7 +422,7 @@ public:
 		{
 			for (size_t sub_pass = 0; sub_pass != n_sub_pass; ++sub_pass)
 			{
-				if (thpool)	  parallel_pass(*thpool); else serial_pass();
+				if (thpool)	parallel_pass(*thpool); else serial_pass();
 				//output
 				DENN_RUNTIME_OUTPUT(m_output, 
 				"pass: "       << pass <<
