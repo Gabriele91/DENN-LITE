@@ -80,16 +80,67 @@ namespace LineInput
 
 		};
 
-		static inline bool compare_n_args(std::initializer_list<const char*> keys, const char* arg)
+		struct ArgumentAndAction
 		{
-			for (const char* key : keys) if (strcmp(key, arg) == 0) return true;
-			return false;
-		}
+			std::string				   		  m_description;
+			std::vector< std::string  > 	  m_arg_key;
+			std::function< void(Arguments&) > m_action;
+		};
 
 	public:
 
-		ReadArguments() {}
-		ReadArguments(int nargs, const char **vargs, bool jump_first = true)
+		ReadArguments() 
+		:m_arguments_and_actions
+		({
+			ArgumentAndAction{ "Global number of generation", { "--gen_tot",    "-t"  }, 
+								[this](Arguments& args) { m_gen_tot = args.get_int() ; } },
+			ArgumentAndAction{ "Number of generation per batch", { "--gen_step",    "-s"  }, 
+								[this](Arguments& args) { m_gen_step = args.get_int() ; } },
+			ArgumentAndAction{ "Size of population", { "--pop_size",    "-p"  }, 
+								[this](Arguments& args) { m_pop_size = args.get_int() ; } },
+
+			ArgumentAndAction{ "Default F factor for DE", { "--f_default",    "-f"  }, 
+								[this](Arguments& args) { m_f_default = args.get_double() ; } },
+			ArgumentAndAction{ "Default CR factor for DE", { "--cr_default",    "-cr"  }, 
+								[this](Arguments& args) { m_cr_default = args.get_double() ; } },
+								
+			ArgumentAndAction{ "Probability of change of F (JDE)", { "--f_jde",    "-jf"  }, 
+								[this](Arguments& args) { m_f_jde = args.get_double() ; } },
+			ArgumentAndAction{ "Probability of change of CR (JDE)", { "--f_jde",    "-jf"  }, 
+								[this](Arguments& args) { m_cr_jde = args.get_double() ; } },
+
+			ArgumentAndAction{ "Minimum size of weight", { "--clamp_min",    "-cmin"  }, 
+								[this](Arguments& args) { m_clamp_min = args.get_double() ; } },
+			ArgumentAndAction{ "Maximum size of weight", { "--clamp_min",    "-cmax"  }, 
+								[this](Arguments& args) { m_clamp_max = args.get_double() ; } },
+
+			ArgumentAndAction{ "Minimum size of weight in random initialization", { "--random_min",    "-rmin"  }, 
+								[this](Arguments& args) { m_range_min = args.get_double() ; } },
+			ArgumentAndAction{ "Maximum size of weight in random initialization", { "--random_max",    "-rmax"  }, 
+								[this](Arguments& args) { m_range_max = args.get_double() ; } },
+
+			ArgumentAndAction{ "Number of change of batches before restart (if accuracy not increase)", { "--restart_count",    "-rc"  }, 
+								[this](Arguments& args) { m_restart_count = args.get_int() ; } },
+			ArgumentAndAction{ "Delta factor to determine if accuracy is increased", { "--restart_delta",    "-rd"  }, 
+								[this](Arguments& args) { m_restart_delta = args.get_double() ; } },
+
+			ArgumentAndAction{ "Path of dataset file (gz)", { "--dataset", "-d", "-i" }, 
+								[this](Arguments& args) {  m_dataset_filename = args.get_string(); } },
+			ArgumentAndAction{ "Path of output file (json)", { "--output", "-o" }, 
+								[this](Arguments& args) {  m_output_filename = args.get_string(); } },
+
+			ArgumentAndAction{ "Number of threads using by OpenMP", { "--threads_omp",    "-omp"  }, 
+								[this](Arguments& args) { m_threads_omp = args.get_int() ; } },
+			ArgumentAndAction{ "Number of threads using for  generate a new population", { "--threads_pop",    "-tp"  }, 
+								[this](Arguments& args) { m_threads_omp = args.get_int() ; } },
+
+			ArgumentAndAction{ "Print the help", { "--help",    "-h"  }, 
+								[this](Arguments& args) { std::cout << make_help(); } },
+		})
+		{
+		}
+
+		ReadArguments(int nargs, const char **vargs, bool jump_first = true):ReadArguments()
 		{
 			get_params_from_args(nargs, vargs, jump_first);
 		}
@@ -102,25 +153,18 @@ namespace LineInput
 			//start
 			while (args.remaining())
 			{
+				bool is_a_valid_arg = false;
 				const char *p = args.get_string();
-				     if (compare_n_args({ "--gen_tot",    "-t"  }, p))      m_gen_tot = args.get_int();
-				else if (compare_n_args({ "--gen_step",   "-s"  }, p))      m_gen_step = args.get_int();
-				else if (compare_n_args({ "--pop_size",   "-p"  }, p))      m_pop_size = args.get_int();
-				else if (compare_n_args({ "--f_default",  "-f"  }, p))      m_f_default  = args.get_double();
-				else if (compare_n_args({ "--cr_default", "-cr" }, p))      m_cr_default = args.get_double();
-				else if (compare_n_args({ "--f_jde",      "-jf" }, p))      m_f_jde      = args.get_double();
-				else if (compare_n_args({ "--cr_jde",     "-jcr" }, p))     m_cr_jde     = args.get_double();
-				else if (compare_n_args({ "--clamp_min",  "-cmin" }, p))    m_clamp_min  = args.get_double();
-				else if (compare_n_args({ "--clamp_max",  "-cmax" }, p))    m_clamp_max  = args.get_double();
-				else if (compare_n_args({ "--random_min",  "-rmin" }, p))   m_range_min  = args.get_double();
-				else if (compare_n_args({ "--random_max",  "-rmax" }, p))   m_range_max  = args.get_double();
-				else if (compare_n_args({ "--restart_count",  "-rc" }, p))  m_restart_count = args.get_int();
-				else if (compare_n_args({ "--restart_delta",  "-rd" }, p))  m_restart_delta = args.get_double();
-				else if (compare_n_args({ "--dataset", "-d", "-i" }, p))    m_dataset_filename = args.get_string();
-				else if (compare_n_args({ "--output",        "-o" }, p))    m_output_filename  = args.get_string();
-				else if (compare_n_args({ "--threads_omp",   "-omp" }, p))  m_threads_omp    = args.get_int();
-				else if (compare_n_args({ "--threads_pop",   "-tp" }, p))   m_threads_pop    = args.get_int();
-				else 
+				for(auto& action : m_arguments_and_actions)
+				{
+					if(compare_n_args(action.m_arg_key, p))
+					{
+						action.m_action(args);
+						is_a_valid_arg = true;
+						break;
+					} 
+				}
+				if(!is_a_valid_arg) 
 				{
 					std::cerr << "parameter " << p << " not found\n";
 					exit(1);
@@ -145,6 +189,49 @@ namespace LineInput
 		read_only<Scalar>	   m_restart_delta{ Scalar(0.02) };
 		read_only<int>	       m_threads_omp   { size_t(2) };
 		read_only<size_t>	   m_threads_pop   { size_t(2) };
+	
+	private:
+
+		static inline bool compare_n_args(const std::vector< std::string >& keys, const char* arg)
+		{
+			for (const std::string& key : keys) if (strcmp(key.c_str(), arg) == 0) return true;
+			return false;
+		}
+		static inline std::string return_n_space(size_t n)
+		{
+			std::string out;
+			while(n--) out+=" ";
+			return std::move(out);
+		}
+
+		std::string make_help() const
+		{
+			std::stringstream s_out;
+			//header
+			s_out << "denn [<args>]" ;
+			s_out << std::endl;				
+			s_out << std::endl;
+			//
+			for(auto& action : m_arguments_and_actions)
+			{
+				size_t space_line = 25;
+				s_out << "\t";
+				for(auto& key : action.m_arg_key)
+				{
+					s_out << key << ", ";
+					space_line -= key.size() + 2;
+				}
+				s_out << return_n_space(Denn::clamp<size_t>(space_line,0,50));
+				s_out << action.m_description;
+				s_out << std::endl;
+				s_out << std::endl;
+			}
+			s_out << std::endl;
+			return s_out.str();
+		}
+
+		std::vector< ArgumentAndAction > m_arguments_and_actions;
+
 
 	};
 
@@ -280,7 +367,8 @@ namespace BuildTest
 		MLP nn0( LP(n_features, n_class) );
 
 		//Function ptr
-		DennAlgo::CostFunction cost_function = CostFunction::softmax_cross_entropy_with_logit<MLP::MatrixType>;
+		typename DennAlgo::CostFunction 
+		cost_function = CostFunction::softmax_cross_entropy_with_logit< typename MLP::MatrixType >;
 
 		//DENN
 		DennAlgo denn
@@ -289,31 +377,31 @@ namespace BuildTest
 			, arguments.m_pop_size
 			, nn0
 			// jde f, cr
-			, DennAlgo::JDEFCrInfo 
-			{ arguments.m_f_jde
+			, typename DennAlgo::JDEFCrInfo 
+			( arguments.m_f_jde
 			, arguments.m_cr_jde
-			}	
+			)	
 			//default f,cr
-			, DennAlgo::FCrInfo    
-			{ arguments.m_f_default
+			, typename DennAlgo::FCrInfo    
+			( arguments.m_f_default
 			, arguments.m_cr_default 
-			}
+			)
 			//default clamp
-			, DennAlgo::ClampInfo  
-			{ arguments.m_clamp_min
+			, typename DennAlgo::ClampInfo  
+			( arguments.m_clamp_min
 			, arguments.m_clamp_max 
-			}
+			)
 			//restart
-			, DennAlgo::RestartInfo
-			{ true
+			, typename DennAlgo::RestartInfo
+			( true
 			, arguments.m_restart_count
 			, arguments.m_restart_delta 
-			}
+			)
 			//random
-			, DennAlgo::RandomRangeInfo
-			{ arguments.m_range_min
+			, typename DennAlgo::RandomRangeInfo
+			( arguments.m_range_min
 			, arguments.m_range_max
-			}
+			)
 			//const function
 			, cost_function
 			//output
@@ -375,7 +463,9 @@ int main(int argc,const char** argv)
 		-omp 4 
 		-tp 8
 	*/
-	LineInput::ReadArguments<> arguments(argc, argv);
+	////////////////////////////////////////////////////////////////////////////////////////////////
+	using ScalarArgument = double;
+	LineInput::ReadArguments<ScalarArgument> arguments(argc, argv);
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	//std::srand(std::time(NULL));
 	////////////////////////////////////////////////////////////////////////////////////////////////
@@ -395,9 +485,10 @@ int main(int argc,const char** argv)
 	size_t n_denn_threads = arguments.m_threads_pop;
 	ThreadPool thpool(n_denn_threads);
 	////////////////////////////////////////////////////////////////////////////////////////////////
-	Denn::DataSetLoader< Denn::IOFileWrapper::zlib_file<> > dataset(arguments.m_dataset_filename);
+	using DataSetLoader = Denn::DataSetLoader< Denn::IOFileWrapper::zlib_file<> >;
+	DataSetLoader dataset((const std::string&)arguments.m_dataset_filename);
 	////////////////////////////////////////////////////////////////////////////////////////////////
-	std::ofstream		  ofile((std::string)arguments.m_output_filename);
+	std::ofstream		  ofile((const std::string&)arguments.m_output_filename);
 	LineInput::OutputData output(ofile);
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	//auto runtime_out = std::make_shared<Denn::RuntimeOutput>(); //default std::cerr
@@ -407,8 +498,8 @@ int main(int argc,const char** argv)
 	//double or float?
 	switch (dataset.get_main_header_info().m_type)
 	{
-		case DataSetType::DS_FLOAT:  BuildTest::execute<float> (arguments, dataset, output, thpool, runtime_out); break;
-		case DataSetType::DS_DOUBLE: BuildTest::execute<double>(arguments, dataset, output, thpool, runtime_out); break;
+		case DataSetType::DS_FLOAT:  BuildTest::execute<float, ScalarArgument, DataSetLoader> (arguments, dataset, output, thpool, runtime_out); break;
+		case DataSetType::DS_DOUBLE: BuildTest::execute<double, ScalarArgument, DataSetLoader>(arguments, dataset, output, thpool, runtime_out); break;
 		default: break;
 	} 
 
