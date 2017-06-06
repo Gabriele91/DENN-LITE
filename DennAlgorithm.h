@@ -194,14 +194,14 @@ public:
 			{
 				//size
 				population.resize(np);
-				//init
-				for (typename Individual::SPtr& i_individual : population)
-				{
-					i_individual = i_default->copy();
-				}
 			}
 			//ref to current
 			Population& population = current();
+			//init
+			for (typename Individual::SPtr& i_individual : population)
+			{
+				i_individual = i_default->copy();
+			}
 			//random exp
 			auto random_exp = random_range_info.get_unary_expr();
 			//random init
@@ -262,8 +262,8 @@ public:
 			for (typename Individual::SPtr& individual : population)
 			{
 				//Copy default params
-				individual->m_f=i_default->m_f;
-				individual->m_cr=i_default->m_cr;
+				individual->m_f   =i_default->m_f;
+				individual->m_cr  =i_default->m_cr;
 				individual->m_eval=i_default->m_eval;
 				//Reinit layers
 				for (LayerType& layer : individual->m_network)
