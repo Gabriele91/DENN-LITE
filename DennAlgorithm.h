@@ -117,7 +117,7 @@ public:
 		{
 			return [this](ScalarType x) -> ScalarType
 			{
-				return (((x + ScalarType(1))*ScalarType(0.5)) * range()) + m_min;
+				return (RandomIndices::random_0_to_1() * range()) + m_min;
 			};
 		}
 	};
@@ -208,9 +208,6 @@ public:
 			for (typename Individual::SPtr& individual : population)
 			for (LayerType& layer : individual->m_network)
 			{
-				layer.weights().setRandom();
-				layer.baias().setRandom();
-
 				layer.weights() = layer.weights().unaryExpr(random_exp);
 				layer.baias() = layer.baias().unaryExpr(random_exp);
 			}
@@ -268,9 +265,6 @@ public:
 				//Reinit layers
 				for (LayerType& layer : individual->m_network)
 				{
-					layer.weights().setRandom();
-					layer.baias().setRandom();
-
 					layer.weights() = layer.weights().unaryExpr(random_exp);
 					layer.baias()   = layer.baias().unaryExpr(random_exp);
 				}

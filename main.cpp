@@ -472,12 +472,11 @@ int main(int argc,const char** argv)
 	using namespace Denn;
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	//parallel (OpenMP)
-	#ifdef _OPEN_MP_SUPPORTED_
-	int n_openMP_threads = arguments.m_threads_omp;
-	if (n_openMP_threads)
+	#ifdef EIGEN_HAS_OPENMP
+	if (arguments.m_threads_omp)
 	{
-		omp_set_num_threads(n_openMP_threads);
-		Eigen::setNbThreads(n_openMP_threads);
+		omp_set_num_threads(arguments.m_threads_omp);
+		Eigen::setNbThreads(arguments.m_threads_omp);
 		Eigen::initParallel();
 	}
 	#endif
