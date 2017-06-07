@@ -9,33 +9,6 @@
 namespace Denn
 {
 
-class PopulationRandomIndexGenerator
-{
-public:
-
-	PopulationRandomIndexGenerator(size_t np, size_t n_index = 3)
-	{
-		m_np = np;
-		m_randoms_i.resize(n_index);
-	}
-
-	void DoRand(int individual)
-	{
-		RandomIndices::n_rand_different_indices(m_np, individual, m_randoms_i, m_randoms_i.size());
-	}
-
-	int operator[](size_t i) const
-	{
-		return m_randoms_i[i];
-	}
-
-protected:
-
-	size_t				m_np;
-	std::vector < int > m_randoms_i;
-
-};
-
 class RuntimeOutput : public std::enable_shared_from_this< RuntimeOutput >
 {
 public:
@@ -147,6 +120,13 @@ public:
 			m_cr	  = cr;
 			m_network = network;
 		}
+		//copy attributes from a other individual
+        void copy_attributes(const Individual& i)
+		{
+			m_f    = i.m_f;
+			m_cr   = i.m_cr;
+			m_eval = i.m_eval;
+		}   
 		//cast
 		operator Network&()
 		{
@@ -259,9 +239,7 @@ public:
 			for (typename Individual::SPtr& individual : population)
 			{
 				//Copy default params
-				individual->m_f   =i_default->m_f;
-				individual->m_cr  =i_default->m_cr;
-				individual->m_eval=i_default->m_eval;
+				individual->copy_attributes(*i_default);
 				//Reinit layers
 				for (LayerType& layer : individual->m_network)
 				{
@@ -270,7 +248,7 @@ public:
 				}
 			}
 			//add best
-			size_t rand_i = RandomIndices::irand(int(population.size()));
+			size_t rand_i = RandomIndices::irand(population.size());
 			//must copy, The Best Individual can't to be changed during the DE process
 			population[rand_i] = best->copy();
 			//eval
@@ -336,7 +314,9 @@ public:
 		for(size_t i = 0; i!= population.size(); ++i)
 		{
 			//get result turget
-			typename Individual::SPtr& new_individual = population_next[i];
+			auto new_individual = population_next[i];
+			//Copy default params
+			new_individual->copy_attributes(*m_default);
 			//compute
 			jde(i, *new_individual);
 			rand_one_bin(i, *new_individual);
@@ -347,11 +327,21 @@ public:
 			if (!(new_individual->m_eval < population[i]->m_eval))
 			{
 				//fail, next element is the target
-				std::swap(population_next[i], population[i]);
+				auto individual_tmp= population_next[i];
+				population_next[i] = population[i];
+				population[i]      = individual_tmp;
 			}
 		}
 		//swap
 		m_population.swap();
+        //test of new generation 
+        #if 0
+		for(auto c_i : m_population.current())
+		for(auto n_i : m_population.next())
+		{
+			assert(c_i.get()!=n_i.get());
+		}
+		#endif
 	}
 
 	//execute a pass
@@ -369,8 +359,10 @@ public:
 			//add
 			m_promises[i] = thpool.push_task([this,i,&population,&population_next]()
 			{ 
-				//get result turget
-				typename Individual::SPtr& new_individual = population_next[i];
+			    //get result turget
+			    auto new_individual = population_next[i];
+			    //Copy default params
+			    new_individual->copy_attributes(*m_default);
 				//compute
 				jde(i, *new_individual);
 				rand_one_bin(i, *new_individual);
@@ -381,7 +373,9 @@ public:
 				if (!(new_individual->m_eval < population[i]->m_eval))
 				{
 					//fail, next element is the target
-					std::swap(population_next[i], population[i]);
+				   auto individual_tmp= population_next[i];
+				   population_next[i] = population[i];
+				   population[i]      = individual_tmp;
 				}
 			});
 		}
@@ -389,6 +383,14 @@ public:
 		for (auto& promise : m_promises) promise.wait();
 		//swap
 		m_population.swap();
+        //test of new generation 
+        #if 0
+		for(auto c_i : m_population.current())
+		for(auto n_i : m_population.next())
+		{
+			assert(c_i.get()!=n_i.get());
+		}
+		#endif
 	}
 
 	//load next batch
@@ -550,7 +552,7 @@ protected:
 
 		return true;
 	}
-	bool rand_one_bin(int target, Individual& i_final) const
+	bool rand_one_bin(size_t target, Individual& i_final) const
 	{
 		//vectors
 		const Population& population = m_population.current();
@@ -559,7 +561,9 @@ protected:
 		const auto& f  = i_final.m_f;
 		const auto& cr = i_final.m_cr;
 		//init generator
-		PopulationRandomIndexGenerator generator(m_np);
+		static thread_local RandomIndices::RandomDeck rand_deck;
+		//set population size in deck
+		rand_deck.resize(population.size());
 		//for each layers
 		for (size_t i_layer=0; i_layer != i_target.size(); ++i_layer)
 		{
@@ -567,11 +571,11 @@ protected:
 			for (size_t m = 0; m!= i_final[i_layer].size(); ++m)
 			{
 				//do rand
-				generator.DoRand(target);
+				rand_deck.reset();
 				//do cross + mutation
-				const Individual& nn_a = *population[generator[0]];
-				const Individual& nn_b = *population[generator[1]];
-				const Individual& nn_c = *population[generator[2]];
+				const Individual& nn_a = *population[rand_deck.get_random_id(target)];
+				const Individual& nn_b = *population[rand_deck.get_random_id(target)];
+				const Individual& nn_c = *population[rand_deck.get_random_id(target)];
 				//
 				auto w_target = i_target[i_layer][m];
 				auto w_final  = i_final[i_layer][m];
@@ -579,14 +583,14 @@ protected:
 				auto w_lr_b   = nn_b[i_layer][m];
 				auto w_lr_c   = nn_c[i_layer][m];
 				//random i
-				int rand = RandomIndices::irand(w_lr_a.size());
+				size_t e_rand = RandomIndices::irand(w_lr_a.size());
 				//CROSS
 				for (size_t e = 0; e != w_lr_a.size(); ++e)
 				{
 					//cross event
 					bool cross_event = RandomIndices::random() < i_target.m_cr;
 					//mutation
-					if (cross_event || rand == e)
+					if (cross_event || e_rand == e)
 					{
 						w_final(e) = f_clamp((w_lr_a(e) - w_lr_b(e)) * f + w_lr_c(e));
 					}

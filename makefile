@@ -61,7 +61,7 @@ rebuild: clean directories debug release
 
 rebuild_debug: clean_debug directories debug
 
-rebuild_debug: clean_release directories release
+rebuild_release: clean_release directories release
 
 debug: directories $(SOURCE_DEBUG_OBJS)
 	$(COMPILER) $(C_FLAGS) $(CC_FLAGS) $(SOURCE_DEBUG_OBJS) $(LDFLAGS) -o $(O_DEBUG_PROG)
