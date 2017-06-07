@@ -643,6 +643,8 @@ protected:
 	{
 		//ref to current
 		Population& population = m_population.current();
+		//alloc promises
+		m_promises.resize(population.size());
 		//for all
 		for (size_t i = 0; i != population.size(); ++i)
 		{
@@ -651,7 +653,7 @@ protected:
 			{
 				auto y = population[i]->m_network.apply(m_dataset_batch.m_features);
 				population[i]->m_eval = m_target_function(m_dataset_batch.m_labels, y);
-			};
+			});
 		}
 		//wait
 		for (auto& promise : m_promises) promise.wait();
