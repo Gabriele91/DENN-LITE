@@ -54,6 +54,7 @@
         "vector": "cpp",
         "ios": "cpp",
         "__bit_reference": "cpp",
-        "algorithm": "cpp"
+        "algorithm": "cpp",
+        "random": "cpp"
     }
 }
