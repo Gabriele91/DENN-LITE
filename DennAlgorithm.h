@@ -11,6 +11,12 @@ namespace Denn
 
 class RuntimeOutput : public std::enable_shared_from_this< RuntimeOutput >
 {
+
+	size_t m_curr_best_g_pass;
+	size_t m_curr_n_restart;
+	double m_curr_best_validation_eval;
+	double m_curr_best_target_eval;
+
 public:
 	using SPtr = std::shared_ptr<RuntimeOutput>;
 
@@ -21,10 +27,60 @@ public:
 	virtual bool is_enable()	   { return true;     }
 	virtual std::ostream& output() { return std::cerr; }
 
+	virtual void start()
+	{
+		//none
+	}
+
+	virtual void send_best(
+		  size_t g_pass
+		, size_t n_restart
+		, double validation_eval
+		, double target_eval
+	)
+	{
+		m_curr_best_g_pass = g_pass;
+		m_curr_n_restart   = n_restart;
+		m_curr_best_validation_eval = validation_eval;
+		m_curr_best_target_eval     = target_eval;
+	}
+
+	virtual void sent_pass(
+		  size_t n_g_pass
+		, size_t n_s_pass
+		, size_t g_pass
+		, size_t s_pass
+		, size_t minimum_on_pop_id
+		, double minimum_on_pop_eval
+	)
+	{
+		output()
+			<< "pass: "
+			<< (n_s_pass * g_pass + s_pass)
+			<< " <- (" << g_pass << ", " << s_pass << ")"
+			<< ", population["
+			<< minimum_on_pop_id
+			<< "] = "
+			<< minimum_on_pop_eval
+			<< " cross entropy, restart = " 
+			<< m_curr_n_restart
+			<< "| best[ global pass "
+					<< m_curr_best_g_pass
+					<<", accuracy "
+					<< m_curr_best_validation_eval 
+					<< ", cross entropy " 
+					<< m_curr_best_target_eval
+					<< " ]"
+			<< std::endl;
+	}
+
+
+	virtual void end()
+	{
+		//none
+	}
 
 };
-
-#define DENN_RUNTIME_OUTPUT(x,y) if((x)->is_enable()){ (x)->output() << y << std::endl; }
 
 template< typename Network, typename DataSetLoader >
 class DennAlgorithm
@@ -405,23 +461,40 @@ public:
 		const size_t n_global_pass = (n_pass / n_sub_pass);
 		//restart init
 		ScalarType restart_last_eval = 0;
+		size_t	   restart_test_count = 0;
 		size_t	   restart_count = 0;
 		//best
 		typename Individual::SPtr best = m_default->copy();
 		ScalarType best_eval  = 0;
+		//start output
+		if (m_output->is_enable())
+		{
+			m_output->start();
+			m_output->send_best(0, restart_count, 0.0, double(best->m_eval));
+		}
 		//main loop
 		for (size_t pass = 0; pass != n_global_pass; ++pass)
-		{
+		{		
+			//eval on batch
+			if (thpool)
+				parallel_execute_target_function_on_all_population(*thpool);
+			else
+				serial_execute_target_function_on_all_population();
+			//sub pass
 			for (size_t sub_pass = 0; sub_pass != n_sub_pass; ++sub_pass)
 			{
-				if (thpool)	parallel_pass(*thpool); else serial_pass();
+				if (thpool)	
+					parallel_pass(*thpool); 
+				else 
+					serial_pass();
 				//output
-				DENN_RUNTIME_OUTPUT(m_output, 
-				"pass: "       << pass <<
-				", sub_pass: " << sub_pass <<
-				" -> "         << (n_sub_pass * pass + sub_pass) 
-				)
-
+				if (m_output->is_enable())
+				{
+					size_t id_best;
+					ScalarType val_best;
+					find_best_of_population_on_target_function(id_best, val_best);
+					m_output->sent_pass(n_global_pass, n_sub_pass, pass, sub_pass, id_best, val_best);
+				}
 			}
 			//find best
 			ScalarType curr_eval;
@@ -444,15 +517,15 @@ public:
 				//inc count
 				if ((best_eval - restart_last_eval) < m_restart_info.m_delta)
 				{
-					++restart_count;
+					++restart_test_count;
 				}
 				else
 				{
-					restart_count = 0;
+					restart_test_count = 0;
 					restart_last_eval = best_eval;
 				}
 				//test
-				if (m_restart_info.m_count_fail <= restart_count)
+				if (m_restart_info.m_count_fail <= restart_test_count)
 				{
 					m_population.restart
 					(
@@ -462,13 +535,19 @@ public:
 						, m_random_range_info
 						, m_target_function
 					);
-					restart_count = 0;
+					restart_test_count = 0;
 					restart_last_eval = best_eval;
+					//restart inc
+					++restart_count;
 				}
 			}
+			//output
+			if (m_output->is_enable()) m_output->send_best(pass+1, restart_count, double(best_eval), double(best->m_eval));
 			//next
 			next_batch();
 		}
+		//end output
+		if (m_output->is_enable()) m_output->end();
 		//result
 		return best;
 	}
@@ -525,9 +604,58 @@ public:
 		return eval;
 	}
 
-
 protected:
-
+	/////////////////////////////////////////////////////////////////
+	void find_best_of_population_on_target_function(size_t& out_i, ScalarType& out_eval)
+	{
+		//ref to pop
+		Population& population = m_population.current();
+		//best
+		ScalarType best_eval;
+		size_t	   best_i;
+		//find best
+		for (size_t i = 0; i != population.size(); ++i)
+		{
+			//minimize (cross_entropy)
+			if (!i || population[i]->m_eval < best_eval)
+			{
+				best_i = i;
+				best_eval = population[i]->m_eval;
+			}
+		}
+		out_i = best_i;
+		out_eval = best_eval;
+	}
+	/////////////////////////////////////////////////////////////////
+	//eval all
+	void serial_execute_target_function_on_all_population()
+	{
+		//ref to current
+		Population& population = m_population.current();
+		//for all
+		for (size_t i = 0; i != population.size(); ++i)
+		{
+			auto y = population[i]->m_network.apply(m_dataset_batch.m_features);
+			population[i]->m_eval = m_target_function(m_dataset_batch.m_labels, y);
+		}
+	}
+	void parallel_execute_target_function_on_all_population(ThreadPool& thpool)
+	{
+		//ref to current
+		Population& population = m_population.current();
+		//for all
+		for (size_t i = 0; i != population.size(); ++i)
+		{
+			//add
+			m_promises[i] = thpool.push_task([this, i, &population]()
+			{
+				auto y = population[i]->m_network.apply(m_dataset_batch.m_features);
+				population[i]->m_eval = m_target_function(m_dataset_batch.m_labels, y);
+			};
+		}
+		//wait
+		for (auto& promise : m_promises) promise.wait();
+	}
 	/////////////////////////////////////////////////////////////////
 	ScalarType f_clamp(ScalarType value) const
 	{
