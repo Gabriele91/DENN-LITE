@@ -117,7 +117,7 @@ public:
 		{
 			return [this](ScalarType x) -> ScalarType
 			{
-				return (RandomIndices::random_0_to_1() * range()) + m_min;
+				return ScalarType(RandomIndices::random(m_min,m_max));
 			};
 		}
 	};
@@ -194,14 +194,14 @@ public:
 			{
 				//size
 				population.resize(np);
+				//init
+				for (typename Individual::SPtr& i_individual : population)
+				{
+					i_individual = i_default->copy();
+				}
 			}
 			//ref to current
 			Population& population = current();
-			//init
-			for (typename Individual::SPtr& i_individual : population)
-			{
-				i_individual = i_default->copy();
-			}
 			//random exp
 			auto random_exp = random_range_info.get_unary_expr();
 			//random init
@@ -335,7 +335,8 @@ public:
 		//for all
 		for(size_t i = 0; i!= population.size(); ++i)
 		{
-			auto new_individual = m_default->copy();
+			//get result turget
+			typename Individual::SPtr& new_individual = population_next[i];
 			//compute
 			jde(i, *new_individual);
 			rand_one_bin(i, *new_individual);
@@ -343,13 +344,10 @@ public:
 			auto y                 = new_individual->m_network.apply(m_dataset_batch.m_features);
 			new_individual->m_eval = m_target_function(m_dataset_batch.m_labels, y);
 			//minimixe (cross_entropy)
-			if (new_individual->m_eval < population[i]->m_eval)
+			if (!(new_individual->m_eval < population[i]->m_eval))
 			{
-				population_next[i] = new_individual;
-			}
-			else
-			{
-				population_next[i] = population[i];
+				//fail, next element is the target
+				std::swap(population_next[i], population[i]);
 			}
 		}
 		//swap
@@ -371,7 +369,8 @@ public:
 			//add
 			m_promises[i] = thpool.push_task([this,i,&population,&population_next]()
 			{ 
-				auto new_individual = m_default->copy();
+				//get result turget
+				typename Individual::SPtr& new_individual = population_next[i];
 				//compute
 				jde(i, *new_individual);
 				rand_one_bin(i, *new_individual);
@@ -379,13 +378,10 @@ public:
 				auto y                 = new_individual->m_network.apply(m_dataset_batch.m_features);
 				new_individual->m_eval = m_target_function(m_dataset_batch.m_labels, y);
 				//minimixe (cross_entropy)
-				if (new_individual->m_eval < population[i]->m_eval)
+				if (!(new_individual->m_eval < population[i]->m_eval))
 				{
-					population_next[i] = new_individual;
-				}
-				else
-				{
-					population_next[i] = population[i];
+					//fail, next element is the target
+					std::swap(population_next[i], population[i]);
 				}
 			});
 		}
@@ -542,13 +538,13 @@ protected:
 		const Population& population = m_population.current();
 		const Individual& i_target   = *population[target];
 		//f JDE
-		if (RandomIndices::random_0_to_1() < m_f_cr_jde_info.m_f)   
-			i_final.m_f = ScalarType(RandomIndices::random_0_to_1() * 2.0);
+		if (RandomIndices::random() < m_f_cr_jde_info.m_f)   
+			i_final.m_f = ScalarType(RandomIndices::random(0.0,2.0));
 		else														
 			i_final.m_f = i_target.m_f;
 		//cr JDE
-		if (RandomIndices::random_0_to_1() < m_f_cr_jde_info.m_cr)   
-			i_final.m_cr = ScalarType(RandomIndices::random_0_to_1());
+		if (RandomIndices::random() < m_f_cr_jde_info.m_cr)   
+			i_final.m_cr = ScalarType(RandomIndices::random());
 		else														
 			i_final.m_cr = i_target.m_cr;
 
@@ -588,7 +584,7 @@ protected:
 				for (size_t e = 0; e != w_lr_a.size(); ++e)
 				{
 					//cross event
-					bool cross_event = RandomIndices::random_0_to_1() < i_target.m_cr;
+					bool cross_event = RandomIndices::random() < i_target.m_cr;
 					//mutation
 					if (cross_event || rand == e)
 					{

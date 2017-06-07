@@ -17,10 +17,11 @@ namespace RandomIndices
 		return distribution(thread_random_generator());
 	}
 
-	//random value in flooting point [0,1] (thread safe)
-	double random_0_to_1()
+	//random value in flooting point [min,max] (thread safe)
+	double random(double min,double max)
 	{
-		return ((double)irand(RAND_MAX) / (double)RAND_MAX);
+		std::uniform_real_distribution<double> distribution(min,max);
+		return distribution(thread_random_generator());
 	}
 
 	//random in range of [0,size], start index = diff+1, diff is excluded (thread safe)
