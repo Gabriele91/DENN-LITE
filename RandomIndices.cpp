@@ -7,13 +7,21 @@ namespace RandomIndices
 	//Get generator (per thread)
 	std::mt19937& thread_random_generator()
 	{
-		static thread_local std::mt19937 generator;
+		static thread_local std::random_device r_device; 
+		static thread_local std::mt19937 generator(r_device());
 		return generator;
 	}
 	//random integer in [0,size) (thread safe)
 	int irand(int max)
 	{
 		std::uniform_int_distribution<int> distribution(0, max-1);
+		return distribution(thread_random_generator());
+	}
+
+	//random integer in [0,size) (thread safe)
+	size_t irand(size_t max)
+	{
+		std::uniform_int_distribution<size_t> distribution(0, max-1);
 		return distribution(thread_random_generator());
 	}
 
@@ -66,5 +74,46 @@ namespace RandomIndices
 		//shuffle
 		std::shuffle(indexs.begin(), indexs.begin() + indexs_size, thread_random_generator());
 	}
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	RandomDeck::RandomDeck(size_t size)
+	:m_size(size)
+	,m_k(size-1)
+	,m_deck(std::make_unique<size_t[]>(m_k))
+	{
+		for(size_t i=0; i!=m_k; ++i) m_deck[i]=i;
+	}
+
+	size_t RandomDeck::get_random_id(size_t target)
+	{
+		size_t j=irand(m_k);
+		size_t r=m_deck[j];
+		//reduce indices region
+		--m_k;
+		//swap with last element
+		m_deck[j]  =m_deck[m_k];
+		m_deck[m_k]=r;
+		//all indices >= target are +1
+		if( r >= target ) r++;
+		//return
+		return r;
+	}
+
+	void RandomDeck::reset()
+	{
+		m_k = m_size-1;
+	}
+
+	void RandomDeck::resize(size_t size)
+	{
+		if(m_size!=size)
+		{
+			m_size = size;
+			m_k    = size-1;
+			m_deck = std::make_unique<size_t[]>(m_k);
+			for(size_t i=0; i!=m_k; ++i) m_deck[i]=i;
+		}
+	}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////
 }
 }
