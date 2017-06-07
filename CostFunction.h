@@ -7,19 +7,24 @@ namespace Denn
 namespace CostFunction
 {
 
+	template < typename Scalar >
+	Scalar safe_log(Scalar x)
+	{
+		const Scalar min_const_ep = 1e-10 ;
+		return Denn::PointFunction::log<Scalar>(Denn::clamp(x,min_const_ep,Scalar(1.0)));
+	}
+
 	template < typename Matrix >
 	Matrix cross_entropy_by_rows(const Matrix& x, const Matrix& y)
 	{
-		const typename Matrix::Scalar const_ep = 1e-10;
-		Matrix log_y = (y.array() + const_ep).matrix().unaryExpr(&Denn::PointFunction::log<typename Matrix::Scalar>);
+		Matrix log_y = y.unaryExpr(&safe_log<typename Matrix::Scalar>);
 		return -((x.array() * log_y.array()).matrix().rowwise()).sum();
 	}	
 
 	template < typename Matrix >
 	typename Matrix::Scalar cross_entropy(const Matrix& x, const Matrix& y)
 	{
-		const typename Matrix::Scalar const_ep = 1e-10 ;
-		Matrix log_y = (y.array() + const_ep).matrix().unaryExpr(&Denn::PointFunction::log<typename Matrix::Scalar>);
+		Matrix log_y = y.unaryExpr(&safe_log<typename Matrix::Scalar>);
 		return -(x.array() * log_y.array()).sum() / (typename Matrix::Scalar)y.rows();
 	}
 

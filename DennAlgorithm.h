@@ -403,18 +403,19 @@ public:
 	//execute a pass
 	void parallel_pass(ThreadPool& thpool)
 	{
-		//ref to current
-		Population& population      = m_population.current();
-		//ref to next
-		Population& population_next = m_population.next();
+		size_t np = m_population.current().size();
 		//alloc promises
-		m_promises.resize(population.size());
+		m_promises.resize(np);
 		//execute
-		for (size_t i = 0; i != population.size(); ++i)
+		for (size_t i = 0; i != np; ++i)
 		{
 			//add
-			m_promises[i] = thpool.push_task([this,i,&population,&population_next]()
+			m_promises[i] = thpool.push_task([this,i]()
 			{ 
+				//ref to current
+				Population& population      = m_population.current();
+				//ref to next
+				Population& population_next = m_population.next();
 			    //get result turget
 			    auto new_individual = population_next[i];
 			    //Copy default params
@@ -476,9 +477,11 @@ public:
 		for (size_t pass = 0; pass != n_global_pass; ++pass)
 		{		
 			//eval on batch
+			#if 1
 			if (thpool)
-				parallel_execute_target_function_on_all_population(*thpool);
+				parallel_execute_target_function_on_all_population(*thpool); //nan in linux/g++?
 			else
+			#endif
 				serial_execute_target_function_on_all_population();
 			//sub pass
 			for (size_t sub_pass = 0; sub_pass != n_sub_pass; ++sub_pass)
@@ -641,18 +644,17 @@ protected:
 	}
 	void parallel_execute_target_function_on_all_population(ThreadPool& thpool)
 	{
-		//ref to current
-		Population& population = m_population.current();
+		size_t np = m_population.current().size();
 		//alloc promises
-		m_promises.resize(population.size());
+		m_promises.resize(np);
 		//for all
-		for (size_t i = 0; i != population.size(); ++i)
+		for (size_t i = 0; i != np; ++i)
 		{
 			//add
-			m_promises[i] = thpool.push_task([this, i, &population]()
+			m_promises[i] = thpool.push_task([this, i]()
 			{
-				auto y = population[i]->m_network.apply(m_dataset_batch.m_features);
-				population[i]->m_eval = m_target_function(m_dataset_batch.m_labels, y);
+				auto y = m_population.current()[i]->m_network.apply(m_dataset_batch.m_features);
+				m_population.current()[i]->m_eval = m_target_function(m_dataset_batch.m_labels, y);
 			});
 		}
 		//wait
