@@ -477,12 +477,15 @@ public:
 		for (size_t pass = 0; pass != n_global_pass; ++pass)
 		{		
 			//eval on batch
-			#if 1
 			if (thpool)
 				parallel_execute_target_function_on_all_population(*thpool); //nan in linux/g++?
 			else
-			#endif
 				serial_execute_target_function_on_all_population();
+
+			#if 0
+			for(auto& i : m_population.current()) assert(!std::isnan(i->m_eval));
+			#endif
+			
 			//sub pass
 			for (size_t sub_pass = 0; sub_pass != n_sub_pass; ++sub_pass)
 			{
@@ -640,6 +643,9 @@ protected:
 		{
 			auto y = population[i]->m_network.apply(m_dataset_batch.m_features);
 			population[i]->m_eval = m_target_function(m_dataset_batch.m_labels, y);
+			//safe
+			if(std::isnan(m_population.current()[i]->m_eval)) 
+				m_population.current()[i]->m_eval = std::numeric_limits<ScalarType>::max() ; 
 		}
 	}
 	void parallel_execute_target_function_on_all_population(ThreadPool& thpool)
@@ -655,6 +661,9 @@ protected:
 			{
 				auto y = m_population.current()[i]->m_network.apply(m_dataset_batch.m_features);
 				m_population.current()[i]->m_eval = m_target_function(m_dataset_batch.m_labels, y);
+				//safe
+				if(std::isnan(m_population.current()[i]->m_eval)) 
+					m_population.current()[i]->m_eval = std::numeric_limits<ScalarType>::max() ; 
 			});
 		}
 		//wait
