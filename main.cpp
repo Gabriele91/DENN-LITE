@@ -447,7 +447,7 @@ int main(int argc,const char** argv)
 		-omp 2 \
 		-tp 4
 		///////////////////////////////////////////////////////////MNIST
-		-t 7000 \
+		-t 8000 \
 		-s 1000 \
 		-p 96 \
 		-f 0.9 \
@@ -460,7 +460,24 @@ int main(int argc,const char** argv)
 		-rmax 2.0 \
 		-i "assets/ARTICLE_MNIST_5_12x4000_1s.gz" \
 		-o "ARTICLE_MNIST_5_12x4000_1s.json" \
-		-omp 4 \
+		-omp 0 \
+		-tp 4
+		///////////////////////////////////////////////////////////MNIST-MINI
+		-t 12500 \
+		-rc 3 \                 
+		-s 1250 \
+		-p 96 \
+		-f 0.9 \
+		-cr 0.9 \
+		-jf 0.2 \
+		-jcr 0.2 \
+		-cmin -30.0 \
+		-cmax 30.0 \
+		-rmin -2.0 \
+		-rmax 2.0 \
+		-i "assets/ARTICLE_mnist_minibatch_v004_576x100_1s.gz" \
+		-o "ARTICLE_mnist_minibatch_v004_576x100_1s.json" \
+		-omp 0 \
 		-tp 4
 	*/
 	////////////////////////////////////////////////////////////////////////////////////////////////
