@@ -502,7 +502,7 @@ int main(int argc,const char** argv)
 		virtual void end(double test_eval) override
 		{ 
 			write_output(); 
-			output() << "Denn end [ test: " << test_eval << ", time: " << Time::get_time() - m_start_time << std::endl;
+			output() << "Denn end [ test: " << test_eval << ", time: " << Time::get_time() - m_start_time << " ]" << std::endl;
 		}
 
 	protected:
