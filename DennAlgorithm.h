@@ -11,6 +11,7 @@ namespace Denn
 
 class RuntimeOutput : public std::enable_shared_from_this< RuntimeOutput >
 {
+protected:
 
     struct PassInfo
 	{

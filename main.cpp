@@ -493,20 +493,30 @@ int main(int argc,const char** argv)
 		{ 
 			output() << "Denn start" << std::endl;
 			m_start_time = Time::get_time();
+			m_pass_time  = Time::get_time(); 
+			m_n_pass = 0;
 		}
 
 		virtual void update_best() override 
 		{ 
+			//reset
+			m_pass_time  = Time::get_time(); 
+			m_n_pass 	 = 0;
+			//
 			write_output(); 
 			output() << std::endl;
 		}
 
 		virtual void update_pass() override 
 		{ 
+			++m_n_pass;
+			//compute pass time
+			double pass_per_sec = (double(m_n_pass) / (Time::get_time() - m_pass_time));
 			//clean line
 			for(short i=0;i!=10;++i) output() << "\t";
 			output() << "\r";
 			//write output
+			output() << double(long(pass_per_sec*10.))/10.0 << " [it/s], ";
 			write_output(); 
 			output() << "\r";
 		}
@@ -521,6 +531,8 @@ int main(int argc,const char** argv)
 	protected:
 
 		double m_start_time;
+		double m_pass_time;
+		long   m_n_pass;
 
 	};
 	//standard
