@@ -128,6 +128,7 @@ public:
 			//return
 			return is_open();
 		}
+        return false;
     }
     
     void close()

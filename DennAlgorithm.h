@@ -12,22 +12,53 @@ namespace Denn
 class RuntimeOutput : public std::enable_shared_from_this< RuntimeOutput >
 {
 
-	size_t m_curr_best_g_pass;
-	size_t m_curr_n_restart;
-	double m_curr_best_validation_eval;
-	double m_curr_best_target_eval;
+    struct PassInfo
+	{
+		size_t m_n_g_pass;
+		size_t m_n_s_pass;
+		size_t m_g_pass;
+		size_t m_s_pass;
+		size_t m_minimum_on_pop_id;
+		double m_minimum_on_pop_eval;
+	};
+	struct GlobalPassInfo
+	{
+		size_t m_g_pass;
+		size_t m_n_restart;
+		double m_validation_eval;
+		double m_target_eval;
+	};
+
+	PassInfo m_pass;
+	GlobalPassInfo m_global_pass;
+	std::ostream& m_stream;
 
 public:
 	using SPtr = std::shared_ptr<RuntimeOutput>;
 
-	RuntimeOutput() {}
+	RuntimeOutput(std::ostream& stream=std::cerr):m_stream(stream) {}
 
 	SPtr get_ptr(){ return shared_from_this(); }
 
-	virtual bool is_enable()	   { return true;     }
-	virtual std::ostream& output() { return std::cerr; }
+	virtual bool is_enable()	         { return true;     }
+	virtual std::ostream& output() const { return m_stream; }
 
 	virtual void start()
+	{
+		//none
+	}
+
+	virtual void update_best()
+	{
+		//none
+	}
+
+	virtual void update_pass()
+	{
+		write_output();
+	}
+
+	virtual void end()
 	{
 		//none
 	}
@@ -39,10 +70,12 @@ public:
 		, double target_eval
 	)
 	{
-		m_curr_best_g_pass = g_pass;
-		m_curr_n_restart   = n_restart;
-		m_curr_best_validation_eval = validation_eval;
-		m_curr_best_target_eval     = target_eval;
+		m_global_pass.m_g_pass = g_pass;
+		m_global_pass.m_n_restart = n_restart;
+		m_global_pass.m_validation_eval = validation_eval;
+		m_global_pass.m_target_eval = target_eval;
+		//
+		update_best();
 	}
 
 	virtual void sent_pass(
@@ -54,30 +87,36 @@ public:
 		, double minimum_on_pop_eval
 	)
 	{
-		output()
-			<< "pass: "
-			<< (n_s_pass * g_pass + s_pass)
-			<< " <- (" << g_pass << ", " << s_pass << ")"
-			<< ", population["
-			<< minimum_on_pop_id
-			<< "] = "
-			<< minimum_on_pop_eval
-			<< " cross entropy, restart = " 
-			<< m_curr_n_restart
-			<< "| best[ global pass "
-					<< m_curr_best_g_pass
-					<<", accuracy "
-					<< m_curr_best_validation_eval 
-					<< ", cross entropy " 
-					<< m_curr_best_target_eval
-					<< " ]"
-			<< std::endl;
+		m_pass.m_n_g_pass = n_g_pass;
+		m_pass.m_n_s_pass = n_s_pass;
+		m_pass.m_g_pass = g_pass;
+		m_pass.m_s_pass = s_pass;
+		m_pass.m_minimum_on_pop_id = minimum_on_pop_id;
+		m_pass.m_minimum_on_pop_eval = minimum_on_pop_eval;
+		//
+		update_pass();
 	}
 
-
-	virtual void end()
+	virtual void write_output() const
 	{
-		//none
+		output()
+			<< "pass: "
+			<< (m_pass.m_n_s_pass * m_pass.m_g_pass + m_pass.m_s_pass)
+			<< " <- (" << m_pass.m_g_pass << ", " << m_pass.m_s_pass << ")"
+			<< ", population["
+			<< m_pass.m_minimum_on_pop_id
+			<< "] = "
+			<< m_pass.m_minimum_on_pop_eval
+			<< " cross entropy | restart = " 
+			<< m_global_pass.m_n_restart
+			<< " | best[ global pass "
+					<< m_global_pass.m_g_pass
+					<<", accuracy "
+					<< m_global_pass.m_validation_eval
+					<< ", cross entropy " 
+					<< m_global_pass.m_target_eval
+					<< " ]"
+			<< std::endl;
 	}
 
 };
@@ -729,7 +768,7 @@ protected:
 				for (size_t e = 0; e != w_lr_a.size(); ++e)
 				{
 					//cross event
-					bool cross_event = RandomIndices::random() < i_target.m_cr;
+					bool cross_event = RandomIndices::random() < cr;
 					//mutation
 					if (cross_event || e_rand == e)
 					{
