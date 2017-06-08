@@ -55,12 +55,19 @@ public:
 
 	virtual void update_pass()
 	{
+		//clean line
+		for(short i=0;i!=10;++i) output() << "\t";
+		output() << "\r";
+		//output
 		write_output();
-	}
+		output() << "\r";
+ 	}
 
 	virtual void end(double test_result)
-	{
-		//none
+	{ 
+		output() << std::endl;
+		output() << "Test: " << test_result;
+		output() << std::endl;
 	}
 
 	virtual void send_best(
@@ -115,8 +122,7 @@ public:
 					<< m_global_pass.m_validation_eval
 					<< ", cross entropy " 
 					<< m_global_pass.m_target_eval
-					<< " ]"
-			<< std::endl;
+					<< " ]";
 	}
 
 };
