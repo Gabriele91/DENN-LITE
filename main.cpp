@@ -40,7 +40,7 @@ namespace LineInput
 			return m_rem_arg;
 		}
 
-	public:
+	protected:
 
 		int		      m_rem_arg;
 		const char**  m_pointer;
@@ -233,35 +233,6 @@ namespace LineInput
 		std::vector< ArgumentAndAction > m_arguments_and_actions;
 
 
-	};
-
-	class FileRuntimeOutput : public Denn::RuntimeOutput
-	{
-	public:
-
-		FileRuntimeOutput(const std::string& pathfile):m_file(pathfile){}
-		virtual bool is_enable() { return true; }
-		virtual std::ostream& output() { return m_file; }
-	
-	private:
-
-		std::ofstream m_file;
-
-	};
-
-	class CoutRuntimeOutput : public Denn::RuntimeOutput
-	{
-	public:
-
-		virtual bool is_enable() { return true; }
-		virtual std::ostream& output() { return std::cout; }
-	};
-
-	class VoidRuntimeOutput : public Denn::RuntimeOutput
-	{
-	public:
-
-		virtual bool is_enable() { return false; }
 	};
 
 	class OutputData
@@ -512,10 +483,33 @@ int main(int argc,const char** argv)
 	std::ofstream		  ofile((const std::string&)arguments.m_output_filename);
 	LineInput::OutputData output(ofile);
 	////////////////////////////////////////////////////////////////////////////////////////////////
-	auto runtime_out = std::make_shared<Denn::RuntimeOutput>(); //default std::cerr
-	//auto runtime_out = std::make_shared<LineInput::FileRuntimeOutput>("runtime.log")->get_ptr(); //file
-	//auto runtime_out = std::make_shared<LineInput::CoutRuntimeOutput>()->get_ptr(); //cout
-	//auto runtime_out = std::make_shared<LineInput::VoidRuntimeOutput>()->get_ptr(); //none
+	class CustomRuntimeOutput : public Denn::RuntimeOutput
+	{
+	public:
+
+		CustomRuntimeOutput(std::ostream& stream=std::cerr) : Denn::RuntimeOutput(stream){}
+
+		virtual void start() override
+		{ 
+			output() << "Denn start" << std::endl;
+		}
+
+		virtual void update_best() override { write_output(); }
+
+		virtual void update_pass() override { }
+
+		virtual void end() override
+		{ 
+			write_output(); 
+			output() << "Denn end" << std::endl;
+		}
+	};
+	//standard
+	//auto runtime_out = std::make_shared<Denn::RuntimeOutput>(/* srd::cerr or std::cout or file */); //default std::cerr
+	//custom
+	auto runtime_out = std::make_shared<CustomRuntimeOutput>()->get_ptr(); //default std::cerr
+
+
 	//double or float?
 	switch (dataset.get_main_header_info().m_type)
 	{
