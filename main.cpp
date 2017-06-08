@@ -495,13 +495,26 @@ int main(int argc,const char** argv)
 			m_start_time = Time::get_time();
 		}
 
-		virtual void update_best() override { write_output(); }
+		virtual void update_best() override 
+		{ 
+			write_output(); 
+			output() << std::endl;
+		}
 
-		virtual void update_pass() override { }
+		virtual void update_pass() override 
+		{ 
+			//clean line
+			for(short i=0;i!=10;++i) output() << "\t";
+			output() << "\r";
+			//write output
+			write_output(); 
+			output() << "\r";
+		}
 
 		virtual void end(double test_eval) override
 		{ 
 			write_output(); 
+			output() << std::endl;
 			output() << "Denn end [ test: " << test_eval << ", time: " << Time::get_time() - m_start_time << " ]" << std::endl;
 		}
 
