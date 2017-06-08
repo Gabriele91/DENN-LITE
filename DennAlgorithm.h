@@ -58,7 +58,7 @@ public:
 		write_output();
 	}
 
-	virtual void end()
+	virtual void end(double test_result)
 	{
 		//none
 	}
@@ -592,7 +592,10 @@ public:
 			next_batch();
 		}
 		//end output
-		if (m_output->is_enable()) m_output->end();
+		if (m_output->is_enable())
+		{
+			m_output->end(double(execute_test(*best)));
+		} 
 		//result
 		return best;
 	}

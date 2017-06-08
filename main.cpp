@@ -492,17 +492,23 @@ int main(int argc,const char** argv)
 		virtual void start() override
 		{ 
 			output() << "Denn start" << std::endl;
+			m_start_time = Time::get_time();
 		}
 
 		virtual void update_best() override { write_output(); }
 
 		virtual void update_pass() override { }
 
-		virtual void end() override
+		virtual void end(double test_eval) override
 		{ 
 			write_output(); 
-			output() << "Denn end" << std::endl;
+			output() << "Denn end [ test: " << test_eval << ", time: " << Time::get_time() - m_start_time << std::endl;
 		}
+
+	protected:
+
+		double m_start_time;
+
 	};
 	//standard
 	//auto runtime_out = std::make_shared<Denn::RuntimeOutput>(/* srd::cerr or std::cout or file */); //default std::cerr
