@@ -97,7 +97,7 @@ namespace ActiveFunction
 		for (int n = 0; n < N; n++)
 		{
 			//reduce
-			 typename Matrix::Scalar sum = inout_matrix.row(n).sum();
+			typename Matrix::Scalar sum = inout_matrix.row(n).sum();
 			//no nan
 			if (sum) inout_matrix.row(n) /= sum;
 		}
