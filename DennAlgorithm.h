@@ -7,6 +7,8 @@
 #include "NeuralNetwork.h"
 #include "DennParameters.h"
 #include "DennPopulation.h"
+#include "DennMutation.h"
+#include "DennCrossover.h"
 
 namespace Denn
 {
@@ -130,17 +132,6 @@ public:
 
 };
 
-enum class MutationType
-{
-	MT_RAND_ONE,
-	MT_BEST_ONE		
-};	
-enum class CrossOverType
-{
-	CR_BIN,
-	CR_EXP		
-};
-
 
 template< typename Network, typename Parameters, typename DataSetLoader >
 class DennAlgorithm
@@ -164,30 +155,11 @@ public:
 	using CostFunction   = typename DoubleBufferPopulation< Network, DataSet >::CostFunction;
 	//DE parallel
 	using PromiseList    = std::vector< std::future<void> >;
+	//Ref mutation crossover
+	using MutationPtr    = std::unique_ptr < Mutation< Parameters, Population, Individual > >;
+	using CrossoverPtr   = std::unique_ptr < Crossover< Individual > >;
+	//Ref mutation
 	////////////////////////////////////////////////////////////////////////
-	class Mutation 
-	{ 
-		public: 
-		Mutation(const Parameters& parameters) : m_parameters(parameters){}
-		virtual void operator()(const Population& population,int id_target,Individual& output)= 0; 
-
-		protected:
-		//utils
-		ScalarType f_clamp(ScalarType value) const
-		{
-			ScalarType cmin = m_parameters.m_clamp_min;
-			ScalarType cmax = m_parameters.m_clamp_max;
-			return Denn::clamp<ScalarType>(value, cmin, cmax);
-		}
-		//attributes
-		const Parameters& m_parameters;
-	};
-	class CrossOver
-	{
-		public: 
-		virtual void operator()(Individual& target,Individual& mutant)= 0; 
-	};
-	/////////////////////////////////////////////////////////////////
 	bool jde(int target, Individual& i_final) const
 	{
 		//vectors
@@ -206,155 +178,6 @@ public:
 
 		return true;
 	}
-	/////////////////////////////////////////////////////////////////
-	class RandOne : public Mutation
-	{ 
-		public: 
-		RandOne(const Parameters& parameters) : Mutation(parameters){}
-		virtual void operator()(const Population& population,int id_target,Individual& i_final)
-		{
-			//alias
-			const auto& f  = i_final.m_f;
-			//target
-			const Individual& i_target = *population[id_target];
-			//init generator
-			static thread_local RandomIndices::RandomDeck rand_deck;
-			//set population size in deck
-			rand_deck.resize(population.size());
-			//for each layers
-			for (size_t i_layer=0; i_layer != i_target.size(); ++i_layer)
-			{
-				//weights and baias
-				for (size_t m = 0; m!= i_target[i_layer].size(); ++m)
-				{
-					//do rand
-					rand_deck.reset();
-					//do cross + mutation
-					const Individual& nn_a = *population[rand_deck.get_random_id(id_target)];
-					const Individual& nn_b = *population[rand_deck.get_random_id(id_target)];
-					const Individual& nn_c = *population[rand_deck.get_random_id(id_target)];
-					//
-					auto w_final  = i_final[i_layer][m];
-					auto w_lr_a   = nn_a[i_layer][m];
-					auto w_lr_b   = nn_b[i_layer][m];
-					auto w_lr_c   = nn_c[i_layer][m];
-					//function
-					for (size_t e = 0; e != w_lr_a.size(); ++e) 
-						w_final(e) = this->f_clamp((w_lr_a(e) - w_lr_b(e)) * f + w_lr_c(e));
-				}
-			}
-		}
-	};
-	class BestOne : public Mutation
-	{ 
-		public: 
-		BestOne(const Parameters& parameters) : Mutation(parameters){}
-		virtual void operator()(const Population& population,int id_target,Individual& i_final)
-		{
-			//alias
-			const auto& f  = i_final.m_f;
-			//target
-			const Individual& i_target = *population[id_target];
-			//best
-			size_t id_best;
-			ScalarType eval_best;
-			find_best_of_population_on_target_function(population, id_best, eval_best);
-			const Individual& i_best = *population[id_best];
-			//init generator
-			static thread_local RandomIndices::RandomDeck rand_deck;
-			//set population size in deck
-			rand_deck.resize(population.size());
-			//for each layers
-			for (size_t i_layer=0; i_layer != i_target.size(); ++i_layer)
-			{
-				//weights and baias
-				for (size_t m = 0; m!= i_target[i_layer].size(); ++m)
-				{
-					//do rand
-					rand_deck.reset();
-					//do cross + mutation
-					const Individual& nn_a = *population[rand_deck.get_random_id(id_target)];
-					const Individual& nn_b = *population[rand_deck.get_random_id(id_target)];
-					//
-					auto w_final  = i_final[i_layer][m];
-					auto w_lr_best= i_best[i_layer][m];
-					auto w_lr_a   = nn_a[i_layer][m];
-					auto w_lr_b   = nn_b[i_layer][m];
-					//function
-					for (size_t e = 0; e != w_lr_a.size(); ++e) 
-						w_final(e) = this->f_clamp((w_lr_a(e) - w_lr_b(e)) * f + w_lr_best(e));
-				}
-			}
-		}
-	};
-	class Bin : public CrossOver
-	{
-		public: 
-		virtual void operator()(Individual& i_target,Individual& i_mutant)
-		{
-			//baias
-			const auto& cr = i_mutant.m_cr;
-			//for each layers
-			for (size_t i_layer=0; i_layer != i_target.size(); ++i_layer)
-			{
-				//weights and baias
-				for (size_t m = 0; m!= i_target[i_layer].size(); ++m)
-				{
-					//elements
-					auto w_target = i_target[i_layer][m];
-					auto w_mutant  = i_mutant[i_layer][m];
-					//random i
-					size_t e_rand = RandomIndices::irand(w_target.size());
-					//CROSS
-					for (size_t e = 0; e != w_target.size(); ++e)
-					{
-						//crossover
-						//!(RandomIndices::random() < cr || e_rand == e)
-						if (e_rand != e && cr <= RandomIndices::random()) 
-						{
-							w_mutant(e) = w_target(e);
-						}
-					}
-				}
-			}
-		}
-	};
-	class Exp : public CrossOver
-	{
-		public: 
-		virtual void operator()(Individual& i_target,Individual& i_mutant)
-		{
-			//baias
-			const auto& cr = i_mutant.m_cr;
-			//for each layers
-			for (size_t i_layer=0; i_layer != i_target.size(); ++i_layer)
-			{
-				//weights and baias
-				for (size_t m = 0; m!= i_target[i_layer].size(); ++m)
-				{
-					//elements
-					auto w_target = i_target[i_layer][m];
-					auto w_mutant  = i_mutant[i_layer][m];
-					//random i
-					size_t e_rand = RandomIndices::irand(w_target.size());
-					//event
-					bool copy_event = false;
-					//CROSS
-					for (size_t e = 0; e != w_target.size(); ++e)
-					{
-						//crossover
-						//!(RandomIndices::random() < cr || e_rand == e)
-						copy_event |= ( e_rand != e && cr <= RandomIndices::random());
-						//copy all vector
-						if (copy_event) 
-						{
-							w_mutant(e) = w_target(e);
-						}
-					}
-				}
-			}
-		}
-	};
 	////////////////////////////////////////////////////////////////////////
 	DennAlgorithm
 	(
@@ -377,20 +200,20 @@ public:
 		{
 			default:
 			case MutationType::MT_RAND_ONE:
-			m_muation   = std::make_unique<RandOne>(m_params);
+			m_muation   = std::make_unique< RandOne< Parameters, Population, Individual > >(m_params);
 			break;
 			case MutationType::MT_BEST_ONE:
-			m_muation   = std::make_unique<BestOne>(m_params);
+			m_muation   = std::make_unique< BestOne< Parameters, Population, Individual > >(m_params);
 			break;
 		}
 		switch(crossover_type)
 		{
 			default:
 			case CrossOverType::CR_BIN:
-			m_crossover   = std::make_unique<Bin>();
+			m_crossover   = std::make_unique< Bin<Individual> >();
 			break;
 			case CrossOverType::CR_EXP:
-			m_crossover   = std::make_unique<Exp>();
+			m_crossover   = std::make_unique< Bin<Individual> >();
 			break;
 		}
 	}	
@@ -565,7 +388,7 @@ public:
 				{
 					size_t id_best;
 					ScalarType val_best;
-					find_best_of_population_on_target_function(m_population.current(), id_best, val_best);
+					m_population.current().best(id_best, val_best);
 					m_output->sent_pass(n_global_pass, n_sub_pass, pass, sub_pass, id_best, val_best);
 				}
 			}
@@ -692,25 +515,6 @@ protected:
 		};
 	}
 	/////////////////////////////////////////////////////////////////
-	static void find_best_of_population_on_target_function(const Population& population, size_t& out_i, ScalarType& out_eval)
-	{
-		//best
-		ScalarType best_eval;
-		size_t	   best_i;
-		//find best
-		for (size_t i = 0; i != population.size(); ++i)
-		{
-			//minimize (cross_entropy)
-			if (!i || population[i]->m_eval < best_eval)
-			{
-				best_i = i;
-				best_eval = population[i]->m_eval;
-			}
-		}
-		out_i = best_i;
-		out_eval = best_eval;
-	}
-	/////////////////////////////////////////////////////////////////
 	//eval all
 	void serial_execute_target_function_on_all_population()
 	{
@@ -770,8 +574,8 @@ protected:
 	DataSet				       m_dataset_batch;
 	//params of DE
 	Parameters 				   m_params;
-	std::unique_ptr<Mutation>  m_muation;
-	std::unique_ptr<CrossOver> m_crossover;
+	MutationPtr                m_muation;
+	CrossoverPtr               m_crossover;
 };
 
 }

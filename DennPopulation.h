@@ -1,3 +1,4 @@
+#pragma once
 #include "Config.h"
 #include "CostFunction.h"
 #include "NeuralNetwork.h"
@@ -70,7 +71,65 @@ namespace Denn
     ////////////////////////////////////////////////////////////////////////
 	//Population
     template < typename Network >
-	using Population = std::vector < typename Individual<Network>::SPtr >;
+	class Population
+	{
+	public:
+
+		//pointer type		
+        using ScalarType    = typename Network::ScalarType;
+        using MatrixType    = typename Network::MatrixType;
+		using IndividualPtr = typename Individual<Network>::SPtr;
+
+		//vector methods 		
+		size_t size() const { return m_individuals.size(); }
+		void   resize(size_t i){ m_individuals.resize(i); }
+		void   push_back(const IndividualPtr& i){ m_individuals.push_back(i); }
+
+		//vector operator
+		      IndividualPtr& operator[](size_t i)       { return m_individuals[i]; }
+		const IndividualPtr& operator[](size_t i) const { return m_individuals[i]; }
+		
+		//iterator
+		typename std::vector < IndividualPtr >::iterator       begin()       { return m_individuals.begin(); }
+		typename std::vector < IndividualPtr >::const_iterator begin() const { return m_individuals.begin(); }
+		typename std::vector < IndividualPtr >::iterator       end()         { return m_individuals.end();   }
+		typename std::vector < IndividualPtr >::const_iterator end()   const { return m_individuals.end();   }
+
+		//costum
+		void best(size_t& out_i, ScalarType& out_eval) const
+		{
+			//best
+			size_t	   best_i;
+			ScalarType best_eval;
+			//find best
+			for (size_t i = 0; i != m_individuals.size(); ++i)
+			{
+				//minimize (cross_entropy)
+				if (!i || m_individuals[i]->m_eval < best_eval)
+				{
+					best_i = i;
+					best_eval = m_individuals[i]->m_eval;
+				}
+			}
+			out_i = best_i;
+			out_eval = best_eval;
+		}
+		IndividualPtr best() const
+		{
+			//values
+			size_t best_i;
+			ScalarType best_eval;
+			//get best id
+			best(best_i, best_eval);
+			//return
+			return m_individuals[best_i];
+		}
+	
+	protected:
+
+		std::vector < IndividualPtr > m_individuals;
+
+	};
 
     ////////////////////////////////////////////////////////////////////////
 	//Double Population buffer
@@ -152,6 +211,15 @@ namespace Denn
 		const Population& const_next() const
 		{
 			return m_pop_buffer[(m_current + 1) % 2];
+		}
+		//get best
+		void best(size_t& best_i, ScalarType& out_eval) const
+		{
+			current().best(best_i,out_eval);
+		}
+		IndividualPtr best() const
+		{
+			return current().best();
 		}
 		//swap
 		void swap()
