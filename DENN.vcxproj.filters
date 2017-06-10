@@ -54,6 +54,15 @@
     <ClInclude Include="Denn.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="DennMutationCrossOver.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="DennParameters.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="DennPopulation.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

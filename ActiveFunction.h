@@ -90,11 +90,25 @@ namespace ActiveFunction
 	{
 		const int	         N   = inout_matrix.rows();
 		const Matrix::Scalar max = inout_matrix.maxCoeff();
+#if 1
+		//compute e^(M-max)
+		inout_matrix = (inout_matrix.array() - max).exp();
+		// M(r,n)/ SUM_r(M(n))
 		for (int n = 0; n < N; n++)
 		{
+			//reduce
+			Matrix::Scalar sum = inout_matrix.row(n).sum();
+			//no nan
+			if (sum) inout_matrix.row(n) /= sum;
+		}
+#else  //standard
+		for (int n = 0; n < N; n++)
+		{
+			// e^(M_r-max)/ SUM_r(e^(M_r-max))
 			inout_matrix.row(n) = (inout_matrix.row(n).array() - max).exp();
 			inout_matrix.row(n) /= inout_matrix.row(n).sum();
 		}
+#endif
 		return inout_matrix;
 	}
 
