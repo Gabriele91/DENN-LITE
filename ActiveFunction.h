@@ -88,8 +88,8 @@ namespace ActiveFunction
 	template < typename Matrix >
 	Matrix& softmax(Matrix& inout_matrix)
 	{
-		const int	         N   = inout_matrix.rows();
-		const Matrix::Scalar max = inout_matrix.maxCoeff();
+		const int	                  N   = inout_matrix.rows();
+		const typename Matrix::Scalar max = inout_matrix.maxCoeff();
 #if 1
 		//compute e^(M-max)
 		inout_matrix = (inout_matrix.array() - max).exp();
@@ -97,7 +97,7 @@ namespace ActiveFunction
 		for (int n = 0; n < N; n++)
 		{
 			//reduce
-			Matrix::Scalar sum = inout_matrix.row(n).sum();
+			 typename Matrix::Scalar sum = inout_matrix.row(n).sum();
 			//no nan
 			if (sum) inout_matrix.row(n) /= sum;
 		}
