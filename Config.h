@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cmath>
 #include <cassert>
+#include <string>
 #include <functional>
 #include <algorithm>
 #include <limits>

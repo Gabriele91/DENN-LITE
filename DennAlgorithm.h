@@ -185,8 +185,6 @@ public:
 		, const Parameters&   params
 		, const Network       nn_default
 		, CostFunction		  target_function
-		, MutationType        mutation_type
-		, CrossOverType       crossover_type
 		, RuntimeOutput::SPtr output
 	) 
 	{
@@ -196,23 +194,23 @@ public:
 		m_params			= params;
 		m_output            = output;
 		//default
-		switch(mutation_type)
+		switch((MutationType)m_params.m_mutation_type)
 		{
 			default:
 			case MutationType::MT_RAND_ONE:
-			m_muation   = std::make_unique< RandOne< Parameters, Population, Individual > >(m_params);
+			m_mutation   = std::make_unique< RandOne< Parameters, Population, Individual > >(m_params);
 			break;
 			case MutationType::MT_BEST_ONE:
-			m_muation   = std::make_unique< BestOne< Parameters, Population, Individual > >(m_params);
+			m_mutation   = std::make_unique< BestOne< Parameters, Population, Individual > >(m_params);
 			break;
 		}
-		switch(crossover_type)
+		switch((CrossoverType)m_params.m_crossover_type)
 		{
 			default:
-			case CrossOverType::CR_BIN:
+			case CrossoverType::CT_BIN:
 			m_crossover   = std::make_unique< Bin<Individual> >();
 			break;
-			case CrossOverType::CR_EXP:
+			case CrossoverType::CT_EXP:
 			m_crossover   = std::make_unique< Bin<Individual> >();
 			break;
 		}
@@ -260,7 +258,7 @@ public:
 			//compute jde
 			jde(i, *new_individual);
 			//call muation
-			(*m_muation)(population, i, *new_individual);
+			(*m_mutation)(population, i, *new_individual);
 			//call crossover
 			(*m_crossover)(*population[i], *new_individual);
 			//eval
@@ -309,7 +307,7 @@ public:
 				//compute jde
 				jde(i, *new_individual);
 				//call muation
-				(*m_muation)(population, i, *new_individual);
+				(*m_mutation)(population, i, *new_individual);
 				//call crossover
 				(*m_crossover)(*population[i], *new_individual);
 				//eval
@@ -574,7 +572,7 @@ protected:
 	DataSet				       m_dataset_batch;
 	//params of DE
 	Parameters 				   m_params;
-	MutationPtr                m_muation;
+	MutationPtr                m_mutation;
 	CrossoverPtr               m_crossover;
 };
 

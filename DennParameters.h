@@ -3,6 +3,8 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include "DennMutation.h"
+#include "DennCrossover.h"
 
 namespace Denn
 {
@@ -90,22 +92,24 @@ namespace Denn
 		read_only<std::string> 					  m_output_filename;
 		std::vector< ParameterInfo >              m_params_info;
 		
-		read_only<size_t>	   m_generations   { size_t(1000)  };
-		read_only<size_t>	   m_sub_gens      { size_t(100)   };
-		read_only<size_t>	   m_np            { size_t(12)    };
-		read_only<Scalar>	   m_default_f     { Scalar(1.0)   };
-		read_only<Scalar>	   m_default_cr    { Scalar(1.0)   };
-		read_only<Scalar>	   m_jde_f         { Scalar(0.1)   };
-		read_only<Scalar>	   m_jde_cr        { Scalar(0.1)   };
-		read_only<Scalar>	   m_clamp_max     { Scalar( 10.0) };
-		read_only<Scalar>	   m_clamp_min     { Scalar(-10.0) };
-		read_only<Scalar>	   m_range_max     { Scalar( 1.0 ) };
-		read_only<Scalar>	   m_range_min     { Scalar(-1.0)  };
-		read_only<bool>	       m_restart_enable{ true          };
-		read_only<size_t>	   m_restart_count { size_t(2)    };
-		read_only<Scalar>	   m_restart_delta { Scalar(0.02) };
-		read_only<int>	       m_threads_omp   { size_t(2) };
-		read_only<size_t>	   m_threads_pop   { size_t(2) };
+		read_only<size_t>	     m_generations   { size_t(1000)  };
+		read_only<size_t>	     m_sub_gens      { size_t(100)   };
+		read_only<size_t>	     m_np            { size_t(12)    };
+		read_only<Scalar>	     m_default_f     { Scalar(1.0)   };
+		read_only<Scalar>	     m_default_cr    { Scalar(1.0)   };
+		read_only<Scalar>	     m_jde_f         { Scalar(0.1)   };
+		read_only<Scalar>	     m_jde_cr        { Scalar(0.1)   };
+		read_only<Scalar>	     m_clamp_max     { Scalar( 10.0) };
+		read_only<Scalar>	     m_clamp_min     { Scalar(-10.0) };
+		read_only<Scalar>	     m_range_max     { Scalar( 1.0 ) };
+		read_only<Scalar>	     m_range_min     { Scalar(-1.0)  };
+		read_only<bool>	         m_restart_enable{ true          };
+		read_only<size_t>	     m_restart_count { size_t(2)    };
+		read_only<Scalar>	     m_restart_delta { Scalar(0.02) };
+		read_only<int>	         m_threads_omp   { size_t(2) };
+		read_only<size_t>	     m_threads_pop   { size_t(2) };
+		read_only<MutationType>  m_mutation_type { MutationType::MT_RAND_ONE };
+		read_only<CrossoverType> m_crossover_type{ CrossoverType::CT_BIN };
 	
 		Parameters() 
 		:m_params_info
@@ -121,6 +125,26 @@ namespace Denn
 			ParameterInfo{
                  "Number of parents", { "--number_parents",    "-np"  }, 
 				 [this](Arguments& args) { m_np = args.get_int() ; }
+            },
+			ParameterInfo{
+                 "Type of DE mutation [rand/1, best/1]", { "--mutation",    "-m"  }, 
+				 [this](Arguments& args) 
+				 { 
+					 std::string str_m_type = args.get_string() ;
+					 std::transform(str_m_type.begin(),str_m_type.end(), str_m_type.begin(), ::tolower);
+					      if( str_m_type == "rand/1" ) m_mutation_type = MutationType::MT_RAND_ONE;
+					 else if( str_m_type == "best/1" ) m_mutation_type = MutationType::MT_BEST_ONE;
+				 }
+            },
+			ParameterInfo{
+                 "Type of DE crossover [bin, exp]", { "--crossover",    "-co"  }, 
+				 [this](Arguments& args) 
+				 { 
+					 std::string str_c_type = args.get_string() ;
+					 std::transform(str_c_type.begin(),str_c_type.end(), str_c_type.begin(), ::tolower);
+					      if( str_c_type == "bin" ) m_crossover_type = CrossoverType::CT_BIN;
+					 else if( str_c_type == "exp" ) m_crossover_type = CrossoverType::CT_EXP;
+				 }
             },
 			ParameterInfo{ 
                 "Default F factor for DE", { "--f_default",    "-f"  }, 
@@ -261,7 +285,6 @@ namespace Denn
 				}
 				s_out << return_n_space(Denn::clamp<size_t>(space_line,0,50));
 				s_out << param.m_description;
-				s_out << std::endl;
 				s_out << std::endl;
 			}
 			s_out << std::endl;

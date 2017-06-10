@@ -115,10 +115,6 @@ namespace BuildTest
 			, parameters
 			, nn0
 			, cost_function
-			//mutation
-			, MutationType::MT_RAND_ONE
-			//crossover
-			, CrossOverType::CR_BIN
 			//output
 			, runtime_output
 		);

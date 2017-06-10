@@ -4,10 +4,10 @@
 
 namespace Denn
 {
-    enum class CrossOverType
+    enum class CrossoverType
     {
-        CR_BIN,
-        CR_EXP		
+        CT_BIN,
+        CT_EXP		
     };
 
     template < typename Individual >
@@ -69,19 +69,22 @@ namespace Denn
 					auto w_target = i_target[i_layer][m];
 					auto w_mutant  = i_mutant[i_layer][m];
 					//random i
-					size_t e_rand = RandomIndices::irand(w_target.size());
+					size_t e_rand  = RandomIndices::irand(w_target.size());
+					size_t e_start = RandomIndices::irand(w_target.size());
 					//event
 					bool copy_event = false;
 					//CROSS
 					for (size_t e = 0; e != w_target.size(); ++e)
 					{
+						//id circ
+						size_t e_circ = (e_start+e) % w_target.size();
 						//crossover
 						//!(RandomIndices::random() < cr || e_rand == e)
-						copy_event |= ( e_rand != e && cr <= RandomIndices::random());
+						copy_event |= ( e_rand != e_circ && cr <= RandomIndices::random());
 						//copy all vector
 						if (copy_event) 
 						{
-							w_mutant(e) = w_target(e);
+							w_mutant(e_circ) = w_target(e_circ);
 						}
 					}
 				}
