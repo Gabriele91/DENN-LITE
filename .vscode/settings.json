@@ -59,6 +59,7 @@
         "csignal": "cpp",
         "cstdarg": "cpp",
         "codecvt": "cpp",
-        "slist": "cpp"
+        "slist": "cpp",
+        "cassert": "cpp"
     }
 }
