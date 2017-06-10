@@ -26,6 +26,9 @@
     <ClInclude Include="DatasetLoader.h" />
     <ClInclude Include="Denn.h" />
     <ClInclude Include="DennAlgorithm.h" />
+    <ClInclude Include="DennMutationCrossOver.h" />
+    <ClInclude Include="DennParameters.h" />
+    <ClInclude Include="DennPopulation.h" />
     <ClInclude Include="IOFileWrapper.h" />
     <ClInclude Include="NeuralNetwork.h" />
     <ClInclude Include="PerceptronLayer.h" />

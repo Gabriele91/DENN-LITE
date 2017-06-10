@@ -424,14 +424,14 @@ public:
 	void serial_pass()
 	{
 		//ref to population
-		auto population = m_population.current();
+		auto& population = m_population.current();
 		//ref to next
-		auto population_next = m_population.next();
+		auto& population_next = m_population.next();
 		//for all
 		for(size_t i = 0; i!= (size_t)m_params.m_np; ++i)
 		{
 			//get temp individual
-			auto new_individual = population_next[i];
+			auto& new_individual = population_next[i];
 			//Copy default params
 			new_individual->copy_attributes(*m_default);
 			//compute jde
@@ -476,11 +476,11 @@ public:
 			m_promises[i] = thpool.push_task([this,i]()
 			{ 
 				//ref to population
-				auto population = m_population.current();
+				auto& population = m_population.current();
 				//ref to next
-				auto population_next = m_population.next();
+				auto& population_next = m_population.next();
 				//get temp individual
-			    auto new_individual = population_next[i];
+			    auto& new_individual = population_next[i];
 			    //Copy default params
 			    new_individual->copy_attributes(*m_default);
 				//compute jde
@@ -684,8 +684,8 @@ protected:
 	/////////////////////////////////////////////////////////////////
 	RandomFunction get_random_func() const
 	{
-		ScalarType min = m_params.m_clamp_min;
-		ScalarType max = m_params.m_clamp_max;
+		ScalarType min = m_params.m_range_min;
+		ScalarType max = m_params.m_range_max;
 		return [=](ScalarType x) -> ScalarType
 		{
 			return ScalarType(RandomIndices::random(min,max));
@@ -751,7 +751,7 @@ protected:
 				auto y = i_target.m_network.apply(m_dataset_batch.m_features);
 				i_target.m_eval = m_target_function(m_dataset_batch.m_labels, y);
 				//safe
-				if(i_target.m_eval)
+				if (std::isnan(i_target.m_eval))
 					i_target.m_eval = std::numeric_limits<ScalarType>::max() ; 
 			});
 		}
