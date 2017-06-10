@@ -88,8 +88,8 @@ namespace ActiveFunction
 	template < typename Matrix >
 	Matrix& softmax(Matrix& inout_matrix)
 	{
-		const int	 N = inout_matrix.rows();
-		const double max = inout_matrix.maxCoeff();
+		const int	         N   = inout_matrix.rows();
+		const Matrix::Scalar max = inout_matrix.maxCoeff();
 		for (int n = 0; n < N; n++)
 		{
 			inout_matrix.row(n) = (inout_matrix.row(n).array() - max).exp();

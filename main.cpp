@@ -4,236 +4,8 @@
 #include "Denn.h"
 
 #define STR_PRINT_ATTRIBUTES(...)  #__VA_ARGS__; __VA_ARGS__
-
-namespace LineInput
+namespace BuildTest
 {
-
-	class Arguments
-	{
-	public:
-
-		Arguments(int nargs, const char** vargs)
-		: m_rem_arg(nargs)
-		, m_pointer(vargs)
-		{
-		}
-
-		const char* get_string()
-		{
-			assert(m_rem_arg);
-			--m_rem_arg;
-			return *(m_pointer++);
-		}
-
-		int get_int() 
-		{
-			return atoi(get_string());
-		}
-
-		double get_double()
-		{
-			return atof(get_string());
-		}
-
-		int remaining() const
-		{
-			return m_rem_arg;
-		}
-
-	protected:
-
-		int		      m_rem_arg;
-		const char**  m_pointer;
-
-	};
-
-	template < typename Scalar = double >
-	class ReadArguments
-	{
-
-		template <class T>
-		class read_only 
-		{
-
-		public:
-
-			//default
-			operator const T&() const { return m_data;    }
-			//cast
-			template < class X >
-			operator const X() const { return X(m_data); }
-
-			//default
-			const T& operator *() const { return m_data; }
-			
-		private:
-
-			read_only() {}
-
-			template < typename I > read_only(const I& arg) { m_data = T(arg); }
-
-			T m_data;
-
-			template < typename I > T operator=(const I& arg) { m_data = T(arg); return m_data; }
-
-			friend class ReadArguments<Scalar>;
-
-		};
-
-		struct ArgumentAndAction
-		{
-			std::string				   		  m_description;
-			std::vector< std::string  > 	  m_arg_key;
-			std::function< void(Arguments&) > m_action;
-		};
-
-	public:
-
-		ReadArguments() 
-		:m_arguments_and_actions
-		({
-			ArgumentAndAction{ "Global number of generation", { "--gen_tot",    "-t"  }, 
-								[this](Arguments& args) { m_gen_tot = args.get_int() ; } },
-			ArgumentAndAction{ "Number of generation per batch", { "--gen_step",    "-s"  }, 
-								[this](Arguments& args) { m_gen_step = args.get_int() ; } },
-			ArgumentAndAction{ "Size of population", { "--pop_size",    "-p"  }, 
-								[this](Arguments& args) { m_pop_size = args.get_int() ; } },
-
-			ArgumentAndAction{ "Default F factor for DE", { "--f_default",    "-f"  }, 
-								[this](Arguments& args) { m_f_default = args.get_double() ; } },
-			ArgumentAndAction{ "Default CR factor for DE", { "--cr_default",    "-cr"  }, 
-								[this](Arguments& args) { m_cr_default = args.get_double() ; } },
-								
-			ArgumentAndAction{ "Probability of change of F (JDE)", { "--f_jde",    "-jf"  }, 
-								[this](Arguments& args) { m_f_jde = args.get_double() ; } },
-			ArgumentAndAction{ "Probability of change of CR (JDE)", { "--cr_jde",    "-jcr"  }, 
-								[this](Arguments& args) { m_cr_jde = args.get_double() ; } },
-
-			ArgumentAndAction{ "Minimum size of weight", { "--clamp_min",    "-cmin"  }, 
-								[this](Arguments& args) { m_clamp_min = args.get_double() ; } },
-			ArgumentAndAction{ "Maximum size of weight", { "--clamp_min",    "-cmax"  }, 
-								[this](Arguments& args) { m_clamp_max = args.get_double() ; } },
-
-			ArgumentAndAction{ "Minimum size of weight in random initialization", { "--random_min",    "-rmin"  }, 
-								[this](Arguments& args) { m_range_min = args.get_double() ; } },
-			ArgumentAndAction{ "Maximum size of weight in random initialization", { "--random_max",    "-rmax"  }, 
-								[this](Arguments& args) { m_range_max = args.get_double() ; } },
-
-			ArgumentAndAction{ "Number of change of batches before restart (if accuracy not increase)", { "--restart_count",    "-rc"  }, 
-								[this](Arguments& args) { m_restart_count = args.get_int() ; } },
-			ArgumentAndAction{ "Delta factor to determine if accuracy is increased", { "--restart_delta",    "-rd"  }, 
-								[this](Arguments& args) { m_restart_delta = args.get_double() ; } },
-
-			ArgumentAndAction{ "Path of dataset file (gz)", { "--dataset", "-d", "-i" }, 
-								[this](Arguments& args) {  m_dataset_filename = args.get_string(); } },
-			ArgumentAndAction{ "Path of output file (json)", { "--output", "-o" }, 
-								[this](Arguments& args) {  m_output_filename = args.get_string(); } },
-
-			ArgumentAndAction{ "Number of threads using by OpenMP", { "--threads_omp",    "-omp"  }, 
-								[this](Arguments& args) { m_threads_omp = args.get_int() ; } },
-			ArgumentAndAction{ "Number of threads using for  generate a new population", { "--threads_pop",    "-tp"  }, 
-								[this](Arguments& args) { m_threads_pop = args.get_int() ; } },
-
-			ArgumentAndAction{ "Print the help", { "--help",    "-h"  }, 
-								[this](Arguments& args) { std::cout << make_help(); } },
-		})
-		{
-		}
-
-		ReadArguments(int nargs, const char **vargs, bool jump_first = true):ReadArguments()
-		{
-			get_params_from_args(nargs, vargs, jump_first);
-		}
-
-		void get_params_from_args(int nargs, const char **vargs, bool jump_first = true)
-		{
-			Arguments args(nargs, vargs);
-			//jump first
-			if (args.remaining() && jump_first) args.get_string();
-			//start
-			while (args.remaining())
-			{
-				bool is_a_valid_arg = false;
-				const char *p = args.get_string();
-				for(auto& action : m_arguments_and_actions)
-				{
-					if(compare_n_args(action.m_arg_key, p))
-					{
-						action.m_action(args);
-						is_a_valid_arg = true;
-						break;
-					} 
-				}
-				if(!is_a_valid_arg) 
-				{
-					std::cerr << "parameter " << p << " not found\n";
-					exit(1);
-				}
-			}
-		}
-
-		read_only<std::string> m_dataset_filename;
-		read_only<std::string> m_output_filename;
-		read_only<size_t>	   m_gen_tot   { size_t(1000)  };
-		read_only<size_t>	   m_gen_step  { size_t(100)   };
-		read_only<size_t>	   m_pop_size  { size_t(12)    };
-		read_only<Scalar>	   m_f_default { Scalar(1.0)   };
-		read_only<Scalar>	   m_cr_default{ Scalar(1.0)   };
-		read_only<Scalar>	   m_f_jde     { Scalar(0.1)   };
-		read_only<Scalar>	   m_cr_jde    { Scalar(0.1)   };
-		read_only<Scalar>	   m_clamp_max { Scalar( 10.0) };
-		read_only<Scalar>	   m_clamp_min { Scalar(-10.0) };
-		read_only<Scalar>	   m_range_max { Scalar( 1.0 ) };
-		read_only<Scalar>	   m_range_min { Scalar(-1.0)  };
-		read_only<size_t>	   m_restart_count{ size_t(2)    };
-		read_only<Scalar>	   m_restart_delta{ Scalar(0.02) };
-		read_only<int>	       m_threads_omp   { size_t(2) };
-		read_only<size_t>	   m_threads_pop   { size_t(2) };
-	
-	private:
-
-		static inline bool compare_n_args(const std::vector< std::string >& keys, const char* arg)
-		{
-			for (const std::string& key : keys) if (strcmp(key.c_str(), arg) == 0) return true;
-			return false;
-		}
-		static inline std::string return_n_space(size_t n)
-		{
-			std::string out;
-			while(n--) out+=" ";
-			return std::move(out);
-		}
-
-		std::string make_help() const
-		{
-			std::stringstream s_out;
-			//header
-			s_out << "denn [<args>]" ;
-			s_out << std::endl;				
-			s_out << std::endl;
-			//
-			for(auto& action : m_arguments_and_actions)
-			{
-				size_t space_line = 25;
-				s_out << "\t";
-				for(auto& key : action.m_arg_key)
-				{
-					s_out << key << ", ";
-					space_line -= key.size() + 2;
-				}
-				s_out << return_n_space(Denn::clamp<size_t>(space_line,0,50));
-				s_out << action.m_description;
-				s_out << std::endl;
-				s_out << std::endl;
-			}
-			s_out << std::endl;
-			return s_out.str();
-		}
-
-		std::vector< ArgumentAndAction > m_arguments_and_actions;
-
-
-	};
 
 	class OutputData
 	{
@@ -250,22 +22,22 @@ namespace LineInput
 			m_ostream << "}" << std::endl;
 		}
 
-		template < typename ScalarType >
-		void serialize_arguments
+		template < typename Parameters >
+		void serialize_parameters
 		(
-			const ReadArguments< ScalarType >& args
+			const Parameters& args
 		)
 		{
 			Eigen::IOFormat matrix_to_json_array(Eigen::FullPrecision, Eigen::DontAlignCols, ", ", ", ", "[", "]", "[", "]");
 			m_ostream << "\t\"arguments\" :" << std::endl;
 			m_ostream << "\t{" << std::endl;
-			m_ostream << "\t\t \"gen_tot\" : "       << *args.m_gen_tot       << "," << std::endl;
-			m_ostream << "\t\t \"gen_step\" : "      << *args.m_gen_step      << "," << std::endl;
-			m_ostream << "\t\t \"pop_size\" : "      << *args.m_pop_size      << "," << std::endl;
-			m_ostream << "\t\t \"f_default\" : "     << *args.m_f_default     << "," << std::endl;
-			m_ostream << "\t\t \"cr_default\" : "    << *args.m_cr_default    << "," << std::endl;
-			m_ostream << "\t\t \"f_jde\" : "         << *args.m_f_jde         << "," << std::endl;
-			m_ostream << "\t\t \"cr_jde\" : "        << *args.m_cr_jde        << "," << std::endl;
+			m_ostream << "\t\t \"generations\" : "   << *args.m_generations   << "," << std::endl;
+			m_ostream << "\t\t \"sub_gens\" : "      << *args.m_sub_gens      << "," << std::endl;
+			m_ostream << "\t\t \"pop_size\" : "      << *args.m_np            << "," << std::endl;
+			m_ostream << "\t\t \"f_default\" : "     << *args.m_default_f     << "," << std::endl;
+			m_ostream << "\t\t \"cr_default\" : "    << *args.m_default_cr    << "," << std::endl;
+			m_ostream << "\t\t \"f_jde\" : "         << *args.m_jde_f         << "," << std::endl;
+			m_ostream << "\t\t \"cr_jde\" : "        << *args.m_jde_cr        << "," << std::endl;
 			m_ostream << "\t\t \"clamp_max\" : "     << *args.m_clamp_max     << "," << std::endl;
 			m_ostream << "\t\t \"clamp_min\" : "     << *args.m_clamp_min     << "," << std::endl;
 			m_ostream << "\t\t \"range_max\" : "     << *args.m_range_max     << "," << std::endl;
@@ -312,25 +84,21 @@ namespace LineInput
 
 	};
 
-}
-
-namespace BuildTest
-{
-
-	template < typename ScalarType, typename ScalarArgument = double, typename DSLoader >
+	template 
+	< typename ScalarType, typename Parameters, typename DSLoader >
 	void execute
 	(
-		  const LineInput::ReadArguments<ScalarArgument>& arguments
+		  const Parameters& parameters
 		, DSLoader& dataset
-		, LineInput::OutputData& output
+		, OutputData& output
 		, Denn::ThreadPool* ptr_thpool
 		, Denn::RuntimeOutput::SPtr runtime_output
 	)
 	{
 		using namespace Denn;
-		using MLP      = PerceptronNetwork< Matrix< ScalarType > >;
-		using LP	   = PerceptronLayer  < Matrix< ScalarType > >;
-		using DennAlgo = DennAlgorithm< MLP, DSLoader >;
+		using MLP           = PerceptronNetwork< Matrix< ScalarType > >;
+		using LP	        = PerceptronLayer  < Matrix< ScalarType > >;
+		using DennAlgo 	    = DennAlgorithm< MLP, Parameters, DSLoader >;
 
 		// NETWORK
 		size_t n_features = dataset.get_main_header_info().m_n_features;
@@ -338,42 +106,14 @@ namespace BuildTest
 		MLP nn0( LP(n_features, n_class) );
 
 		//Function ptr
-		typename DennAlgo::CostFunction 
-		cost_function = CostFunction::softmax_cross_entropy_with_logit< typename MLP::MatrixType >;
+		auto cost_function = CostFunction::softmax_cross_entropy_with_logit< typename MLP::MatrixType >;
 
 		//DENN
 		DennAlgo denn
 		(
 			  &dataset
-			, arguments.m_pop_size
+			, parameters
 			, nn0
-			// jde f, cr
-			, typename DennAlgo::JDEFCrInfo 
-			( arguments.m_f_jde
-			, arguments.m_cr_jde
-			)	
-			//default f,cr
-			, typename DennAlgo::FCrInfo    
-			( arguments.m_f_default
-			, arguments.m_cr_default 
-			)
-			//default clamp
-			, typename DennAlgo::ClampInfo  
-			( arguments.m_clamp_min
-			, arguments.m_clamp_max 
-			)
-			//restart
-			, typename DennAlgo::RestartInfo
-			( true
-			, arguments.m_restart_count
-			, arguments.m_restart_delta 
-			)
-			//random
-			, typename DennAlgo::RandomRangeInfo
-			( arguments.m_range_min
-			, arguments.m_range_max
-			)
-			//const function
 			, cost_function
 			//mutation
 			, MutationType::MT_RAND_ONE
@@ -386,11 +126,11 @@ namespace BuildTest
 		denn.init();
 		//execute
 		double execute_time = Time::get_time();
-		auto result = denn.execute(arguments.m_gen_tot, arguments.m_gen_step, ptr_thpool);
+		auto result = denn.execute(ptr_thpool);
 		execute_time = Time::get_time() - execute_time;
 
 		//output
-		output.serialize_arguments< ScalarArgument >(arguments);
+		output.serialize_parameters< Parameters >(parameters);
 		output.serialize_a_individual< ScalarType >
 		(
 		  execute_time
@@ -408,7 +148,7 @@ int main(int argc,const char** argv)
 		///////////////////////////////////////////////////////////IRIS
 		-t 5000 \
 		-s 40 \
-		-p 42 \
+		-np 42 \
 		-f 0.6 \
 		-cr 0.8 \
 		-jf 0.1 \
@@ -424,7 +164,7 @@ int main(int argc,const char** argv)
 		///////////////////////////////////////////////////////////MNIST
 		-t 8000 \
 		-s 1000 \
-		-p 96 \
+		-np 96 \
 		-f 0.9 \
 		-cr 0.9 \
 		-jf 0.1 \
@@ -441,7 +181,7 @@ int main(int argc,const char** argv)
 		-t 12500 \
 		-rc 3 \
 		-s 1250 \
-		-p 96 \
+		-np 96 \
 		-f 0.9 \
 		-cr 0.9 \
 		-jf 0.2 \
@@ -456,12 +196,14 @@ int main(int argc,const char** argv)
 		-tp 4
 	*/
 	////////////////////////////////////////////////////////////////////////////////////////////////
+	using namespace Denn;
+	////////////////////////////////////////////////////////////////////////////////////////////////
 	using ScalarArgument = double;
-	LineInput::ReadArguments<ScalarArgument> arguments(argc, argv);
+	using Parameters = Denn::Parameters<ScalarArgument>;
+	Parameters arguments(argc, argv);
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	//std::srand(std::time(NULL));
 	////////////////////////////////////////////////////////////////////////////////////////////////
-	using namespace Denn;
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	//parallel (OpenMP)
 	#ifdef EIGEN_HAS_OPENMP
@@ -485,7 +227,7 @@ int main(int argc,const char** argv)
 	DataSetLoader dataset((const std::string&)arguments.m_dataset_filename);
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	std::ofstream		  ofile((const std::string&)arguments.m_output_filename);
-	LineInput::OutputData output(ofile);
+	BuildTest::OutputData output(ofile);
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	class CustomRuntimeOutput : public Denn::RuntimeOutput
 	{
@@ -548,8 +290,8 @@ int main(int argc,const char** argv)
 	//double or float?
 	switch (dataset.get_main_header_info().m_type)
 	{
-		case DataSetType::DS_FLOAT:  BuildTest::execute<float, ScalarArgument, DataSetLoader> (arguments, dataset, output, uptr_thpool.get(), runtime_out); break;
-		case DataSetType::DS_DOUBLE: BuildTest::execute<double, ScalarArgument, DataSetLoader>(arguments, dataset, output, uptr_thpool.get(), runtime_out); break;
+		case DataSetType::DS_FLOAT:  BuildTest::execute<float, Parameters, DataSetLoader> (arguments, dataset, output, uptr_thpool.get(), runtime_out); break;
+		case DataSetType::DS_DOUBLE: BuildTest::execute<double, Parameters, DataSetLoader>(arguments, dataset, output, uptr_thpool.get(), runtime_out); break;
 		default: break;
 	} 
 

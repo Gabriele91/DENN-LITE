@@ -83,7 +83,24 @@ namespace CostFunction
 	template < typename Matrix >
 	typename Matrix::Scalar accuracy(const Matrix& x, const Matrix& y)
 	{
+		#if 0
 		return correct_prediction <Matrix>(x, y).mean();
+		#else
+		using Scalar = typename Matrix::Scalar;
+		//output
+		Scalar output = Scalar(0.0);;
+		////values
+		typename Matrix::Index  max_index_x, max_index_y, i;
+		//max-max
+		for (typename Matrix::Index j = 0; j < x.rows(); ++j)
+		{
+			x.row(j).maxCoeff(&i, &max_index_x);
+			y.row(j).maxCoeff(&i, &max_index_y);
+			output += Scalar(max_index_x == max_index_y);
+		}
+		//
+		return output/Scalar(x.rows());
+		#endif
 	}
 
 }
