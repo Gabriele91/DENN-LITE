@@ -31,21 +31,23 @@ namespace BuildTest
 			Eigen::IOFormat matrix_to_json_array(Eigen::FullPrecision, Eigen::DontAlignCols, ", ", ", ", "[", "]", "[", "]");
 			m_ostream << "\t\"arguments\" :" << std::endl;
 			m_ostream << "\t{" << std::endl;
-			m_ostream << "\t\t \"generations\" : "   << *args.m_generations   << "," << std::endl;
-			m_ostream << "\t\t \"sub_gens\" : "      << *args.m_sub_gens      << "," << std::endl;
-			m_ostream << "\t\t \"pop_size\" : "      << *args.m_np            << "," << std::endl;
-			m_ostream << "\t\t \"f_default\" : "     << *args.m_default_f     << "," << std::endl;
-			m_ostream << "\t\t \"cr_default\" : "    << *args.m_default_cr    << "," << std::endl;
-			m_ostream << "\t\t \"f_jde\" : "         << *args.m_jde_f         << "," << std::endl;
-			m_ostream << "\t\t \"cr_jde\" : "        << *args.m_jde_cr        << "," << std::endl;
-			m_ostream << "\t\t \"clamp_max\" : "     << *args.m_clamp_max     << "," << std::endl;
-			m_ostream << "\t\t \"clamp_min\" : "     << *args.m_clamp_min     << "," << std::endl;
-			m_ostream << "\t\t \"range_max\" : "     << *args.m_range_max     << "," << std::endl;
-			m_ostream << "\t\t \"range_min\" : "     << *args.m_range_min     << "," << std::endl;
-			m_ostream << "\t\t \"restart_count\" : " << *args.m_restart_count << "," << std::endl;
-			m_ostream << "\t\t \"restart_delta\" : " << *args.m_restart_delta << "," << std::endl;
-			m_ostream << "\t\t \"threads_omp\" : "   << *args.m_threads_omp   << "," << std::endl;
-			m_ostream << "\t\t \"threads_pop\" : "   << *args.m_threads_pop   <<		std::endl;
+			m_ostream << "\t\t \"generations\" : "   << *args.m_generations   			           << ","   << std::endl;
+			m_ostream << "\t\t \"sub_gens\" : "      << *args.m_sub_gens     		    	       << ","   << std::endl;
+			m_ostream << "\t\t \"number_parents\" : "<< *args.m_np            			           << ","   << std::endl;
+			m_ostream << "\t\t \"mutation\" : \""    << mutation_to_string(*args.m_mutation_type)  << "\"," << std::endl;
+			m_ostream << "\t\t \"crossover\" : \""   << crossover_to_string(*args.m_crossover_type)<< "\"," << std::endl;
+			m_ostream << "\t\t \"f_default\" : "     << *args.m_default_f      		 	           << ","   << std::endl;
+			m_ostream << "\t\t \"cr_default\" : "    << *args.m_default_cr   			           << ","   << std::endl;
+			m_ostream << "\t\t \"f_jde\" : "         << *args.m_jde_f        		 	           << ","   << std::endl;
+			m_ostream << "\t\t \"cr_jde\" : "        << *args.m_jde_cr       	                   << ","   << std::endl;
+			m_ostream << "\t\t \"clamp_max\" : "     << *args.m_clamp_max  		                   << ","   << std::endl;
+			m_ostream << "\t\t \"clamp_min\" : "     << *args.m_clamp_min   	                   << ","   << std::endl;
+			m_ostream << "\t\t \"range_max\" : "     << *args.m_range_max    			 	       << ","   << std::endl;
+			m_ostream << "\t\t \"range_min\" : "     << *args.m_range_min    			 	       << ","   << std::endl;
+			m_ostream << "\t\t \"restart_count\" : " << *args.m_restart_count			 	       << ","   << std::endl;
+			m_ostream << "\t\t \"restart_delta\" : " << *args.m_restart_delta 			           << ","   << std::endl;
+			m_ostream << "\t\t \"threads_omp\" : "   << *args.m_threads_omp   				       << ","   << std::endl;
+			m_ostream << "\t\t \"threads_pop\" : "   << *args.m_threads_pop   				       << std::endl;
 			m_ostream << "\t}," << std::endl;
 		}
 
@@ -81,6 +83,27 @@ namespace BuildTest
 	private:
 
 		std::ostream& m_ostream;
+
+		std::string mutation_to_string(Denn::MutationType type)
+		{
+			switch(type) 
+			{ 
+				case Denn::MutationType::MT_RAND_ONE: return "rand/1";	
+				case Denn::MutationType::MT_RAND_TWO: return "rand/2";	
+				case Denn::MutationType::MT_BEST_ONE: return "best/1";	
+				case Denn::MutationType::MT_BEST_TWO: return "best/2";	
+				default: return "unknown";
+			}
+		}
+		std::string crossover_to_string(Denn::CrossoverType type)
+		{
+			switch(type) 
+			{ 
+				case Denn::CrossoverType::CT_EXP: return "exp";	
+				case Denn::CrossoverType::CT_BIN: return "bin";	
+				default: return "unknown";
+			}
+		}
 
 	};
 
@@ -244,6 +267,9 @@ int main(int argc,const char** argv)
 			//reset
 			m_pass_time  = Time::get_time(); 
 			m_n_pass 	 = 0;
+			//clean line
+			for(short i=0;i!=20;++i) output() << "        ";
+			output() << "\r";
 			//
 			write_output(); 
 			output() << std::endl;
@@ -255,7 +281,7 @@ int main(int argc,const char** argv)
 			//compute pass time
 			double pass_per_sec = (double(m_n_pass) / (Time::get_time() - m_pass_time));
 			//clean line
-			for(short i=0;i!=10;++i) output() << "\t";
+			for(short i=0;i!=20;++i) output() << "        ";
 			output() << "\r";
 			//write output
 			output() << double(long(pass_per_sec*10.))/10.0 << " [it/s], ";

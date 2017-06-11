@@ -127,13 +127,15 @@ namespace Denn
 				 [this](Arguments& args) { m_np = args.get_int() ; }
             },
 			ParameterInfo{
-                 "Type of DE mutation [rand/1, best/1]", { "--mutation",    "-m"  }, 
+                 "Type of DE mutation [rand/1, rand/2, best/1, best/2]", { "--mutation",    "-m"  }, 
 				 [this](Arguments& args) 
 				 { 
 					 std::string str_m_type = args.get_string() ;
 					 std::transform(str_m_type.begin(),str_m_type.end(), str_m_type.begin(), ::tolower);
 					      if( str_m_type == "rand/1" ) m_mutation_type = MutationType::MT_RAND_ONE;
+					 else if( str_m_type == "rand/2" ) m_mutation_type = MutationType::MT_RAND_TWO;
 					 else if( str_m_type == "best/1" ) m_mutation_type = MutationType::MT_BEST_ONE;
+					 else if( str_m_type == "best/2" ) m_mutation_type = MutationType::MT_BEST_TWO;
 				 }
             },
 			ParameterInfo{
@@ -270,20 +272,38 @@ namespace Denn
 		{
 			std::stringstream s_out;
 			//header
-			s_out << "denn [<args>]" ;
+			s_out << "Usage: denn [options] <arg>" ;
 			s_out << std::endl;				
+			s_out << "Options:";				
 			s_out << std::endl;
+			//style
+			const size_t max_space_line         = 30;
+			const size_t padding_to_description = 2;
+			const size_t padding_left           = 4;
+			const std::string separetor(", ");
+			//determinate space line init
+			size_t space_line_init = 0;
 			//
 			for(auto& param : m_params_info)
 			{
-				size_t space_line = 25;
-				s_out << "\t";
+				size_t n_space_used = 0;
+				for(auto& key : param.m_arg_key) n_space_used += key.size() + separetor.size();
+				space_line_init = std::max(n_space_used, space_line_init);
+			}
+			//add padding
+			space_line_init += padding_to_description;
+			std::string padding_left_str = return_n_space(padding_left);
+			//print
+			for(auto& param : m_params_info)
+			{
+				size_t space_line = space_line_init;
+				s_out << padding_left_str;
 				for(auto& key : param.m_arg_key)
 				{
-					s_out << key << ", ";
-					space_line -= key.size() + 2;
+					s_out << key << separetor;
+					space_line -= key.size() + separetor.size();
 				}
-				s_out << return_n_space(Denn::clamp<size_t>(space_line,0,50));
+				s_out << return_n_space(Denn::clamp<size_t>(space_line,0,max_space_line));
 				s_out << param.m_description;
 				s_out << std::endl;
 			}
