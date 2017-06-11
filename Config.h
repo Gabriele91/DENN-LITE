@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cmath>
 #include <cassert>
+#include <string>
 #include <functional>
 #include <algorithm>
 #include <limits>
@@ -31,8 +32,8 @@ namespace Denn
 	using RowVectorF = typename Eigen::Matrix<float,  1, Eigen::Dynamic>;
 	using ColVectorD = typename Eigen::Matrix<double, Eigen::Dynamic, 1>;
 	using ColVectorF = typename Eigen::Matrix<float,  Eigen::Dynamic, 1>;
-	using MatrixD	 = typename Eigen::MatrixXd;
-	using MatrixF	 = typename Eigen::MatrixXf;
+	using MatrixD	 = typename Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>;
+	using MatrixF	 = typename Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>;
 
 	template < typename Scalar >
 	using Matrix = typename Eigen::Matrix< Scalar, Eigen::Dynamic, Eigen::Dynamic > ;

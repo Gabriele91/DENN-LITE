@@ -55,6 +55,11 @@
         "ios": "cpp",
         "__bit_reference": "cpp",
         "algorithm": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "csignal": "cpp",
+        "cstdarg": "cpp",
+        "codecvt": "cpp",
+        "slist": "cpp",
+        "cassert": "cpp"
     }
 }

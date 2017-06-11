@@ -5,6 +5,10 @@
 #include "RandomIndices.h"
 #include "DatasetLoader.h"
 #include "NeuralNetwork.h"
+#include "DennParameters.h"
+#include "DennPopulation.h"
+#include "DennMutation.h"
+#include "DennCrossover.h"
 
 namespace Denn
 {
@@ -15,19 +19,19 @@ protected:
 
     struct PassInfo
 	{
-		size_t m_n_g_pass;
-		size_t m_n_s_pass;
-		size_t m_g_pass;
-		size_t m_s_pass;
-		size_t m_minimum_on_pop_id;
-		double m_minimum_on_pop_eval;
+		size_t m_n_g_pass{ 0 };
+		size_t m_n_s_pass{ 0 };
+		size_t m_g_pass{ 0 };
+		size_t m_s_pass{ 0 };
+		size_t m_minimum_on_pop_id  { 0 };
+		double m_minimum_on_pop_eval{ 0 };
 	};
 	struct GlobalPassInfo
 	{
-		size_t m_g_pass;
-		size_t m_n_restart;
-		double m_validation_eval;
-		double m_target_eval;
+		size_t m_g_pass{ 0 };
+		size_t m_n_restart{ 0 };
+		double m_validation_eval{ 0.0 };
+		double m_target_eval{ 0.0 };
 	};
 
 	PassInfo m_pass;
@@ -128,496 +132,86 @@ public:
 
 };
 
-enum class MutationType
-{
-	MT_RAND_ONE,
-	MT_BEST_ONE		
-};	
-enum class CrossOverType
-{
-	CR_BIN,
-	CR_EXP		
-};
 
-template< typename Network, typename DataSetLoader >
+template< typename Network, typename Parameters, typename DataSetLoader >
 class DennAlgorithm
 {
 public:
 	////////////////////////////////////////////////////////////////////////
-	using LayerType    = typename Network::LayerType;
-	using MatrixType   = typename Network::MatrixType;
-	using ScalarType   = typename Network::ScalarType;
-	using LayerList    = typename Network::LayerList;
-	using DennAlgoType = DennAlgorithm< Network, DataSetLoader >;
-	using DataSet	   = DataSetRaw< ScalarType >;
-	using CostFunction = std::function < ScalarType (const MatrixType&, const MatrixType&) >;
-	using PromiseList  = std::vector< std::future<void> >;
+	//NN
+	using LayerType      = typename Network::LayerType;
+	using MatrixType     = typename Network::MatrixType;
+	using ScalarType     = typename Network::ScalarType;
+	using LayerList      = typename Network::LayerList;
+	//DB
+	using DennAlgoType   = DennAlgorithm< Network, Parameters, DataSetLoader >;
+	using DataSet	     = DataSetRaw< ScalarType >;
+	//Search space
+	using DBPopulation   = DoubleBufferPopulation< Network, DataSet >;
+	using Individual     = typename DoubleBufferPopulation< Network, DataSet >::Individual;
+	using IndividualPtr  = typename DoubleBufferPopulation< Network, DataSet >::IndividualPtr;
+	using Population     = typename DoubleBufferPopulation< Network, DataSet >::Population;
+	using RandomFunction = typename DoubleBufferPopulation< Network, DataSet >::RandomFunction;
+	using CostFunction   = typename DoubleBufferPopulation< Network, DataSet >::CostFunction;
+	//DE parallel
+	using PromiseList    = std::vector< std::future<void> >;
+	//Ref mutation crossover
+	using MutationPtr    = std::unique_ptr < Mutation< Parameters, Population, Individual > >;
+	using CrossoverPtr   = std::unique_ptr < Crossover< Individual > >;
+	//Ref mutation
 	////////////////////////////////////////////////////////////////////////
-	struct FCrInfo
-	{
-		ScalarType m_f{ ScalarType(1.0) };
-		ScalarType m_cr{ ScalarType(1.0) };
-
-		FCrInfo() {}
-		FCrInfo(ScalarType f, ScalarType cr) :m_f(f), m_cr(cr) {}
-	};
-	struct JDEFCrInfo
-	{
-		ScalarType m_f{ ScalarType(0.1) };
-		ScalarType m_cr{ ScalarType(0.1) };
-
-		JDEFCrInfo() {}
-		JDEFCrInfo(ScalarType f, ScalarType cr) :m_f(f), m_cr(cr) {}
-	};
-	struct ClampInfo
-	{
-		ScalarType m_min{ ScalarType(-1.0) };
-		ScalarType m_max{ ScalarType(1.0) };
-
-		ClampInfo() {}
-		ClampInfo(ScalarType min, ScalarType max) :m_min(min), m_max(max) {}
-	};
-	struct RestartInfo
-	{
-		bool		m_enable{ false };
-		size_t		m_count_fail{ 0 };
-		ScalarType  m_delta{ ScalarType(0.01) };
-
-		RestartInfo() {}
-		RestartInfo(size_t count, ScalarType delta = 0.01) :m_enable(true), m_count_fail(count), m_delta(delta) {}
-		RestartInfo(bool enable, size_t count, ScalarType delta = 0.01) :m_enable(enable), m_count_fail(count), m_delta(delta) {}
-	};
-	struct RandomRangeInfo
-	{
-		ScalarType m_min{ ScalarType(-1.0) };
-		ScalarType m_max{ ScalarType(1.0) };
-
-		RandomRangeInfo() {}
-		RandomRangeInfo(ScalarType min, ScalarType max) :m_min(min), m_max(max) {}
-
-		ScalarType range() const
-		{
-			return m_max - m_min;
-		}
-
-		std::function<ScalarType(ScalarType)> get_unary_expr() const
-		{
-			return [this](ScalarType x) -> ScalarType
-			{
-				return ScalarType(RandomIndices::random(m_min,m_max));
-			};
-		}
-	};
-	////////////////////////////////////////////////////////////////////////
-	class Individual : public std::enable_shared_from_this< Individual >
-	{
-	public:
-		//ref to individual
-		using SPtr = std::shared_ptr<Individual>;
-		//return ptr
-		SPtr get_ptr(){ return this->shared_from_this(); }
-		//shared copy
-		SPtr copy() const
-		{
-			return std::make_shared<Individual>(*this);
-		}
-		//attributes
-		ScalarType m_eval{ std::numeric_limits<ScalarType>::max() };
-		ScalarType m_f   { 1.0 };
-		ScalarType m_cr  { 1.0 };
-		Network	   m_network;
-		//init
-		Individual() {}
-		Individual(ScalarType f, ScalarType cr, const Network& network)
-		{
-			m_f		  = f;
-			m_cr	  = cr;
-			m_network = network;
-		}
-		//copy attributes from a other individual
-        void copy_attributes(const Individual& i)
-		{
-			m_f    = i.m_f;
-			m_cr   = i.m_cr;
-			m_eval = i.m_eval;
-		}   
-		//cast
-		operator Network&()
-		{
-			return m_network;
-		}
-
-		operator const Network& () const
-		{
-			return m_network;
-		}
-		//like Network
-		LayerType& operator[](size_t i)
-		{
-			return m_network[i];
-		}
-		const LayerType& operator[](size_t i) const
-		{
-			return m_network[i];
-		}
-		size_t size() const
-		{
-			return m_network.size();
-		}
-	};
-	////////////////////////////////////////////////////////////////////////
-	//types
-	using Population = std::vector < typename Individual::SPtr >;
-	//population pass
-	struct DoubleBufferPopulation
-	{
-		size_t     m_current { 0 };
-		Population m_pop_buffer[2];
-		//init population
-		void init(
-			  size_t np
-			, const typename Individual::SPtr& i_default
-			, const DataSet& dataset
-			, const RandomRangeInfo& random_range_info
-			, CostFunction target_function
-		)
-		{
-			//init counter
-			m_current = 0;
-			//init pop
-			for (Population& population : m_pop_buffer)
-			{
-				//size
-				population.resize(np);
-				//init
-				for (typename Individual::SPtr& i_individual : population)
-				{
-					i_individual = i_default->copy();
-				}
-			}
-			//ref to current
-			Population& population = current();
-			//random exp
-			auto random_exp = random_range_info.get_unary_expr();
-			//random init
-			for (typename Individual::SPtr& individual : population)
-			for (LayerType& layer : individual->m_network)
-			{
-				layer.weights() = layer.weights().unaryExpr(random_exp);
-				layer.baias() = layer.baias().unaryExpr(random_exp);
-			}
-			//eval
-			for (size_t i = 0; i != population.size(); ++i)
-			{
-				auto y = population[i]->m_network.apply(dataset.m_features);
-				population[i]->m_eval = target_function(dataset.m_labels, y);
-			}
-		}
-		//current
-		Population& current()
-		{
-			return m_pop_buffer[m_current];
-		}
-		const Population& current() const
-		{
-			return m_pop_buffer[m_current];
-		}
-		const Population& const_current() const
-		{
-			return m_pop_buffer[m_current];
-		}
-		//next
-		Population& next()
-		{
-			return m_pop_buffer[(m_current+1)%2];
-		}
-		const Population& next() const
-		{
-			return m_pop_buffer[(m_current + 1) % 2];
-		}
-		const Population& const_next() const
-		{
-			return m_pop_buffer[(m_current + 1) % 2];
-		}
-		//swap
-		void swap()
-		{
-			m_current = (m_current + 1) % 2;
-		}
-		//restart
-		void restart
-		(
-			  typename Individual::SPtr best
-			, const typename Individual::SPtr& i_default
-			, const DataSet& dataset
-			, const RandomRangeInfo& random_range_info
-			, CostFunction target_function
-		)
-		{
-			//ref to current
-			Population& population = current();
-			//random exp
-			auto random_exp = random_range_info.get_unary_expr();
-			//random init
-			for (typename Individual::SPtr& individual : population)
-			{
-				//Copy default params
-				individual->copy_attributes(*i_default);
-				//Reinit layers
-				for (LayerType& layer : individual->m_network)
-				{
-					layer.weights() = layer.weights().unaryExpr(random_exp);
-					layer.baias()   = layer.baias().unaryExpr(random_exp);
-				}
-			}
-			//add best
-			size_t rand_i = RandomIndices::irand(population.size());
-			//must copy, The Best Individual can't to be changed during the DE process
-			population[rand_i] = best->copy();
-			//eval
-			for (size_t i = 0; i != population.size(); ++i)
-			{
-				auto y = population[i]->m_network.apply(dataset.m_features);
-				population[i]->m_eval = target_function(dataset.m_labels, y);
-			}
-		}
-	};
-	////////////////////////////////////////////////////////////////////////
-	class Mutation 
-	{ 
-		public: 
-		Mutation(const ClampInfo& clamp_info) : m_clamp_info(clamp_info){}
-		virtual void operator()(const Population& population,int id_target,Individual& output)= 0; 
-
-		protected:
-		//utils
-		ScalarType f_clamp(ScalarType value) const
-		{
-			return clamp(value, m_clamp_info.m_min, m_clamp_info.m_max);
-		}
-		//attributes
-		ClampInfo m_clamp_info;
-	};
-	class CrossOver
-	{
-		public: 
-		virtual void operator()(Individual& target,Individual& mutant)= 0; 
-	};
-	/////////////////////////////////////////////////////////////////
 	bool jde(int target, Individual& i_final) const
 	{
 		//vectors
 		const Population& population = m_population.current();
 		const Individual& i_target   = *population[target];
 		//f JDE
-		if (RandomIndices::random() < m_f_cr_jde_info.m_f)   
+		if (RandomIndices::random() < ScalarType(m_params.m_jde_f))   
 			i_final.m_f = ScalarType(RandomIndices::random(0.0,2.0));
 		else														
 			i_final.m_f = i_target.m_f;
 		//cr JDE
-		if (RandomIndices::random() < m_f_cr_jde_info.m_cr)   
+		if (RandomIndices::random() < ScalarType(m_params.m_jde_cr))   
 			i_final.m_cr = ScalarType(RandomIndices::random());
 		else														
 			i_final.m_cr = i_target.m_cr;
 
 		return true;
 	}
-	/////////////////////////////////////////////////////////////////
-	class RandOne : public Mutation
-	{ 
-		public: 
-		RandOne(const ClampInfo& clamp_info) : Mutation(clamp_info){}
-		virtual void operator()(const Population& population,int id_target,Individual& i_final)
-		{
-			//alias
-			const auto& f  = i_final.m_f;
-			//target
-			const Individual& i_target = *population[id_target];
-			//init generator
-			static thread_local RandomIndices::RandomDeck rand_deck;
-			//set population size in deck
-			rand_deck.resize(population.size());
-			//for each layers
-			for (size_t i_layer=0; i_layer != i_target.size(); ++i_layer)
-			{
-				//weights and baias
-				for (size_t m = 0; m!= i_target[i_layer].size(); ++m)
-				{
-					//do rand
-					rand_deck.reset();
-					//do cross + mutation
-					const Individual& nn_a = *population[rand_deck.get_random_id(id_target)];
-					const Individual& nn_b = *population[rand_deck.get_random_id(id_target)];
-					const Individual& nn_c = *population[rand_deck.get_random_id(id_target)];
-					//
-					auto w_target = i_target[i_layer][m];
-					auto w_final  = i_final[i_layer][m];
-					auto w_lr_a   = nn_a[i_layer][m];
-					auto w_lr_b   = nn_b[i_layer][m];
-					auto w_lr_c   = nn_c[i_layer][m];
-					//function
-					for (size_t e = 0; e != w_lr_a.size(); ++e) 
-						w_final(e) = f_clamp((w_lr_a(e) - w_lr_b(e)) * f + w_lr_c(e));
-				}
-			}
-		}
-	};
-	class BestOne : public Mutation
-	{ 
-		public: 
-		BestOne(const ClampInfo& clamp_info) : Mutation(clamp_info){}
-		virtual void operator()(const Population& population,int id_target,Individual& i_final)
-		{
-			//alias
-			const auto& f  = i_final.m_f;
-			//target
-			const Individual& i_target = *population[id_target];
-			//best
-			size_t id_best;
-			ScalarType eval_best;
-			find_best_of_population_on_target_function(population, id_best, eval_best);
-			const Individual& i_best = *population[id_best];
-			//init generator
-			static thread_local RandomIndices::RandomDeck rand_deck;
-			//set population size in deck
-			rand_deck.resize(population.size());
-			//for each layers
-			for (size_t i_layer=0; i_layer != i_target.size(); ++i_layer)
-			{
-				//weights and baias
-				for (size_t m = 0; m!= i_target[i_layer].size(); ++m)
-				{
-					//do rand
-					rand_deck.reset();
-					//do cross + mutation
-					const Individual& nn_a = *population[rand_deck.get_random_id(id_target)];
-					const Individual& nn_b = *population[rand_deck.get_random_id(id_target)];
-					//
-					auto w_target = i_target[i_layer][m];
-					auto w_final  = i_final[i_layer][m];
-					auto w_lr_best= i_best[i_layer][m];
-					auto w_lr_a   = nn_a[i_layer][m];
-					auto w_lr_b   = nn_b[i_layer][m];
-					//function
-					for (size_t e = 0; e != w_lr_a.size(); ++e) 
-						w_final(e) = f_clamp((w_lr_a(e) - w_lr_b(e)) * f + w_lr_best(e));
-				}
-			}
-		}
-	};
-	class Bin : public CrossOver
-	{
-		public: 
-		virtual void operator()(Individual& i_target,Individual& i_mutant)
-		{
-			//baias
-			const auto& cr = i_mutant.m_cr;
-			//for each layers
-			for (size_t i_layer=0; i_layer != i_target.size(); ++i_layer)
-			{
-				//weights and baias
-				for (size_t m = 0; m!= i_target[i_layer].size(); ++m)
-				{
-					//elements
-					auto w_target = i_target[i_layer][m];
-					auto w_mutant  = i_mutant[i_layer][m];
-					//random i
-					size_t e_rand = RandomIndices::irand(w_target.size());
-					//CROSS
-					for (size_t e = 0; e != w_target.size(); ++e)
-					{
-						//crossover
-						//!(RandomIndices::random() < cr || e_rand == e)
-						if (e_rand != e && cr <= RandomIndices::random()) 
-						{
-							w_mutant(e) = w_target(e);
-						}
-					}
-				}
-			}
-		}
-	};
-	class Exp : public CrossOver
-	{
-		public: 
-		virtual void operator()(Individual& i_target,Individual& i_mutant)
-		{
-			//baias
-			const auto& cr = i_mutant.m_cr;
-			//for each layers
-			for (size_t i_layer=0; i_layer != i_target.size(); ++i_layer)
-			{
-				//weights and baias
-				for (size_t m = 0; m!= i_target[i_layer].size(); ++m)
-				{
-					//elements
-					auto w_target = i_target[i_layer][m];
-					auto w_mutant  = i_mutant[i_layer][m];
-					//random i
-					size_t e_rand = RandomIndices::irand(w_target.size());
-					//event
-					bool copy_event = false;
-					//CROSS
-					for (size_t e = 0; e != w_target.size(); ++e)
-					{
-						//crossover
-						//!(RandomIndices::random() < cr || e_rand == e)
-						copy_event |= ( e_rand != e && cr <= RandomIndices::random());
-						//copy all vector
-						if (copy_event) 
-						{
-							w_mutant(e) = w_target(e);
-						}
-					}
-				}
-			}
-		}
-	};
 	////////////////////////////////////////////////////////////////////////
 	DennAlgorithm
 	(
-		  DataSetLoader* dataset_loader
-		, size_t np
-		, const Network   nn_default
-		, JDEFCrInfo      f_cr_jde			 = JDEFCrInfo()
-		, FCrInfo         f_cr_default		 = FCrInfo()
-		, ClampInfo       clamp_info		 = ClampInfo()
-		, RestartInfo     restart_info		 = RestartInfo()
-		, RandomRangeInfo random_range_info  = RandomRangeInfo()
-		, CostFunction    target_function	 = Denn::CostFunction::cross_entropy<MatrixType>
-		, MutationType	  mutation_type		 = MutationType::MT_RAND_ONE
-		, CrossOverType	  crossover_type	 = CrossOverType::CR_BIN
-		, RuntimeOutput::SPtr      output    = std::make_shared<RuntimeOutput>()
+		  DataSetLoader*      dataset_loader
+		, const Parameters&   params
+		, const Network       nn_default
+		, CostFunction		  target_function
+		, RuntimeOutput::SPtr output
 	) 
 	{
 		m_dataset_loader    = dataset_loader;
-		m_np			    = np;
-		m_default		    = std::make_shared<Individual>(f_cr_default.m_f, f_cr_default.m_cr, nn_default );
-		m_f_cr_jde_info     = f_cr_jde;
-		m_clamp_info	    = clamp_info;
-		m_restart_info      = restart_info;
-		m_random_range_info = random_range_info;
+		m_default		    = std::make_shared<Individual>(m_params.m_default_f, m_params.m_default_cr, nn_default );
 		m_target_function   = target_function;
-		m_output			= output;
+		m_params			= params;
+		m_output            = output;
 		//default
-		switch(mutation_type)
+		switch((MutationType)m_params.m_mutation_type)
 		{
 			default:
 			case MutationType::MT_RAND_ONE:
-			m_muation   = std::make_unique<RandOne>(m_clamp_info);
+			m_mutation   = std::make_unique< RandOne< Parameters, Population, Individual > >(m_params);
 			break;
 			case MutationType::MT_BEST_ONE:
-			m_muation   = std::make_unique<BestOne>(m_clamp_info);
+			m_mutation   = std::make_unique< BestOne< Parameters, Population, Individual > >(m_params);
 			break;
 		}
-		switch(crossover_type)
+		switch((CrossoverType)m_params.m_crossover_type)
 		{
 			default:
-			case CrossOverType::CR_BIN:
-			m_crossover   = std::make_unique<Bin>();
+			case CrossoverType::CT_BIN:
+			m_crossover   = std::make_unique< Bin<Individual> >();
 			break;
-			case CrossOverType::CR_EXP:
-			m_crossover   = std::make_unique<Exp>();
+			case CrossoverType::CT_EXP:
+			m_crossover   = std::make_unique< Bin<Individual> >();
 			break;
 		}
 	}	
@@ -634,7 +228,14 @@ public:
 		//if success //init pop
 		if (success)
 		{
-			m_population.init(m_np, m_default, m_dataset_batch, m_random_range_info, m_target_function);
+			m_population.init
+			(
+				m_params.m_np, 
+				m_default, 
+				m_dataset_batch,
+				get_random_func(),
+				m_target_function
+			);
 		}
 		//true
 		return success;
@@ -643,21 +244,21 @@ public:
 	//execute a pass
 	void serial_pass()
 	{
-		//ref to current
-		Population& population = m_population.current();
+		//ref to population
+		auto& population = m_population.current();
 		//ref to next
-		Population& population_next = m_population.next();
+		auto& population_next = m_population.next();
 		//for all
-		for(size_t i = 0; i!= population.size(); ++i)
+		for(size_t i = 0; i!= (size_t)m_params.m_np; ++i)
 		{
-			//get result turget
-			auto new_individual = population_next[i];
+			//get temp individual
+			auto& new_individual = population_next[i];
 			//Copy default params
 			new_individual->copy_attributes(*m_default);
 			//compute jde
 			jde(i, *new_individual);
 			//call muation
-			(*m_muation)(population, i, *new_individual);
+			(*m_mutation)(population, i, *new_individual);
 			//call crossover
 			(*m_crossover)(*population[i], *new_individual);
 			//eval
@@ -687,27 +288,26 @@ public:
 	//execute a pass
 	void parallel_pass(ThreadPool& thpool)
 	{
-		size_t np = m_population.current().size();
 		//alloc promises
-		m_promises.resize(np);
+		m_promises.resize(m_params.m_np);
 		//execute
-		for (size_t i = 0; i != np; ++i)
+		for (size_t i = 0; i != (size_t)m_params.m_np; ++i)
 		{
 			//add
 			m_promises[i] = thpool.push_task([this,i]()
 			{ 
-				//ref to current
-				Population& population = m_population.current();
+				//ref to population
+				auto& population = m_population.current();
 				//ref to next
-				Population& population_next = m_population.next();
-			    //get result turget
-			    auto new_individual = population_next[i];
+				auto& population_next = m_population.next();
+				//get temp individual
+			    auto& new_individual = population_next[i];
 			    //Copy default params
 			    new_individual->copy_attributes(*m_default);
 				//compute jde
 				jde(i, *new_individual);
 				//call muation
-				(*m_muation)(population, i, *new_individual);
+				(*m_mutation)(population, i, *new_individual);
 				//call crossover
 				(*m_crossover)(*population[i], *new_individual);
 				//eval
@@ -744,16 +344,17 @@ public:
 	}
 
 	//big loop
-	typename Individual::SPtr execute(const size_t n_pass, const size_t n_sub_pass, ThreadPool* thpool = nullptr)
+	IndividualPtr execute(ThreadPool* thpool = nullptr)
 	{
-		const size_t n_global_pass = (n_pass / n_sub_pass);
+		const size_t n_global_pass = ((size_t)m_params.m_generations /(size_t)m_params.m_sub_gens);
+		const size_t n_sub_pass = m_params.m_sub_gens;
 		//restart init
 		ScalarType restart_last_eval = 0;
 		size_t	   restart_test_count = 0;
 		size_t	   restart_count = 0;
 		//best
-		typename Individual::SPtr best = m_default->copy();
-		ScalarType best_eval  = 0;
+		auto best = m_default->copy();
+		ScalarType best_eval = 0;
 		//start output
 		if (m_output->is_enable())
 		{
@@ -785,13 +386,13 @@ public:
 				{
 					size_t id_best;
 					ScalarType val_best;
-					find_best_of_population_on_target_function(m_population.current(),id_best, val_best);
+					m_population.current().best(id_best, val_best);
 					m_output->sent_pass(n_global_pass, n_sub_pass, pass, sub_pass, id_best, val_best);
 				}
 			}
 			//find best
 			ScalarType curr_eval;
-			typename Individual::SPtr curr = find_best(curr_eval);
+			auto curr = find_best(curr_eval);
 			//maximize (accuracy)
 			if (best_eval < curr_eval)
 			{
@@ -803,12 +404,12 @@ public:
 				best_eval = curr_eval;
 			}
 			//restart
-			if (m_restart_info.m_enable)
+			if (m_params.m_restart_enable)
 			{
 				//first
 				if (!pass) restart_last_eval = best_eval;
 				//inc count
-				if ((best_eval - restart_last_eval) < m_restart_info.m_delta)
+				if ((best_eval - restart_last_eval) < (ScalarType)m_params.m_restart_delta)
 				{
 					++restart_test_count;
 				}
@@ -818,14 +419,14 @@ public:
 					restart_last_eval = best_eval;
 				}
 				//test
-				if (m_restart_info.m_count_fail <= restart_test_count)
+				if ((ScalarType)m_params.m_restart_count <= restart_test_count)
 				{
 					m_population.restart
 					(
 						  best
 						, m_default
 						, m_dataset_batch
-						, m_random_range_info
+						, get_random_func()
 						, m_target_function
 					);
 					restart_test_count = 0;
@@ -852,7 +453,7 @@ public:
 	bool find_best(size_t& out_i, ScalarType& out_eval)
 	{
 		//ref to pop
-		Population& population = m_population.current();
+		auto population = m_population.current();
 		//validation
 		DataSet validation;
 		m_dataset_loader->read_validation(validation);
@@ -878,7 +479,7 @@ public:
 	}
 	
 	//find best individual (validation test)
-	typename Individual::SPtr find_best(ScalarType& out_eval)
+	IndividualPtr find_best(ScalarType& out_eval)
 	{
 		//best 
 		size_t best_i;
@@ -902,83 +503,77 @@ public:
 
 protected:
 	/////////////////////////////////////////////////////////////////
-	static void find_best_of_population_on_target_function(const Population& population, size_t& out_i, ScalarType& out_eval)
+	RandomFunction get_random_func() const
 	{
-		//best
-		ScalarType best_eval;
-		size_t	   best_i;
-		//find best
-		for (size_t i = 0; i != population.size(); ++i)
+		ScalarType min = m_params.m_range_min;
+		ScalarType max = m_params.m_range_max;
+		return [=](ScalarType x) -> ScalarType
 		{
-			//minimize (cross_entropy)
-			if (!i || population[i]->m_eval < best_eval)
-			{
-				best_i = i;
-				best_eval = population[i]->m_eval;
-			}
-		}
-		out_i = best_i;
-		out_eval = best_eval;
+			return ScalarType(RandomIndices::random(min,max));
+		};
 	}
 	/////////////////////////////////////////////////////////////////
 	//eval all
 	void serial_execute_target_function_on_all_population()
 	{
-		//ref to current
-		Population& population = m_population.current();
+		//np
+		size_t np = (size_t)m_params.m_np;
+		//pop ref
+		auto& popolation = m_population.current();
 		//for all
-		for (size_t i = 0; i != population.size(); ++i)
+		for (size_t i = 0; i != np; ++i)
 		{
-			auto y = population[i]->m_network.apply(m_dataset_batch.m_features);
-			population[i]->m_eval = m_target_function(m_dataset_batch.m_labels, y);
+			//ref to target
+			auto& i_target = *popolation[i];
+			//eval
+			auto y = i_target.m_network.apply(m_dataset_batch.m_features);
+			i_target.m_eval = m_target_function(m_dataset_batch.m_labels, y);
 			//safe
-			if(std::isnan(m_population.current()[i]->m_eval)) 
-				m_population.current()[i]->m_eval = std::numeric_limits<ScalarType>::max() ; 
+			if(std::isnan(i_target.m_eval)) 
+				i_target.m_eval = std::numeric_limits<ScalarType>::max() ; 
 		}
 	}
 	void parallel_execute_target_function_on_all_population(ThreadPool& thpool)
 	{
-		size_t np = m_population.current().size();
+		//np
+		size_t np = (size_t)m_params.m_np;
+		//pop ref
+		auto& popolation = m_population.current();
 		//alloc promises
 		m_promises.resize(np);
 		//for all
 		for (size_t i = 0; i != np; ++i)
 		{
+			//ref to target
+			auto& i_target = *popolation[i];
 			//add
-			m_promises[i] = thpool.push_task([this, i]()
+			m_promises[i] = thpool.push_task([this, &i_target]()
 			{
-				auto y = m_population.current()[i]->m_network.apply(m_dataset_batch.m_features);
-				m_population.current()[i]->m_eval = m_target_function(m_dataset_batch.m_labels, y);
+				//test
+				auto y = i_target.m_network.apply(m_dataset_batch.m_features);
+				i_target.m_eval = m_target_function(m_dataset_batch.m_labels, y);
 				//safe
-				if(std::isnan(m_population.current()[i]->m_eval)) 
-					m_population.current()[i]->m_eval = std::numeric_limits<ScalarType>::max() ; 
+				if (std::isnan(i_target.m_eval))
+					i_target.m_eval = std::numeric_limits<ScalarType>::max() ; 
 			});
 		}
 		//wait
 		for (auto& promise : m_promises) promise.wait();
 	}
 	/////////////////////////////////////////////////////////////////
-	ScalarType f_clamp(ScalarType value) const
-	{
-		return clamp(value, m_clamp_info.m_min, m_clamp_info.m_max);
-	}
-	/////////////////////////////////////////////////////////////////
-	DoubleBufferPopulation  m_population;
-	PromiseList			    m_promises;
-	//info
+	//serach space
+	DBPopulation        m_population;
+	PromiseList	        m_promises;
+	RuntimeOutput::SPtr m_output;
+	CostFunction        m_target_function;
+	//dataset
 	typename Individual::SPtr  m_default;
 	DataSetLoader*		       m_dataset_loader;
 	DataSet				       m_dataset_batch;
-	size_t					   m_np;
-	std::unique_ptr<Mutation>  m_muation;
-	std::unique_ptr<CrossOver> m_crossover;
-
-	JDEFCrInfo			      m_f_cr_jde_info;
-	ClampInfo			      m_clamp_info;
-	RestartInfo			      m_restart_info;
-	RandomRangeInfo		      m_random_range_info;
-	CostFunction			  m_target_function;
-	RuntimeOutput::SPtr       m_output;
+	//params of DE
+	Parameters 				   m_params;
+	MutationPtr                m_mutation;
+	CrossoverPtr               m_crossover;
 };
 
 }

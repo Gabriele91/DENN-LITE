@@ -42,6 +42,16 @@ ifeq ($(shell uname -s),Darwin)
 RELEASE_FLAGS += -march=native
 endif
 
+##
+# Support function for colored output
+# Args:
+#     - $(1) = Color Type
+#     - $(2) = String to print
+define colorecho
+      @tput setaf $(1)
+      @echo $(2)
+      @tput sgr0
+endef
 
 # Color Types
 COLOR_BLACK = 0
@@ -53,39 +63,45 @@ COLOR_MAGENTA = 5
 COLOR_CYAN = 6
 COLOR_WHITE = 7
 
-all: directories debug release
+all: directories show_debug_flags debug release
 
 directories: ${O_DEBUG_DIR} ${O_RELEASE_DIR}
 
 rebuild: clean directories debug release
 
-rebuild_debug: clean_debug directories debug
+rebuild_debug: clean_debug debug
 
-rebuild_release: clean_release directories release
+rebuild_release: clean_release release
 
-debug: directories $(SOURCE_DEBUG_OBJS)
+debug: directories show_debug_flags $(SOURCE_DEBUG_OBJS)
 	$(COMPILER) $(C_FLAGS) $(CC_FLAGS) $(SOURCE_DEBUG_OBJS) $(LDFLAGS) -o $(O_DEBUG_PROG)
 	
-release: directories $(SOURCE_RELEASE_OBJS)
+release: directories show_release_flags $(SOURCE_RELEASE_OBJS)
 	$(COMPILER) $(C_FLAGS) $(CC_FLAGS) $(SOURCE_RELEASE_OBJS) $(LDFLAGS) -o $(O_RELEASE_PROG)
 
 # makedir
 ${O_DEBUG_DIR}:
-	$(call colorecho,$(COLOR_GREEN),"[ Create $(O_DEBUG_DIR) directory ]")
+	$(call colorecho,$(COLOR_CYAN),"[ Create $(O_DEBUG_DIR) directory ]")
 	@${MKDIR_P} ${O_DEBUG_DIR}
 
 # makedir
 ${O_RELEASE_DIR}:
-	$(call colorecho,$(COLOR_GREEN),"[ Create $(O_RELEASE_DIR) directory ]")
+	$(call colorecho,$(COLOR_CYAN),"[ Create $(O_RELEASE_DIR) directory ]")
 	@${MKDIR_P} ${O_RELEASE_DIR}
 
+show_debug_flags:
+	$(call colorecho,$(COLOR_YELLOW),"[ Debug flags: $(C_FLAGS) $(CC_FLAGS) $(DEBUG_FLAGS) ]")
+
+show_release_flags:
+	$(call colorecho,$(COLOR_YELLOW),"[ Release flags: $(C_FLAGS) $(CC_FLAGS) $(RELEASE_FLAGS) ]")
+
 $(O_DEBUG_DIR)/%.o: $(S_DIR)/%.cpp
-	$(call colorecho,$(COLOR_GREEN),"[ Make debug object $(@) ]")
-	$(COMPILER) $(C_FLAGS) $(CC_FLAGS) $(DEBUG_FLAGS) -c $< -o $@
+	$(call colorecho,$(COLOR_GREEN),"[ Make debug object: $(@) ]")
+	@$(COMPILER) $(C_FLAGS) $(CC_FLAGS) $(DEBUG_FLAGS) -c $< -o $@
 
 $(O_RELEASE_DIR)/%.o: $(S_DIR)/%.cpp
-	$(call colorecho,$(COLOR_GREEN),"[ Make release object $(@) ]")
-	$(COMPILER) $(C_FLAGS) $(CC_FLAGS) $(RELEASE_FLAGS) -c $< -o $@
+	$(call colorecho,$(COLOR_GREEN),"[ Make release object: $(@) ]")
+	@$(COMPILER) $(C_FLAGS) $(CC_FLAGS) $(RELEASE_FLAGS) -c $< -o $@
 
 # Clean
 clean: clean_debug clean_release
