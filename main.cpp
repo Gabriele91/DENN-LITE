@@ -253,6 +253,8 @@ int main(int argc,const char** argv)
 	public:
 
 		CustomRuntimeOutput(std::ostream& stream=std::cerr) : Denn::RuntimeOutput(stream){}
+		
+		virtual bool is_enable() override  { return true; }
 
 		virtual void start() override
 		{ 
@@ -268,9 +270,8 @@ int main(int argc,const char** argv)
 			m_pass_time  = Time::get_time(); 
 			m_n_pass 	 = 0;
 			//clean line
-			for(short i=0;i!=20;++i) output() << "        ";
-			output() << "\r";
-			//
+			clean_line();
+			//output
 			write_output(); 
 			output() << std::endl;
 		}
@@ -281,19 +282,40 @@ int main(int argc,const char** argv)
 			//compute pass time
 			double pass_per_sec = (double(m_n_pass) / (Time::get_time() - m_pass_time));
 			//clean line
-			for(short i=0;i!=20;++i) output() << "        ";
-			output() << "\r";
+			clean_line();
 			//write output
 			output() << double(long(pass_per_sec*10.))/10.0 << " [it/s], ";
 			write_output(); 
 			output() << "\r";
 		}
 
-		virtual void end(double test_eval) override
+		virtual void end() override
 		{ 
-			write_output(); 
-			output() << std::endl;
-			output() << "Denn end [ test: " << test_eval << ", time: " << Time::get_time() - m_start_time << " ]" << std::endl;
+			output() 
+			<< "Denn end [ test: " 
+			<< m_end_of_iterations.m_test_result 
+			<< ", time: " 
+			<< Time::get_time() - m_start_time 
+			<< " ]" 
+			<< std::endl;
+		}
+
+		virtual void write_output()
+		{
+			write_local_pass();
+			output() << " -> on population: ";
+			write_pass_best("[ id: ",", cross: ");
+			output() << ", best: ";
+			write_global_best("[ acc: ",", cross: ");
+		}
+
+		virtual void clean_line()
+		{
+			//clean line
+			for(short i=0;i!=11;++i) 
+			   output() << "          ";
+			//end row
+			output() << "\r";
 		}
 
 	protected:

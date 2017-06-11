@@ -17,25 +17,34 @@ class RuntimeOutput : public std::enable_shared_from_this< RuntimeOutput >
 {
 protected:
 
-    struct PassInfo
+	struct Initialization
 	{
 		size_t m_n_g_pass{ 0 };
 		size_t m_n_s_pass{ 0 };
-		size_t m_g_pass{ 0 };
-		size_t m_s_pass{ 0 };
-		size_t m_minimum_on_pop_id  { 0 };
-		double m_minimum_on_pop_eval{ 0 };
 	};
 	struct GlobalPassInfo
 	{
-		size_t m_g_pass{ 0 };
-		size_t m_n_restart{ 0 };
-		double m_validation_eval{ 0.0 };
-		double m_target_eval{ 0.0 };
+		size_t m_g_pass         { size_t(-1) };
+		size_t m_n_restart      {  0         };
+		double m_validation_eval{ 0.0        };
+		double m_target_eval    { 0.0        };
+	};
+    struct PassInfo
+	{
+		size_t m_g_pass             { size_t(-1) };
+		size_t m_s_pass             { 0          };
+		size_t m_minimum_on_pop_id  { 0          };
+		double m_minimum_on_pop_eval{ 0          };
+	};
+	struct EndOfIterations
+	{
+		double m_test_result;
 	};
 
 	PassInfo m_pass;
 	GlobalPassInfo m_global_pass;
+	Initialization m_initialization;
+	EndOfIterations m_end_of_iterations;
 	std::ostream& m_stream;
 
 public:
@@ -45,8 +54,10 @@ public:
 
 	SPtr get_ptr(){ return shared_from_this(); }
 
-	virtual bool is_enable()	         { return true;     }
-	virtual std::ostream& output() const { return m_stream; }
+	virtual bool is_enable()	         { return false;             }
+	virtual bool is_enable_best()	     { return this->is_enable(); }
+	virtual bool is_enable_pass()	     { return this->is_enable(); }
+	virtual std::ostream& output() const { return m_stream;          }
 
 	virtual void start()
 	{
@@ -60,19 +71,32 @@ public:
 
 	virtual void update_pass()
 	{
-		//clean line
-		for(short i=0;i!=10;++i) output() << "\t";
-		output() << "\r";
-		//output
-		write_output();
-		output() << "\r";
+		//none
  	}
 
-	virtual void end(double test_result)
+	virtual void end()
 	{ 
-		output() << std::endl;
-		output() << "Test: " << test_result;
-		output() << std::endl;
+		//none
+	}
+
+	virtual void send_start(
+		  size_t n_g_pass
+		, size_t n_s_pass
+	)
+	{
+		m_initialization.m_n_g_pass = n_g_pass;
+		m_initialization.m_n_s_pass = n_s_pass;
+		//call start
+		start();
+	}
+
+	virtual void send_end(
+		double test_result
+	)
+	{
+		m_end_of_iterations.m_test_result = test_result;
+		//call start
+		end();
 	}
 
 	virtual void send_best(
@@ -91,17 +115,13 @@ public:
 	}
 
 	virtual void sent_pass(
-		  size_t n_g_pass
-		, size_t n_s_pass
-		, size_t g_pass
+		  size_t g_pass
 		, size_t s_pass
 		, size_t minimum_on_pop_id
 		, double minimum_on_pop_eval
 	)
 	{
-		m_pass.m_n_g_pass = n_g_pass;
-		m_pass.m_n_s_pass = n_s_pass;
-		m_pass.m_g_pass = g_pass;
+		m_pass.m_g_pass = g_pass; //is equal to m_global_pass.m_g_pass + 1
 		m_pass.m_s_pass = s_pass;
 		m_pass.m_minimum_on_pop_id = minimum_on_pop_id;
 		m_pass.m_minimum_on_pop_eval = minimum_on_pop_eval;
@@ -109,25 +129,42 @@ public:
 		update_pass();
 	}
 
-	virtual void write_output() const
+	virtual void write_global_pass() 
 	{
-		output()
-			<< "pass: "
-			<< (m_pass.m_n_s_pass * m_pass.m_g_pass + m_pass.m_s_pass)
-			<< " <- (" << m_pass.m_g_pass << ", " << m_pass.m_s_pass << ")"
-			<< ", population["
-			<< m_pass.m_minimum_on_pop_id
-			<< "] = "
-			<< m_pass.m_minimum_on_pop_eval
-			<< " cross entropy | restart = " 
-			<< m_global_pass.m_n_restart
-			<< " | best[ global pass "
-					<< m_global_pass.m_g_pass
-					<<", accuracy "
-					<< m_global_pass.m_validation_eval
-					<< ", cross entropy " 
-					<< m_global_pass.m_target_eval
-					<< " ]";
+		output() << (m_initialization.m_n_s_pass * m_global_pass.m_g_pass);
+	}
+
+	virtual void write_local_pass() 
+	{
+		output() << (m_initialization.m_n_s_pass * m_pass.m_g_pass + m_pass.m_s_pass);
+	}
+
+	virtual void write_global_best(
+		const std::string& open="[ ", 
+		const std::string& separetor=", ", 
+		const std::string& closer=" ]"
+	) 
+	{
+		output() 
+		<< open 
+		<< m_global_pass.m_validation_eval
+		<< separetor 
+		<< m_global_pass.m_target_eval 
+		<< closer;
+	}
+
+	virtual void write_pass_best(
+		const std::string& open="[ ", 
+		const std::string& separetor=", ", 
+		const std::string& closer=" ]"
+	) 
+	{
+		output() 
+		<< open 
+		<< m_pass.m_minimum_on_pop_id
+		<< separetor 
+		<< m_pass.m_minimum_on_pop_eval 
+		<< closer;
 	}
 
 };
@@ -275,14 +312,6 @@ public:
 		}
 		//swap
 		m_population.swap();
-        //test of new generation 
-        #if 0
-		for(auto c_i : m_population.current())
-		for(auto n_i : m_population.next())
-		{
-			assert(c_i.get()!=n_i.get());
-		}
-		#endif
 	}
 
 	//execute a pass
@@ -327,20 +356,6 @@ public:
 		for (auto& promise : m_promises) promise.wait();
 		//swap
 		m_population.swap();
-        //test of new generation 
-        #if 0
-		for(auto c_i : m_population.current())
-		for(auto n_i : m_population.next())
-		{
-			assert(c_i.get()!=n_i.get());
-		}
-		#endif
-	}
-
-	//load next batch
-	bool next_batch()
-	{
-		return m_dataset_loader->read_batch(m_dataset_batch);
 	}
 
 	//big loop
@@ -356,11 +371,7 @@ public:
 		auto best = m_default->copy();
 		ScalarType best_eval = 0;
 		//start output
-		if (m_output->is_enable())
-		{
-			m_output->start();
-			m_output->send_best(0, restart_count, 0.0, double(best->m_eval));
-		}
+		if (m_output->is_enable()) m_output->send_start(n_global_pass, n_sub_pass);
 		//main loop
 		for (size_t pass = 0; pass != n_global_pass; ++pass)
 		{		
@@ -369,11 +380,6 @@ public:
 				parallel_execute_target_function_on_all_population(*thpool); //nan in linux/g++?
 			else
 				serial_execute_target_function_on_all_population();
-
-			#if 0
-			for(auto& i : m_population.current()) assert(!std::isnan(i->m_eval));
-			#endif
-			
 			//sub pass
 			for (size_t sub_pass = 0; sub_pass != n_sub_pass; ++sub_pass)
 			{
@@ -382,12 +388,12 @@ public:
 				else 
 					serial_pass();
 				//output
-				if (m_output->is_enable())
+				if (m_output->is_enable_pass())
 				{
 					size_t id_best;
 					ScalarType val_best;
 					m_population.current().best(id_best, val_best);
-					m_output->sent_pass(n_global_pass, n_sub_pass, pass, sub_pass, id_best, val_best);
+					m_output->sent_pass(pass, sub_pass, id_best, val_best);
 				}
 			}
 			//find best
@@ -436,14 +442,17 @@ public:
 				}
 			}
 			//output
-			if (m_output->is_enable()) m_output->send_best(pass+1, restart_count, double(best_eval), double(best->m_eval));
+			if (m_output->is_enable_best())
+			{
+				m_output->send_best(pass, restart_count, double(best_eval), double(best->m_eval));
+			} 
 			//next
 			next_batch();
 		}
 		//end output
 		if (m_output->is_enable())
 		{
-			m_output->end(double(execute_test(*best)));
+			m_output->send_end(double(execute_test(*best)));
 		} 
 		//result
 		return best;
@@ -511,6 +520,12 @@ protected:
 		{
 			return ScalarType(RandomIndices::random(min,max));
 		};
+	}
+	/////////////////////////////////////////////////////////////////
+	//load next batch
+	bool next_batch()
+	{
+		return m_dataset_loader->read_batch(m_dataset_batch);
 	}
 	/////////////////////////////////////////////////////////////////
 	//eval all
