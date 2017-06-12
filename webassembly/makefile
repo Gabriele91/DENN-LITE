@@ -34,7 +34,9 @@ LDFLAGS += -lm \
   -s INLINING_LIMIT=50 \
   -s TOTAL_MEMORY=134217728 \
   -s INVOKE_RUN=0 \
-  -s NO_EXIT_RUNTIME=1
+  -s NO_EXIT_RUNTIME=1\
+  -s 'EXTRA_EXPORTED_RUNTIME_METHODS=["FS"]'\
+  -s FORCE_FILESYSTEM=1
 # Emscripten FLAGS
 JS_LDFLAGS = --preload-file $(TOP)/../assets@/assets
 

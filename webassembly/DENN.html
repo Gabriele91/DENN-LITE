@@ -24,7 +24,7 @@
     <div class="w3-content" style="max-width:1280px">
         
         <!-- Header -->
-        <header class="w3-container w3-padding-32" id="header">
+        <header class="w3-container w3-padding-16" id="header">
             <div class="w3-card-4  w3-white">
                 <div class="w3-container w3-theme">            
                     <h1 class="w3-xxxlarge">DENN</h1>
@@ -36,6 +36,22 @@
                 </div>
             </div>
         </header>
+
+        <div class="w3-container">
+            <div class="w3-card-4  w3-white">
+                <div class="w3-container w3-theme">
+                    <h2>Datasets</h2>
+                </div>
+                <div class="w3-container">
+                <p>
+                <ul class="w3-ul w3-hoverable" data-path="" id="select_db" onclick="SelectDataset(event)">
+                </ul>
+                </p>
+                </div>
+            </div>
+        </div>
+        
+        <br>
 
         <div class="w3-container">
             <div class="w3-card-4  w3-white" id="denn_inputs">
@@ -291,7 +307,9 @@
         var Module = 
         {
             preRun: [],
-            postRun: [],
+            postRun: [function(){
+                AppendFilesToDatasetList();
+            }],
             arguments:[             
                 "-t", "5000",
                 "-s", "40",
@@ -335,6 +353,13 @@
             var table_args = {};
             for(var k=0; k < Module['arguments'].length - 1; k+=2)
                 table_args[Module['arguments'][k]] = Module['arguments'][k+1]
+            //dataset
+            var select_db=document.getElementById('select_db');
+            //test
+            if(typeof select_db.path === 'string' && select_db.path.length > 0)
+            {
+                table_args['-i'] = select_db.path;
+            }
             //from user
             var denn_inputs = document.getElementById("denn_inputs");
             var input_childs = denn_inputs.getElementsByTagName("*");
@@ -362,6 +387,69 @@
             }
             //call
             setTimeout(function(){ Module.callMain(args) }, 0)
+        };        
+        //file list
+        var GetAllGzFiles = function()
+        {
+            var GzList = [];
+            var FS = Module.FS;
+            function recursive_files_gz(node)
+            {
+                for(var k in node.contents)
+                {
+                    var content =  node.contents[k];
+                    
+                    if(!content.isFolder && content.name.split('.').pop() == 'gz')
+                    {
+                        GzList.push(FS.getPath(content));
+                    }
+                    else if(content.isFolder)
+                    {
+                        recursive_files_gz(content);
+                    }
+                }
+            }
+            recursive_files_gz(FS.lookupPath(FS.cwd()).node);
+            return GzList;
+        };
+        var SelectDataset = function(event)
+        {
+            if(event.target.tagName.toLowerCase() !== "li") return;
+            var select_db=document.getElementById('select_db');
+            for(var k = 0; k < select_db.childNodes.length; ++k)
+            {
+                if(select_db.childNodes[k].nodeName.toLowerCase() === "li")
+                {
+                    select_db.childNodes[k].style="background-color:#FFF";
+                }
+            }
+            event.target.style = "background-color:#AAA";
+            select_db.path = event.target.path;
+        }
+        var AppendFilesToDatasetList = function()
+        {
+            var select_db=document.getElementById('select_db');
+            var paths = GetAllGzFiles();
+            var first = null;
+            for(var k in paths)
+            {
+                var node = document.createElement("li");
+                node.setAttribute("path","");
+                node.path = paths[k];
+                node.innerText = paths[k].replace(/^.*[\\\/]/, '');
+                select_db.appendChild(node);
+                if(first === null) first = node;
+            }
+            if(first !== null)
+            {
+                var fake_event = new MouseEvent('click', {
+                    'view': window,
+                    'bubbles': true,
+                    'cancelable': true
+                });
+                Object.defineProperty(fake_event, 'target', {value: first, enumerable: true});
+                SelectDataset(fake_event);
+            }
         }
         //error load
         window.onerror = function(event) 
@@ -370,5 +458,6 @@
         };
     </script>
     <script async type="text/javascript" src="DENN.js"></script>
+    
 
 </html>
