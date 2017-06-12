@@ -1,0 +1,5 @@
+#file gen by emscripten
+DENN.js
+DENN.wasm
+DENN.data
+pthread-main.js

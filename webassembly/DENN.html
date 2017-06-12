@@ -1,0 +1,374 @@
+<html>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3pro.css">
+    <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-blue.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+
+    <!-- <link rel="stylesheet" href="https://www.w3schools.com/lib/w3-theme-black.css"> -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.3.0/css/font-awesome.min.css"> -->
+
+    <style>
+    /*.json_pre {outline: 1px solid #ccc; padding: 5px; margin: 5px; }*/
+    .json_string  { color: darkgreen; }
+    .json_number  { color: blueviolet; font-weight: bold; }
+    .json_boolean { color: red; }
+    .json_null    { color: magenta; }
+    .json_key     { color: blue; }
+    </style>
+
+    <body class="w3-theme-dark" >
+    <div class="w3-content" style="max-width:1280px">
+        
+        <!-- Header -->
+        <header class="w3-container w3-padding-32" id="header">
+            <div class="w3-card-4  w3-white">
+                <div class="w3-container w3-theme">            
+                    <h1 class="w3-xxxlarge">DENN</h1>
+                </div>
+                <div class="w3-container">
+                <p>
+                    <h4 class="w3-large">DENN: Differential evolution for neural network</h4>
+                </p>
+                </div>
+            </div>
+        </header>
+
+        <div class="w3-container">
+            <div class="w3-card-4  w3-white" id="denn_inputs">
+                <div class="w3-container w3-theme">
+                <h2>Input Form</h2>
+                </div>
+                <form class="w3-container">
+                <p>
+                <input class="w3-input w3-animate-input" style="width:80%" name="-t" value="8000" type="text" onkeypress="return onlyNumber(event);" >
+                <label>Generation</label></p>
+                </p>
+                <p>
+                <input class="w3-input w3-animate-input" style="width:80%" name="-s" value="50" type="text" onkeypress="return onlyNumber(event);" >
+                <label>Sub generation</label>
+                </p>
+                <p>
+                <input class="w3-input w3-animate-input" style="width:80%" name="-np" value="42" type="text" onkeypress="return onlyNumber(event);" >
+                <label>Number Parents</label>
+                </p>
+                <div class="w3-row">
+                    <div class="w3-half">
+                        <p>
+                        <input class="w3-input w3-animate-input" style="width:60%;max-width:90%" name="-f" value="0.6" type="text" onkeypress="return onlyRealNumber(event);" >
+                        <label>Default f</label>
+                        </p>
+                    </div>
+                    <div class="w3-half">
+                        <p>
+                        <input class="w3-input w3-animate-input" style="width:60%;max-width:90%" name="-cr" value="0.8" type="text" onkeypress="return onlyRealNumber(event);" >
+                        <label>Default cr</label>
+                        </p>
+                    </div>
+                </div>
+                <div class="w3-row">
+                    <div class="w3-half">
+                        <p>
+                        <input class="w3-input w3-animate-input" style="width:60%;max-width:90%" name="-jf" value="0.1" type="text" onkeypress="return onlyRealNumber(event);" >
+                        <label>JDE f</label>
+                        </p>
+                    </div>
+                    <div class="w3-half">
+                        <p>
+                        <input class="w3-input w3-animate-input" style="width:60%;max-width:90%" name="-jcr" value="0.1" type="text" onkeypress="return onlyRealNumber(event);" >
+                        <label>JDE cr</label>
+                        </p>
+                    </div>
+                </div>                
+                <div class="w3-row">
+                    <div class="w3-half">
+                        <p>
+                        <input class="w3-input w3-animate-input" style="width:60%;max-width:90%" name="-cmin" value="10.0" type="text" onkeypress="return onlyRealNumber(event);" >
+                        <label>Clamp min</label>
+                        </p>
+                    </div>
+                    <div class="w3-half">
+                        <p>
+                        <input class="w3-input w3-animate-input" style="width:60%;max-width:90%" name="-cmax" value="10.0" type="text" onkeypress="return onlyRealNumber(event);" >
+                        <label>Clamp max</label>
+                        </p>
+                    </div>
+                </div>               
+                <div class="w3-row">
+                    <div class="w3-half">
+                        <p>
+                        <input class="w3-input w3-animate-input" style="width:60%;max-width:90%" name="-rmin" value="1.0" type="text" onkeypress="return onlyRealNumber(event);" >
+                        <label>Random initialization range min</label>
+                        </p>
+                    </div>
+                    <div class="w3-half">
+                        <p>
+                        <input class="w3-input w3-animate-input" style="width:60%;max-width:90%" name="-rmax" value="1.0" type="text" onkeypress="return onlyRealNumber(event);" >
+                        <label>Random initialization range max</label>
+                        </p>
+                    </div>
+                </div>
+                <div class="w3-row">
+                    <div class="w3-half w3-colum">               
+                        <h2>Mutation</h2>
+                        <p>
+                        <input class="w3-radio" type="radio" name="-m" value="rand/1" checked>
+                        <label>rand/1</label>
+                        <br>
+                        <input class="w3-radio" type="radio" name="-m" value="rand/2">
+                        <label>rand/2</label>
+                        <br>
+                        <input class="w3-radio" type="radio" name="-m" value="best/1">
+                        <label>best/1</label>
+                        <br>
+                        <input class="w3-radio" type="radio" name="-m" value="best/2">
+                        <label>best/2</label>
+                        <br>
+                        </p>
+                    </div>
+                    <div class="w3-half">         
+                        <h2>Crossover</h2>
+                        <p>
+                        <input class="w3-radio" type="radio" name="-co" value="bin" checked>
+                        <label>Bin</label>
+                        <br>
+                        <input class="w3-radio" type="radio" name="-co" value="exp">
+                        <label>Exp</label>
+                        <br>
+                        </p>
+                    </div>
+                </div>
+                <p>
+                <button class="w3-btn w3-padding w3-theme" type="button" onclick="ExecuteDenn()" >Execute</button>
+                </p>
+                </form>
+            </div>
+        </div>
+
+        <div class="w3-container">
+            <div class="w3-card">
+                <div class="w3-card-4 w3-white" style="min-height:100px; max-height:480">
+                    <div class="w3-container w3-theme">
+                        <h3>Console Output</h3>  
+                    </div>    
+                    <div class="w3-container w3-left-align">
+                        <p id="output"></p>
+                    </div>  
+                </div>
+            </div>
+        </div>
+
+        <div id="result_dialog" class="w3-modal">
+            <div class="w3-modal-content">    
+                <span onclick="closeResults()" class="w3-button w3-display-topright w3-theme">&times;</span>               
+                <div class="w3-container w3-theme">
+                    <h3>Result</h3>  
+                </div> 
+                <div class="w3-container w3-left-align" style="max-width:600px;">
+                    <pre style="color:black;"><code id="result"><code></pre>
+                </div>
+            </div>
+        </div>
+
+        <footer class="w3-container  w3-padding-16">
+            <div class="w3-card-4  w3-white">
+                <div class="w3-container w3-theme">  
+                    <h4>Links</h4>    
+                </div>
+                <div class="w3-container">
+                    <p>
+                        <a href="https://github.com/Gabriele91/DENN-LITE/" class="w3-button w3-theme-light" target="_blank">Denn Lite</a> 
+                        <a href="https://github.com/Gabriele91/DENN" class="w3-button w3-theme-light" target="_blank">Denn</a>
+                    </p>
+                </div>
+            </div>
+        </footer>
+    <div>
+    </body>
+
+    <script type='text/javascript'>  
+        //input
+        function onlyNumber(event)
+        {    
+            var charCode = (event.which) ? event.which : event.keyCode
+            if (charCode > 31 && (charCode < 48 || charCode > 57))
+                return false;
+            return true;
+        }
+        function onlyRealNumber(event)
+        {
+            var charCode = (event.which) ? event.which : event.keyCode
+            if (charCode > 31 && (charCode != 46 &&(charCode < 48 || charCode > 57)))
+                return false;
+            return true;
+        }
+        //show/close result
+        function showResults()
+        {
+            document.getElementById('result_dialog').style.display='block';
+        }
+        function closeResults()
+        {
+            document.getElementById('result_dialog').style.display='none';
+        }
+        //init
+        function jsonSyntaxHighlight(json)
+        {
+            json = json.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            return json.replace(/("(\\u[a-zA-Z0-9]{4}|\\[^u]|[^\\"])*"(\s*:)?|\b(true|false|null)\b|-?\d+(?:\.\d*)?(?:[eE][+\-]?\d+)?)/g, function (match) {
+                var cls = 'json_number';
+                if (/^"/.test(match)) {
+                    if (/:$/.test(match)) {
+                        cls = 'json_key';
+                    } else {
+                        cls = 'json_string';
+                    }
+                } else if (/true|false/.test(match)) {
+                    cls = 'json_oolean';
+                } else if (/null/.test(match)) {
+                    cls = 'json_null';
+                }
+                return '<span class="' + cls + '">' + match + '</span>';
+            });
+        }
+        //error function
+        var OutputFunction = 
+        (function() 
+        {
+            // dom output
+            var element_output = document.getElementById('output');
+            // clear browser cache
+            if (element_output) element_output.innerHTML = ''; 
+            // console output function
+            return function(text) 
+            {           
+                setTimeout(function()
+                { 
+                    if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+                    console.log(text);
+                    if (true)
+                    {
+                        text = text.replace(/&/g, "&amp;");
+                        text = text.replace(/</g, "&lt;");
+                        text = text.replace(/>/g, "&gt;");
+                        text = text.replace(new RegExp('\n', 'g'),'<br>');
+                    }
+                    if (element_output) 
+                    {
+                        element_output.innerHTML = text + "<br>"; //replace
+                        //element_output.scrollTop = element_output.scrollHeight; // focus on bottom
+                    }
+                }, 0);
+            };
+        });        
+        //error function
+        var ResultsFunction = 
+        (function() 
+        {
+            // dom output
+            var element_result = document.getElementById('result');
+            // clear browser cache
+            if (element_result) element_result.innerHTML = ''; 
+            // console output function
+            return function(text) 
+            {           
+                setTimeout(function()
+                { 
+                    if (arguments.length > 1) text = Array.prototype.slice.call(arguments).join(' ');
+                    console.log(text);
+                    if (element_result) 
+                    {
+                       element_result.innerHTML = jsonSyntaxHighlight(JSON.stringify(JSON.parse(text), undefined, 4)) ;
+                    } 
+                    showResults();
+                }, 0);
+            };
+        });
+        //init module
+        var Module = 
+        {
+            preRun: [],
+            postRun: [],
+            arguments:[             
+                "-t", "5000",
+                "-s", "40",
+                "-np", "42", 
+                "-f", "0.6", 
+                "-cr", "0.8", 
+                "-jf", "0.1", 
+                "-jcr", "0.1",
+                "-cmin", "-1", 
+                "-cmax", "1", 
+                "-rmin", "-1.0",
+                "-rmax", "1.0", 
+                "-i", "assets/iris_105x6_5s.gz",
+                "-o", "iris_105x6_5s.json", 
+                "-omp", "0", 
+                "-tp", "4"
+             ],
+            print: OutputFunction(),
+            print_results: ResultsFunction(),
+            printErr: function(text)
+            {
+                console.log(text);
+                // OutputFunction("error: "+text);
+            },
+            quit: function(status, toThrow) 
+            {
+                OutputFunction("exit: " + status + ", toThrow:"+toThrow);
+            },
+            setStatus: function(text) 
+            {
+                //void
+            },
+            totalDependencies: 0
+        };
+        //callback
+        var ExecuteDenn = function()
+        {
+            Module.print=OutputFunction();
+            Module.print_results=ResultsFunction();
+            //default
+            var table_args = {};
+            for(var k=0; k < Module['arguments'].length - 1; k+=2)
+                table_args[Module['arguments'][k]] = Module['arguments'][k+1]
+            //from user
+            var denn_inputs = document.getElementById("denn_inputs");
+            var input_childs = denn_inputs.getElementsByTagName("*");
+            for ( var k in input_childs )
+            {
+                if(typeof input_childs[k].nodeName === 'string')
+                {
+                    if(input_childs[k].nodeName.toLowerCase() == 'input')
+                    {
+                        if(input_childs[k].name[0] === '-')
+                        {
+                            if(input_childs[k].type.toLowerCase() != 'radio'  || input_childs[k].checked)
+                            {
+                                table_args[input_childs[k].name] = input_childs[k].value;
+                            }
+                        }
+                    }
+                }
+            }
+            //list 
+            var args = [];
+            for(var k in table_args){
+                args.push(k); 
+                args.push(table_args[k]);
+            }
+            //call
+            setTimeout(function(){ Module.callMain(args) }, 0)
+        }
+        //error load
+        window.onerror = function(event) 
+        {
+            // TODO: do not warn on ok events like simulating an infinite loop or exitStatus
+        };
+    </script>
+    <script async type="text/javascript" src="DENN.js"></script>
+
+</html>

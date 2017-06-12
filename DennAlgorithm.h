@@ -131,7 +131,7 @@ public:
 
 	virtual void write_global_pass() 
 	{
-		output() << (m_initialization.m_n_s_pass * m_global_pass.m_g_pass);
+		output() << (m_initialization.m_n_s_pass * (m_global_pass.m_g_pass+1));
 	}
 
 	virtual void write_local_pass() 
