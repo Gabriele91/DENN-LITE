@@ -132,6 +132,12 @@ namespace Denn
 	};
 
     ////////////////////////////////////////////////////////////////////////
+	enum class PopulationType : size_t
+	{
+		PT_PARENTS=0,
+		PT_SONS,
+		PT_SIZE
+	};
 	//Double Population buffer
     template < typename Network, typename DataSet >
 	struct DoubleBufferPopulation
@@ -146,8 +152,7 @@ namespace Denn
         using RandomFunction = std::function<ScalarType(ScalarType)>;
 		using CostFunction   = std::function<ScalarType(const MatrixType&, const MatrixType&) >;
         //attributes
-		size_t     m_current { 0 };
-		Population m_pop_buffer[2];
+		Population m_pop_buffer[ size_t(PopulationType::PT_SIZE) ];
 		//init population
 		void init(
 			  size_t np
@@ -157,8 +162,6 @@ namespace Denn
 			, CostFunction target_function
 		)
 		{
-			//init counter
-			m_current = 0;
 			//init pop
 			for (Population& population : m_pop_buffer)
 			{
@@ -171,7 +174,7 @@ namespace Denn
 				}
 			}
 			//ref to current
-			Population& population = current();
+			Population& population = parents();
 			//random init
 			for (auto& individual : population)
 			for (auto& layer : individual->m_network)
@@ -187,44 +190,53 @@ namespace Denn
 			}
 		}
 		//current
-		Population& current()
+		Population& parents()
 		{
-			return m_pop_buffer[m_current];
+			return m_pop_buffer[size_t(PopulationType::PT_PARENTS)];
 		}
-		const Population& current() const
+		const Population& parents() const
 		{
-			return m_pop_buffer[m_current];
+			return m_pop_buffer[size_t(PopulationType::PT_PARENTS)];
 		}
-		const Population& const_current() const
+		const Population& const_parents() const
 		{
-			return m_pop_buffer[m_current];
+			return m_pop_buffer[size_t(PopulationType::PT_PARENTS)];
 		}
 		//next
-		Population& next()
-		{
-			return m_pop_buffer[(m_current+1)%2];
+		Population& sons()
+		{			
+			return m_pop_buffer[size_t(PopulationType::PT_SONS)];
 		}
-		const Population& next() const
+		const Population& sons() const
 		{
-			return m_pop_buffer[(m_current + 1) % 2];
+			return m_pop_buffer[size_t(PopulationType::PT_SONS)];
 		}
-		const Population& const_next() const
+		const Population& const_sons() const
 		{
-			return m_pop_buffer[(m_current + 1) % 2];
+			return m_pop_buffer[size_t(PopulationType::PT_SONS)];
 		}
 		//get best
 		void best(size_t& best_i, ScalarType& out_eval) const
 		{
-			current().best(best_i,out_eval);
+			parents().best(best_i,out_eval);
 		}
 		IndividualPtr best() const
 		{
-			return current().best();
+			return parents().best();
 		}
 		//swap
-		void swap()
+		void the_best_sons_become_parents()
 		{
-			m_current = (m_current + 1) % 2;
+			//minimize (cross_entropy)
+			for(size_t i=0;i!=parents().size();++i)
+			{
+				if (sons()[i]->m_eval < parents()[i]->m_eval)
+				{
+					auto individual_tmp= parents()[i];
+					parents()[i] 	   = sons()[i];
+					sons()[i]          = individual_tmp;
+				}
+			}
 		}
 		//restart
 		void restart
@@ -237,7 +249,7 @@ namespace Denn
 		)
 		{
 			//ref to current
-			Population& population = current();
+			Population& population = parents();
 			//random init
 			for (auto& individual : population)
 			{

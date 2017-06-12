@@ -200,8 +200,8 @@ public:
 	bool jde(int target, Individual& i_final) const
 	{
 		//vectors
-		const Population& population = m_population.current();
-		const Individual& i_target   = *population[target];
+		const Population& parents  = m_population.parents();
+		const Individual& i_target = *parents[target];
 		//f JDE
 		if (RandomIndices::random() < ScalarType(m_params.m_jde_f))   
 			i_final.m_f = ScalarType(RandomIndices::random(0.0,2.0));
@@ -281,37 +281,29 @@ public:
 	//execute a pass
 	void serial_pass()
 	{
-		//ref to population
-		auto& population = m_population.current();
-		//ref to next
-		auto& population_next = m_population.next();
+		//ref to parents
+		auto& parents = m_population.parents();
+		//ref to sons
+		auto& sons = m_population.sons();
 		//for all
 		for(size_t i = 0; i!= (size_t)m_params.m_np; ++i)
 		{
 			//get temp individual
-			auto& new_individual = population_next[i];
+			auto& new_son = sons[i];
 			//Copy default params
-			new_individual->copy_attributes(*m_default);
+			new_son->copy_attributes(*m_default);
 			//compute jde
-			jde(i, *new_individual);
+			jde(i, *new_son);
 			//call muation
-			(*m_mutation)(population, i, *new_individual);
+			(*m_mutation)(parents, i, *new_son);
 			//call crossover
-			(*m_crossover)(*population[i], *new_individual);
+			(*m_crossover)(*parents[i], *new_son);
 			//eval
-			auto y                 = new_individual->m_network.apply(m_dataset_batch.m_features);
-			new_individual->m_eval = m_target_function(m_dataset_batch.m_labels, y);
-			//minimixe (cross_entropy)
-			if (!(new_individual->m_eval < population[i]->m_eval))
-			{
-				//fail, next element is the target
-				auto individual_tmp= population_next[i];
-				population_next[i] = population[i];
-				population[i]      = individual_tmp;
-			}
-		}
+			auto y          = new_son->m_network.apply(m_dataset_batch.m_features);
+			new_son->m_eval = m_target_function(m_dataset_batch.m_labels, y);
+		}		
 		//swap
-		m_population.swap();
+		m_population.the_best_sons_become_parents();
 	}
 
 	//execute a pass
@@ -325,37 +317,29 @@ public:
 			//add
 			m_promises[i] = thpool.push_task([this,i]()
 			{ 
-				//ref to population
-				auto& population = m_population.current();
-				//ref to next
-				auto& population_next = m_population.next();
+				//ref to parents
+				auto& parents = m_population.parents();
+				//ref to sons
+				auto& sons = m_population.sons();
 				//get temp individual
-			    auto& new_individual = population_next[i];
-			    //Copy default params
-			    new_individual->copy_attributes(*m_default);
+				auto& new_son = sons[i];
+				//Copy default params
+				new_son->copy_attributes(*m_default);
 				//compute jde
-				jde(i, *new_individual);
+				jde(i, *new_son);
 				//call muation
-				(*m_mutation)(population, i, *new_individual);
+				(*m_mutation)(parents, i, *new_son);
 				//call crossover
-				(*m_crossover)(*population[i], *new_individual);
+				(*m_crossover)(*parents[i], *new_son);
 				//eval
-				auto y                 = new_individual->m_network.apply(m_dataset_batch.m_features);
-				new_individual->m_eval = m_target_function(m_dataset_batch.m_labels, y);
-				//minimixe (cross_entropy)
-				if (!(new_individual->m_eval < population[i]->m_eval))
-				{
-					//fail, next element is the target
-				   auto individual_tmp= population_next[i];
-				   population_next[i] = population[i];
-				   population[i]      = individual_tmp;
-				}
+				auto y          = new_son->m_network.apply(m_dataset_batch.m_features);
+				new_son->m_eval = m_target_function(m_dataset_batch.m_labels, y);
 			});
 		}
 		//wait
 		for (auto& promise : m_promises) promise.wait();
 		//swap
-		m_population.swap();
+		m_population.the_best_sons_become_parents();
 	}
 
 	//big loop
@@ -392,7 +376,7 @@ public:
 				{
 					size_t id_best;
 					ScalarType val_best;
-					m_population.current().best(id_best, val_best);
+					m_population.parents().best(id_best, val_best);
 					m_output->sent_pass(pass, sub_pass, id_best, val_best);
 				}
 			}
@@ -462,7 +446,7 @@ public:
 	bool find_best(size_t& out_i, ScalarType& out_eval)
 	{
 		//ref to pop
-		auto population = m_population.current();
+		auto population = m_population.parents();
 		//validation
 		DataSet validation;
 		m_dataset_loader->read_validation(validation);
@@ -493,8 +477,8 @@ public:
 		//best 
 		size_t best_i;
 		find_best(best_i, out_eval);
-		//ref to pop
-		return m_population.current()[best_i];
+		//return best
+		return m_population.parents()[best_i];
 	}
 
 	//using the test set on a individual
@@ -534,7 +518,7 @@ protected:
 		//np
 		size_t np = (size_t)m_params.m_np;
 		//pop ref
-		auto& popolation = m_population.current();
+		auto& popolation = m_population.parents();
 		//for all
 		for (size_t i = 0; i != np; ++i)
 		{
@@ -553,7 +537,7 @@ protected:
 		//np
 		size_t np = (size_t)m_params.m_np;
 		//pop ref
-		auto& popolation = m_population.current();
+		auto& popolation = m_population.parents();
 		//alloc promises
 		m_promises.resize(np);
 		//for all
