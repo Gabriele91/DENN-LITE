@@ -9,166 +9,10 @@
 #include "DennPopulation.h"
 #include "DennMutation.h"
 #include "DennCrossover.h"
+#include "DennRuntimeOutput.h"
 
 namespace Denn
 {
-
-class RuntimeOutput : public std::enable_shared_from_this< RuntimeOutput >
-{
-protected:
-
-	struct Initialization
-	{
-		size_t m_n_g_pass{ 0 };
-		size_t m_n_s_pass{ 0 };
-	};
-	struct GlobalPassInfo
-	{
-		size_t m_g_pass         { size_t(-1) };
-		size_t m_n_restart      {  0         };
-		double m_validation_eval{ 0.0        };
-		double m_target_eval    { 0.0        };
-	};
-    struct PassInfo
-	{
-		size_t m_g_pass             { size_t(-1) };
-		size_t m_s_pass             { 0          };
-		size_t m_minimum_on_pop_id  { 0          };
-		double m_minimum_on_pop_eval{ 0          };
-	};
-	struct EndOfIterations
-	{
-		double m_test_result;
-	};
-
-	PassInfo m_pass;
-	GlobalPassInfo m_global_pass;
-	Initialization m_initialization;
-	EndOfIterations m_end_of_iterations;
-	std::ostream& m_stream;
-
-public:
-	using SPtr = std::shared_ptr<RuntimeOutput>;
-
-	RuntimeOutput(std::ostream& stream=std::cerr):m_stream(stream) {}
-
-	SPtr get_ptr(){ return shared_from_this(); }
-
-	virtual bool is_enable()	         { return false;             }
-	virtual bool is_enable_best()	     { return this->is_enable(); }
-	virtual bool is_enable_pass()	     { return this->is_enable(); }
-	virtual std::ostream& output() const { return m_stream;          }
-
-	virtual void start()
-	{
-		//none
-	}
-
-	virtual void update_best()
-	{
-		//none
-	}
-
-	virtual void update_pass()
-	{
-		//none
- 	}
-
-	virtual void end()
-	{ 
-		//none
-	}
-
-	virtual void send_start(
-		  size_t n_g_pass
-		, size_t n_s_pass
-	)
-	{
-		m_initialization.m_n_g_pass = n_g_pass;
-		m_initialization.m_n_s_pass = n_s_pass;
-		//call start
-		start();
-	}
-
-	virtual void send_end(
-		double test_result
-	)
-	{
-		m_end_of_iterations.m_test_result = test_result;
-		//call start
-		end();
-	}
-
-	virtual void send_best(
-		  size_t g_pass
-		, size_t n_restart
-		, double validation_eval
-		, double target_eval
-	)
-	{
-		m_global_pass.m_g_pass = g_pass;
-		m_global_pass.m_n_restart = n_restart;
-		m_global_pass.m_validation_eval = validation_eval;
-		m_global_pass.m_target_eval = target_eval;
-		//
-		update_best();
-	}
-
-	virtual void sent_pass(
-		  size_t g_pass
-		, size_t s_pass
-		, size_t minimum_on_pop_id
-		, double minimum_on_pop_eval
-	)
-	{
-		m_pass.m_g_pass = g_pass; //is equal to m_global_pass.m_g_pass + 1
-		m_pass.m_s_pass = s_pass;
-		m_pass.m_minimum_on_pop_id = minimum_on_pop_id;
-		m_pass.m_minimum_on_pop_eval = minimum_on_pop_eval;
-		//
-		update_pass();
-	}
-
-	virtual void write_global_pass() 
-	{
-		output() << (m_initialization.m_n_s_pass * (m_global_pass.m_g_pass+1));
-	}
-
-	virtual void write_local_pass() 
-	{
-		output() << (m_initialization.m_n_s_pass * m_pass.m_g_pass + m_pass.m_s_pass);
-	}
-
-	virtual void write_global_best(
-		const std::string& open="[ ", 
-		const std::string& separetor=", ", 
-		const std::string& closer=" ]"
-	) 
-	{
-		output() 
-		<< open 
-		<< m_global_pass.m_validation_eval
-		<< separetor 
-		<< m_global_pass.m_target_eval 
-		<< closer;
-	}
-
-	virtual void write_pass_best(
-		const std::string& open="[ ", 
-		const std::string& separetor=", ", 
-		const std::string& closer=" ]"
-	) 
-	{
-		output() 
-		<< open 
-		<< m_pass.m_minimum_on_pop_id
-		<< separetor 
-		<< m_pass.m_minimum_on_pop_eval 
-		<< closer;
-	}
-
-};
-
 
 template< typename Network, typename Parameters, typename DataSetLoader >
 class DennAlgorithm
@@ -197,6 +41,36 @@ public:
 	using CrossoverPtr   = std::unique_ptr < Crossover< Individual > >;
 	//Ref mutation
 	////////////////////////////////////////////////////////////////////////
+	//structs utilities
+	struct RestartContext
+	{
+		ScalarType m_last_eval;
+		size_t	   m_test_count;
+		size_t	   m_count;
+        //
+		RestartContext(
+			  ScalarType last_eval  = ScalarType(0.0)
+			, size_t	 test_count = 0
+			, size_t	 count      = 0
+		)
+		{
+			m_last_eval  = last_eval;
+			m_test_count = test_count;
+			m_count      = count;
+		}
+	};
+	struct BestContext
+	{
+		IndividualPtr m_best;
+		ScalarType    m_eval;
+        //
+		BestContext(IndividualPtr best = nullptr, IndividualPtr eval = 0)
+		{
+			m_best = best;
+			m_eval = 0;
+		}
+	};
+	////////////////////////////////////////////////////////////////////////
 	bool jde(int target, Individual& i_final) const
 	{
 		//vectors
@@ -223,6 +97,7 @@ public:
 		, const Network       nn_default
 		, CostFunction		  target_function
 		, RuntimeOutput::SPtr output
+		, ThreadPool*		  thpool = nullptr
 	) 
 	{
 		m_dataset_loader    = dataset_loader;
@@ -230,6 +105,7 @@ public:
 		m_target_function   = target_function;
 		m_params			= params;
 		m_output            = output;
+		m_thpool			= thpool;
 		//default
 		switch((MutationType)m_params.m_mutation_type)
 		{
@@ -251,10 +127,12 @@ public:
 			m_crossover   = std::make_unique< Bin<Individual> >();
 			break;
 		}
+		//init all
+		reset();
 	}	
 	
 	//init
-	bool init()
+	bool reset()
 	{
 		//success flag
 		bool success = m_dataset_loader != nullptr;
@@ -278,168 +156,29 @@ public:
 		return success;
 	}
 	
-	//execute a pass
-	void serial_pass()
-	{
-		//ref to parents
-		auto& parents = m_population.parents();
-		//ref to sons
-		auto& sons = m_population.sons();
-		//for all
-		for(size_t i = 0; i!= (size_t)m_params.m_np; ++i)
-		{
-			//get temp individual
-			auto& new_son = sons[i];
-			//Copy default params
-			new_son->copy_attributes(*m_default);
-			//compute jde
-			jde(i, *new_son);
-			//call muation
-			(*m_mutation)(parents, i, *new_son);
-			//call crossover
-			(*m_crossover)(*parents[i], *new_son);
-			//eval
-			auto y          = new_son->m_network.apply(m_dataset_batch.m_features);
-			new_son->m_eval = m_target_function(m_dataset_batch.m_labels, y);
-		}		
-		//swap
-		m_population.the_best_sons_become_parents();
-	}
-
-	//execute a pass
-	void parallel_pass(ThreadPool& thpool)
-	{
-		//alloc promises
-		m_promises.resize(m_params.m_np);
-		//execute
-		for (size_t i = 0; i != (size_t)m_params.m_np; ++i)
-		{
-			//add
-			m_promises[i] = thpool.push_task([this,i]()
-			{ 
-				//ref to parents
-				auto& parents = m_population.parents();
-				//ref to sons
-				auto& sons = m_population.sons();
-				//get temp individual
-				auto& new_son = sons[i];
-				//Copy default params
-				new_son->copy_attributes(*m_default);
-				//compute jde
-				jde(i, *new_son);
-				//call muation
-				(*m_mutation)(parents, i, *new_son);
-				//call crossover
-				(*m_crossover)(*parents[i], *new_son);
-				//eval
-				auto y          = new_son->m_network.apply(m_dataset_batch.m_features);
-				new_son->m_eval = m_target_function(m_dataset_batch.m_labels, y);
-			});
-		}
-		//wait
-		for (auto& promise : m_promises) promise.wait();
-		//swap
-		m_population.the_best_sons_become_parents();
-	}
-
 	//big loop
-	IndividualPtr execute(ThreadPool* thpool = nullptr)
+	virtual IndividualPtr execute()
 	{
+		//global info
 		const size_t n_global_pass = ((size_t)m_params.m_generations /(size_t)m_params.m_sub_gens);
 		const size_t n_sub_pass = m_params.m_sub_gens;
 		//restart init
-		ScalarType restart_last_eval = 0;
-		size_t	   restart_test_count = 0;
-		size_t	   restart_count = 0;
+		RestartContext ctx_restart;
 		//best
-		auto best = m_default->copy();
-		ScalarType best_eval = 0;
+		BestContext ctx_best(m_default->copy());
 		//start output
 		if (m_output->is_enable()) m_output->send_start(n_global_pass, n_sub_pass);
 		//main loop
 		for (size_t pass = 0; pass != n_global_pass; ++pass)
 		{		
-			//eval on batch
-			if (thpool)
-				parallel_execute_target_function_on_all_population(*thpool); //nan in linux/g++?
-			else
-				serial_execute_target_function_on_all_population();
-			//sub pass
-			for (size_t sub_pass = 0; sub_pass != n_sub_pass; ++sub_pass)
-			{
-				if (thpool)	
-					parallel_pass(*thpool); 
-				else 
-					serial_pass();
-				//output
-				if (m_output->is_enable_pass())
-				{
-					size_t id_best;
-					ScalarType val_best;
-					m_population.parents().best(id_best, val_best);
-					m_output->sent_pass(pass, sub_pass, id_best, val_best);
-				}
-			}
-			//find best
-			ScalarType curr_eval;
-			auto curr = find_best(curr_eval);
-			//maximize (accuracy)
-			if (best_eval < curr_eval)
-			{
-				//must copy because "restart" 
-				//not copy element then 
-				//it can change the values of the best individual
-				best	  = curr->copy();
-				//save eval (on validation) of best
-				best_eval = curr_eval;
-			}
-			//restart
-			if (m_params.m_restart_enable)
-			{
-				//first
-				if (!pass) restart_last_eval = best_eval;
-				//inc count
-				if ((best_eval - restart_last_eval) < (ScalarType)m_params.m_restart_delta)
-				{
-					++restart_test_count;
-				}
-				else
-				{
-					restart_test_count = 0;
-					restart_last_eval = best_eval;
-				}
-				//test
-				if ((ScalarType)m_params.m_restart_count <= restart_test_count)
-				{
-					m_population.restart
-					(
-						  best
-						, m_default
-						, m_dataset_batch
-						, get_random_func()
-						, m_target_function
-					);
-					restart_test_count = 0;
-					restart_last_eval = best_eval;
-					//restart inc
-					++restart_count;
-				}
-			}
-			//output
-			if (m_output->is_enable_best())
-			{
-				m_output->send_best(pass, restart_count, double(best_eval), double(best->m_eval));
-			} 
+			execute_a_pass(pass, n_sub_pass, ctx_best, ctx_restart);
 			//next
 			next_batch();
 		}
 		//end output
-		if (m_output->is_enable())
-		{
-			m_output->send_end(double(execute_test(*best)));
-		} 
+		if (m_output->is_enable()) m_output->send_end(double(execute_test(*(ctx_best.m_best))));
 		//result
-		return best;
+		return ctx_best.m_best;
 	}
 
 	//find best individual (validation test)
@@ -496,23 +235,166 @@ public:
 
 protected:
 	/////////////////////////////////////////////////////////////////
-	RandomFunction get_random_func() const
+	//Intermedie steps
+	virtual void execute_a_pass(size_t pass,size_t n_sub_pass, BestContext& ctx_best, RestartContext& ctx_restart)
 	{
-		ScalarType min = m_params.m_range_min;
-		ScalarType max = m_params.m_range_max;
-		return [=](ScalarType x) -> ScalarType
+		execute_target_function_on_all_population();
+		//sub pass
+		for (size_t sub_pass = 0; sub_pass != n_sub_pass; ++sub_pass)
 		{
-			return ScalarType(RandomIndices::random(min,max));
-		};
+			execute_a_sub_pass(pass, sub_pass);
+		}
+		//update context
+		execute_update_best(ctx_best);
+		//restart
+		execute_update_restart(pass, ctx_best, ctx_restart);
+		//output
+		if (m_output->is_enable_best())
+		{
+			m_output->send_best
+			(
+			  pass
+			, ctx_restart.m_count
+			, double(ctx_best.m_eval)
+			, double(ctx_best.m_best->m_eval)
+			);
+		} 
+	}
+	void execute_a_sub_pass(size_t pass,size_t sub_pass)
+	{
+		//pass
+		execute_pass();
+		//output
+		if (m_output->is_enable_pass())
+		{
+			size_t id_best;
+			ScalarType val_best;
+			m_population.parents().best(id_best, val_best);
+			m_output->sent_pass(pass, sub_pass, id_best, val_best);
+		}
+	}
+	void  execute_update_best(BestContext& ctx_best)
+	{
+		//find best
+		ScalarType curr_eval;
+		auto curr = find_best(curr_eval);
+		//maximize (accuracy)
+		if (ctx_best.m_eval < curr_eval)
+		{
+			//must copy because "restart" 
+			//not copy element then 
+			//it can change the values of the best individual
+			ctx_best.m_best	= curr->copy();
+			//save eval (on validation) of best
+			ctx_best.m_eval = curr_eval;
+		}
+	}
+	void  execute_update_restart(size_t pass, const BestContext& ctx_best, RestartContext& ctx)
+	{
+		//inc count
+		if ((ctx_best.m_eval - ctx.m_last_eval) <= (ScalarType)m_params.m_restart_delta)
+		{
+			++ctx.m_test_count;
+		}
+		else
+		{
+			ctx.m_test_count = 0;
+			ctx.m_last_eval = ctx_best.m_eval;
+		}
+		//first
+		if (!pass) ctx.m_last_eval = ctx_best.m_eval;
+		//test
+		if ((ScalarType)m_params.m_restart_count <= ctx.m_test_count)
+		{
+			m_population.restart
+			(
+				  ctx_best.m_best
+				, m_default
+				, m_dataset_batch
+				, get_random_func()
+				, m_target_function
+			);
+			ctx.m_test_count = 0;
+			ctx.m_last_eval = ctx_best.m_eval;
+			//restart inc
+			++ctx.m_count;
+		}
 	}
 	/////////////////////////////////////////////////////////////////
-	//load next batch
-	bool next_batch()
+	//execute a pass
+	void execute_pass()
 	{
-		return m_dataset_loader->read_batch(m_dataset_batch);
+		if (m_thpool) parallel_execute_pass(*m_thpool); 
+		else          serial_execute_pass();
+	}
+	void serial_execute_pass()
+	{
+		//ref to parents
+		auto& parents = m_population.parents();
+		//ref to sons
+		auto& sons = m_population.sons();
+		//for all
+		for(size_t i = 0; i!= (size_t)m_params.m_np; ++i)
+		{
+			//get temp individual
+			auto& new_son = sons[i];
+			//Copy default params
+			new_son->copy_attributes(*m_default);
+			//compute jde
+			jde(i, *new_son);
+			//call muation
+			(*m_mutation)(parents, i, *new_son);
+			//call crossover
+			(*m_crossover)(*parents[i], *new_son);
+			//eval
+			auto y          = new_son->m_network.apply(m_dataset_batch.m_features);
+			new_son->m_eval = m_target_function(m_dataset_batch.m_labels, y);
+		}		
+		//swap
+		m_population.the_best_sons_become_parents();
+	}
+	void parallel_execute_pass(ThreadPool& thpool)
+	{
+		//alloc promises
+		m_promises.resize(m_params.m_np);
+		//execute
+		for (size_t i = 0; i != (size_t)m_params.m_np; ++i)
+		{
+			//add
+			m_promises[i] = thpool.push_task([this,i]()
+			{ 
+				//ref to parents
+				auto& parents = m_population.parents();
+				//ref to sons
+				auto& sons = m_population.sons();
+				//get temp individual
+				auto& new_son = sons[i];
+				//Copy default params
+				new_son->copy_attributes(*m_default);
+				//compute jde
+				jde(i, *new_son);
+				//call muation
+				(*m_mutation)(parents, i, *new_son);
+				//call crossover
+				(*m_crossover)(*parents[i], *new_son);
+				//eval
+				auto y          = new_son->m_network.apply(m_dataset_batch.m_features);
+				new_son->m_eval = m_target_function(m_dataset_batch.m_labels, y);
+			});
+		}
+		//wait
+		for (auto& promise : m_promises) promise.wait();
+		//swap
+		m_population.the_best_sons_become_parents();
 	}
 	/////////////////////////////////////////////////////////////////
 	//eval all
+	void execute_target_function_on_all_population()
+	{
+		//eval on batch
+		if (m_thpool) parallel_execute_target_function_on_all_population(*m_thpool); 
+		else 		  serial_execute_target_function_on_all_population();
+	}
 	void serial_execute_target_function_on_all_population()
 	{
 		//np
@@ -560,6 +442,22 @@ protected:
 		for (auto& promise : m_promises) promise.wait();
 	}
 	/////////////////////////////////////////////////////////////////
+	//get random function
+	RandomFunction get_random_func() const
+	{
+		ScalarType min = m_params.m_range_min;
+		ScalarType max = m_params.m_range_max;
+		return [=](ScalarType x) -> ScalarType
+		{
+			return ScalarType(RandomIndices::random(min,max));
+		};
+	}
+	//load next batch
+	bool next_batch()
+	{
+		return m_dataset_loader->read_batch(m_dataset_batch);
+	}
+	/////////////////////////////////////////////////////////////////
 	//serach space
 	DBPopulation        m_population;
 	PromiseList	        m_promises;
@@ -569,6 +467,8 @@ protected:
 	typename Individual::SPtr  m_default;
 	DataSetLoader*		       m_dataset_loader;
 	DataSet				       m_dataset_batch;
+	//threads
+	ThreadPool*				   m_thpool;
 	//params of DE
 	Parameters 				   m_params;
 	MutationPtr                m_mutation;
