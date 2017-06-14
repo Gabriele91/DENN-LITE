@@ -14,7 +14,7 @@
 namespace Denn
 {
 
-template< typename Network, typename Parameters, typename DataSetLoader >
+template< typename Network, typename Parameters >
 class DennAlgorithm
 {
 public:
@@ -25,8 +25,8 @@ public:
 	using ScalarType     = typename Network::ScalarType;
 	using LayerList      = typename Network::LayerList;
 	//DB
-	using DennAlgoType   = DennAlgorithm< Network, Parameters, DataSetLoader >;
-	using DataSet	     = DataSetRaw< ScalarType >;
+	using DennAlgoType   = DennAlgorithm< Network, Parameters >;
+	using DataSet	     = DataSetX< ScalarType >;
 	//Search space
 	using DBPopulation   = DoubleBufferPopulation< Network, DataSet >;
 	using Individual     = typename DoubleBufferPopulation< Network, DataSet >::Individual;

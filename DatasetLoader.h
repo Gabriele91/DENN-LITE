@@ -2,15 +2,9 @@
 #pragma once 
 #include "Config.h"
 #include "IOFileWrapper.h"
-
+#include "DennDataSet.h"
 namespace Denn
 {
-	enum DataSetType
-	{
-		DS_UNKNOWN = -1,
-		DS_FLOAT   = 1,
-		DS_DOUBLE  = 2
-	};
 
 	ASPACKED(struct DataSetHeader
 	{
@@ -24,6 +18,16 @@ namespace Denn
 		unsigned int m_test_offset;
 		unsigned int m_validation_offset;
 		unsigned int m_train_offset;
+
+		DataType get_data_type() const
+		{
+			switch(m_type)
+			{
+				case 1:  return DataType::DT_FLOAT;
+				case 2:  return DataType::DT_DOUBLE;
+				default: return DataType::DT_UNKNOWN;
+			}
+		}
 	});
 
 	ASPACKED(struct DataSetTestHeader
@@ -42,28 +46,46 @@ namespace Denn
 		unsigned int m_n_row;
 	});
 
-	template < typename ScalarType >
-	struct DataSetRaw
-	{
-		Eigen::Matrix< ScalarType, Eigen::Dynamic, Eigen::Dynamic > m_features;
-		Eigen::Matrix< ScalarType, Eigen::Dynamic, Eigen::Dynamic > m_labels;
-		//get type
-		static int get_type_id() { return DataSetType::DS_UNKNOWN;  }
-	};
-	template<> inline int DataSetRaw< float >::get_type_id()  { return DataSetType::DS_FLOAT; };
-	template<> inline int DataSetRaw< double >::get_type_id() { return DataSetType::DS_DOUBLE; };
 
-	template < class IO >
 	class DataSetLoader
 	{
+	public:
+		///////////////////////////////////////////////////////////////////
+		virtual bool open(const std::string& path_file) = 0;
 
+		virtual bool is_open() const = 0;
+
+		virtual const DataSetHeader& get_main_header_info() const  = 0;
+
+		virtual const DataSetTrainHeader& get_last_batch_info() const  = 0;
+
+		///////////////////////////////////////////////////////////////////
+		// READ TEST SET
+		virtual bool read_test(DataSet& t_out) = 0;
+
+		///////////////////////////////////////////////////////////////////
+		// READ VALIDATION SET
+		virtual bool read_validation(DataSet& t_out) = 0;
+
+		///////////////////////////////////////////////////////////////////
+		// READ TRAINING SET
+		virtual bool start_read_batch() = 0;
+
+		virtual bool read_batch(DataSet& t_out, bool loop = true) = 0;
+
+	};
+
+
+	template < class IO >
+	class DataSetLoaderT : public DataSetLoader
+	{
 	public:
 
-		DataSetLoader()
+		DataSetLoaderT()
 		{
 		}
 
-		DataSetLoader(const std::string& path_file)
+		DataSetLoaderT(const std::string& path_file)
 		{
 			open(path_file);
 		}
@@ -95,8 +117,7 @@ namespace Denn
 
 		///////////////////////////////////////////////////////////////////
 		// READ TEST SET
-		template < typename ScalarType >
-		bool read_test(DataSetRaw< ScalarType > & t_out)
+		bool read_test(DataSet& t_out)
 		{
 			if (is_open())
 			{
@@ -107,7 +128,7 @@ namespace Denn
 				//read header
 				m_file.read(&m_test_header, sizeof(DataSetTestHeader), 1);
 				//read data
-				bool status = read_raw(t_out, m_test_header.m_n_row);
+				bool status = read(t_out, m_test_header.m_n_row);
 				//return back
 				m_file.seek_set(cur_pos);
 				//return
@@ -118,8 +139,7 @@ namespace Denn
 
 		///////////////////////////////////////////////////////////////////
 		// READ VALIDATION SET
-		template < typename ScalarType >
-		bool read_validation(DataSetRaw< ScalarType >& t_out)
+		bool read_validation(DataSet& t_out)
 		{
 			if (is_open())
 			{
@@ -130,7 +150,7 @@ namespace Denn
 				//read header
 				m_file.read(&m_val_header, sizeof(DataSetValidationHeader), 1);
 				//read data
-				bool status = read_raw(t_out, m_val_header.m_n_row);
+				bool status = read(t_out, m_val_header.m_n_row);
 				//return back
 				m_file.seek_set(cur_pos);
 				//return
@@ -153,15 +173,14 @@ namespace Denn
 			return false;
 		}
 
-		template < typename ScalarType >
-		bool read_batch(DataSetRaw< ScalarType >& t_out, bool loop = true)
+		bool read_batch(DataSet& t_out, bool loop = true)
 		{
 			if (is_open())
 			{
 				//read header
 				m_file.read(&m_train_header, sizeof(DataSetTrainHeader), 1);
 				//read data
-				bool status = read_raw(t_out, m_train_header.m_n_row);
+				bool status = read(t_out, m_train_header.m_n_row);
 				//if loop enable and batch is the last
 				if (loop
 					&& int(m_train_header.m_batch_id + 1) == m_header.m_n_batch)
@@ -177,19 +196,55 @@ namespace Denn
 
 	protected:
 
+		bool read(DataSet& t_out, const unsigned int size)
+		{
+			if (t_out.get_data_type() == m_header.get_data_type())
+			{
+				switch(t_out.get_data_type())
+				{
+					case DataType::DT_FLOAT:  return template_read(*((DataSetX<float>*)(&t_out)),size);
+					case DataType::DT_DOUBLE: return template_read(*((DataSetX<double>*)(&t_out)),size);
+					default: return false;
+				}
+			}
+			else 
+			{
+				switch(t_out.get_data_type())
+				{
+					case DataType::DT_FLOAT:
+					{
+						DataSetX<double> t_double;
+						bool success = template_read(t_double,size);
+						t_out.features<float>() = t_double.features<double>().cast<float>();
+						t_out.labels<float>()   = t_double.labels<double>().cast<float>();
+						return success;
+					}  
+					case DataType::DT_DOUBLE:
+					{
+						DataSetX<float> t_float;
+						bool success = template_read(t_float,size);
+						t_out.features<double>() = t_float.features<float>().cast<double>();
+						t_out.labels<double>()   = t_float.labels<float>().cast<double>();
+						return success;
+					}  
+					default: return false;
+				}
+			}
+		}
+
 		template < typename ScalarType >
-		bool read_raw(DataSetRaw< ScalarType >& t_out, const unsigned int size)
+		bool template_read(DataSetX<ScalarType>& t_out, const unsigned int size)
 		{
 			//equal type?
-			if (t_out.get_type_id() != m_header.m_type) return false;
+			if (t_out.get_data_type() != m_header.get_data_type()) return false;
 			//alloc output 
 			//data are in row-major layour then the shape is traspose
 			t_out.m_features.resize(m_header.m_n_features, size);
 			//read features
 			m_file.read
 			(
-				 (void*)(t_out.m_features.data())
-				, t_out.m_features.rows()*t_out.m_features.cols() * sizeof(ScalarType)
+				 (void*)(t_out.data_features())
+				, t_out.features_rows()*t_out.features_cols() * sizeof(ScalarType)
 				, 1
 			);
 			//to column-major
@@ -200,8 +255,8 @@ namespace Denn
 			//read labels
 			m_file.read
 			(
-				  (void*)(t_out.m_labels.data())
-				, t_out.m_labels.rows()*t_out.m_labels.cols() * sizeof(ScalarType)
+				  (void*)(t_out.data_labels())
+				, t_out.labels_rows()*t_out.labels_cols() * sizeof(ScalarType)
 				, 1
 			);
 			//to column-major
@@ -216,4 +271,7 @@ namespace Denn
 		DataSetValidationHeader m_val_header;
 		DataSetTrainHeader      m_train_header;
 	};
+
+	using DataSetLoaderSTD = DataSetLoaderT< IOFileWrapper::std_file    >;
+	using DataSetLoaderGZ  = DataSetLoaderT< IOFileWrapper::zlib_file<> >;
 }

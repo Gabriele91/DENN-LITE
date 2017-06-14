@@ -108,11 +108,11 @@ namespace BuildTest
 	};
 
 	template 
-	< typename ScalarType, typename Parameters, typename DSLoader >
+	< typename ScalarType, typename Parameters >
 	void execute
 	(
 		  const Parameters& parameters
-		, DSLoader& dataset
+		, Denn::DataSetLoader& dataset
 		, OutputData& output
 		, Denn::ThreadPool* ptr_thpool
 		, Denn::RuntimeOutput::SPtr runtime_output
@@ -121,7 +121,7 @@ namespace BuildTest
 		using namespace Denn;
 		using MLP           = PerceptronNetwork< Matrix< ScalarType > >;
 		using LP	        = PerceptronLayer  < Matrix< ScalarType > >;
-		using DennAlgo 	    = DennAlgorithm< MLP, Parameters, DSLoader >;
+		using DennAlgo 	    = DennAlgorithm< MLP, Parameters >;
 
 		// NETWORK
 		size_t n_features = dataset.get_main_header_info().m_n_features;
@@ -243,8 +243,7 @@ int main(int argc,const char** argv)
 		uptr_thpool = std::make_unique<ThreadPool>(size_t(arguments.m_threads_pop));
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////
-	using DataSetLoader = Denn::DataSetLoader< Denn::IOFileWrapper::zlib_file<> >;
-	DataSetLoader dataset((const std::string&)arguments.m_dataset_filename);
+	DataSetLoaderGZ dataset((const std::string&)arguments.m_dataset_filename);
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	std::ofstream		  ofile((const std::string&)arguments.m_output_filename);
 	BuildTest::OutputData output(ofile);
@@ -333,10 +332,10 @@ int main(int argc,const char** argv)
 
 
 	//double or float?
-	switch (dataset.get_main_header_info().m_type)
+	switch (dataset.get_main_header_info().get_data_type())
 	{
-		case DataSetType::DS_FLOAT:  BuildTest::execute<float, Parameters, DataSetLoader> (arguments, dataset, output, uptr_thpool.get(), runtime_out); break;
-		case DataSetType::DS_DOUBLE: BuildTest::execute<double, Parameters, DataSetLoader>(arguments, dataset, output, uptr_thpool.get(), runtime_out); break;
+		case DataType::DT_FLOAT:  BuildTest::execute<float, Parameters> (arguments, dataset, output, uptr_thpool.get(), runtime_out); break;
+		case DataType::DT_DOUBLE: BuildTest::execute<double, Parameters>(arguments, dataset, output, uptr_thpool.get(), runtime_out); break;
 		default: break;
 	} 
 

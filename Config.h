@@ -83,3 +83,20 @@ namespace Denn
 	#define ASSERT_DEBUG_MSG( _code_, _msg_ )\
 			{ if (!(_code_)) { std::cout << _msg_ << std::endl; } assert(_code_); } 
 #endif
+
+namespace Denn
+{
+	enum class DataType
+	{
+		DT_UNKNOWN =-1,
+		DT_FLOAT   = 1,
+		DT_DOUBLE  = 2 
+	};
+
+	template < typename ScalarType >
+	inline DataType GetDataType(){ return DataType::DT_UNKNOWN; }
+	template <>
+	inline DataType GetDataType<float>(){ return DataType::DT_FLOAT; }
+	template <>
+	inline DataType GetDataType<double>(){ return DataType::DT_DOUBLE; }
+}
