@@ -336,19 +336,7 @@ protected:
 		//for all
 		for(size_t i = 0; i!= (size_t)m_params.m_np; ++i)
 		{
-			//get temp individual
-			auto& new_son = sons[i];
-			//Copy default params
-			new_son->copy_attributes(*m_default);
-			//compute jde
-			jde(i, *new_son);
-			//call muation
-			(*m_mutation)(parents, i, *new_son);
-			//call crossover
-			(*m_crossover)(*parents[i], *new_son);
-			//eval
-			auto y          = new_son->m_network.apply(m_dataset_batch.m_features);
-			new_son->m_eval = m_target_function(m_dataset_batch.m_labels, y);
+			execute_generation_task(i);
 		}		
 		//swap
 		m_population.the_best_sons_become_parents();
@@ -363,29 +351,33 @@ protected:
 			//add
 			m_promises[i] = thpool.push_task([this,i]()
 			{ 
-				//ref to parents
-				auto& parents = m_population.parents();
-				//ref to sons
-				auto& sons = m_population.sons();
-				//get temp individual
-				auto& new_son = sons[i];
-				//Copy default params
-				new_son->copy_attributes(*m_default);
-				//compute jde
-				jde(i, *new_son);
-				//call muation
-				(*m_mutation)(parents, i, *new_son);
-				//call crossover
-				(*m_crossover)(*parents[i], *new_son);
-				//eval
-				auto y          = new_son->m_network.apply(m_dataset_batch.m_features);
-				new_son->m_eval = m_target_function(m_dataset_batch.m_labels, y);
+				execute_generation_task(i);
 			});
 		}
 		//wait
 		for (auto& promise : m_promises) promise.wait();
 		//swap
 		m_population.the_best_sons_become_parents();
+	}
+	void  execute_generation_task(size_t i)
+	{
+		//ref to parents
+		auto& parents = m_population.parents();
+		//ref to sons
+		auto& sons = m_population.sons();
+		//get temp individual
+		auto& new_son = sons[i];
+		//Copy default params
+		new_son->copy_attributes(*m_default);
+		//compute jde
+		jde(i, *new_son);
+		//call muation
+		(*m_mutation)(parents, i, *new_son);
+		//call crossover
+		(*m_crossover)(*parents[i], *new_son);
+		//eval
+		auto y          = new_son->m_network.apply(m_dataset_batch.m_features);
+		new_son->m_eval = m_target_function(m_dataset_batch.m_labels, y);
 	}
 	/////////////////////////////////////////////////////////////////
 	//eval all

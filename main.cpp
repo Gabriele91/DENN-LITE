@@ -140,12 +140,13 @@ namespace BuildTest
 			, cost_function
 			//output
 			, runtime_output
+			//thread pool
+			, ptr_thpool
 		);
-		//Init population
-		denn.init();
+		
 		//execute
 		double execute_time = Time::get_time();
-		auto result = denn.execute(ptr_thpool);
+		auto result = denn.execute();
 		execute_time = Time::get_time() - execute_time;
 
 		//output
