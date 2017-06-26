@@ -26,7 +26,7 @@ namespace Denn
 					//random i
 					size_t e_rand = RandomIndices::index_rand(w_target.size());
 					//CROSS
-					for (size_t e = 0; e != w_target.size(); ++e)
+					for (decltype(w_target.size()) e = 0; e != w_target.size(); ++e)
 					{
 						//crossover
 						//!(RandomIndices::random() < cr || e_rand == e)
@@ -66,7 +66,7 @@ namespace Denn
 					//event
 					bool copy_event = false;
 					//CROSS
-					for (size_t e = 0; e != w_target.size(); ++e)
+					for (decltype(w_target.size()) e = 0; e != w_target.size(); ++e)
 					{
 						//id circ
 						size_t e_circ = (e_start + e) % w_target.size();

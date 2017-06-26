@@ -1,7 +1,7 @@
 #pragma once
 #include "Config.h"
 #include "CostFunction.h"
-#include "DennDataSet.h"
+#include "DennDataset.h"
 #include "NeuralNetwork.h"
 #include "DennIndividual.h"
 

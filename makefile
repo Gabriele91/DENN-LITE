@@ -15,7 +15,7 @@ O_RELEASE_PROG = $(TOP)/Release/DENN
 DIPS_INCLUDE = $(TOP)/dips/include/
 
 # C++ files
-SOURCE_FILES = $(S_DIR)/main.cpp $(S_DIR)/TicksTime.cpp $(S_DIR)/RandomIndices.cpp
+SOURCE_FILES = $(wildcard $(S_DIR)/*.cpp)
 SOURCE_DEBUG_OBJS = $(addprefix $(O_DEBUG_DIR)/,$(notdir $(SOURCE_FILES:.cpp=.o)))
 SOURCE_RELEASE_OBJS = $(addprefix $(O_RELEASE_DIR)/,$(notdir $(SOURCE_FILES:.cpp=.o)))
 
