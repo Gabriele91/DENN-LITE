@@ -1,68 +1,12 @@
 #pragma once
 #include "Config.h"
 #include "CostFunction.h"
+#include "DennDataSet.h"
 #include "NeuralNetwork.h"
+#include "DennIndividual.h"
 
 namespace Denn
 {
-    ////////////////////////////////////////////////////////////////////////
-    class Individual : public std::enable_shared_from_this< Individual >
-    {
-    public:
-        //ref to individual
-        using SPtr = std::shared_ptr<Individual>;
-        //return ptr
-        SPtr get_ptr(){ return this->shared_from_this(); }
-        //shared copy
-        SPtr copy() const
-        {
-            return std::make_shared<Individual>(*this);
-        }
-        //attributes
-        Scalar m_eval{ std::numeric_limits<Scalar>::max() };
-        Scalar m_f   { 1.0 };
-        Scalar m_cr  { 1.0 };
-        NeuralNetwork m_network;
-        //init
-        Individual() {}
-        Individual(Scalar f, Scalar cr, const NeuralNetwork& network)
-        {
-            m_f		  = f;
-            m_cr	  = cr;
-            m_network = network;
-        }
-        //copy attributes from a other individual
-        void copy_attributes(const Individual& i)
-        {
-            m_f    = i.m_f;
-            m_cr   = i.m_cr;
-            m_eval = i.m_eval;
-        }   
-        //cast
-        operator NeuralNetwork&()
-        {
-            return m_network;
-        }
-
-        operator const NeuralNetwork& () const
-        {
-            return m_network;
-        }
-        //like Network
-        Layer& operator[](size_t i)
-        {
-            return m_network[i];
-        }
-        const Layer& operator[](size_t i) const
-        {
-            return m_network[i];
-        }
-        size_t size() const
-        {
-            return m_network.size();
-        }
-    };
-
     ////////////////////////////////////////////////////////////////////////
 	//Population
 	class Population
@@ -73,49 +17,23 @@ namespace Denn
 		using IndividualPtr = typename Individual::SPtr;
 
 		//vector methods 		
-		size_t size() const { return m_individuals.size(); }
-		void   resize(size_t i){ m_individuals.resize(i); }
-		void   push_back(const IndividualPtr& i){ m_individuals.push_back(i); }
+		size_t size() const;
+		void   resize(size_t i);
+		void   push_back(const IndividualPtr& i);
 
 		//vector operator
-		      IndividualPtr& operator[](size_t i)       { return m_individuals[i]; }
-		const IndividualPtr& operator[](size_t i) const { return m_individuals[i]; }
+		IndividualPtr& operator[](size_t i);
+		const IndividualPtr& operator[](size_t i) const;
 		
 		//iterator
-		typename std::vector < IndividualPtr >::iterator       begin()       { return m_individuals.begin(); }
-		typename std::vector < IndividualPtr >::const_iterator begin() const { return m_individuals.begin(); }
-		typename std::vector < IndividualPtr >::iterator       end()         { return m_individuals.end();   }
-		typename std::vector < IndividualPtr >::const_iterator end()   const { return m_individuals.end();   }
+		typename std::vector < IndividualPtr >::iterator       begin();
+		typename std::vector < IndividualPtr >::const_iterator begin() const;
+		typename std::vector < IndividualPtr >::iterator       end();
+		typename std::vector < IndividualPtr >::const_iterator end() const;
 
 		//costum
-		void best(size_t& out_i, Scalar& out_eval) const
-		{
-			//best
-			size_t	   best_i;
-			Scalar best_eval;
-			//find best
-			for (size_t i = 0; i != m_individuals.size(); ++i)
-			{
-				//minimize (cross_entropy)
-				if (!i || m_individuals[i]->m_eval < best_eval)
-				{
-					best_i = i;
-					best_eval = m_individuals[i]->m_eval;
-				}
-			}
-			out_i = best_i;
-			out_eval = best_eval;
-		}
-		IndividualPtr best() const
-		{
-			//values
-			size_t best_i;
-			Scalar best_eval;
-			//get best id
-			best(best_i, best_eval);
-			//return
-			return m_individuals[best_i];
-		}
+		void best(size_t& out_i, Scalar& out_eval) const;
+		IndividualPtr best() const;
 	
 	protected:
 
@@ -141,89 +59,25 @@ namespace Denn
 		Population m_pop_buffer[ size_t(PopulationType::PT_SIZE) ];
 		//init population
 		void init(
-			  size_t np
+			size_t np
 			, const IndividualPtr& i_default
 			, const DataSet& dataset
 			, const RandomFunction random_func
 			, CostFunction target_function
-		)
-		{
-			//init pop
-			for (Population& population : m_pop_buffer)
-			{
-				//size
-				population.resize(np);
-				//init
-				for (auto& i_individual : population)
-				{
-					i_individual = i_default->copy();
-				}
-			}
-			//ref to current
-			Population& population = parents();
-			//random init
-			for (auto& individual : population)
-			for (auto& layer  : individual->m_network)
-			for (auto& matrix : *layer)
-			{
-				matrix = matrix.unaryExpr(random_func);
-			}
-			//eval
-			for (size_t i = 0; i != population.size(); ++i)
-			{
-				auto y = population[i]->m_network.apply(dataset.features());
-				population[i]->m_eval = target_function(dataset.labels(), y);
-			}
-		}
+		);
 		//current
-		Population& parents()
-		{
-			return m_pop_buffer[size_t(PopulationType::PT_PARENTS)];
-		}
-		const Population& parents() const
-		{
-			return m_pop_buffer[size_t(PopulationType::PT_PARENTS)];
-		}
-		const Population& const_parents() const
-		{
-			return m_pop_buffer[size_t(PopulationType::PT_PARENTS)];
-		}
+		Population& parents();
+		const Population& parents() const;
+		const Population& const_parents() const;
 		//next
-		Population& sons()
-		{			
-			return m_pop_buffer[size_t(PopulationType::PT_SONS)];
-		}
-		const Population& sons() const
-		{
-			return m_pop_buffer[size_t(PopulationType::PT_SONS)];
-		}
-		const Population& const_sons() const
-		{
-			return m_pop_buffer[size_t(PopulationType::PT_SONS)];
-		}
+		Population& sons();
+		const Population& sons() const;
+		const Population& const_sons() const;
 		//get best
-		void best(size_t& best_i, Scalar& out_eval) const
-		{
-			parents().best(best_i,out_eval);
-		}
-		IndividualPtr best() const
-		{
-			return parents().best();
-		}
+		void best(size_t& best_i, Scalar& out_eval) const;
+		IndividualPtr best() const;
 		//swap
-		void the_best_sons_become_parents()
-		{
-			//minimize (cross_entropy)
-			for(size_t i=0;i!=parents().size();++i)
-			{
-				if (sons()[i]->m_eval < parents()[i]->m_eval)
-				{
-					auto individual_tmp= parents()[i];
-					parents()[i] 	   = sons()[i];
-					sons()[i]          = individual_tmp;
-				}
-			}
-		}
+		void the_best_sons_become_parents();
 		//restart
 		void restart
 		(
@@ -232,32 +86,6 @@ namespace Denn
 			, const DataSet& dataset
 			, const RandomFunction random_func
 			, CostFunction target_function
-		)
-		{
-			//ref to current
-			Population& population = parents();
-			//random init
-			for (auto& individual : population)
-			{
-				//Copy default params
-				individual->copy_attributes(*i_default);
-				//Reinit layers
-				for (auto& layer  : individual->m_network)
-				for (auto& matrix : *layer)
-				{
-					matrix = matrix.unaryExpr(random_func);
-				}
-			}
-			//add best
-			size_t rand_i = RandomIndices::irand(population.size());
-			//must copy, The Best Individual can't to be changed during the DE process
-			population[rand_i] = best->copy();
-			//eval
-			for (size_t i = 0; i != population.size(); ++i)
-			{
-				auto y = population[i]->m_network.apply(dataset.features());
-				population[i]->m_eval = target_function(dataset.labels(), y);
-			}
-		}
+		);
 	};
 }

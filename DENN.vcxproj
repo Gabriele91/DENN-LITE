@@ -28,8 +28,8 @@
     <ClInclude Include="DennAlgorithm.h" />
     <ClInclude Include="DennCrossover.h" />
     <ClInclude Include="DennDataSet.h" />
+    <ClInclude Include="DennIndividual.h" />
     <ClInclude Include="DennMutation.h" />
-    <ClInclude Include="DennMutationCrossOver.h" />
     <ClInclude Include="DennParameters.h" />
     <ClInclude Include="DennPopulation.h" />
     <ClInclude Include="DennRuntimeOutput.h" />
@@ -42,7 +42,13 @@
     <ClInclude Include="TicksTime.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DennAlgorithm.cpp" />
+    <ClCompile Include="DennIndividual.cpp" />
+    <ClCompile Include="DennPopulation.cpp" />
+    <ClCompile Include="Layer.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="NeuralNetwork.cpp" />
+    <ClCompile Include="PerceptronLayer.cpp" />
     <ClCompile Include="RandomIndices.cpp" />
     <ClCompile Include="TicksTime.cpp" />
   </ItemGroup>

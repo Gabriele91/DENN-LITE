@@ -6,38 +6,41 @@ namespace Denn
 	class Layer 
 	{
 	public:		
+		///////////////////////////////////////////////////////////////////////////
 		virtual Layer* copy() const  					= 0;
 		virtual Matrix apply(const Matrix& input)       = 0;
 		virtual size_t size() const                     = 0;
 		virtual Matrix& operator[](size_t i)            = 0;
 		virtual const Matrix& operator[](size_t i) const= 0;
-
+		///////////////////////////////////////////////////////////////////////////
 		class Iterator 
 		{
 		public:
 
-			Iterator(const Iterator& it) :m_layer(it.m_layer), m_index(it.m_index) {}			
-			Iterator(      Layer& layer,size_t index) :m_layer((Layer*)&layer), m_index(index) {}			
-			Iterator(const Layer& layer,size_t index) :m_layer((Layer*)&layer), m_index(index) {}	
+			Iterator(const Iterator& it);
+			Iterator(Layer& layer, size_t index);
+			Iterator(const Layer& layer, size_t index);
 	
-			Iterator& operator++()   { ++m_index; return *this;                     }
-			Iterator operator++(int) { Iterator it(*this); operator++(); return it; }
+			Iterator& operator++();
+			Iterator operator++(int);
 			
-			bool operator==(const Iterator& rhs) const {return m_index==rhs.m_index;}
-			bool operator!=(const Iterator& rhs) const {return m_index!=rhs.m_index;}
+			bool operator==(const Iterator& rhs) const;
+			bool operator!=(const Iterator& rhs) const;
 
-			      Matrix& operator*() 	    { return (*m_layer)[m_index];                 }
-			const Matrix& operator*() const { return (*((const Layer*)m_layer))[m_index]; }
+			Matrix& operator*();
+			const Matrix& operator*() const;
 
 		protected:
+
 			friend class Denn::Layer;
 			Layer* m_layer;
 			size_t m_index;
 		};
 
-		Iterator begin()		     { return Iterator(*this,0); }
-		Iterator end()   			 { return Iterator(*this,size()); }
-		const Iterator begin() const { return Iterator(*this,0); }
-		const Iterator end()   const { return Iterator(*this,size()); }
+		Iterator begin();
+		Iterator end();
+		const Iterator begin() const;
+		const Iterator end()   const;
+		///////////////////////////////////////////////////////////////////////////
 	};
 }
