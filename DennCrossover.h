@@ -4,82 +4,80 @@
 
 namespace Denn
 {
-	class Crossover
+	class Crossover : public std::enable_shared_from_this< Crossover >
 	{
-		public: 
-		virtual void operator()(Individual& target,Individual& mutant)= 0; 
+		public:
+		//ref to individual
+		using SPtr = std::shared_ptr<Crossover>;
+		//operator
+		virtual void operator()(Individual& target,Individual& mutant)= 0;
+		//return ptr
+		SPtr get_ptr() { return this->shared_from_this(); }
 	};
 
-	class Bin : public Crossover
+	//class factory of Crossover methods
+	class CrossoverFactory
 	{
-		public: 
-		virtual void operator()(Individual& i_target,Individual& i_mutant)
-		{
-			//baias
-			const auto& cr = i_mutant.m_cr;
-			//for each layers
-			for (size_t i_layer=0; i_layer != i_target.size(); ++i_layer)
-			{
-				//weights and baias
-				for (size_t m = 0; m!= i_target[i_layer].size(); ++m)
-				{
-					//elements
-					auto w_target = i_target[i_layer][m].array();
-					auto w_mutant  = i_mutant[i_layer][m].array();
-					//random i
-					size_t e_rand = RandomIndices::index_rand(w_target.size());
-					//CROSS
-					for (size_t e = 0; e != w_target.size(); ++e)
-					{
-						//crossover
-						//!(RandomIndices::random() < cr || e_rand == e)
-						if (e_rand != e && cr <= RandomIndices::random()) 
-						{
-							w_mutant(e) = w_target(e);
-						}
-					}
-				}
-			}
-		}
+
+	public:
+		//Crossover classes map
+		typedef Crossover::SPtr(*CreateObject)();
+
+		//public
+		static Crossover::SPtr create(const std::string& name);
+		static void append(const std::string& name, CreateObject fun, size_t size);
+
+		//list of methods
+		static std::vector< std::string > list_of_crossovers();
+		static std::string names_of_crossovers(const std::string& sep = ", ");
+
+	protected:
+
+		static std::unique_ptr< std::map< std::string, CreateObject > > m_cmap;
+
 	};
 
-	class Exp : public Crossover
+	//class used for static registration of a object class
+	template<class T>
+	class CrossoverItem
 	{
-		public: 
-		virtual void operator()(Individual& i_target,Individual& i_mutant)
+
+		static Crossover::SPtr create()
 		{
-			//baias
-			const auto& cr = i_mutant.m_cr;
-			//for each layers
-			for (size_t i_layer=0; i_layer != i_target.size(); ++i_layer)
-			{
-				//weights and baias
-				for (size_t m = 0; m!= i_target[i_layer].size(); ++m)
-				{
-					//elements
-					auto w_target = i_target[i_layer][m].array();
-					auto w_mutant  = i_mutant[i_layer][m].array();
-					//random i
-					size_t e_rand  = RandomIndices::index_rand(w_target.size());
-					size_t e_start = RandomIndices::index_rand(w_target.size());
-					//event
-					bool copy_event = false;
-					//CROSS
-					for (size_t e = 0; e != w_target.size(); ++e)
-					{
-						//id circ
-						size_t e_circ = (e_start+e) % w_target.size();
-						//crossover
-						//!(RandomIndices::random() < cr || e_rand == e)
-						copy_event |= ( e_rand != e_circ && cr <= RandomIndices::random());
-						//copy all vector
-						if (copy_event) 
-						{
-							w_mutant(e_circ) = w_target(e_circ);
-						}
-					}
-				}
-			}
+			return (std::make_shared< T >())->get_ptr();
 		}
+
+		CrossoverItem(const std::string& name, size_t size)
+		{
+			CrossoverFactory::append(name, CrossoverItem<T>::create, size);
+		}
+
+	public:
+
+
+		static CrossoverItem<T>& instance(const std::string& name, size_t size)
+		{
+			static CrossoverItem<T> objectItem(name, size);
+			return objectItem;
+		}
+
 	};
+
+
+	#define REGISTERED_CROSSOVER(classname)\
+	namespace\
+	{\
+		static const CrossoverItem<classname>& _Denn_ ## classname ## _ObjectItem= CrossoverItem<classname>::instance( #classname, sizeof(classname) );\
+	}
+
+	#define CREATE_CROSSOVER_METHOD(classname, target, mutant, ...)\
+	class classname : public Crossover\
+	{\
+	public:\
+		virtual void operator()(Individual& target, Individual& mutant)\
+		{\
+			__VA_ARGS__\
+		}\
+	};\
+	REGISTERED_CROSSOVER(classname);
 }

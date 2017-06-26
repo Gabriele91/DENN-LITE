@@ -29,16 +29,7 @@ namespace Denn
 			m_mutation = std::make_unique< BestOne >(m_params);
 			break;
 		}
-		switch ((CrossoverType)m_params.m_crossover_type)
-		{
-		default:
-		case CrossoverType::CT_BIN:
-			m_crossover = std::make_unique< Bin >();
-			break;
-		case CrossoverType::CT_EXP:
-			m_crossover = std::make_unique< Exp >();
-			break;
-		}
+		m_crossover = CrossoverFactory::create(m_params.m_crossover_type);
 		//init all
 		reset();
 	}

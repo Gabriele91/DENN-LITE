@@ -34,7 +34,7 @@ namespace BuildTest
 			m_ostream << "\t\t \"sub_gens\" : "      << *args.m_sub_gens     		    	       << ","   << std::endl;
 			m_ostream << "\t\t \"number_parents\" : "<< *args.m_np            			           << ","   << std::endl;
 			m_ostream << "\t\t \"mutation\" : \""    << mutation_to_string(*args.m_mutation_type)  << "\"," << std::endl;
-			m_ostream << "\t\t \"crossover\" : \""   << crossover_to_string(*args.m_crossover_type)<< "\"," << std::endl;
+			m_ostream << "\t\t \"crossover\" : \""   << *args.m_crossover_type                     << "\"," << std::endl;
 			m_ostream << "\t\t \"f_default\" : "     << *args.m_default_f      		 	           << ","   << std::endl;
 			m_ostream << "\t\t \"cr_default\" : "    << *args.m_default_cr   			           << ","   << std::endl;
 			m_ostream << "\t\t \"f_jde\" : "         << *args.m_jde_f        		 	           << ","   << std::endl;
@@ -90,15 +90,6 @@ namespace BuildTest
 				case Denn::MutationType::MT_RAND_TWO: return "rand/2";	
 				case Denn::MutationType::MT_BEST_ONE: return "best/1";	
 				case Denn::MutationType::MT_BEST_TWO: return "best/2";	
-				default: return "unknown";
-			}
-		}
-		std::string crossover_to_string(Denn::CrossoverType type)
-		{
-			switch(type) 
-			{ 
-				case Denn::CrossoverType::CT_EXP: return "exp";	
-				case Denn::CrossoverType::CT_BIN: return "bin";	
 				default: return "unknown";
 			}
 		}

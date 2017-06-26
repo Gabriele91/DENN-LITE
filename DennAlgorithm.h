@@ -29,7 +29,7 @@ public:
 	using PromiseList    = std::vector< std::future<void> >;
 	//Ref mutation crossover
 	using MutationPtr    = std::unique_ptr < Mutation >;
-	using CrossoverPtr   = std::unique_ptr < Crossover >;
+	using CrossoverPtr   = typename Crossover::SPtr;
 	//Ref mutation
 	////////////////////////////////////////////////////////////////////////
 	//structs utilities

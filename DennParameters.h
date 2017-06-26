@@ -1,5 +1,6 @@
 #pragma once
 #include "Config.h"
+#include "DennCrossover.h"
 #include <string>
 #include <vector>
 #include <sstream>
@@ -7,12 +8,6 @@
 
 namespace Denn
 {
-    enum class CrossoverType
-    {
-        CT_BIN,
-        CT_EXP		
-    };
-
     enum class MutationType
     {
         MT_RAND_ONE,
@@ -121,7 +116,7 @@ namespace Denn
 		read_only<int>	         m_threads_omp   { size_t(2) };
 		read_only<size_t>	     m_threads_pop   { size_t(2) };
 		read_only<MutationType>  m_mutation_type { MutationType::MT_RAND_ONE };
-		read_only<CrossoverType> m_crossover_type{ CrossoverType::CT_BIN };
+		read_only<std::string>   m_crossover_type{ "Bin" };
 	
 		Parameters() 
 		:m_params_info
@@ -151,13 +146,16 @@ namespace Denn
 				 }
             },
 			ParameterInfo{
-                 "Type of DE crossover [bin, exp]", { "--crossover",    "-co"  }, 
+                 "Type of DE crossover ["+CrossoverFactory::names_of_crossovers()+"]", { "--crossover",    "-co"  },
 				 [this](Arguments& args) 
 				 { 
-					 std::string str_c_type = args.get_string() ;
+					 std::string str_c_type = args.get_string();
+					 //all lower case
 					 std::transform(str_c_type.begin(),str_c_type.end(), str_c_type.begin(), ::tolower);
-					      if( str_c_type == "bin" ) m_crossover_type = CrossoverType::CT_BIN;
-					 else if( str_c_type == "exp" ) m_crossover_type = CrossoverType::CT_EXP;
+					 //but the first is upper case
+					 str_c_type[0] = ::toupper(str_c_type[0]);
+					 //save
+					 m_crossover_type = str_c_type;
 				 }
             },
 			ParameterInfo{ 
