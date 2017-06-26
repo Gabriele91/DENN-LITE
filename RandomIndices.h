@@ -17,7 +17,7 @@ namespace Denn
 		extern int irand(int max);
 
 		//random integer in [0,size) (thread safe)
-		extern size_t irand(size_t max);
+		extern size_t index_rand(size_t max);
 
 		//random value in flooting point [min,max] (thread safe)
 		extern double random(double min = 0.0,double max = 1.0);

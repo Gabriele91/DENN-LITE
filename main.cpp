@@ -22,10 +22,9 @@ namespace BuildTest
 			m_ostream << "}" << std::endl;
 		}
 
-		template < typename Parameters >
 		void serialize_parameters
 		(
-			const Parameters& args
+			const Denn::Parameters& args
 		)
 		{
 			Eigen::IOFormat matrix_to_json_array(Eigen::FullPrecision, Eigen::DontAlignCols, ", ", ", ", "[", "]", "[", "]");
@@ -51,14 +50,13 @@ namespace BuildTest
 			m_ostream << "\t}," << std::endl;
 		}
 
-		template < typename ScalarType >
 		void serialize_a_individual
 		(
 			 double time,
-			 ScalarType accuracy,
-			 ScalarType f,
-			 ScalarType cr,
-			 const Denn::PerceptronNetwork< Denn::Matrix< ScalarType > >& network
+			 Denn::Scalar accuracy,
+			 Denn::Scalar f,
+			 Denn::Scalar cr,
+			 const Denn::NeuralNetwork& network
 		)
 		{
 			Eigen::IOFormat matrix_to_json_array(Eigen::FullPrecision, Eigen::DontAlignCols, ", ", ", ", "[", "]", "[", "]");
@@ -71,9 +69,9 @@ namespace BuildTest
 			{
 				m_ostream
 				<< "\t\t["
-				<< network[i].weights().format(matrix_to_json_array)
+				<< network[i][0].format(matrix_to_json_array)
 				<< ","
-				<< network[i].baias().format(matrix_to_json_array)
+				<< network[i][1].format(matrix_to_json_array)
 				<< ((i != network.size() - 1) ? "]," : "]")
 				<< std::endl;
 			}
@@ -107,11 +105,9 @@ namespace BuildTest
 
 	};
 
-	template 
-	< typename ScalarType, typename Parameters >
 	void execute
 	(
-		  const Parameters& parameters
+		  const Denn::Parameters& parameters
 		, Denn::DataSetLoader& dataset
 		, OutputData& output
 		, Denn::ThreadPool* ptr_thpool
@@ -119,20 +115,16 @@ namespace BuildTest
 	)
 	{
 		using namespace Denn;
-		using MLP           = PerceptronNetwork< Matrix< ScalarType > >;
-		using LP	        = PerceptronLayer  < Matrix< ScalarType > >;
-		using DennAlgo 	    = DennAlgorithm< MLP, Parameters >;
-
 		// NETWORK
 		size_t n_features = dataset.get_main_header_info().m_n_features;
 		size_t n_class    = dataset.get_main_header_info().m_n_classes;
-		MLP nn0( LP(n_features, n_class) );
+		NeuralNetwork nn0( PerceptronLayer(n_features, n_class) );
 
 		//Function ptr
-		auto cost_function = CostFunction::softmax_cross_entropy_with_logit< typename MLP::MatrixType >;
+		auto cost_function = CostFunction::softmax_cross_entropy_with_logit< Matrix >;
 
 		//DENN
-		DennAlgo denn
+		DennAlgorithm denn
 		(
 			  &dataset
 			, parameters
@@ -150,12 +142,12 @@ namespace BuildTest
 		execute_time = Time::get_time() - execute_time;
 
 		//output
-		output.serialize_parameters< Parameters >(parameters);
-		output.serialize_a_individual< ScalarType >
+		output.serialize_parameters(parameters);
+		output.serialize_a_individual
 		(
 		  execute_time
 		, denn.execute_test(*result)
-		, result->m_f
+		, result->m_f 
 		, result->m_cr
 		, result->m_network
 		);
@@ -218,12 +210,9 @@ int main(int argc,const char** argv)
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	using namespace Denn;
 	////////////////////////////////////////////////////////////////////////////////////////////////
-	using ScalarArgument = double;
-	using Parameters = Denn::Parameters<ScalarArgument>;
 	Parameters arguments(argc, argv);
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	//std::srand(std::time(NULL));
-	////////////////////////////////////////////////////////////////////////////////////////////////
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	//parallel (OpenMP)
 	#ifdef EIGEN_HAS_OPENMP
@@ -325,19 +314,10 @@ int main(int argc,const char** argv)
 		long   m_n_pass;
 
 	};
-	//standard
-	//auto runtime_out = std::make_shared<Denn::RuntimeOutput>(/* srd::cerr or std::cout or file */); //default std::cerr
 	//custom
 	auto runtime_out = std::make_shared<CustomRuntimeOutput>()->get_ptr(); //default std::cerr
-
-
-	//double or float?
-	switch (dataset.get_main_header_info().get_data_type())
-	{
-		case DataType::DT_FLOAT:  BuildTest::execute<float, Parameters> (arguments, dataset, output, uptr_thpool.get(), runtime_out); break;
-		case DataType::DT_DOUBLE: BuildTest::execute<double, Parameters>(arguments, dataset, output, uptr_thpool.get(), runtime_out); break;
-		default: break;
-	} 
-
+	//execute test
+ 	BuildTest::execute(arguments, dataset, output, uptr_thpool.get(), runtime_out);
+	
 	return 0;
 }

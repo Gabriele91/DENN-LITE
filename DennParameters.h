@@ -3,11 +3,23 @@
 #include <string>
 #include <vector>
 #include <sstream>
-#include "DennMutation.h"
-#include "DennCrossover.h"
 
 namespace Denn
 {
+    enum class CrossoverType
+    {
+        CT_BIN,
+        CT_EXP		
+    };
+
+    enum class MutationType
+    {
+        MT_RAND_ONE,
+        MT_RAND_TWO,
+        MT_BEST_ONE,	
+        MT_BEST_TWO	
+    };
+
 	class Arguments
 	{
 	public:
@@ -47,7 +59,6 @@ namespace Denn
 
 	};
 
-	template < typename Scalar = double >
 	class Parameters
 	{
 
@@ -75,7 +86,7 @@ namespace Denn
 			//sata
 			T m_data;
 
-			friend class Parameters<Scalar>;
+			friend class Parameters;
 
 		};
 
@@ -104,7 +115,7 @@ namespace Denn
 		read_only<Scalar>	     m_range_max     { Scalar( 1.0 ) };
 		read_only<Scalar>	     m_range_min     { Scalar(-1.0)  };
 		read_only<bool>	         m_restart_enable{ true          };
-		read_only<size_t>	     m_restart_count { size_t(2)    };
+		read_only<long>	         m_restart_count { size_t(2)    };
 		read_only<Scalar>	     m_restart_delta { Scalar(0.02) };
 		read_only<int>	         m_threads_omp   { size_t(2) };
 		read_only<size_t>	     m_threads_pop   { size_t(2) };
@@ -186,7 +197,7 @@ namespace Denn
 				[this](Arguments& args) 
 				{ 
 					m_restart_count = args.get_int() ; 
-					if(*m_restart_count<0) m_restart_enable = false;
+					if(*m_restart_count < 0) m_restart_enable = false;
 				} 
             },
 			ParameterInfo{ 
@@ -265,7 +276,7 @@ namespace Denn
 		{
 			std::string out;
 			while(n--) out+=" ";
-			return std::move(out);
+			return out;
 		}
 
 		std::string make_help() const

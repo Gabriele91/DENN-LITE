@@ -14,42 +14,33 @@
 namespace Denn
 {
 
-template< typename Network, typename Parameters >
 class DennAlgorithm
 {
 public:
 	////////////////////////////////////////////////////////////////////////
-	//NN
-	using LayerType      = typename Network::LayerType;
-	using MatrixType     = typename Network::MatrixType;
-	using ScalarType     = typename Network::ScalarType;
-	using LayerList      = typename Network::LayerList;
-	//DB
-	using DennAlgoType   = DennAlgorithm< Network, Parameters >;
-	using DataSet	     = DataSetX< ScalarType >;
+	//Alias
+	using LayerList      = typename NeuralNetwork::LayerList;
 	//Search space
-	using DBPopulation   = DoubleBufferPopulation< Network, DataSet >;
-	using Individual     = typename DoubleBufferPopulation< Network, DataSet >::Individual;
-	using IndividualPtr  = typename DoubleBufferPopulation< Network, DataSet >::IndividualPtr;
-	using Population     = typename DoubleBufferPopulation< Network, DataSet >::Population;
-	using RandomFunction = typename DoubleBufferPopulation< Network, DataSet >::RandomFunction;
-	using CostFunction   = typename DoubleBufferPopulation< Network, DataSet >::CostFunction;
+	using DBPopulation   = DoubleBufferPopulation;
+	using IndividualPtr  = typename DoubleBufferPopulation::IndividualPtr;
+	using RandomFunction = typename DoubleBufferPopulation::RandomFunction;
+	using CostFunction   = typename DoubleBufferPopulation::CostFunction;
 	//DE parallel
 	using PromiseList    = std::vector< std::future<void> >;
 	//Ref mutation crossover
-	using MutationPtr    = std::unique_ptr < Mutation< Parameters, Population, Individual > >;
-	using CrossoverPtr   = std::unique_ptr < Crossover< Individual > >;
+	using MutationPtr    = std::unique_ptr < Mutation >;
+	using CrossoverPtr   = std::unique_ptr < Crossover >;
 	//Ref mutation
 	////////////////////////////////////////////////////////////////////////
 	//structs utilities
 	struct RestartContext
 	{
-		ScalarType m_last_eval;
+		Scalar m_last_eval;
 		size_t	   m_test_count;
 		size_t	   m_count;
         //
 		RestartContext(
-			  ScalarType last_eval  = ScalarType(0.0)
+			  Scalar last_eval  = Scalar(0.0)
 			, size_t	 test_count = 0
 			, size_t	 count      = 0
 		)
@@ -62,7 +53,7 @@ public:
 	struct BestContext
 	{
 		IndividualPtr m_best;
-		ScalarType    m_eval;
+		Scalar    m_eval;
         //
 		BestContext(IndividualPtr best = nullptr, IndividualPtr eval = 0)
 		{
@@ -77,13 +68,13 @@ public:
 		const Population& parents  = m_population.parents();
 		const Individual& i_target = *parents[target];
 		//f JDE
-		if (RandomIndices::random() < ScalarType(m_params.m_jde_f))   
-			i_final.m_f = ScalarType(RandomIndices::random(0.0,2.0));
+		if (RandomIndices::random() < Scalar(m_params.m_jde_f))   
+			i_final.m_f = Scalar(RandomIndices::random(0.0,2.0));
 		else														
 			i_final.m_f = i_target.m_f;
 		//cr JDE
-		if (RandomIndices::random() < ScalarType(m_params.m_jde_cr))   
-			i_final.m_cr = ScalarType(RandomIndices::random());
+		if (RandomIndices::random() < Scalar(m_params.m_jde_cr))   
+			i_final.m_cr = Scalar(RandomIndices::random());
 		else														
 			i_final.m_cr = i_target.m_cr;
 
@@ -94,7 +85,7 @@ public:
 	(
 		  DataSetLoader*      dataset_loader
 		, const Parameters&   params
-		, const Network       nn_default
+		, const NeuralNetwork nn_default
 		, CostFunction		  target_function
 		, RuntimeOutput::SPtr output
 		, ThreadPool*		  thpool = nullptr
@@ -111,20 +102,20 @@ public:
 		{
 			default:
 			case MutationType::MT_RAND_ONE:
-			m_mutation   = std::make_unique< RandOne< Parameters, Population, Individual > >(m_params);
+			m_mutation   = std::make_unique< RandOne >(m_params);
 			break;
 			case MutationType::MT_BEST_ONE:
-			m_mutation   = std::make_unique< BestOne< Parameters, Population, Individual > >(m_params);
+			m_mutation   = std::make_unique< BestOne >(m_params);
 			break;
 		}
 		switch((CrossoverType)m_params.m_crossover_type)
 		{
 			default:
 			case CrossoverType::CT_BIN:
-			m_crossover   = std::make_unique< Bin<Individual> >();
+			m_crossover   = std::make_unique< Bin >();
 			break;
 			case CrossoverType::CT_EXP:
-			m_crossover   = std::make_unique< Bin<Individual> >();
+			m_crossover   = std::make_unique< Exp >();
 			break;
 		}
 		//init all
@@ -182,21 +173,21 @@ public:
 	}
 
 	//find best individual (validation test)
-	bool find_best(size_t& out_i, ScalarType& out_eval)
+	bool find_best(size_t& out_i, Scalar& out_eval)
 	{
 		//ref to pop
 		auto population = m_population.parents();
 		//validation
-		DataSet validation;
+		DataSetScalar validation;
 		m_dataset_loader->read_validation(validation);
 		//best
-		ScalarType best_eval;
+		Scalar best_eval;
 		size_t	   best_i;
 		//find best
 		for (size_t i = 0; i != population.size(); ++i)
 		{
 			auto y          = population[i]->m_network.apply(validation.m_features);
-			ScalarType eval = Denn::CostFunction::accuracy(validation.m_labels, y);
+			Scalar eval = Denn::CostFunction::accuracy(validation.m_labels, y);
 			//maximize (accuracy)
 			if (!i || best_eval < eval)
 			{
@@ -211,7 +202,7 @@ public:
 	}
 	
 	//find best individual (validation test)
-	IndividualPtr find_best(ScalarType& out_eval)
+	IndividualPtr find_best(Scalar& out_eval)
 	{
 		//best 
 		size_t best_i;
@@ -221,14 +212,14 @@ public:
 	}
 
 	//using the test set on a individual
-	ScalarType execute_test(Individual& individual)
+	Scalar execute_test(Individual& individual)
 	{
 		//validation
-		DataSet test;
+		DataSetScalar test;
 		m_dataset_loader->read_test(test);
 		//compute
 		auto y = individual.m_network.apply(test.m_features);
-		ScalarType eval = Denn::CostFunction::accuracy(test.m_labels, y);
+		Scalar eval = Denn::CostFunction::accuracy(test.m_labels, y);
 		//return
 		return eval;
 	}
@@ -268,7 +259,7 @@ protected:
 		if (m_output->is_enable_pass())
 		{
 			size_t id_best;
-			ScalarType val_best;
+			Scalar val_best;
 			m_population.parents().best(id_best, val_best);
 			m_output->sent_pass(pass, sub_pass, id_best, val_best);
 		}
@@ -276,7 +267,7 @@ protected:
 	void  execute_update_best(BestContext& ctx_best)
 	{
 		//find best
-		ScalarType curr_eval;
+		Scalar curr_eval;
 		auto curr = find_best(curr_eval);
 		//maximize (accuracy)
 		if (ctx_best.m_eval < curr_eval)
@@ -292,7 +283,7 @@ protected:
 	void  execute_update_restart(size_t pass, const BestContext& ctx_best, RestartContext& ctx)
 	{
 		//inc count
-		if ((ctx_best.m_eval - ctx.m_last_eval) <= (ScalarType)m_params.m_restart_delta)
+		if ((ctx_best.m_eval - ctx.m_last_eval) <= (Scalar)m_params.m_restart_delta)
 		{
 			++ctx.m_test_count;
 		}
@@ -304,7 +295,7 @@ protected:
 		//first
 		if (!pass) ctx.m_last_eval = ctx_best.m_eval;
 		//test
-		if ((ScalarType)m_params.m_restart_count <= ctx.m_test_count)
+		if ((Scalar)m_params.m_restart_count <= ctx.m_test_count)
 		{
 			m_population.restart
 			(
@@ -329,10 +320,6 @@ protected:
 	}
 	void serial_execute_pass()
 	{
-		//ref to parents
-		auto& parents = m_population.parents();
-		//ref to sons
-		auto& sons = m_population.sons();
 		//for all
 		for(size_t i = 0; i!= (size_t)m_params.m_np; ++i)
 		{
@@ -403,7 +390,7 @@ protected:
 			i_target.m_eval = m_target_function(m_dataset_batch.m_labels, y);
 			//safe
 			if(std::isnan(i_target.m_eval)) 
-				i_target.m_eval = std::numeric_limits<ScalarType>::max() ; 
+				i_target.m_eval = std::numeric_limits<Scalar>::max() ; 
 		}
 	}
 	void parallel_execute_target_function_on_all_population(ThreadPool& thpool)
@@ -427,7 +414,7 @@ protected:
 				i_target.m_eval = m_target_function(m_dataset_batch.m_labels, y);
 				//safe
 				if (std::isnan(i_target.m_eval))
-					i_target.m_eval = std::numeric_limits<ScalarType>::max() ; 
+					i_target.m_eval = std::numeric_limits<Scalar>::max() ; 
 			});
 		}
 		//wait
@@ -437,11 +424,11 @@ protected:
 	//get random function
 	RandomFunction get_random_func() const
 	{
-		ScalarType min = m_params.m_range_min;
-		ScalarType max = m_params.m_range_max;
-		return [=](ScalarType x) -> ScalarType
+		Scalar min = m_params.m_range_min;
+		Scalar max = m_params.m_range_max;
+		return [=](Scalar x) -> Scalar
 		{
-			return ScalarType(RandomIndices::random(min,max));
+			return Scalar(RandomIndices::random(min,max));
 		};
 	}
 	//load next batch
@@ -458,7 +445,7 @@ protected:
 	//dataset
 	typename Individual::SPtr  m_default;
 	DataSetLoader*		       m_dataset_loader;
-	DataSet				       m_dataset_batch;
+	DataSetScalar		       m_dataset_batch;
 	//threads
 	ThreadPool*				   m_thpool;
 	//params of DE

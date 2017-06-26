@@ -4,26 +4,9 @@
 #include "DennPopulation.h"
 
 namespace Denn
-{
-
-    enum class MutationType
-    {
-        MT_RAND_ONE,
-        MT_RAND_TWO,
-        MT_BEST_ONE,	
-        MT_BEST_TWO	
-    };	
-
-    template <
-        typename Parameters, 
-        typename Population, 
-        typename Individual 
-    >
+{	
     class Mutation 
 	{ 
-        //alias
-        using ScalarType = typename Individual::ScalarType;
-
 		public: 
 
 		Mutation(const Parameters& parameters) : m_parameters(parameters){}
@@ -31,29 +14,21 @@ namespace Denn
 
 		protected:
 		//utils
-		ScalarType f_clamp(ScalarType value) const
+		Scalar f_clamp(Scalar value) const
 		{
-			ScalarType cmin = m_parameters.m_clamp_min;
-			ScalarType cmax = m_parameters.m_clamp_max;
-			return Denn::clamp<ScalarType>(value, cmin, cmax);
+			Scalar cmin = m_parameters.m_clamp_min;
+			Scalar cmax = m_parameters.m_clamp_max;
+			return Denn::clamp<Scalar>(value, cmin, cmax);
 		}
 		//attributes
 		const Parameters& m_parameters;
 	};
 
-    template <
-        typename Parameters, 
-        typename Population, 
-        typename Individual 
-    >
-    class RandOne : public Mutation< Parameters, Population, Individual >
+    class RandOne : public Mutation
 	{ 
-        //alias
-        using ScalarType = typename Individual::ScalarType;
-
 		public: 
 
-		RandOne(const Parameters& parameters):Mutation< Parameters, Population, Individual >(parameters){}
+		RandOne(const Parameters& parameters):Mutation(parameters){}
 
 		virtual void operator()(const Population& population,int id_target,Individual& i_final)
 		{
@@ -78,10 +53,10 @@ namespace Denn
 					const Individual& nn_b = *population[rand_deck.get_random_id(id_target)];
 					const Individual& nn_c = *population[rand_deck.get_random_id(id_target)];
 					//
-					auto w_final  = i_final[i_layer][m];
-					auto w_lr_a   = nn_a[i_layer][m];
-					auto w_lr_b   = nn_b[i_layer][m];
-					auto w_lr_c   = nn_c[i_layer][m];
+					auto w_final  = i_final[i_layer][m].array();
+					auto w_lr_a   = nn_a[i_layer][m].array();
+					auto w_lr_b   = nn_b[i_layer][m].array();
+					auto w_lr_c   = nn_c[i_layer][m].array();
 					//function
 					for (size_t e = 0; e != w_lr_a.size(); ++e) 
 						w_final(e) = this->f_clamp((w_lr_a(e) - w_lr_b(e)) * f + w_lr_c(e));
@@ -90,19 +65,11 @@ namespace Denn
 		}
 	};
 
-    template <
-        typename Parameters, 
-        typename Population, 
-        typename Individual 
-    >
-    class RandTwo : public Mutation< Parameters, Population, Individual >
+    class RandTwo : public Mutation
 	{ 
-        //alias
-        using ScalarType = typename Individual::ScalarType;
-
 		public: 
 
-		RandTwo(const Parameters& parameters):Mutation< Parameters, Population, Individual >(parameters){}
+		RandTwo(const Parameters& parameters) : Mutation(parameters){}
 
 		virtual void operator()(const Population& population,int id_target,Individual& i_final)
 		{
@@ -129,12 +96,12 @@ namespace Denn
 					const Individual& nn_d = *population[rand_deck.get_random_id(id_target)];
 					const Individual& nn_e = *population[rand_deck.get_random_id(id_target)];
 					//
-					auto w_final  = i_final[i_layer][m];
-					auto w_lr_a   = nn_a[i_layer][m];
-					auto w_lr_b   = nn_b[i_layer][m];
-					auto w_lr_c   = nn_c[i_layer][m];
-					auto w_lr_d   = nn_d[i_layer][m];
-					auto w_lr_e   = nn_e[i_layer][m];
+					auto w_final  = i_final[i_layer][m].array();
+					auto w_lr_a   = nn_a[i_layer][m].array();
+					auto w_lr_b   = nn_b[i_layer][m].array();
+					auto w_lr_c   = nn_c[i_layer][m].array();
+					auto w_lr_d   = nn_d[i_layer][m].array();
+					auto w_lr_e   = nn_e[i_layer][m].array();
 					//function
 					for (size_t e = 0; e != w_lr_a.size(); ++e) 
 						w_final(e) = this->f_clamp(
@@ -145,19 +112,11 @@ namespace Denn
 		}
 	};
 
-    template <
-        typename Parameters, 
-        typename Population, 
-        typename Individual 
-    >
-	class BestOne : public Mutation< Parameters, Population, Individual >
+	class BestOne : public Mutation
 	{ 
-        //alias
-        using ScalarType = typename Individual::ScalarType;
-
 		public: 
 
-		BestOne(const Parameters& parameters):Mutation< Parameters, Population, Individual >(parameters){}
+		BestOne(const Parameters& parameters) : Mutation(parameters){}
 
 		virtual void operator()(const Population& population,int id_target,Individual& i_final)
 		{
@@ -183,10 +142,10 @@ namespace Denn
 					const Individual& nn_a = *population[rand_deck.get_random_id(id_target)];
 					const Individual& nn_b = *population[rand_deck.get_random_id(id_target)];
 					//
-					auto w_final  = i_final[i_layer][m];
-					auto w_lr_best= i_best[i_layer][m];
-					auto w_lr_a   = nn_a[i_layer][m];
-					auto w_lr_b   = nn_b[i_layer][m];
+					auto w_final  = i_final[i_layer][m].array();
+					auto w_lr_best= i_best[i_layer][m].array();
+					auto w_lr_a   = nn_a[i_layer][m].array();
+					auto w_lr_b   = nn_b[i_layer][m].array();
 					//function
 					for (size_t e = 0; e != w_lr_a.size(); ++e) 
 						w_final(e) = this->f_clamp((w_lr_a(e) - w_lr_b(e)) * f + w_lr_best(e));
@@ -195,19 +154,11 @@ namespace Denn
 		}
 	};    
 	
-	template <
-        typename Parameters, 
-        typename Population, 
-        typename Individual 
-    >
-	class BestTwo : public Mutation< Parameters, Population, Individual >
+	class BestTwo : public Mutation
 	{ 
-        //alias
-        using ScalarType = typename Individual::ScalarType;
-
 		public: 
 
-		BestTwo(const Parameters& parameters):Mutation< Parameters, Population, Individual >(parameters){}
+		BestTwo(const Parameters& parameters):Mutation(parameters){}
 
 		virtual void operator()(const Population& population,int id_target,Individual& i_final)
 		{
@@ -235,12 +186,12 @@ namespace Denn
 					const Individual& nn_c = *population[rand_deck.get_random_id(id_target)];
 					const Individual& nn_d = *population[rand_deck.get_random_id(id_target)];
 					//
-					auto w_final  = i_final[i_layer][m];
-					auto w_lr_best= i_best[i_layer][m];
-					auto w_lr_a   = nn_a[i_layer][m];
-					auto w_lr_b   = nn_b[i_layer][m];
-					auto w_lr_c   = nn_c[i_layer][m];
-					auto w_lr_d   = nn_d[i_layer][m];
+					auto w_final  = i_final[i_layer][m].array();
+					auto w_lr_best= i_best[i_layer][m].array();
+					auto w_lr_a   = nn_a[i_layer][m].array();
+					auto w_lr_b   = nn_b[i_layer][m].array();
+					auto w_lr_c   = nn_c[i_layer][m].array();
+					auto w_lr_d   = nn_d[i_layer][m].array();
 					//function
 					for (size_t e = 0; e != w_lr_a.size(); ++e) 
 						w_final(e) = this->f_clamp(

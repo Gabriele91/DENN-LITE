@@ -1,21 +1,17 @@
 #pragma once
 #include "Config.h"
-#include "PerceptronLayer.h"
+#include "Layer.h"
 
 namespace Denn
 {
-template < typename Layer >
 class NeuralNetwork
 {
 public:
-	///////////////////////////////////////
-	using LayerType		     = Layer;
-	using MatrixType		 = typename Layer::MatrixType;
-	using ScalarType		 = typename Layer::ScalarType;
-	using LayerList			 = std::vector < Layer >;
+	////////////////////////////////////////////////////////////////
+	using LayerList			 = std::vector < std::unique_ptr<Layer> >;
 	using LayerIterator		 = typename LayerList::iterator;
 	using LayerConstIterator = typename LayerList::const_iterator;
-	///////////////////////////////////////
+	////////////////////////////////////////////////////////////////
 
 	NeuralNetwork()
 	{
@@ -27,10 +23,37 @@ public:
 		add_layer(layers...);
 	}
 
-	/////////////////////////////////////////////////////////////////////////
-	void add_layer(const Layer& layer)
+
+    //  default copy constructor  and assignment operator
+	NeuralNetwork(const NeuralNetwork& nn)
 	{
-		m_layers.push_back(layer);
+		//alloc
+		m_layers.resize(nn.size());
+		//copy all layers
+		for(size_t i=0; i!=size(); ++i) 
+		{
+			m_layers[i] = std::move(std::unique_ptr<Layer>(nn[i].copy()));
+		}
+	}
+    NeuralNetwork& operator= (const NeuralNetwork & nn)
+	{
+		//alloc
+		m_layers.resize(nn.size());
+		//copy all layers
+		for(size_t i=0; i!=size(); ++i) 
+		{
+			m_layers[i] = std::move(std::unique_ptr<Layer>(nn[i].copy()));
+		}
+		//self return
+		return *this;
+	}
+	/////////////////////////////////////////////////////////////////////////
+	template < typename DerivateLayer >
+	void add_layer(const DerivateLayer& layer)
+	{
+		m_layers.push_back(std::move(
+			std::unique_ptr<Layer>(std::make_unique<DerivateLayer>(layer))
+		));
 	}
 
 	template < typename ...Layers >
@@ -40,22 +63,20 @@ public:
 		add_layer(layers...);
 	}
 	/////////////////////////////////////////////////////////////////////////
-
-	MatrixType apply(const MatrixType& input)
+	Matrix apply(const Matrix& input)
 	{
 		//no layer?
 		assert(m_layers.size());
 		//input layer
-		MatrixType output = m_layers[0].apply(input);
+		Matrix output = m_layers[0]->apply(input);
 		//hidden layers
 		for (size_t i = 1; i < m_layers.size(); ++i)
 		{
-			output = m_layers[i].apply(output);
+			output = m_layers[i]->apply(output);
 		}
 		//return
 		return output;
 	}
-
 	/////////////////////////////////////////////////////////////////////////
 	size_t size() const
 	{
@@ -64,12 +85,12 @@ public:
 
 	Layer& operator [] (size_t i)
 	{
-		return m_layers[i];
+		return *(m_layers[i].get());
 	}
 
 	const Layer& operator [] (size_t i) const
 	{
-		return m_layers[i];
+		return *(m_layers[i].get());
 	}
 
 	LayerIterator begin()
@@ -98,11 +119,5 @@ protected:
 	LayerList m_layers;
 
 };
-
-//////////////////////////////////////////////////////ALIAS
-using PerceptronNetworkD = NeuralNetwork< PerceptronLayerD >;
-using PerceptronNetworkF = NeuralNetwork< PerceptronLayerF >;
-template < typename Matrix >
-using PerceptronNetwork = NeuralNetwork< PerceptronLayer< Matrix > >;
 
 }

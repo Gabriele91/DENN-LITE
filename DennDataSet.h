@@ -7,11 +7,11 @@ namespace Denn
 	class DataSet
 	{
     public:
-		virtual void* ptr_features()  = 0;
-		virtual void* ptr_labels()    = 0;
+		virtual void* ptr_features() const = 0;
+		virtual void* ptr_labels()   const  = 0;
 
-		virtual void* data_features() = 0;
-		virtual void* data_labels()   = 0;
+		virtual void* data_features() const = 0;
+		virtual void* data_labels()   const = 0;
 
 		virtual size_t features_rows() const = 0;
 		virtual size_t features_cols() const  = 0;
@@ -22,15 +22,32 @@ namespace Denn
 		virtual DataType get_data_type() const { return DataType::DT_UNKNOWN;  }
 
 		//auto cast
-		template < typename ScalarType > 
-		Denn::Matrix< ScalarType >&  features()
+		const Matrix&  features() const
 		{
-			return *((Denn::Matrix< ScalarType >*)(ptr_features()));
+			return *((const Matrix*)(ptr_features()));
 		}
-		template < typename ScalarType > 
-		Denn::Matrix< ScalarType >&  labels()
+		const Matrix&  labels() const
 		{
-			return *((Denn::Matrix< ScalarType >*)(ptr_labels()));
+			return *((const Matrix*)(ptr_labels()));
+		}
+		Matrix&  features()
+		{
+			return *((Matrix*)(ptr_features()));
+		}
+		Matrix&  labels()
+		{
+			return *((Matrix*)(ptr_labels()));
+		}
+
+		template < typename ScalarType = Scalar > 
+		Denn::MatrixT< ScalarType >&  features_as_type() 
+		{
+			return *((Denn::MatrixT< ScalarType >*)(ptr_features()));
+		}
+		template < typename ScalarType = Scalar > 
+		Denn::MatrixT< ScalarType >&  labels_as_type()
+		{
+			return *((Denn::MatrixT< ScalarType >*)(ptr_labels()));
 		}
 	};
 
@@ -41,11 +58,11 @@ namespace Denn
 		Eigen::Matrix< ScalarType, Eigen::Dynamic, Eigen::Dynamic > m_features;
 		Eigen::Matrix< ScalarType, Eigen::Dynamic, Eigen::Dynamic > m_labels;
 
-		virtual void* ptr_features()	 { return (void*)&m_features;       }
-		virtual void* ptr_labels()		 { return (void*)&m_labels;         }
+		virtual void* ptr_features() const { return (void*)&m_features;       }
+		virtual void* ptr_labels()	 const { return (void*)&m_labels;         }
 
-		virtual void* data_features()    { return (void*)m_features.data(); }
-		virtual void* data_labels()      { return (void*)m_labels.data();   }
+		virtual void* data_features() const { return (void*)m_features.data(); }
+		virtual void* data_labels()   const { return (void*)m_labels.data();   }
 
 
 		virtual size_t features_rows() const
@@ -69,6 +86,7 @@ namespace Denn
 		virtual DataType get_data_type() const { return Denn::GetDataType<ScalarType>();  }
 	};
 
-	using DataSetF = DataSetX<float>;
-	using DataSetD = DataSetX<double>;
+	using DataSetScalar = DataSetX<Scalar>;
+	using DataSetF 	    = DataSetX<float>;
+	using DataSetD      = DataSetX<double>;
 }

@@ -215,16 +215,16 @@ namespace Denn
 					{
 						DataSetX<double> t_double;
 						bool success = template_read(t_double,size);
-						t_out.features<float>() = t_double.features<double>().cast<float>();
-						t_out.labels<float>()   = t_double.labels<double>().cast<float>();
+						t_out.features_as_type<float>() = t_double.features_as_type<double>().cast<float>();
+						t_out.labels_as_type<float>()   = t_double.labels_as_type<double>().cast<float>();
 						return success;
 					}  
 					case DataType::DT_DOUBLE:
 					{
 						DataSetX<float> t_float;
 						bool success = template_read(t_float,size);
-						t_out.features<double>() = t_float.features<float>().cast<double>();
-						t_out.labels<double>()   = t_float.labels<float>().cast<double>();
+						t_out.features_as_type<double>() = t_float.features_as_type<float>().cast<double>();
+						t_out.labels_as_type<double>()   = t_float.labels_as_type<float>().cast<double>();
 						return success;
 					}  
 					default: return false;

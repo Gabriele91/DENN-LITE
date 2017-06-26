@@ -6,14 +6,9 @@
 namespace Denn
 {
     ////////////////////////////////////////////////////////////////////////
-    template < typename Network >
-    class Individual : public std::enable_shared_from_this< Individual<Network> >
+    class Individual : public std::enable_shared_from_this< Individual >
     {
     public:
-        //alias
-        using LayerType    = typename Network::LayerType;
-        using MatrixType   = typename Network::MatrixType;
-        using ScalarType   = typename Network::ScalarType;
         //ref to individual
         using SPtr = std::shared_ptr<Individual>;
         //return ptr
@@ -24,13 +19,13 @@ namespace Denn
             return std::make_shared<Individual>(*this);
         }
         //attributes
-        ScalarType m_eval{ std::numeric_limits<ScalarType>::max() };
-        ScalarType m_f   { 1.0 };
-        ScalarType m_cr  { 1.0 };
-        Network	   m_network;
+        Scalar m_eval{ std::numeric_limits<Scalar>::max() };
+        Scalar m_f   { 1.0 };
+        Scalar m_cr  { 1.0 };
+        NeuralNetwork m_network;
         //init
         Individual() {}
-        Individual(ScalarType f, ScalarType cr, const Network& network)
+        Individual(Scalar f, Scalar cr, const NeuralNetwork& network)
         {
             m_f		  = f;
             m_cr	  = cr;
@@ -44,21 +39,21 @@ namespace Denn
             m_eval = i.m_eval;
         }   
         //cast
-        operator Network&()
+        operator NeuralNetwork&()
         {
             return m_network;
         }
 
-        operator const Network& () const
+        operator const NeuralNetwork& () const
         {
             return m_network;
         }
         //like Network
-        LayerType& operator[](size_t i)
+        Layer& operator[](size_t i)
         {
             return m_network[i];
         }
-        const LayerType& operator[](size_t i) const
+        const Layer& operator[](size_t i) const
         {
             return m_network[i];
         }
@@ -70,15 +65,12 @@ namespace Denn
 
     ////////////////////////////////////////////////////////////////////////
 	//Population
-    template < typename Network >
 	class Population
 	{
 	public:
 
-		//pointer type		
-        using ScalarType    = typename Network::ScalarType;
-        using MatrixType    = typename Network::MatrixType;
-		using IndividualPtr = typename Individual<Network>::SPtr;
+		//pointer type
+		using IndividualPtr = typename Individual::SPtr;
 
 		//vector methods 		
 		size_t size() const { return m_individuals.size(); }
@@ -96,11 +88,11 @@ namespace Denn
 		typename std::vector < IndividualPtr >::const_iterator end()   const { return m_individuals.end();   }
 
 		//costum
-		void best(size_t& out_i, ScalarType& out_eval) const
+		void best(size_t& out_i, Scalar& out_eval) const
 		{
 			//best
 			size_t	   best_i;
-			ScalarType best_eval;
+			Scalar best_eval;
 			//find best
 			for (size_t i = 0; i != m_individuals.size(); ++i)
 			{
@@ -118,7 +110,7 @@ namespace Denn
 		{
 			//values
 			size_t best_i;
-			ScalarType best_eval;
+			Scalar best_eval;
 			//get best id
 			best(best_i, best_eval);
 			//return
@@ -139,18 +131,12 @@ namespace Denn
 		PT_SIZE
 	};
 	//Double Population buffer
-    template < typename Network, typename DataSet >
 	struct DoubleBufferPopulation
 	{
-        //alias
-        using Population     = Denn::Population<Network>;
-        using Individual     = Denn::Individual<Network>;
-        using IndividualPtr  = typename Denn::Individual<Network>::SPtr;
-
-        using ScalarType     = typename Network::ScalarType;
-        using MatrixType     = typename Network::MatrixType;
-        using RandomFunction = std::function<ScalarType(ScalarType)>;
-		using CostFunction   = std::function<ScalarType(const MatrixType&, const MatrixType&) >;
+        //Pointer
+        using IndividualPtr  = typename Denn::Individual::SPtr;
+        using RandomFunction = std::function<Scalar(Scalar)>;
+		using CostFunction   = std::function<Scalar(const Matrix&, const Matrix&) >;
         //attributes
 		Population m_pop_buffer[ size_t(PopulationType::PT_SIZE) ];
 		//init population
@@ -177,16 +163,16 @@ namespace Denn
 			Population& population = parents();
 			//random init
 			for (auto& individual : population)
-			for (auto& layer : individual->m_network)
+			for (auto& layer  : individual->m_network)
+			for (auto& matrix : *layer)
 			{
-				layer.weights() = layer.weights().unaryExpr(random_func);
-				layer.baias() = layer.baias().unaryExpr(random_func);
+				matrix = matrix.unaryExpr(random_func);
 			}
 			//eval
 			for (size_t i = 0; i != population.size(); ++i)
 			{
-				auto y = population[i]->m_network.apply(dataset.m_features);
-				population[i]->m_eval = target_function(dataset.m_labels, y);
+				auto y = population[i]->m_network.apply(dataset.features());
+				population[i]->m_eval = target_function(dataset.labels(), y);
 			}
 		}
 		//current
@@ -216,7 +202,7 @@ namespace Denn
 			return m_pop_buffer[size_t(PopulationType::PT_SONS)];
 		}
 		//get best
-		void best(size_t& best_i, ScalarType& out_eval) const
+		void best(size_t& best_i, Scalar& out_eval) const
 		{
 			parents().best(best_i,out_eval);
 		}
@@ -256,10 +242,10 @@ namespace Denn
 				//Copy default params
 				individual->copy_attributes(*i_default);
 				//Reinit layers
-				for (auto& layer : individual->m_network)
+				for (auto& layer  : individual->m_network)
+				for (auto& matrix : *layer)
 				{
-					layer.weights() = layer.weights().unaryExpr(random_func);
-					layer.baias()   = layer.baias().unaryExpr(random_func);
+					matrix = matrix.unaryExpr(random_func);
 				}
 			}
 			//add best
@@ -269,8 +255,8 @@ namespace Denn
 			//eval
 			for (size_t i = 0; i != population.size(); ++i)
 			{
-				auto y = population[i]->m_network.apply(dataset.m_features);
-				population[i]->m_eval = target_function(dataset.m_labels, y);
+				auto y = population[i]->m_network.apply(dataset.features());
+				population[i]->m_eval = target_function(dataset.labels(), y);
 			}
 		}
 	};

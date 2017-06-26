@@ -19,7 +19,7 @@ namespace RandomIndices
 	}
 
 	//random integer in [0,size) (thread safe)
-	size_t irand(size_t max)
+	size_t index_rand(size_t max)
 	{
 		std::uniform_int_distribution<size_t> distribution(0, max-1);
 		return distribution(thread_random_generator());
