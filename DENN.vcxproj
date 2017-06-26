@@ -26,10 +26,15 @@
     <ClInclude Include="DatasetLoader.h" />
     <ClInclude Include="Denn.h" />
     <ClInclude Include="DennAlgorithm.h" />
+    <ClInclude Include="DennCrossover.h" />
+    <ClInclude Include="DennDataSet.h" />
+    <ClInclude Include="DennMutation.h" />
     <ClInclude Include="DennMutationCrossOver.h" />
     <ClInclude Include="DennParameters.h" />
     <ClInclude Include="DennPopulation.h" />
+    <ClInclude Include="DennRuntimeOutput.h" />
     <ClInclude Include="IOFileWrapper.h" />
+    <ClInclude Include="Layer.h" />
     <ClInclude Include="NeuralNetwork.h" />
     <ClInclude Include="PerceptronLayer.h" />
     <ClInclude Include="RandomIndices.h" />
