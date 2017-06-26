@@ -18,18 +18,9 @@ namespace Denn
 		m_params = params;
 		m_output = output;
 		m_thpool = thpool;
-		//default
-		switch ((MutationType)m_params.m_mutation_type)
-		{
-		default:
-		case MutationType::MT_RAND_ONE:
-			m_mutation = std::make_unique< RandOne >(m_params);
-			break;
-		case MutationType::MT_BEST_ONE:
-			m_mutation = std::make_unique< BestOne >(m_params);
-			break;
-		}
-		m_crossover = CrossoverFactory::create(m_params.m_crossover_type);
+		//methods of mutation and crossover
+		m_mutation  = MutationFactory::create(m_params.m_mutation_type, params);
+		m_crossover = CrossoverFactory::create(m_params.m_crossover_type, params);
 		//init all
 		reset();
 	}
@@ -273,7 +264,7 @@ namespace Denn
 		//call muation
 		(*m_mutation)(parents, i, *new_son);
 		//call crossover
-		(*m_crossover)(*parents[i], *new_son);
+		(*m_crossover)(parents, i, *new_son);
 		//eval
 		auto y = new_son->m_network.apply(m_dataset_batch.m_features);
 		new_son->m_eval = m_target_function(m_dataset_batch.m_labels, y);

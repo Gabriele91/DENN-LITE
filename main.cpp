@@ -33,7 +33,7 @@ namespace BuildTest
 			m_ostream << "\t\t \"generations\" : "   << *args.m_generations   			           << ","   << std::endl;
 			m_ostream << "\t\t \"sub_gens\" : "      << *args.m_sub_gens     		    	       << ","   << std::endl;
 			m_ostream << "\t\t \"number_parents\" : "<< *args.m_np            			           << ","   << std::endl;
-			m_ostream << "\t\t \"mutation\" : \""    << mutation_to_string(*args.m_mutation_type)  << "\"," << std::endl;
+			m_ostream << "\t\t \"mutation\" : \""    << *args.m_mutation_type                      << "\"," << std::endl;
 			m_ostream << "\t\t \"crossover\" : \""   << *args.m_crossover_type                     << "\"," << std::endl;
 			m_ostream << "\t\t \"f_default\" : "     << *args.m_default_f      		 	           << ","   << std::endl;
 			m_ostream << "\t\t \"cr_default\" : "    << *args.m_default_cr   			           << ","   << std::endl;
@@ -81,19 +81,7 @@ namespace BuildTest
 	private:
 
 		std::ostream& m_ostream;
-
-		std::string mutation_to_string(Denn::MutationType type)
-		{
-			switch(type) 
-			{ 
-				case Denn::MutationType::MT_RAND_ONE: return "rand/1";	
-				case Denn::MutationType::MT_RAND_TWO: return "rand/2";	
-				case Denn::MutationType::MT_BEST_ONE: return "best/1";	
-				case Denn::MutationType::MT_BEST_TWO: return "best/2";	
-				default: return "unknown";
-			}
-		}
-
+		
 	};
 
 	void execute

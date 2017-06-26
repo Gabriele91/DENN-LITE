@@ -46,6 +46,8 @@
     <ClCompile Include="DennCrossoverFactory.cpp" />
     <ClCompile Include="DennCrossoverItems.cpp" />
     <ClCompile Include="DennIndividual.cpp" />
+    <ClCompile Include="DennMutationFactory.cpp" />
+    <ClCompile Include="DennMutationItems.cpp" />
     <ClCompile Include="DennPopulation.cpp" />
     <ClCompile Include="Layer.cpp" />
     <ClCompile Include="main.cpp" />

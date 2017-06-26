@@ -1,4 +1,5 @@
 #include "DennCrossover.h"
+#include "DennParameters.h"
 
 namespace Denn
 {
@@ -6,9 +7,12 @@ namespace Denn
 	class Bin : public Crossover
 	{
 	public:
-		virtual void operator()(Individual& i_target, Individual& i_mutant)
+		Bin(const Parameters& parameters) : Crossover(parameters) {}
+
+		virtual void operator()(const Population& population, int id_target, Individual& i_mutant)
 		{
 			//baias
+			const auto& i_target = *population[id_target];
 			const auto& cr = i_mutant.m_cr;
 			//for each layers
 			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
@@ -35,14 +39,17 @@ namespace Denn
 			}
 		}
 	};
-	REGISTERED_CROSSOVER(Bin)
+	REGISTERED_CROSSOVER(Bin,"bin")
 
 	class Exp : public Crossover
 	{
 	public:
-		virtual void operator()(Individual& i_target, Individual& i_mutant)
+		Exp(const Parameters& parameters) : Crossover(parameters) {}
+
+		virtual void operator()(const Population& population, int id_target, Individual& i_mutant)
 		{
 			//baias
+			const auto& i_target = *population[id_target];
 			const auto& cr = i_mutant.m_cr;
 			//for each layers
 			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
@@ -76,5 +83,5 @@ namespace Denn
 			}
 		}
 	};
-	REGISTERED_CROSSOVER(Exp)
+	REGISTERED_CROSSOVER(Exp, "exp")
 }

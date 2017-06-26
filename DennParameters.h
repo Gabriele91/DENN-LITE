@@ -1,5 +1,6 @@
 #pragma once
 #include "Config.h"
+#include "DennMutation.h"
 #include "DennCrossover.h"
 #include <string>
 #include <vector>
@@ -8,14 +9,6 @@
 
 namespace Denn
 {
-    enum class MutationType
-    {
-        MT_RAND_ONE,
-        MT_RAND_TWO,
-        MT_BEST_ONE,	
-        MT_BEST_TWO	
-    };
-
 	class Arguments
 	{
 	public:
@@ -115,8 +108,8 @@ namespace Denn
 		read_only<Scalar>	     m_restart_delta { Scalar(0.02) };
 		read_only<int>	         m_threads_omp   { size_t(2) };
 		read_only<size_t>	     m_threads_pop   { size_t(2) };
-		read_only<MutationType>  m_mutation_type { MutationType::MT_RAND_ONE };
-		read_only<std::string>   m_crossover_type{ "Bin" };
+		read_only<std::string>   m_mutation_type { "rand/1" };
+		read_only<std::string>   m_crossover_type{ "bin" };
 	
 		Parameters() 
 		:m_params_info
@@ -134,26 +127,23 @@ namespace Denn
 				 [this](Arguments& args) { m_np = args.get_int() ; }
             },
 			ParameterInfo{
-                 "Type of DE mutation [rand/1, rand/2, best/1, best/2]", { "--mutation",    "-m"  }, 
+                 "Type of DE mutation [" + MutationFactory::names_of_mutations() + "]", { "--mutation",    "-m"  },
 				 [this](Arguments& args) 
 				 { 
 					 std::string str_m_type = args.get_string() ;
+					 //all lower case
 					 std::transform(str_m_type.begin(),str_m_type.end(), str_m_type.begin(), ::tolower);
-					      if( str_m_type == "rand/1" ) m_mutation_type = MutationType::MT_RAND_ONE;
-					 else if( str_m_type == "rand/2" ) m_mutation_type = MutationType::MT_RAND_TWO;
-					 else if( str_m_type == "best/1" ) m_mutation_type = MutationType::MT_BEST_ONE;
-					 else if( str_m_type == "best/2" ) m_mutation_type = MutationType::MT_BEST_TWO;
+					 //save
+					 m_mutation_type = str_m_type;
 				 }
             },
 			ParameterInfo{
-                 "Type of DE crossover ["+CrossoverFactory::names_of_crossovers()+"]", { "--crossover",    "-co"  },
+                 "Type of DE crossover [" + CrossoverFactory::names_of_crossovers() + "]", { "--crossover",    "-co"  },
 				 [this](Arguments& args) 
 				 { 
 					 std::string str_c_type = args.get_string();
 					 //all lower case
 					 std::transform(str_c_type.begin(),str_c_type.end(), str_c_type.begin(), ::tolower);
-					 //but the first is upper case
-					 str_c_type[0] = ::toupper(str_c_type[0]);
 					 //save
 					 m_crossover_type = str_c_type;
 				 }

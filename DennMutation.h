@@ -1,204 +1,83 @@
 #pragma once
 #include "Config.h"
-#include "DennParameters.h"
 #include "DennPopulation.h"
 
 namespace Denn
 {	
-    class Mutation 
+	//parameters
+	class Parameters;
+	//mutation
+    class Mutation : public std::enable_shared_from_this< Mutation >
 	{ 
-		public: 
-
+		public:
+		//ref to Mutation
+		using SPtr = std::shared_ptr<Mutation>;
+		//return ptr
+		SPtr get_ptr() { return this->shared_from_this(); }
+		//Mutation
 		Mutation(const Parameters& parameters) : m_parameters(parameters){}
+		//operation
 		virtual void operator()(const Population& population,int id_target,Individual& output)= 0; 
 
 		protected:
 		//utils
-		Scalar f_clamp(Scalar value) const
-		{
-			Scalar cmin = m_parameters.m_clamp_min;
-			Scalar cmax = m_parameters.m_clamp_max;
-			return Denn::clamp<Scalar>(value, cmin, cmax);
-		}
+		Scalar f_clamp(Scalar value) const;
 		//attributes
 		const Parameters& m_parameters;
 	};
 
-    class RandOne : public Mutation
-	{ 
-		public: 
+	//class factory of Mutation methods
+	class MutationFactory
+	{
 
-		RandOne(const Parameters& parameters):Mutation(parameters){}
+	public:
+		//Mutation classes map
+		typedef Mutation::SPtr(*CreateObject)(const Parameters& parameters);
 
-		virtual void operator()(const Population& population,int id_target,Individual& i_final)
-		{
-			//alias
-			const auto& f  = i_final.m_f;
-			//target
-			const Individual& i_target = *population[id_target];
-			//init generator
-			static thread_local RandomIndices::RandomDeck rand_deck;
-			//set population size in deck
-			rand_deck.resize(population.size());
-			//for each layers
-			for (size_t i_layer=0; i_layer != i_target.size(); ++i_layer)
-			{
-				//weights and baias
-				for (size_t m = 0; m!= i_target[i_layer].size(); ++m)
-				{
-					//do rand
-					rand_deck.reset();
-					//do cross + mutation
-					const Individual& nn_a = *population[rand_deck.get_random_id(id_target)];
-					const Individual& nn_b = *population[rand_deck.get_random_id(id_target)];
-					const Individual& nn_c = *population[rand_deck.get_random_id(id_target)];
-					//
-					auto w_final  = i_final[i_layer][m].array();
-					auto w_lr_a   = nn_a[i_layer][m].array();
-					auto w_lr_b   = nn_b[i_layer][m].array();
-					auto w_lr_c   = nn_c[i_layer][m].array();
-					//function
-					for (size_t e = 0; e != w_lr_a.size(); ++e) 
-						w_final(e) = this->f_clamp((w_lr_a(e) - w_lr_b(e)) * f + w_lr_c(e));
-				}
-			}
-		}
+		//public
+		static Mutation::SPtr create(const std::string& name, const Parameters& parameters);
+		static void append(const std::string& name, CreateObject fun, size_t size);
+
+		//list of methods
+		static std::vector< std::string > list_of_mutations();
+		static std::string names_of_mutations(const std::string& sep = ", ");
+
+	protected:
+
+		static std::unique_ptr< std::map< std::string, CreateObject > > m_cmap;
+
 	};
 
-    class RandTwo : public Mutation
-	{ 
-		public: 
+	//class used for static registration of a object class
+	template<class T>
+	class MutationItem
+	{
 
-		RandTwo(const Parameters& parameters) : Mutation(parameters){}
-
-		virtual void operator()(const Population& population,int id_target,Individual& i_final)
+		static Mutation::SPtr create(const Parameters& parameters)
 		{
-			//alias
-			const auto& f  = i_final.m_f;
-			//target
-			const Individual& i_target = *population[id_target];
-			//init generator
-			static thread_local RandomIndices::RandomDeck rand_deck;
-			//set population size in deck
-			rand_deck.resize(population.size());
-			//for each layers
-			for (size_t i_layer=0; i_layer != i_target.size(); ++i_layer)
-			{
-				//weights and baias
-				for (size_t m = 0; m!= i_target[i_layer].size(); ++m)
-				{
-					//do rand
-					rand_deck.reset();
-					//do cross + mutation
-					const Individual& nn_a = *population[rand_deck.get_random_id(id_target)];
-					const Individual& nn_b = *population[rand_deck.get_random_id(id_target)];
-					const Individual& nn_c = *population[rand_deck.get_random_id(id_target)];
-					const Individual& nn_d = *population[rand_deck.get_random_id(id_target)];
-					const Individual& nn_e = *population[rand_deck.get_random_id(id_target)];
-					//
-					auto w_final  = i_final[i_layer][m].array();
-					auto w_lr_a   = nn_a[i_layer][m].array();
-					auto w_lr_b   = nn_b[i_layer][m].array();
-					auto w_lr_c   = nn_c[i_layer][m].array();
-					auto w_lr_d   = nn_d[i_layer][m].array();
-					auto w_lr_e   = nn_e[i_layer][m].array();
-					//function
-					for (size_t e = 0; e != w_lr_a.size(); ++e) 
-						w_final(e) = this->f_clamp(
-							((w_lr_a(e) - w_lr_b(e)) + (w_lr_c(e) - w_lr_d(e))) * f + w_lr_e(e)
-						);
-				}
-			}
+			return (std::make_shared< T >(parameters))->get_ptr();
 		}
+
+		MutationItem(const std::string& name, size_t size)
+		{
+			MutationFactory::append(name, MutationItem<T>::create, size);
+		}
+
+	public:
+
+
+		static MutationItem<T>& instance(const std::string& name, size_t size)
+		{
+			static MutationItem<T> objectItem(name, size);
+			return objectItem;
+		}
+
 	};
 
-	class BestOne : public Mutation
-	{ 
-		public: 
 
-		BestOne(const Parameters& parameters) : Mutation(parameters){}
-
-		virtual void operator()(const Population& population,int id_target,Individual& i_final)
-		{
-			//alias
-			const auto& f  = i_final.m_f;
-			//target
-			const Individual& i_target = *population[id_target];
-			//best
-			const Individual& i_best = *population.best();
-			//init generator
-			static thread_local RandomIndices::RandomDeck rand_deck;
-			//set population size in deck
-			rand_deck.resize(population.size());
-			//for each layers
-			for (size_t i_layer=0; i_layer != i_target.size(); ++i_layer)
-			{
-				//weights and baias
-				for (size_t m = 0; m!= i_target[i_layer].size(); ++m)
-				{
-					//do rand
-					rand_deck.reset();
-					//do cross + mutation
-					const Individual& nn_a = *population[rand_deck.get_random_id(id_target)];
-					const Individual& nn_b = *population[rand_deck.get_random_id(id_target)];
-					//
-					auto w_final  = i_final[i_layer][m].array();
-					auto w_lr_best= i_best[i_layer][m].array();
-					auto w_lr_a   = nn_a[i_layer][m].array();
-					auto w_lr_b   = nn_b[i_layer][m].array();
-					//function
-					for (size_t e = 0; e != w_lr_a.size(); ++e) 
-						w_final(e) = this->f_clamp((w_lr_a(e) - w_lr_b(e)) * f + w_lr_best(e));
-				}
-			}
-		}
-	};    
-	
-	class BestTwo : public Mutation
-	{ 
-		public: 
-
-		BestTwo(const Parameters& parameters):Mutation(parameters){}
-
-		virtual void operator()(const Population& population,int id_target,Individual& i_final)
-		{
-			//alias
-			const auto& f  = i_final.m_f;
-			//target
-			const Individual& i_target = *population[id_target];
-			//best
-			const Individual& i_best = *population.best();
-			//init generator
-			static thread_local RandomIndices::RandomDeck rand_deck;
-			//set population size in deck
-			rand_deck.resize(population.size());
-			//for each layers
-			for (size_t i_layer=0; i_layer != i_target.size(); ++i_layer)
-			{
-				//weights and baias
-				for (size_t m = 0; m!= i_target[i_layer].size(); ++m)
-				{
-					//do rand
-					rand_deck.reset();
-					//do cross + mutation
-					const Individual& nn_a = *population[rand_deck.get_random_id(id_target)];
-					const Individual& nn_b = *population[rand_deck.get_random_id(id_target)];
-					const Individual& nn_c = *population[rand_deck.get_random_id(id_target)];
-					const Individual& nn_d = *population[rand_deck.get_random_id(id_target)];
-					//
-					auto w_final  = i_final[i_layer][m].array();
-					auto w_lr_best= i_best[i_layer][m].array();
-					auto w_lr_a   = nn_a[i_layer][m].array();
-					auto w_lr_b   = nn_b[i_layer][m].array();
-					auto w_lr_c   = nn_c[i_layer][m].array();
-					auto w_lr_d   = nn_d[i_layer][m].array();
-					//function
-					for (size_t e = 0; e != w_lr_a.size(); ++e) 
-						w_final(e) = this->f_clamp(
-							((w_lr_a(e) - w_lr_b(e)) + (w_lr_c(e) - w_lr_d(e))) * f + w_lr_best(e)
-						);
-				}
-			}
-		}
-	};
+	#define REGISTERED_MUTATION(class_,name_)\
+	namespace\
+	{\
+		static const MutationItem<class_>& _Denn_ ## class_ ## _MutationItem= MutationItem<class_>::instance( name_, sizeof(class_) );\
+	}
 }

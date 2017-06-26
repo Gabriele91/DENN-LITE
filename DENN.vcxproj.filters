@@ -113,6 +113,12 @@
     <ClCompile Include="DennCrossoverFactory.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
+    <ClCompile Include="DennMutationFactory.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="DennMutationItems.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="makefile">

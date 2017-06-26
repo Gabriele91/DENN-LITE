@@ -28,7 +28,7 @@ public:
 	//DE parallel
 	using PromiseList    = std::vector< std::future<void> >;
 	//Ref mutation crossover
-	using MutationPtr    = std::unique_ptr < Mutation >;
+	using MutationPtr    = typename Mutation::SPtr;
 	using CrossoverPtr   = typename Crossover::SPtr;
 	//Ref mutation
 	////////////////////////////////////////////////////////////////////////
