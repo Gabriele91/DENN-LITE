@@ -36,9 +36,6 @@
     <ClInclude Include="IOFileWrapper.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="DatasetLoader.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
     <ClInclude Include="TicksTime.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
@@ -76,6 +73,9 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="DennIndividual.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="DennDatasetLoader.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>

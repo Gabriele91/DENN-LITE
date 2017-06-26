@@ -9,12 +9,14 @@
 
 //NeuralNetwork includes
 #include  "ActiveFunction.h"
+#include  "Layer.h"
 #include  "PerceptronLayer.h"
 #include  "NeuralNetwork.h"
 #include  "CostFunction.h"
 
 //Dataset includes
-#include  "DatasetLoader.h"
+#include  "DennDatasetLoader.h"
+#include  "DennDataset.h"
 
 //Denn
 #include  "DennAlgorithm.h"

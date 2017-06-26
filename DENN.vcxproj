@@ -23,7 +23,7 @@
     <ClInclude Include="Config.h" />
     <ClInclude Include="Constants.h" />
     <ClInclude Include="CostFunction.h" />
-    <ClInclude Include="DatasetLoader.h" />
+    <ClInclude Include="DennDatasetLoader.h" />
     <ClInclude Include="Denn.h" />
     <ClInclude Include="DennAlgorithm.h" />
     <ClInclude Include="DennCrossover.h" />
