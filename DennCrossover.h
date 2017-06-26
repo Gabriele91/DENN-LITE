@@ -74,10 +74,7 @@ namespace Denn
 	class classname : public Crossover\
 	{\
 	public:\
-		virtual void operator()(Individual& target, Individual& mutant)\
-		{\
-			__VA_ARGS__\
-		}\
+		virtual void operator()(Individual& target, Individual& mutant) __VA_ARGS__\
 	};\
 	REGISTERED_CROSSOVER(classname);
 }
