@@ -41,6 +41,9 @@ namespace Denn
 		//list of methods
 		static std::vector< std::string > list_of_mutations();
 		static std::string names_of_mutations(const std::string& sep = ", ");
+		
+		//info
+		static bool exists(const std::string& name);
 
 	protected:
 

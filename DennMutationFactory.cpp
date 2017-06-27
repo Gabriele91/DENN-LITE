@@ -48,4 +48,12 @@ namespace Denn
 		sout << *(list.end() - 1);
 		return sout.str();
 	}
+	//info
+	bool MutationFactory::exists(const std::string& name)
+	{
+		//find
+		auto it = m_cmap->find(name);
+		//return 
+		return it != m_cmap->end();
+	}
 }

@@ -40,4 +40,11 @@ namespace Denn
 		sout << *(list.end() - 1);
 		return sout.str();
 	}
+	bool CrossoverFactory::exists(const std::string& name)
+	{
+		//find
+		auto it = m_cmap->find(name);
+		//return 
+		return it != m_cmap->end();
+	}
 }
