@@ -7,13 +7,18 @@
 namespace Denn
 {
 	//Mutation
-	//utils
-	Scalar Mutation::f_clamp(Scalar value) const
+	Mutation::Mutation(const Parameters& parameters)
+	: m_clamp
+	([cmin = parameters.m_clamp_min
+	 ,cmax = parameters.m_clamp_max]
+	(Scalar value) -> Scalar
 	{
-		Scalar cmin = m_parameters.m_clamp_min;
-		Scalar cmax = m_parameters.m_clamp_max;
 		return Denn::clamp<Scalar>(value, cmin, cmax);
+	})
+	, m_parameters(parameters)
+	{
 	}
+
 	//map
 	std::unique_ptr< std::map< std::string, MutationFactory::CreateObject > > MutationFactory::m_cmap;
 	//public

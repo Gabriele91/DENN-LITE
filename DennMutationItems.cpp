@@ -36,13 +36,11 @@ namespace Denn
 					const Individual& nn_b = *population[rand_deck.get_random_id(id_target)];
 					const Individual& nn_c = *population[rand_deck.get_random_id(id_target)];
 					//
-					auto w_final = i_final[i_layer][m].array();
-					auto w_lr_a = nn_a[i_layer][m].array();
-					auto w_lr_b = nn_b[i_layer][m].array();
-					auto w_lr_c = nn_c[i_layer][m].array();
-					//function
-					for (size_t e = 0; e != w_lr_a.size(); ++e)
-						w_final(e) = this->f_clamp((w_lr_a(e) - w_lr_b(e)) * f + w_lr_c(e));
+					Matrix& w_final = i_final[i_layer][m];
+					const Matrix& x_a = nn_a[i_layer][m];
+					const Matrix& x_b = nn_b[i_layer][m];
+					const Matrix& x_c = nn_c[i_layer][m];
+					w_final = ((x_a - x_b) * f + x_c).unaryExpr(m_clamp);
 				}
 			}
 		}
@@ -80,17 +78,13 @@ namespace Denn
 					const Individual& nn_d = *population[rand_deck.get_random_id(id_target)];
 					const Individual& nn_e = *population[rand_deck.get_random_id(id_target)];
 					//
-					auto w_final = i_final[i_layer][m].array();
-					auto w_lr_a = nn_a[i_layer][m].array();
-					auto w_lr_b = nn_b[i_layer][m].array();
-					auto w_lr_c = nn_c[i_layer][m].array();
-					auto w_lr_d = nn_d[i_layer][m].array();
-					auto w_lr_e = nn_e[i_layer][m].array();
-					//function
-					for (size_t e = 0; e != w_lr_a.size(); ++e)
-						w_final(e) = this->f_clamp(
-						((w_lr_a(e) - w_lr_b(e)) + (w_lr_c(e) - w_lr_d(e))) * f + w_lr_e(e)
-						);
+					Matrix& w_final = i_final[i_layer][m];
+					const Matrix& x_a = nn_a[i_layer][m];
+					const Matrix& x_b = nn_b[i_layer][m];
+					const Matrix& x_c = nn_c[i_layer][m];
+					const Matrix& x_d = nn_d[i_layer][m];
+					const Matrix& x_e = nn_e[i_layer][m];
+					w_final = ((x_a - x_b) + (x_c - x_d) * f + x_e).unaryExpr(m_clamp);
 				}
 			}
 		}
@@ -127,13 +121,11 @@ namespace Denn
 					const Individual& nn_a = *population[rand_deck.get_random_id(id_target)];
 					const Individual& nn_b = *population[rand_deck.get_random_id(id_target)];
 					//
-					auto w_final = i_final[i_layer][m].array();
-					auto w_lr_best = i_best[i_layer][m].array();
-					auto w_lr_a = nn_a[i_layer][m].array();
-					auto w_lr_b = nn_b[i_layer][m].array();
-					//function
-					for (size_t e = 0; e != w_lr_a.size(); ++e)
-						w_final(e) = this->f_clamp((w_lr_a(e) - w_lr_b(e)) * f + w_lr_best(e));
+					Matrix& w_final      = i_final[i_layer][m];
+					const Matrix& x_best = i_best[i_layer][m];
+					const Matrix& x_a    = nn_a[i_layer][m];
+					const Matrix& x_b    = nn_b[i_layer][m];
+					w_final = ((x_a - x_b) * f + x_best).unaryExpr(m_clamp);
 				}
 			}
 		}
@@ -172,17 +164,13 @@ namespace Denn
 					const Individual& nn_c = *population[rand_deck.get_random_id(id_target)];
 					const Individual& nn_d = *population[rand_deck.get_random_id(id_target)];
 					//
-					auto w_final = i_final[i_layer][m].array();
-					auto w_lr_best = i_best[i_layer][m].array();
-					auto w_lr_a = nn_a[i_layer][m].array();
-					auto w_lr_b = nn_b[i_layer][m].array();
-					auto w_lr_c = nn_c[i_layer][m].array();
-					auto w_lr_d = nn_d[i_layer][m].array();
-					//function
-					for (size_t e = 0; e != w_lr_a.size(); ++e)
-						w_final(e) = this->f_clamp(
-						((w_lr_a(e) - w_lr_b(e)) + (w_lr_c(e) - w_lr_d(e))) * f + w_lr_best(e)
-						);
+					Matrix& w_final      = i_final[i_layer][m];
+					const Matrix& w_best = i_best[i_layer][m];
+					const Matrix& x_a = nn_a[i_layer][m];
+					const Matrix& x_b = nn_b[i_layer][m];
+					const Matrix& x_c = nn_c[i_layer][m];
+					const Matrix& x_d = nn_d[i_layer][m];
+					w_final = ((x_a - x_b) + (x_c - x_d) * f + w_best).unaryExpr(m_clamp);
 				}
 			}
 		}

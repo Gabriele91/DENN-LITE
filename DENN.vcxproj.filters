@@ -119,6 +119,9 @@
     <ClCompile Include="DennMutationItems.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
+    <ClCompile Include="DennParameters.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="makefile">

@@ -15,13 +15,13 @@ namespace Denn
 		//return ptr
 		SPtr get_ptr() { return this->shared_from_this(); }
 		//Mutation
-		Mutation(const Parameters& parameters) : m_parameters(parameters){}
+		Mutation(const Parameters& parameters);
 		//operation
 		virtual void operator()(const Population& population,int id_target,Individual& output)= 0; 
 
 		protected:
 		//utils
-		Scalar f_clamp(Scalar value) const;
+		std::function<Scalar(Scalar)> m_clamp;
 		//attributes
 		const Parameters& m_parameters;
 	};
