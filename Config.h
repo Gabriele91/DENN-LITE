@@ -74,6 +74,12 @@ namespace Denn
 		return clamp< T >(v, 0.0, 1.0);
 	}
 
+	template < typename T >
+	constexpr const T& lerp(const T& a, const T& b, const T& alpha)
+	{
+		return ( T(1.0) - alpha ) * a + b * alpha;
+	}
+
 	inline std::string str_replace(std::string str, const std::string& old_str, const std::string& new_str)
 	{
 		std::string::size_type pos = 0u;
