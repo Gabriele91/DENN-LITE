@@ -35,41 +35,41 @@ namespace Denn
     ({
         ParameterInfo{ 
             "Global number of generation", { "--generation",    "-t"  }, 
-                [this](Arguments& args) -> bool { m_generations = args.get_int() ; return true; } 
+            [this](Arguments& args) -> bool { m_generations = args.get_int() ; return true; } 
         },
         ParameterInfo{ 
             "Number of generation per batch", { "--sub_gens",    "-s"  }, 
             [this](Arguments& args) -> bool { m_sub_gens = args.get_int() ; return true; }
         },
         ParameterInfo{
-                "Number of parents", { "--number_parents",    "-np"  }, 
-                [this](Arguments& args) -> bool { m_np = args.get_int() ; return true; }
+            "Number of parents", { "--number_parents",    "-np"  }, 
+            [this](Arguments& args) -> bool { m_np = args.get_int() ; return true; }
         },
         ParameterInfo{
-                "Type of DE mutation [" + MutationFactory::names_of_mutations() + "]", { "--mutation",    "-m"  },
-                [this](Arguments& args) -> bool  
-                { 
-                    std::string str_m_type = args.get_string() ;
-                    //all lower case
-                    std::transform(str_m_type.begin(),str_m_type.end(), str_m_type.begin(), ::tolower);
-                    //save
-                    m_mutation_type = str_m_type;
-                    //ok
-                    return MutationFactory::exists(*m_mutation_type); 
-                }
+            "Type of DE mutation [" + MutationFactory::names_of_mutations() + "]", { "--mutation",    "-m"  },
+            [this](Arguments& args) -> bool  
+            { 
+                std::string str_m_type = args.get_string() ;
+                //all lower case
+                std::transform(str_m_type.begin(),str_m_type.end(), str_m_type.begin(), ::tolower);
+                //save
+                m_mutation_type = str_m_type;
+                //ok
+                return MutationFactory::exists(*m_mutation_type); 
+            }
         },
         ParameterInfo{
-                "Type of DE crossover [" + CrossoverFactory::names_of_crossovers() + "]", { "--crossover",    "-co"  },
-                [this](Arguments& args) -> bool 
-                { 
-                    std::string str_c_type = args.get_string();
-                    //all lower case
-                    std::transform(str_c_type.begin(),str_c_type.end(), str_c_type.begin(), ::tolower);
-                    //save
-                    m_crossover_type = str_c_type;
-                    //ok
-                    return CrossoverFactory::exists(*m_crossover_type); 
-                }
+            "Type of DE crossover [" + CrossoverFactory::names_of_crossovers() + "]", { "--crossover",    "-co"  },
+            [this](Arguments& args) -> bool 
+            { 
+                std::string str_c_type = args.get_string();
+                //all lower case
+                std::transform(str_c_type.begin(),str_c_type.end(), str_c_type.begin(), ::tolower);
+                //save
+                m_crossover_type = str_c_type;
+                //ok
+                return CrossoverFactory::exists(*m_crossover_type); 
+            }
         },
         ParameterInfo{ 
             "Default F factor for DE", { "--f_default",    "-f"  }, 
@@ -123,8 +123,8 @@ namespace Denn
             } 
         },
         ParameterInfo{
-                "Path of dataset file (gz)", { "--dataset", "-d", "-i" }, 
-                [this](Arguments& args) -> bool {  m_dataset_filename = args.get_string();  return true; } 
+            "Path of dataset file (gz)", { "--dataset", "-d", "-i" }, 
+            [this](Arguments& args) -> bool {  m_dataset_filename = args.get_string();  return true; } 
         },
         ParameterInfo{ 
             "Path of output file (json)", { "--output", "-o" }, 
@@ -139,9 +139,17 @@ namespace Denn
             [this](Arguments& args) -> bool { m_threads_pop = args.get_int() ;  return true; } 
         },
         ParameterInfo{
+            "Print list of muation", { "--mutation-list",    "-mlist"  }, 
+            [this](Arguments& args) -> bool { std::cout << MutationFactory::names_of_mutations() << std::endl; return true; } 
+        },
+        ParameterInfo{
+            "Print list of crossover", { "--crossover-list",    "-colist"  }, 
+            [this](Arguments& args) -> bool { std::cout << CrossoverFactory::names_of_crossovers() << std::endl; return true; } 
+        },
+        ParameterInfo{
             "Print the help", { "--help",    "-h"  }, 
             [this](Arguments& args) -> bool { std::cout << make_help();  return true; } 
-        },
+        }
     })
     {
     }

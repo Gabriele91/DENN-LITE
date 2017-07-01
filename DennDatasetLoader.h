@@ -204,29 +204,83 @@ namespace Denn
 				{
 					case DataType::DT_FLOAT:  return template_read(*((DataSetX<float>*)(&t_out)),size);
 					case DataType::DT_DOUBLE: return template_read(*((DataSetX<double>*)(&t_out)),size);
+					case DataType::DT_LONG_DOUBLE: return template_read(*((DataSetX<long double>*)(&t_out)),size);
 					default: return false;
 				}
 			}
 			else 
 			{
-				switch(t_out.get_data_type())
+				switch(m_header.get_data_type())
 				{
 					case DataType::DT_FLOAT:
 					{
-						DataSetX<double> t_double;
-						bool success = template_read(t_double,size);
-						t_out.features_as_type<float>() = t_double.features_as_type<double>().cast<float>();
-						t_out.labels_as_type<float>()   = t_double.labels_as_type<double>().cast<float>();
-						return success;
-					}  
-					case DataType::DT_DOUBLE:
-					{
 						DataSetX<float> t_float;
 						bool success = template_read(t_float,size);
-						t_out.features_as_type<double>() = t_float.features_as_type<float>().cast<double>();
-						t_out.labels_as_type<double>()   = t_float.labels_as_type<float>().cast<double>();
+						switch(t_out.get_data_type())
+						{
+							case DataType::DT_DOUBLE:
+							{
+								t_out.features_as_type<double>() = t_float.features_as_type<float>().cast<double>();
+								t_out.labels_as_type<double>()   = t_float.labels_as_type<float>().cast<double>();
+							}
+							break;
+							case DataType::DT_LONG_DOUBLE: 
+							{
+								t_out.features_as_type<long double>() = t_float.features_as_type<float>().cast<long double>();
+								t_out.labels_as_type<long double>()   = t_float.labels_as_type<float>().cast<long double>();
+							}
+							break;
+							default: return false;
+						}
 						return success;
-					}  
+					}
+					break;
+					case DataType::DT_DOUBLE:
+					{
+						DataSetX<double> t_double;
+						bool success = template_read(t_double,size);
+						switch(t_out.get_data_type())
+						{
+							case DataType::DT_FLOAT:
+							{
+								t_out.features_as_type<float>() = t_double.features_as_type<double>().cast<float>();
+								t_out.labels_as_type<float>()   = t_double.labels_as_type<double>().cast<float>();
+							}
+							break;
+							case DataType::DT_LONG_DOUBLE: 
+							{
+								t_out.features_as_type<long double>() = t_double.features_as_type<double>().cast<long double>();
+								t_out.labels_as_type<long double>()   = t_double.labels_as_type<double>().cast<long double>();
+							}
+							break;
+							default: return false;
+						}
+						return success;
+					}
+					break;
+					case DataType::DT_LONG_DOUBLE:
+					{
+						DataSetX<long double> t_long_double;
+						bool success = template_read(t_long_double,size);
+						switch(t_out.get_data_type())
+						{
+							case DataType::DT_FLOAT:
+							{
+								t_out.features_as_type<float>() = t_long_double.features_as_type<long double>().cast<float>();
+								t_out.labels_as_type<float>()   = t_long_double.labels_as_type<long double>().cast<float>();
+							}
+							break;
+							case DataType::DT_DOUBLE: 
+							{
+								t_out.features_as_type<double>() = t_long_double.features_as_type<long double>().cast<double>();
+								t_out.labels_as_type<double>()   = t_long_double.labels_as_type<long double>().cast<double>();
+							}
+							break;
+							default: return false;
+						}
+						return success;
+					}
+					break;
 					default: return false;
 				}
 			}

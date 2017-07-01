@@ -2,14 +2,11 @@
 MKDIR_P       ?=mkdir -p
 COMPILER      ?=g++
 TOP           ?=$(shell pwd)
-
+SCALAR		  ?= FLOAT
+HAVE_TERM     := $(shell echo $$TERM)
 #program name
 S_DIR  = $(TOP)/
 S_INC  = $(TOP)/
-O_DEBUG_DIR    = $(TOP)/Debug/obj
-O_RELEASE_DIR  = $(TOP)/Release/obj
-O_DEBUG_PROG   = $(TOP)/Debug/DENN
-O_RELEASE_PROG = $(TOP)/Release/DENN
 
 #global include
 DIPS_INCLUDE = $(TOP)/dips/include/
@@ -30,6 +27,29 @@ DEBUG_FLAGS = -g -D_DEBUG -Wall
 # Linker
 LDFLAGS += -lz -lm -lutil 
 
+ifeq ($(SCALAR),FLOAT)
+O_DEBUG_DIR    = $(TOP)/Debug/obj-float
+O_RELEASE_DIR  = $(TOP)/Release/obj-float
+O_DEBUG_PROG   = $(TOP)/Debug/DENN-float
+O_RELEASE_PROG = $(TOP)/Release/DENN-float
+C_FLAGS		  += -DUSE_FLOAT
+else ifeq ($(SCALAR),DOUBLE)
+O_DEBUG_DIR    = $(TOP)/Debug/obj-double
+O_RELEASE_DIR  = $(TOP)/Release/obj-double
+O_DEBUG_PROG   = $(TOP)/Debug/DENN-double
+O_RELEASE_PROG = $(TOP)/Release/DENN-double
+C_FLAGS		  += -DUSE_DOUBLE
+else ifeq ($(SCALAR),LONG_DOUBLE)
+O_DEBUG_DIR    = $(TOP)/Debug/obj-long-double
+O_RELEASE_DIR  = $(TOP)/Release/obj-long-double
+O_DEBUG_PROG   = $(TOP)/Debug/DENN-long-double
+O_RELEASE_PROG = $(TOP)/Release/DENN-long-double
+C_FLAGS		  += -DUSE_LONG_DOUBLE
+else 
+	$(error Set SCALAR=FLOAT|DOUBLE|LONG_DOUBLE)
+endif
+
+
 # Linux flags
 ifeq ($(shell uname -s),Linux)
 # too slow -fopenmp 
@@ -41,17 +61,22 @@ ifeq ($(shell uname -s),Darwin)
 #No OpenMP 
 RELEASE_FLAGS += -march=native
 endif
-
 ##
 # Support function for colored output
 # Args:
 #     - $(1) = Color Type
 #     - $(2) = String to print
+ifdef HAVE_TERM
 define colorecho
-      @tput setaf $(1)
-      @echo $(2)
-      @tput sgr0
+	@tput setaf $(1)
+	@echo $(2)
+	@tput sgr0
 endef
+else
+define colorecho
+	@echo $(2)
+endef
+endif
 
 # Color Types
 COLOR_BLACK = 0

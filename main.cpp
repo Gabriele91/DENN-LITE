@@ -135,63 +135,12 @@ namespace BuildTest
 
 int main(int argc,const char** argv)
 {
-	/*input example
-		///////////////////////////////////////////////////////////IRIS
-		-t 5000 \
-		-s 40 \
-		-np 42 \
-		-f 0.6 \
-		-cr 0.8 \
-		-jf 0.1 \
-		-jcr 0.1 \
-		-cmin -15 \
-		-cmax 15 \
-		-rmin -2.0 \
-		-rmax 2.0 \
-		-i "assets/iris_105x6_5s.gz" \
-		-o "iris_105x6_5s.json" \
-		-omp 2 \
-		-tp 4
-		///////////////////////////////////////////////////////////MNIST
-		-t 8000 \
-		-s 1000 \
-		-np 96 \
-		-f 0.9 \
-		-cr 0.9 \
-		-jf 0.1 \
-		-jcr 0.1 \
-		-cmin -30.0 \
-		-cmax 30.0 \
-		-rmin -2.0 \
-		-rmax 2.0 \
-		-i "assets/ARTICLE_MNIST_5_12x4000_1s.gz" \
-		-o "ARTICLE_MNIST_5_12x4000_1s.json" \
-		-omp 0 \
-		-tp 4
-		///////////////////////////////////////////////////////////MNIST-MINI
-		-t 12500 \
-		-rc 3 \
-		-s 1250 \
-		-np 96 \
-		-f 0.9 \
-		-cr 0.9 \
-		-jf 0.2 \
-		-jcr 0.2 \
-		-cmin -30.0 \
-		-cmax 30.0 \
-		-rmin -2.0 \
-		-rmax 2.0 \
-		-i "assets/ARTICLE_mnist_minibatch_v004_576x100_1s.gz" \
-		-o "ARTICLE_mnist_minibatch_v004_576x100_1s.json" \
-		-omp 0 \
-		-tp 4
-	*/
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	using namespace Denn;
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	Parameters arguments(argc, argv);
-	////////////////////////////////////////////////////////////////////////////////////////////////
-	//std::srand(std::time(NULL));
+	//test file name
+	if(!(*arguments.m_dataset_filename).size()) return -1;
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	//parallel (OpenMP)
 	#ifdef EIGEN_HAS_OPENMP
