@@ -4,7 +4,7 @@
 #include <QProcess>
 #include <QVariant>
 #ifdef _WIN32
-    //todo
+    #include <Windows.h>
 #else
     #include <signal.h>
     #include <sys/wait.h>
@@ -38,10 +38,15 @@ public:
     Q_INVOKABLE void forceClose(){
         //Specify the process is no longer running
         setProcessState(ProcessState::NotRunning);
-        //kill
 #ifdef _WIN32
-        //todo
-        assert(0);
+        //kill
+        TerminateProcess(pid()->hProcess,0);
+
+        // Wait until child process exits.
+        WaitForSingleObject( pid()->hProcess, INFINITE );
+
+        // Get exit code
+        // GetExitCodeProcess( pid()->hProcess, &exit_code );
 #else
         ::kill(pid(), SIGKILL);
         ::waitpid(pid(),NULL,WNOHANG);

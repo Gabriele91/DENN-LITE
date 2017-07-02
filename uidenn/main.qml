@@ -75,7 +75,6 @@ ApplicationWindow {
                 process.start(applicationDirPath + "/DENN-"+type, [ nameOfList ]);
             }
             function asArguments(){
-                var pathDataset = textPathDataset.text.substring("file://".length)
                 var args =
                 [
                     "-t", generation.text,
@@ -89,7 +88,7 @@ ApplicationWindow {
                     "-cmax", clampMax.text,
                     "-rmin", randMin.text,
                     "-rmax", randMax.text,
-                    "-i", pathDataset,
+                    "-i", textPathDataset.text,
                     "-o", "output.json",
                     "-omp", "0",
                     "-tp", "4"
@@ -108,7 +107,12 @@ ApplicationWindow {
                                        , appWindow
                                        , "dynamicPath")
                     dialog.accepted.connect(function(){
-                        textPathDataset.text = dialog.fileUrls[0]
+                        // get path
+                        var path = dialog.fileUrl.toString();
+                        // remove prefixed "file:///"
+                        path= path.replace(/^(file:\/{3})|(qrc:\/{2})|(http:\/{2})/,"");
+                        // unescape html codes like '%23' for '#'
+                        textPathDataset.text = decodeURIComponent(path);
                     })
                     dialog.visible = true;
                 })
