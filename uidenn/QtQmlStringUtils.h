@@ -3,6 +3,7 @@
 #include <QString>
 #include <QObject>
 #include <QVariant>
+#include <QUrl>
 
 class QtQmlStringUtils : public QObject
 {
@@ -48,6 +49,11 @@ public:
     Q_INVOKABLE QString trimmed(const QString& str)
     {
         return str.trimmed();
+    }
+
+    Q_INVOKABLE QString toLocalFile(const QString& path)
+    {
+        return QUrl(path).toLocalFile();
     }
 };
 

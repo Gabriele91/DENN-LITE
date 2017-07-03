@@ -108,9 +108,7 @@ ApplicationWindow {
                                        , "dynamicPath")
                     dialog.accepted.connect(function(){
                         // get path
-                        var path = dialog.fileUrl.toString();
-                        // remove prefixed "file:///"
-                        path= path.replace(/^(file:\/{3})|(qrc:\/{2})|(http:\/{2})/,"");
+                        var path = StringUtils.toLocalFile(dialog.fileUrl.toString());
                         // unescape html codes like '%23' for '#'
                         textPathDataset.text = decodeURIComponent(path);
                     })
@@ -134,6 +132,7 @@ ApplicationWindow {
                     consoleOutput.text = ""
                     processDenn.processDennOutput(function(){
                         var out_string = processDenn.readAllStandardOutput();
+                        out_string = out_string.replace(/\r\n/g,'\n') //window
                         out_string = out_string.replace(/\t/g,' ')
                         out_string = out_string.replace(/ +(?= )/g,'');
                         //..
@@ -142,6 +141,7 @@ ApplicationWindow {
                     })
                     processDenn.processDennError(function(){
                         var out_string = processDenn.readAllStandardError();
+                        out_string = out_string.replace(/\r\n/g,'\n') //window
                         out_string = out_string.replace(/\t/g,' ')
                         out_string = out_string.replace(/ +(?= )/g,'');
                         //..
@@ -168,7 +168,7 @@ ApplicationWindow {
         TabButton {
             text: qsTr("Execute")
             onClicked: {
-                console.log("Args:" + pageConfigure.asArguments());
+                console.log("Args:" + pageConfigure.asArguments().join(" "));
             }
         }
     }
