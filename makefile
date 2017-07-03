@@ -4,6 +4,14 @@ COMPILER      ?=g++
 TOP           ?=$(shell pwd)
 SCALAR		  ?= FLOAT
 HAVE_TERM     := $(shell echo $$TERM)
+#undef to none (linux)
+ifndef HAVE_TERM
+	HAVE_TERM = none
+endif
+#dump to none (macOS)
+ifeq ($(HAVE_TERM),dumb)
+	HAVE_TERM = none
+endif
 #program name
 S_DIR  = $(TOP)/
 S_INC  = $(TOP)/
@@ -66,7 +74,7 @@ endif
 # Args:
 #     - $(1) = Color Type
 #     - $(2) = String to print
-ifdef HAVE_TERM
+ifneq ($(HAVE_TERM),none)
 define colorecho
 	@tput setaf $(1)
 	@echo $(2)

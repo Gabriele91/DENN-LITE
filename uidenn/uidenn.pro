@@ -14,46 +14,61 @@ MOC_DIR = $$DESTDIR/.moc
 RCC_DIR = $$DESTDIR/.qrc
 UI_DIR = $$DESTDIR/.ui
 
+linux {
+    OUTPUT_TARGET = $$DESTDIR/
+}
+
+macx {
+    OUTPUT_TARGET = $$DESTDIR/$${TARGET}.app/Contents/MacOS/
+}
+
 unix {
     denn_float.CONFIG += recursive
     denn_float.target = denn_float_executable
     denn_float.commands = make -C $$PWD/../ release SCALAR=FLOAT
     denn_float.files = $$PWD/../Release/DENN-float
-    denn_float.path = $${DESTDIR}/
+    denn_float.path = $${OUTPUT_TARGET}
 
     denn_double.CONFIG += recursive
     denn_double.target = denn_double_executable
     denn_double.commands = make -C $$PWD/../ release SCALAR=DOUBLE
     denn_double.files = $$PWD/../Release/DENN-double
-    denn_double.path = $${DESTDIR}/
+    denn_double.path = $${OUTPUT_TARGET}
 
     denn_longdouble.CONFIG += recursive
     denn_longdouble.target = denn_longdouble_executable
     denn_longdouble.commands = make -C $$PWD/../ release SCALAR=LONG_DOUBLE
     denn_longdouble.files = $$PWD/../Release/DENN-long-double
-    denn_longdouble.path = $${DESTDIR}/
+    denn_longdouble.path = $${OUTPUT_TARGET}
 
     #add target
     QMAKE_EXTRA_TARGETS += denn_float denn_double denn_longdouble
 
     #make
     POST_TARGETDEPS += denn_float_executable denn_double_executable denn_longdouble_executable
+
 }
 
 linux {
-
     #copy
     QMAKE_POST_LINK += $$quote(cp -rf $$denn_float.files $$denn_float.path$$escape_expand(\n\t))
     QMAKE_POST_LINK += $$quote(cp -rf $$denn_double.files $$denn_double.path$$escape_expand(\n\t))
     QMAKE_POST_LINK += $$quote(cp -rf $$denn_longdouble.files $$denn_longdouble.path$$escape_expand(\n\t))
-
 }
-
 
 macx {
 
-    #add into bundle
-    QMAKE_BUNDLE_DATA += denn_float denn_double denn_longdouble
+    copy_float.target = denn_float_copy
+    copy_float.commands = cp $$denn_float.files $$denn_float.path
+
+    copy_double.target = denn_double_copy
+    copy_double.commands = cp $$denn_double.files $$denn_double.path
+
+    copy_longdouble.target = denn_longdouble_copy
+    copy_longdouble.commands = cp $$denn_longdouble.files $$denn_longdouble.path
+
+    QMAKE_EXTRA_TARGETS += copy_float copy_double copy_longdouble
+    POST_TARGETDEPS     += denn_float_copy denn_double_copy denn_longdouble_copy
 
 }
 
