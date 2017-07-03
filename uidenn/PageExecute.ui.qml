@@ -5,6 +5,8 @@ import QtQuick.Controls.Material 2.2
 
 Item {
 
+    property alias consoleOutputScrollView: consoleOutputScrollView
+    property alias consoleOutputFlickable: consoleOutputFlickable
     property alias consoleOutput: consoleOutput
     property alias runAndStop: runAndStop
 
@@ -30,23 +32,26 @@ Item {
                 Material.accent: Material.Purple
 
                 ScrollView {
+                    id: consoleOutputScrollView
                     anchors.fill: parent
                     ScrollBar.horizontal.interactive: true
                     ScrollBar.vertical.interactive: true
                     clip: true
 
-                    TextEdit {
-                        font.family: "Verdana"
-                        font.italic: true
-                        font.bold: true
-                        color: "#fff"
-                        id: consoleOutput
-                        text: qsTr("")
-                        readOnly: true
-                        cursorVisible: true
-                        verticalAlignment: Text.AlignTop
+                    Flickable {
+                        id: consoleOutputFlickable
                         anchors.fill: parent
-                        font.pixelSize: 12
+                        Text {
+                            id: consoleOutput
+                            font.family: "Verdana"
+                            font.italic: true
+                            font.bold: true
+                            color: "#fff"
+                            text: qsTr("")
+                            anchors.fill: parent
+                            verticalAlignment: Text.AlignTop
+                            font.pixelSize: 14
+                        }
                     }
                 }
             }

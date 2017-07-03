@@ -118,8 +118,30 @@ ApplicationWindow {
         }
 
         PageExecute {
+            //Context
+            property var consoleOutputLastContent: 0
+            //Info
             Layout.fillWidth: true
+
+            //init
             Component.onCompleted: {
+                //update function
+                function updateConsoleContent(){
+                    //compute
+                    var newConsoleOutputLastContent = consoleOutput.height - consoleOutputFlickable.height;
+                    //must to be positive
+                    newConsoleOutputLastContent = newConsoleOutputLastContent < 0 ? 0 : newConsoleOutputLastContent;
+                    //
+                    if(newConsoleOutputLastContent != consoleOutputLastContent)
+                    if(consoleOutputFlickable.contentY >= consoleOutputLastContent)
+                    {
+                        consoleOutputLastContent = newConsoleOutputLastContent;
+                        consoleOutputFlickable.contentY = consoleOutputLastContent;
+                    }
+                    //get value
+                    return newConsoleOutputLastContent;
+                }
+                //event run
                 runAndStop.clicked.connect(function()
                 {
                     if(processDenn.isRunning()){
@@ -127,9 +149,11 @@ ApplicationWindow {
                         runAndStop.text = "Run"
                         return;
                     }
-                    //else
+                    //else init context
                     runAndStop.text = "Stop"
                     consoleOutput.text = ""
+                    consoleOutputLastContent = updateConsoleContent();
+                    //events
                     processDenn.processDennOutput(function(){
                         var out_string = processDenn.readAllStandardOutput();
                         out_string = out_string.replace(/\r\n/g,'\n') //window
@@ -138,6 +162,7 @@ ApplicationWindow {
                         //..
                         out_string = StringUtils.removeEndCarriage(consoleOutput.text+out_string)
                         consoleOutput.text = out_string;
+                        updateConsoleContent()
                     })
                     processDenn.processDennError(function(){
                         var out_string = processDenn.readAllStandardError();
@@ -147,6 +172,7 @@ ApplicationWindow {
                         //..
                         out_string = StringUtils.removeEndCarriage(consoleOutput.text+out_string)
                         consoleOutput.text = out_string;
+                        updateConsoleContent()
                     })
                     processDenn.processDennTermination(function(){
                         runAndStop.text = "Run"
