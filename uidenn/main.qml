@@ -19,6 +19,20 @@ ApplicationWindow {
         setY(Screen.height / 2 - height / 2);
     }
 
+    header: TabBar {
+        id: tabBar
+        currentIndex: swipeView.currentIndex
+        TabButton {
+            text: qsTr("Configure")
+        }
+        TabButton {
+            text: qsTr("Execute")
+            onClicked: {
+                console.log("Args:" + pageConfigure.asArguments().join(" "));
+            }
+        }
+    }
+
     BasicProcess {
         id: processDenn
 
@@ -180,22 +194,25 @@ ApplicationWindow {
                     processDenn.startDenn("float",pageConfigure.asArguments());
 
                 })
+                //event hover/click
+                var in_color = Material.accent
+                var in_width = 2
+                var out_color = Material.foreground
+                var out_width = 1
+                consoleOutputBackGround.border.color = out_color
+                //
+                consoleOutputMouseArea.dynamicPressed.connect(function(mouse){
+                    consoleOutputBackGround.border.color = in_color
+                    consoleOutputBackGround.border.width = in_width
+                    mouse.accepted = false
+                })
+                consoleOutputMouseArea.exited.connect(function(){
+                    consoleOutputBackGround.border.color = out_color
+                    consoleOutputBackGround.border.width = out_width
+                })
             }
         }
     }
 
 
-    footer: TabBar {
-        id: tabBar
-        currentIndex: swipeView.currentIndex
-        TabButton {
-            text: qsTr("Configure")
-        }
-        TabButton {
-            text: qsTr("Execute")
-            onClicked: {
-                console.log("Args:" + pageConfigure.asArguments().join(" "));
-            }
-        }
-    }
 }

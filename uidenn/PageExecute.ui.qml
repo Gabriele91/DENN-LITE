@@ -5,6 +5,8 @@ import QtQuick.Controls.Material 2.2
 
 Item {
 
+    property alias consoleOutputMouseArea: consoleOutputMouseArea
+    property alias consoleOutputBackGround: consoleOutputBackGround
     property alias consoleOutputScrollView: consoleOutputScrollView
     property alias consoleOutputFlickable: consoleOutputFlickable
     property alias consoleOutput: consoleOutput
@@ -28,8 +30,6 @@ Item {
                 font.pointSize: 14
                 Layout.fillHeight: true
                 Layout.fillWidth: true
-                Material.theme: Material.Dark
-                Material.accent: Material.Purple
 
                 ScrollView {
                     id: consoleOutputScrollView
@@ -41,18 +41,42 @@ Item {
                     Flickable {
                         id: consoleOutputFlickable
                         anchors.fill: parent
-                        Text {
+                        Label {
                             id: consoleOutput
                             font.family: "Verdana"
                             font.italic: true
                             font.bold: true
-                            color: "#fff"
                             text: qsTr("")
+                            rightPadding: 4
+                            bottomPadding: 4
+                            leftPadding: 4
+                            topPadding: 4
                             anchors.fill: parent
                             verticalAlignment: Text.AlignTop
                             font.pixelSize: 14
                         }
                     }
+
+                    background: Rectangle {
+                        id: consoleOutputBackGround
+                        color: "#00000000"
+                        border.width: 1
+                        radius: 4
+                    }
+                }
+
+                MouseAreaDynamicPress {
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    id: consoleOutputMouseArea
+                    propagateComposedEvents: true
+
+                    //onPressed: mouse.accepted = false //overload
+                    onClicked: mouse.accepted = false
+                    onReleased: mouse.accepted = false
+                    onDoubleClicked: mouse.accepted = false
+                    onPositionChanged: mouse.accepted = false
+                    onPressAndHold: mouse.accepted = false
                 }
             }
 

@@ -46,7 +46,7 @@ Item {
                 Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                 anchors.horizontalCenter: parent.horizontalCenter
 
-                Text {
+                Label {
                     id: textGeneration
                     text: qsTr("Generation")
                     verticalAlignment: Text.AlignVCenter
@@ -70,7 +70,7 @@ Item {
                 Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                 anchors.horizontalCenter: parent.horizontalCenter
 
-                Text {
+                Label {
                     id: textSubGeneration
                     text: qsTr("Sub Generation")
                     verticalAlignment: Text.AlignVCenter
@@ -94,7 +94,7 @@ Item {
                 Layout.alignment: Qt.AlignLeft | Qt.AlignTop
                 anchors.horizontalCenter: parent.horizontalCenter
 
-                Text {
+                Label {
                     id: textNumberParents
                     text: qsTr("Number Parents")
                     verticalAlignment: Text.AlignVCenter
@@ -121,7 +121,7 @@ Item {
                 ColumnLayout {
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
 
-                    Text {
+                    Label {
                         id: textDefaultF
                         text: qsTr("Default F")
                         verticalAlignment: Text.AlignVCenter
@@ -144,7 +144,7 @@ Item {
                 ColumnLayout {
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
 
-                    Text {
+                    Label {
                         id: textDefaultCR
                         text: qsTr("Default CR")
                         verticalAlignment: Text.AlignVCenter
@@ -169,7 +169,7 @@ Item {
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                 ColumnLayout {
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                    Text {
+                    Label {
                         id: textJdeF
                         text: qsTr("JDE F")
                         Layout.fillWidth: true
@@ -191,7 +191,7 @@ Item {
 
                 ColumnLayout {
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                    Text {
+                    Label {
                         id: textJdeCR
                         text: qsTr("JDE CR")
                         Layout.fillWidth: true
@@ -216,7 +216,7 @@ Item {
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                 ColumnLayout {
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                    Text {
+                    Label {
                         id: textClampMin
                         text: qsTr("Clamp min")
                         Layout.fillWidth: true
@@ -238,7 +238,7 @@ Item {
 
                 ColumnLayout {
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                    Text {
+                    Label {
                         id: textClampMax
                         text: qsTr("Clamp max")
                         Layout.fillWidth: true
@@ -263,7 +263,7 @@ Item {
                 Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
                 ColumnLayout {
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                    Text {
+                    Label {
                         id: textRandMin
                         text: qsTr("Random initialization range min")
                         Layout.fillWidth: true
@@ -285,7 +285,7 @@ Item {
 
                 ColumnLayout {
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
-                    Text {
+                    Label {
                         id: textRandMax
                         text: qsTr("Random initialization range max")
                         Layout.fillWidth: true
@@ -312,7 +312,7 @@ Item {
                 ColumnLayout {
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
 
-                    Text {
+                    Label {
                         id: textMutation
                         text: qsTr("Mutation")
                         Layout.fillWidth: true
@@ -334,7 +334,7 @@ Item {
                 ColumnLayout {
                     Layout.alignment: Qt.AlignLeft | Qt.AlignTop
 
-                    Text {
+                    Label {
                         id: textCrossover
                         text: qsTr("Crossover")
                         Layout.fillWidth: true
@@ -373,13 +373,10 @@ Item {
 
                     Layout.alignment: Qt.AlignHCenter | Qt.AlignVCenter
 
-                    TextInput {
+                    Label {
                         id: textPathDataset
                         width: 80
                         height: 20
-                        cursorVisible: false
-                        readOnly: true
-                        inputMask: ""
                         Layout.fillWidth: true
                         font.pixelSize: 16
                     }
