@@ -97,8 +97,27 @@ namespace BuildTest
 		// NETWORK
 		size_t n_features = dataset.get_main_header_info().m_n_features;
 		size_t n_class    = dataset.get_main_header_info().m_n_classes;
-		NeuralNetwork nn0( PerceptronLayer(n_features, n_class) );
-
+		NeuralNetwork nn0;
+		//hidden layer list
+		const auto& hidden_layers = (*parameters.m_hidden_layers);
+		//push all hidden layers
+		if(hidden_layers.size())
+		{
+			//add first layer
+			nn0.add_layer( PerceptronLayer(n_features, hidden_layers[0]) );
+			//add next layers
+			for(size_t i = 0; i != hidden_layers.size() - 1;++i)
+			{
+				nn0.add_layer( PerceptronLayer(hidden_layers[i], hidden_layers[i+1]) );
+			}
+			//add last layer
+			nn0.add_layer( PerceptronLayer(hidden_layers[hidden_layers.size()-1], n_class) );
+		}
+		//else add only input layer
+		else 
+		{
+			nn0.add_layer( PerceptronLayer(n_features, n_class) );
+		}
 		//Function ptr
 		auto cost_function = CostFunction::softmax_cross_entropy_with_logit< Matrix >;
 
