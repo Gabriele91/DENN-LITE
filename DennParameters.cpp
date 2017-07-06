@@ -30,6 +30,18 @@ namespace Denn
         return m_rem_arg;
     }
 
+    void Arguments::back_of_one()
+    {
+        ++m_rem_arg;
+        --m_pointer;
+    }
+
+    bool Arguments::start_with_minus() const
+    {
+        return (*m_pointer)[0] == '-';
+    }
+
+
     Parameters::Parameters() 
     :m_params_info
     ({
@@ -121,6 +133,18 @@ namespace Denn
                 if(*m_restart_delta<0) m_restart_enable = false;
                  return true; 
             } 
+        },
+        ParameterInfo{
+            "Size of hidden layers", { "--hidden_layers",    "-hl"  },
+            [this](Arguments& args) -> bool 
+            { 
+                while(args.remaining() && !args.start_with_minus())
+                {
+                    m_hidden_layers.get().push_back(args.get_int());
+                }
+                //ok
+                return m_hidden_layers.get().size() != 0; 
+            }
         },
         ParameterInfo{
             "Path of dataset file (gz)", { "--dataset", "-d", "-i" }, 
