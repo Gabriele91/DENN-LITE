@@ -26,6 +26,9 @@ ApplicationWindow {
             text: qsTr("Configure")
         }
         TabButton {
+            text: qsTr("Neural Network")
+        }
+        TabButton {
             text: qsTr("Execute")
             onClicked: {
                 console.log("Args:" + pageConfigure.asArguments().join(" "));
@@ -129,6 +132,10 @@ ApplicationWindow {
                     dialog.visible = true;
                 })
             }
+        }
+
+        PageNeuralNetwork {
+
         }
 
         PageExecute {

@@ -5,5 +5,8 @@
         <file>qtquickcontrols2.conf</file>
         <file>PageExecute.ui.qml</file>
         <file>MouseAreaDynamicPress.qml</file>
+        <file>PageNeuralNetwork.qml</file>
+        <file>DraggableItem.qml</file>
+        <file>DraggableItemDropArea.qml</file>
     </qresource>
 </RCC>

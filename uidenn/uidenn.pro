@@ -70,6 +70,7 @@ macx {
     QMAKE_EXTRA_TARGETS += copy_float copy_double copy_longdouble
     POST_TARGETDEPS     += denn_float_copy denn_double_copy denn_longdouble_copy
 
+
 }
 
 win32 {
