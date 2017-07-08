@@ -11,7 +11,7 @@ ApplicationWindow {
     id: appWindow
     visible: true
     width: 1280
-    height: 740
+    height: 760
     title: qsTr("Denn")
 
     Component.onCompleted: {
@@ -31,7 +31,7 @@ ApplicationWindow {
         TabButton {
             text: qsTr("Execute")
             onClicked: {
-                console.log("Args:" + pageConfigure.asArguments().join(" "));
+                console.log("DENN-" + getDennType() + " " + getDennArguments().join(" "));
             }
         }
     }
@@ -59,6 +59,26 @@ ApplicationWindow {
             processDenn.finished.connect(fun);
         }
     }
+
+    function getDennArguments(){
+        //configuration args
+        var args = pageConfigure.asArguments()
+        //network args
+        var layers = pageNeuralNetwork.getHiddenLayer()
+        //to args
+        if(layers.length > 0)
+        {
+            args.push("-hl")
+            args.push(layers.join(" "))
+        }
+        //return
+        return args
+    }
+
+    function getDennType(){
+        return pageNeuralNetwork.getDennType()
+    }
+
 
     SwipeView {
         id: swipeView
@@ -110,6 +130,7 @@ ApplicationWindow {
                     "-omp", "0",
                     "-tp", "4"
                 ];
+                //
                 return args
             }
             function connectEventOfDatasetSelection(){
@@ -135,15 +156,17 @@ ApplicationWindow {
         }
 
         PageNeuralNetwork {
-
+            //id
+            id: pageNeuralNetwork
         }
 
         PageExecute {
+            //id
+            id: pageExecute
             //Context
             property var consoleOutputLastContent: 0
             //Info
             Layout.fillWidth: true
-
             //init
             Component.onCompleted: {
                 //update function
@@ -198,7 +221,7 @@ ApplicationWindow {
                     processDenn.processDennTermination(function(){
                         runAndStop.text = "Run"
                     })
-                    processDenn.startDenn("float",pageConfigure.asArguments());
+                    processDenn.startDenn(getDennType(),getDennArguments());
 
                 })
                 //event hover/click

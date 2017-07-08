@@ -23,7 +23,7 @@ DropArea {
             bottom: dropIndex === 0 ? undefined : parent.verticalCenter
         }
         height: 2
-        opacity: root.containsDrag ? 0.8 : 0.1
+        opacity: root.containsDrag ? 0.0 : 0.0
         color: Material.accent
     }
 }
