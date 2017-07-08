@@ -2,7 +2,7 @@
 #include "Config.h"
 #include "ThreadPool.h"
 #include "CostFunction.h"
-#include "RandomIndices.h"
+#include "DennRandom.h"
 #include "DennDatasetLoader.h"
 #include "DennParameters.h"
 #include "DennPopulation.h"
@@ -67,13 +67,13 @@ public:
 		const Population& parents  = m_population.parents();
 		const Individual& i_target = *parents[target];
 		//f JDE
-		if (RandomIndices::random() < Scalar(m_params.m_jde_f))   
-			i_final.m_f = Scalar(RandomIndices::random(0.0,2.0));
+		if (Random::random() < Scalar(m_params.m_jde_f))   
+			i_final.m_f = Scalar(Random::random(0.0,2.0));
 		else														
 			i_final.m_f = i_target.m_f;
 		//cr JDE
-		if (RandomIndices::random() < Scalar(m_params.m_jde_cr))   
-			i_final.m_cr = Scalar(RandomIndices::random());
+		if (Random::random() < Scalar(m_params.m_jde_cr))   
+			i_final.m_cr = Scalar(Random::random());
 		else														
 			i_final.m_cr = i_target.m_cr;
 

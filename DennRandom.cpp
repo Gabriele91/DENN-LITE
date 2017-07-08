@@ -1,8 +1,8 @@
-#include "RandomIndices.h"
+#include "DennRandom.h"
 
 namespace Denn
 {
-namespace RandomIndices
+namespace Random
 {
 	//Get generator (per thread)
 	std::mt19937& thread_random_generator()

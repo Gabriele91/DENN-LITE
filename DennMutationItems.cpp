@@ -20,7 +20,7 @@ namespace Denn
 			//target
 			const Individual& i_target = *population[id_target];
 			//init generator
-			static thread_local RandomIndices::RandomDeck rand_deck;
+			static thread_local Random::RandomDeck rand_deck;
 			//set population size in deck
 			rand_deck.resize(population.size());
 			//for each layers
@@ -60,7 +60,7 @@ namespace Denn
 			//target
 			const Individual& i_target = *population[id_target];
 			//init generator
-			static thread_local RandomIndices::RandomDeck rand_deck;
+			static thread_local Random::RandomDeck rand_deck;
 			//set population size in deck
 			rand_deck.resize(population.size());
 			//for each layers
@@ -106,7 +106,7 @@ namespace Denn
 			//best
 			const Individual& i_best = *population.best();
 			//init generator
-			static thread_local RandomIndices::RandomDeck rand_deck;
+			static thread_local Random::RandomDeck rand_deck;
 			//set population size in deck
 			rand_deck.resize(population.size());
 			//for each layers
@@ -147,7 +147,7 @@ namespace Denn
 			//best
 			const Individual& i_best = *population.best();
 			//init generator
-			static thread_local RandomIndices::RandomDeck rand_deck;
+			static thread_local Random::RandomDeck rand_deck;
 			//set population size in deck
 			rand_deck.resize(population.size());
 			//for each layers

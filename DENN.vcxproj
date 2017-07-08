@@ -37,7 +37,7 @@
     <ClInclude Include="Layer.h" />
     <ClInclude Include="NeuralNetwork.h" />
     <ClInclude Include="PerceptronLayer.h" />
-    <ClInclude Include="RandomIndices.h" />
+    <ClInclude Include="DennRandom.h" />
     <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="TicksTime.h" />
   </ItemGroup>
@@ -54,7 +54,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NeuralNetwork.cpp" />
     <ClCompile Include="PerceptronLayer.cpp" />
-    <ClCompile Include="RandomIndices.cpp" />
+    <ClCompile Include="DennRandom.cpp" />
     <ClCompile Include="TicksTime.cpp" />
   </ItemGroup>
   <ItemGroup>

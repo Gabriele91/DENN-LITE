@@ -158,7 +158,7 @@ namespace Denn
 				}
 		}
 		//add best
-		size_t rand_i = RandomIndices::irand(population.size());
+		size_t rand_i = Random::irand(population.size());
 		//must copy, The Best Individual can't to be changed during the DE process
 		population[rand_i] = best->copy();
 		//eval

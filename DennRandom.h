@@ -8,7 +8,7 @@
 
 namespace Denn
 {
-	namespace RandomIndices
+	namespace Random
 	{
 		//Get generator (per thread)
 		extern std::mt19937& thread_random_generator();

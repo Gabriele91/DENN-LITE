@@ -333,7 +333,7 @@ namespace Denn
 		Scalar max = m_params.m_range_max;
 		return [=](Scalar x) -> Scalar
 		{
-			return Scalar(RandomIndices::random(min, max));
+			return Scalar(Random::random(min, max));
 		};
 	}
 	

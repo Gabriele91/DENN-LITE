@@ -39,9 +39,6 @@
     <ClInclude Include="TicksTime.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="RandomIndices.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
     <ClInclude Include="ThreadPool.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
@@ -78,15 +75,15 @@
     <ClInclude Include="DennDatasetLoader.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="DennRandom.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="TicksTime.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
-    <ClCompile Include="RandomIndices.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="NeuralNetwork.cpp">
@@ -120,6 +117,9 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="DennParameters.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="DennRandom.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

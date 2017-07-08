@@ -163,10 +163,10 @@ int main(int argc,const char** argv)
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	//parallel (OpenMP)
 	#ifdef EIGEN_HAS_OPENMP
-	if (arguments.m_threads_omp)
+	if (*arguments.m_threads_omp)
 	{
-		omp_set_num_threads(arguments.m_threads_omp);
-		Eigen::setNbThreads(arguments.m_threads_omp);
+		omp_set_num_threads(*arguments.m_threads_omp);
+		Eigen::setNbThreads(*arguments.m_threads_omp);
 		Eigen::initParallel();
 	}
 	#endif
@@ -174,9 +174,9 @@ int main(int argc,const char** argv)
 	//ptr
 	std::unique_ptr<ThreadPool> uptr_thpool;
 	//alloc new ThreadPool
-	if(arguments.m_threads_pop)
+	if(*arguments.m_threads_pop)
 	{
-		uptr_thpool = std::make_unique<ThreadPool>(size_t(arguments.m_threads_pop));
+		uptr_thpool = std::make_unique<ThreadPool>(*arguments.m_threads_pop);
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	DataSetLoaderGZ dataset((const std::string&)arguments.m_dataset_filename);

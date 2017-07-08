@@ -14,7 +14,7 @@
 #include <zlib.h>
 //internal include
 #include "TicksTime.h"
-#include "RandomIndices.h"
+#include "DennRandom.h"
 //defines
 #define USE_CROSS_ENTROPY_SAFE
 //macro

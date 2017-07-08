@@ -5,7 +5,7 @@
 #include  "TicksTime.h"
 #include  "Constants.h"
 #include  "IOFileWrapper.h"
-#include  "RandomIndices.h"
+#include  "DennRandom.h"
 
 //NeuralNetwork includes
 #include  "ActiveFunction.h"
