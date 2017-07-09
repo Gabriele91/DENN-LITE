@@ -89,14 +89,15 @@ namespace Denn
 			m_archive.clear();
 		}
 
+		virtual void start_a_gen_pass(DoubleBufferPopulation& dpopulation) override
+		{
+			//Update F/CR??
+		}
+
 		virtual void start_a_subgen_pass(DoubleBufferPopulation& dpopulation) override
 		{
 			//sort parents
 			dpopulation.parents().sort();
-		}
-
-		virtual void end_a_subgen_pass(DoubleBufferPopulation& dpopulation) override
-		{
 		}
 
 		virtual void update_f_cr
