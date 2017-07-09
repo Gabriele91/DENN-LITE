@@ -3,7 +3,7 @@
 //  HCubo
 //
 //  Created by Gabriele on 09/07/176.
-//  Copyright © 2017 Gabriele. All rights reserved.
+//  Copyright ï¿½ 2017 Gabriele. All rights reserved.
 //
 #pragma once
 #include "Config.h"
@@ -743,18 +743,18 @@ namespace Denn
 		switch (ref.get_type())
 		{
 		case VariantType::VR_NONE:     (*this) = Variant();        break;
-		case VariantType::VR_CHAR:     (*this) = (const char)ref;  break;
-		case VariantType::VR_SHORT:    (*this) = (const short)ref; break;
-		case VariantType::VR_INT:      (*this) = (const int)ref;   break;
-		case VariantType::VR_LONG:     (*this) = (const long)ref;  break;
-		case VariantType::VR_LONGLONG: (*this) = (const long long)ref; break;
-		case VariantType::VR_UCHAR:    (*this) = (const unsigned char)ref; break;
-		case VariantType::VR_USHORT:   (*this) = (const unsigned short)ref; break;
-		case VariantType::VR_UINT:     (*this) = (const unsigned int)ref; break;
-		case VariantType::VR_ULONG:    (*this) = (const unsigned long)ref; break;
-		case VariantType::VR_ULONGLONG:(*this) = (const unsigned long long)ref; break;
-		case VariantType::VR_FLOAT:    (*this) = (const float)ref; break;
-		case VariantType::VR_DOUBLE:   (*this) = (const double)ref; break;
+		case VariantType::VR_CHAR:     (*this) = ref.get<char>();  break;
+		case VariantType::VR_SHORT:    (*this) = ref.get<short>(); break;
+		case VariantType::VR_INT:      (*this) = ref.get<int>();   break;
+		case VariantType::VR_LONG:     (*this) = ref.get<long>();  break;
+		case VariantType::VR_LONGLONG: (*this) = ref.get<long long>(); break;
+		case VariantType::VR_UCHAR:    (*this) = ref.get<unsigned char>(); break;
+		case VariantType::VR_USHORT:   (*this) = ref.get<unsigned short>(); break;
+		case VariantType::VR_UINT:     (*this) = ref.get<unsigned int>(); break;
+		case VariantType::VR_ULONG:    (*this) = ref.get<unsigned long>(); break;
+		case VariantType::VR_ULONGLONG:(*this) = ref.get<unsigned long long>(); break;
+		case VariantType::VR_FLOAT:    (*this) = ref.get<float>(); break;
+		case VariantType::VR_DOUBLE:   (*this) = ref.get<double>();  break;
 
 		case VariantType::VR_FLOAT_MATRIX:      (*this)  = (const MatrixF&)ref; break;
 		case VariantType::VR_DOUBLE_MATRIX:     (*this)  = (const MatrixD&)ref; break;
@@ -775,7 +775,7 @@ namespace Denn
 		case VariantType::VR_STD_STRING:           (*this) = (const std::string&)ref; break;
 		case VariantType::VR_STD_VECTOR_STRING:    (*this) = (const std::vector<std::string>&)ref; break;
 
-		case VariantType::VR_PTR:				   (*this) = (void*)(const void*)ref; break;
+		case VariantType::VR_PTR:				   (*this) = (void*)ref.get_ptr<void>(); break;
 		default: break;
 		}
 	}
