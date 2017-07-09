@@ -82,6 +82,8 @@ namespace Denn
 		{
 			m_archive_max_size = m_algorithm.parameters().m_archive_size;
 			m_c_adapt          = m_algorithm.parameters().m_f_cr_adapt;
+			m_mutation_f       = Scalar(0.5);
+			m_mutation_cr      = Scalar(0.5);
 		}
 		
 		virtual void reset() override

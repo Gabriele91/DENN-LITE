@@ -66,11 +66,11 @@ namespace Denn
             { 
                 std::string str_m_type = args.get_string() ;
                 //all lower case
-                std::transform(str_m_type.begin(),str_m_type.end(), str_m_type.begin(), ::tolower);
+                std::transform(str_m_type.begin(),str_m_type.end(), str_m_type.begin(), ::toupper);
                 //save
 				m_evolution_type = str_m_type;
-                //ok
-                return MutationFactory::exists(*m_mutation_type); 
+                //ok 
+                return EvolutionMethodFactory::exists(*m_evolution_type);
             }
         },
         ParameterInfo{
