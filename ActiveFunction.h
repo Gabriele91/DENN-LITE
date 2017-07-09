@@ -88,7 +88,7 @@ namespace ActiveFunction
 	template < typename Matrix >
 	Matrix& softmax(Matrix& inout_matrix)
 	{
-		const int	                  N   = inout_matrix.rows();
+		const auto	                  N   = inout_matrix.rows();
 		const typename Matrix::Scalar max = inout_matrix.maxCoeff();
 #if 1
 		//compute e^(M-max)

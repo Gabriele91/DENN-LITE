@@ -78,6 +78,12 @@
     <ClInclude Include="DennRandom.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="DennEvolutionMethod.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="DennVariant.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -120,6 +126,12 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="DennRandom.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="DennEvolutionMethodFactory.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="DennEvolutionMethodItems.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

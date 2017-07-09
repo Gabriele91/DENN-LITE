@@ -5,7 +5,7 @@
 namespace Denn
 {	
 	//parameters
-	class Parameters;
+	class DennAlgorithm;
 	//mutation
     class Mutation : public std::enable_shared_from_this< Mutation >
 	{ 
@@ -15,15 +15,13 @@ namespace Denn
 		//return ptr
 		SPtr get_ptr() { return this->shared_from_this(); }
 		//Mutation
-		Mutation(const Parameters& parameters);
+		Mutation(const DennAlgorithm& algorithm);
 		//operation
 		virtual void operator()(const Population& population,int id_target,Individual& output)= 0; 
 
 		protected:
-		//utils
-		std::function<Scalar(Scalar)> m_clamp;
 		//attributes
-		const Parameters& m_parameters;
+		const DennAlgorithm& m_algorithm;
 	};
 
 	//class factory of Mutation methods
@@ -32,10 +30,10 @@ namespace Denn
 
 	public:
 		//Mutation classes map
-		typedef Mutation::SPtr(*CreateObject)(const Parameters& parameters);
+		typedef Mutation::SPtr(*CreateObject)(const DennAlgorithm& algorithm);
 
 		//public
-		static Mutation::SPtr create(const std::string& name, const Parameters& parameters);
+		static Mutation::SPtr create(const std::string& name, const DennAlgorithm& algorithm);
 		static void append(const std::string& name, CreateObject fun, size_t size);
 
 		//list of methods
@@ -56,9 +54,9 @@ namespace Denn
 	class MutationItem
 	{
 
-		static Mutation::SPtr create(const Parameters& parameters)
+		static Mutation::SPtr create(const DennAlgorithm& algorithm)
 		{
-			return (std::make_shared< T >(parameters))->get_ptr();
+			return (std::make_shared< T >(algorithm))->get_ptr();
 		}
 
 		MutationItem(const std::string& name, size_t size)

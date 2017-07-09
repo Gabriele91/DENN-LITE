@@ -9,14 +9,14 @@ namespace Denn
 	//map
 	std::unique_ptr< std::map< std::string, CrossoverFactory::CreateObject > > CrossoverFactory::m_cmap;
 	//public
-	Crossover::SPtr CrossoverFactory::create(const std::string& name, const Parameters& parameters)
+	Crossover::SPtr CrossoverFactory::create(const std::string& name, const DennAlgorithm& algorithm)
 	{
 		//map is alloc?
 		if (!m_cmap) return nullptr;
 		//find
 		auto it = m_cmap->find(name);
 		//return
-		return it->second(parameters);
+		return it->second(algorithm);
 	}
 	void CrossoverFactory::append(const std::string& name, CrossoverFactory::CreateObject fun, size_t size)
 	{

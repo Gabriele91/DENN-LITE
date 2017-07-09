@@ -5,21 +5,23 @@
 namespace Denn
 {
 	//parameters
-	class Parameters;
+	class DennAlgorithm;
 	//mutation
 	class Crossover : public std::enable_shared_from_this< Crossover >
 	{
 		public:
 		//Crossover info
-		Crossover(const Parameters& parameters) : m_parameters(parameters) {}
+		Crossover(const DennAlgorithm& algorithm) : m_algorithm(algorithm) {}
 		//ref to Crossover
 		using SPtr = std::shared_ptr<Crossover>;
 		//operator
 		virtual void operator()(const Population& population, int id_target, Individual& mutant)= 0;
 		//return ptr
 		SPtr get_ptr() { return this->shared_from_this(); }
+
+	protected:
 		//attributes
-		const Parameters& m_parameters;
+		const DennAlgorithm& m_algorithm;
 	};
 
 	//class factory of Crossover methods
@@ -28,10 +30,10 @@ namespace Denn
 
 	public:
 		//Crossover classes map
-		typedef Crossover::SPtr(*CreateObject)(const Parameters& parameters);
+		typedef Crossover::SPtr(*CreateObject)(const DennAlgorithm& algorithm);
 
 		//public
-		static Crossover::SPtr create(const std::string& name, const Parameters& parameters);
+		static Crossover::SPtr create(const std::string& name, const DennAlgorithm& algorithm);
 		static void append(const std::string& name, CreateObject fun, size_t size);
 
 		//list of methods
@@ -52,9 +54,9 @@ namespace Denn
 	class CrossoverItem
 	{
 
-		static Crossover::SPtr create(const Parameters& parameters)
+		static Crossover::SPtr create(const DennAlgorithm& algorithm)
 		{
-			return (std::make_shared< T >(parameters))->get_ptr();
+			return (std::make_shared< T >(algorithm))->get_ptr();
 		}
 
 		CrossoverItem(const std::string& name, size_t size)

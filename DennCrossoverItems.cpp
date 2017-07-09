@@ -7,7 +7,7 @@ namespace Denn
 	class None : public Crossover
 	{
 	public:
-		None(const Parameters& parameters) : Crossover(parameters) {}
+		None(const DennAlgorithm& algorithm) : Crossover(algorithm) {}
 
 		virtual void operator()(const Population& population, int id_target, Individual& i_mutant)
 		{
@@ -19,7 +19,7 @@ namespace Denn
 	class Bin : public Crossover
 	{
 	public:
-		Bin(const Parameters& parameters) : Crossover(parameters) {}
+		Bin(const DennAlgorithm& algorithm) : Crossover(algorithm) {}
 
 		virtual void operator()(const Population& population, int id_target, Individual& i_mutant)
 		{
@@ -42,7 +42,7 @@ namespace Denn
 					{
 						//crossover
 						//!(RandomIndices::random() < cr || e_rand == e)
-						if (e_rand != e && cr <= Random::random())
+						if (e_rand != e && cr <= Random::uniform())
 						{
 							w_mutant(e) = w_target(e);
 						}
@@ -56,7 +56,7 @@ namespace Denn
 	class Exp : public Crossover
 	{
 	public:
-		Exp(const Parameters& parameters) : Crossover(parameters) {}
+		Exp(const DennAlgorithm& algorithm) : Crossover(algorithm) {}
 
 		virtual void operator()(const Population& population, int id_target, Individual& i_mutant)
 		{
@@ -84,7 +84,7 @@ namespace Denn
 						size_t e_circ = (e_start + e) % w_target.size();
 						//crossover
 						//!(RandomIndices::random() < cr || e_rand == e)
-						copy_event |= (e_rand != e_circ && cr <= Random::random());
+						copy_event |= (e_rand != e_circ && cr <= Random::uniform());
 						//copy all vector
 						if (copy_event)
 						{
@@ -100,7 +100,7 @@ namespace Denn
 	class Interm : public Crossover
 	{
 	public:
-		Interm(const Parameters& parameters) : Crossover(parameters) {}
+		Interm(const DennAlgorithm& algorithm) : Crossover(algorithm) {}
 
 		virtual void operator()(const Population& population, int id_target, Individual& i_mutant)
 		{
@@ -119,7 +119,7 @@ namespace Denn
 					//CROSS
 					for (decltype(w_target.size()) e = 0; e != w_target.size(); ++e)
 					{
-						Scalar factor = Random::random();
+						Scalar factor = Random::uniform();
 						w_mutant(e) = w_target(e) + factor * (w_mutant(e) - w_target(e));
 					}
 				}
@@ -131,7 +131,7 @@ namespace Denn
 	class BinInterm : public Crossover
 	{
 	public:
-		BinInterm(const Parameters& parameters) : Crossover(parameters) {}
+		BinInterm(const DennAlgorithm& algorithm) : Crossover(algorithm) {}
 
 		virtual void operator()(const Population& population, int id_target, Individual& i_mutant)
 		{
@@ -154,9 +154,9 @@ namespace Denn
 					{
 						//crossover
 						//!(RandomIndices::random() < cr || e_rand == e)
-						if (e_rand != e && cr <= Random::random())
+						if (e_rand != e && cr <= Random::uniform())
 						{
-							Scalar factor = Random::random();
+							Scalar factor = Scalar(Random::uniform());
 							w_mutant(e) = w_target(e) + factor * (w_mutant(e) - w_target(e));
 						}
 					}

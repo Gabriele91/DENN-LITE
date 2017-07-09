@@ -8,6 +8,7 @@
 #include "DennPopulation.h"
 #include "DennMutation.h"
 #include "DennCrossover.h"
+#include "DennEvolutionMethod.h"
 #include "DennRuntimeOutput.h"
 
 namespace Denn
@@ -27,8 +28,10 @@ public:
 	//DE parallel
 	using PromiseList    = std::vector< std::future<void> >;
 	//Ref mutation crossover
-	using MutationPtr    = typename Mutation::SPtr;
-	using CrossoverPtr   = typename Crossover::SPtr;
+	using EvolutionMethodPtr = typename EvolutionMethod::SPtr;
+	using MutationPtr        = typename Mutation::SPtr;
+	using CrossoverPtr       = typename Crossover::SPtr;
+	using ClampFunction      = std::function<Scalar(Scalar)>;
 	//Ref mutation
 	////////////////////////////////////////////////////////////////////////
 	//structs utilities
@@ -61,25 +64,6 @@ public:
 		}
 	};
 	////////////////////////////////////////////////////////////////////////
-	bool jde(int target, Individual& i_final) const
-	{
-		//vectors
-		const Population& parents  = m_population.parents();
-		const Individual& i_target = *parents[target];
-		//f JDE
-		if (Random::random() < Scalar(m_params.m_jde_f))   
-			i_final.m_f = Scalar(Random::random(0.0,2.0));
-		else														
-			i_final.m_f = i_target.m_f;
-		//cr JDE
-		if (Random::random() < Scalar(m_params.m_jde_cr))   
-			i_final.m_cr = Scalar(Random::random());
-		else														
-			i_final.m_cr = i_target.m_cr;
-
-		return true;
-	}
-	////////////////////////////////////////////////////////////////////////
 	DennAlgorithm
 	(
 		DataSetLoader*      dataset_loader
@@ -105,6 +89,37 @@ public:
 	//using the test set on a individual
 	Scalar execute_test(Individual& individual);
 
+	//info
+	const Parameters& parameters() const
+	{
+		return m_params;
+	}
+
+	const EvolutionMethod& evolution_method() const
+	{
+		return *m_e_method;
+	}
+
+	const Mutation& mutation() const
+	{
+		return *m_mutation;
+	}
+
+	const Crossover& crossover() const
+	{
+		return *m_crossover;
+	}
+
+	const RandomFunction& random_function() const
+	{
+		return m_random_function;
+	}	
+
+	const RandomFunction& clamp_function() const
+	{
+		return m_clamp_function;
+	}
+
 protected:
 	/////////////////////////////////////////////////////////////////
 	//Intermedie steps
@@ -124,8 +139,10 @@ protected:
 	void serial_execute_target_function_on_all_population();
 	void parallel_execute_target_function_on_all_population(ThreadPool& thpool);
 	/////////////////////////////////////////////////////////////////
-	//get random function
-	RandomFunction get_random_func() const;
+	//gen random function
+	RandomFunction gen_random_func() const;
+	//gen clamp function
+	ClampFunction gen_clamp_func() const;
 	//load next batch
 	bool next_batch();
 	/////////////////////////////////////////////////////////////////
@@ -142,8 +159,12 @@ protected:
 	ThreadPool*				   m_thpool;
 	//params of DE
 	Parameters 				   m_params;
+	EvolutionMethodPtr         m_e_method;
 	MutationPtr                m_mutation;
 	CrossoverPtr               m_crossover;
+	//function for DE
+	RandomFunction			   m_random_function;
+	ClampFunction			   m_clamp_function;
 };
 
 }

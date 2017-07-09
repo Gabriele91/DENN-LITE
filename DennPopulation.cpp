@@ -7,7 +7,7 @@ namespace Denn
 	size_t Population::size() const { return m_individuals.size(); }
 	void   Population::resize(size_t i) { m_individuals.resize(i); }
 	void   Population::push_back(const IndividualPtr& i) { m_individuals.push_back(i); }
-
+	void   Population::clear() { m_individuals.clear(); }
 	//vector operator
 	Population::IndividualPtr&       Population::operator[](size_t i) { return m_individuals[i]; }
 	const Population::IndividualPtr& Population::operator[](size_t i) const { return m_individuals[i]; }
@@ -47,6 +47,17 @@ namespace Denn
 		//return
 		return m_individuals[best_i];
 	}
+
+	static bool compare_individual(const Individual::SPtr& li, const Individual::SPtr& ri)
+	{
+		return li->m_eval < ri->m_eval;
+	}
+
+	void Population::sort()
+	{
+		std::sort(m_individuals.begin(), m_individuals.end(), compare_individual);
+	}
+
 	////////////////////////////////////////////////////////////////////////
 	//init population
 	void DoubleBufferPopulation::init(
@@ -132,6 +143,12 @@ namespace Denn
 				sons()[i] = individual_tmp;
 			}
 		}
+	}
+	void DoubleBufferPopulation::swap(size_t i)
+	{
+		auto individual_tmp = parents()[i];
+		parents()[i] = sons()[i];
+		sons()[i] = individual_tmp;
 	}
 	//restart
 	void DoubleBufferPopulation::restart

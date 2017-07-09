@@ -1,4 +1,7 @@
 #include "DennParameters.h"
+#include "DennMutation.h"
+#include "DennCrossover.h"
+#include "DennEvolutionMethod.h"
 
 namespace Denn
 {
@@ -58,6 +61,19 @@ namespace Denn
             [this](Arguments& args) -> bool { m_np = args.get_int() ; return true; }
         },
         ParameterInfo{
+            "Type of evolution method [" + EvolutionMethodFactory::names_of_evolution_methods() + "]", { "--evolution_method", "--evolution",    "-em"  },
+            [this](Arguments& args) -> bool  
+            { 
+                std::string str_m_type = args.get_string() ;
+                //all lower case
+                std::transform(str_m_type.begin(),str_m_type.end(), str_m_type.begin(), ::tolower);
+                //save
+				m_evolution_type = str_m_type;
+                //ok
+                return MutationFactory::exists(*m_mutation_type); 
+            }
+        },
+        ParameterInfo{
             "Type of DE mutation [" + MutationFactory::names_of_mutations() + "]", { "--mutation",    "-m"  },
             [this](Arguments& args) -> bool  
             { 
@@ -83,6 +99,7 @@ namespace Denn
                 return CrossoverFactory::exists(*m_crossover_type); 
             }
         },
+
         ParameterInfo{ 
             "Default F factor for DE", { "--f_default",    "-f"  }, 
             [this](Arguments& args) -> bool { m_default_f = args.get_double() ;  return true; } 
@@ -100,6 +117,21 @@ namespace Denn
             "Probability of change of CR (JDE)", { "--cr_jde",    "-jcr"  }, 
             [this](Arguments& args) -> bool { m_jde_cr = args.get_double() ;  return true; } 
         },
+				
+		ParameterInfo{
+			"Archive size (JADE)",{ "--archive_size",    "-as" },
+			[this](Arguments& args) -> bool { m_archive_size = args.get_int();  return true; }
+		},				
+		ParameterInfo{
+			"Auto adaptation factor of f and c parameters (JADE)",{ "--adapt_f_cr",    "-afcr" },
+			[this](Arguments& args) -> bool { m_f_cr_adapt = args.get_double();  return true; }
+		},		
+
+		ParameterInfo{
+			"Percentage of best (Current P Best/JADE)",{ "--perc_of_best",    "-pob" },
+			[this](Arguments& args) -> bool { m_perc_of_best = args.get_double();  return true; }
+		},
+
         ParameterInfo{ 
             "Minimum size of weight", { "--clamp_min",    "-cmin"  }, 
             [this](Arguments& args) -> bool { m_clamp_min = args.get_double() ; return true;  } 

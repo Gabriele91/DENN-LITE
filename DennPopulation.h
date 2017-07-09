@@ -20,6 +20,7 @@ namespace Denn
 		size_t size() const;
 		void   resize(size_t i);
 		void   push_back(const IndividualPtr& i);
+		void   clear();
 
 		//vector operator
 		IndividualPtr& operator[](size_t i);
@@ -34,6 +35,8 @@ namespace Denn
 		//costum
 		void best(size_t& out_i, Scalar& out_eval) const;
 		IndividualPtr best() const;
+		//sort
+		void sort();
 	
 	protected:
 
@@ -78,6 +81,7 @@ namespace Denn
 		IndividualPtr best() const;
 		//swap
 		void the_best_sons_become_parents();
+		void swap(size_t i);
 		//restart
 		void restart
 		(

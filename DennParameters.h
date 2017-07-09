@@ -1,7 +1,5 @@
 #pragma once
 #include "Config.h"
-#include "DennMutation.h"
-#include "DennCrossover.h"
 #include <string>
 #include <vector>
 #include <sstream>
@@ -84,8 +82,16 @@ namespace Denn
 		read_only<size_t>	             m_np            { size_t(12)    };
 		read_only<Scalar>	             m_default_f     { Scalar(1.0)   };
 		read_only<Scalar>	             m_default_cr    { Scalar(1.0)   };
+		//JDE
 		read_only<Scalar>	             m_jde_f         { Scalar(0.1)   };
 		read_only<Scalar>	             m_jde_cr        { Scalar(0.1)   };
+		//JADE
+		read_only<size_t>	             m_archive_size { 0           };
+		read_only<Scalar>	             m_f_cr_adapt   { Scalar(0.1) };
+		//Current to P best
+		read_only<Scalar>	             m_perc_of_best { Scalar(0.1) };
+
+
 		read_only<Scalar>	             m_clamp_max     { Scalar( 10.0) };
 		read_only<Scalar>	             m_clamp_min     { Scalar(-10.0) };
 		read_only<Scalar>	             m_range_max     { Scalar( 1.0 ) };
@@ -97,6 +103,7 @@ namespace Denn
 		read_only<size_t>	             m_threads_pop   { size_t(2) };
 		read_only<std::string>           m_mutation_type { "rand/1" };
 		read_only<std::string>           m_crossover_type{ "bin" };
+		read_only<std::string>           m_evolution_type{ "JDE" };
 		read_only< std::vector<size_t> > m_hidden_layers { /* none */ };
 	
 		Parameters();

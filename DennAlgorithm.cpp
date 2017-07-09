@@ -19,8 +19,12 @@ namespace Denn
 		m_output = output;
 		m_thpool = thpool;
 		//methods of mutation and crossover
-		m_mutation  = MutationFactory::create(m_params.m_mutation_type, params);
-		m_crossover = CrossoverFactory::create(m_params.m_crossover_type, params);
+		m_e_method  = EvolutionMethodFactory::create(m_params.m_evolution_type, *this);
+		m_mutation  = MutationFactory::create(m_params.m_mutation_type, *this);
+		m_crossover = CrossoverFactory::create(m_params.m_crossover_type, *this);
+		//functions
+		m_random_function = gen_random_func();
+		m_clamp_function = gen_clamp_func();
 		//init all
 		reset();
 	}
@@ -42,10 +46,12 @@ namespace Denn
 				m_params.m_np,
 				m_default,
 				m_dataset_batch,
-				get_random_func(),
+				random_function(),
 				m_target_function
 			);
 		}
+		//reset method
+		m_e_method->reset();
 		//true
 		return success;
 	}
@@ -132,11 +138,15 @@ namespace Denn
 	void DennAlgorithm::execute_a_pass(size_t pass, size_t n_sub_pass, BestContext& ctx_best, RestartContext& ctx_restart)
 	{
 		execute_target_function_on_all_population();
+		//start pass
+		m_e_method->start_a_gen_pass(m_population);
 		//sub pass
 		for (size_t sub_pass = 0; sub_pass != n_sub_pass; ++sub_pass)
 		{
 			execute_a_sub_pass(pass, sub_pass);
 		}
+		//end pass
+		m_e_method->end_a_gen_pass(m_population);
 		//update context
 		execute_update_best(ctx_best);
 		//restart
@@ -166,7 +176,7 @@ namespace Denn
 			m_output->sent_pass(pass, sub_pass, id_best, val_best);
 		}
 	}
-	void  DennAlgorithm::execute_update_best(BestContext& ctx_best)
+	void DennAlgorithm::execute_update_best(BestContext& ctx_best)
 	{
 		//find best
 		Scalar curr_eval;
@@ -182,7 +192,7 @@ namespace Denn
 			ctx_best.m_eval = curr_eval;
 		}
 	}
-	void  DennAlgorithm::execute_update_restart(size_t pass, const BestContext& ctx_best, RestartContext& ctx)
+	void DennAlgorithm::execute_update_restart(size_t pass, const BestContext& ctx_best, RestartContext& ctx)
 	{
 		//inc count
 		if ((ctx_best.m_eval - ctx.m_last_eval) <= (Scalar)m_params.m_restart_delta)
@@ -204,7 +214,7 @@ namespace Denn
 				ctx_best.m_best
 				, m_default
 				, m_dataset_batch
-				, get_random_func()
+				, random_function()
 				, m_target_function
 			);
 			ctx.m_test_count = 0;
@@ -218,8 +228,10 @@ namespace Denn
 	//execute a pass
 	void DennAlgorithm::execute_pass()
 	{
+		m_e_method->start_a_subgen_pass(m_population);
 		if (m_thpool) parallel_execute_pass(*m_thpool);
 		else          serial_execute_pass();
+		m_e_method->end_a_subgen_pass(m_population);
 	}
 	void DennAlgorithm::serial_execute_pass()
 	{
@@ -249,7 +261,7 @@ namespace Denn
 		//swap
 		m_population.the_best_sons_become_parents();
 	}
-	void  DennAlgorithm::execute_generation_task(size_t i)
+	void DennAlgorithm::execute_generation_task(size_t i)
 	{
 		//ref to parents
 		auto& parents = m_population.parents();
@@ -260,7 +272,7 @@ namespace Denn
 		//Copy default params
 		new_son->copy_attributes(*m_default);
 		//compute jde
-		jde(i, *new_son);
+		m_e_method->update_f_cr(m_population, i, *new_son);
 		//call muation
 		(*m_mutation)(parents, i, *new_son);
 		//call crossover
@@ -326,17 +338,26 @@ namespace Denn
 	}
 	
 	/////////////////////////////////////////////////////////////////
-	//get random function
-	DennAlgorithm::RandomFunction DennAlgorithm::get_random_func() const
+	//gen random function
+	DennAlgorithm::RandomFunction DennAlgorithm::gen_random_func() const
 	{
 		Scalar min = m_params.m_range_min;
 		Scalar max = m_params.m_range_max;
 		return [=](Scalar x) -> Scalar
 		{
-			return Scalar(Random::random(min, max));
+			return Scalar(Random::uniform(min, max));
 		};
 	}
-	
+	//gen clamp function	
+	DennAlgorithm::ClampFunction DennAlgorithm::gen_clamp_func() const
+	{
+		Scalar min = m_params.m_clamp_min;
+		Scalar max = m_params.m_clamp_max;
+		return [=](Scalar x) -> Scalar
+		{
+			return Denn::clamp<Scalar>(x, min, max);
+		};
+	}
 	//load next batch
 	bool DennAlgorithm::next_batch()
 	{

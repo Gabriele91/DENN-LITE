@@ -1,5 +1,5 @@
 #include "DennMutation.h"
-#include "DennParameters.h"
+#include "DennAlgorithm.h"
 #include <algorithm>
 #include <sstream>
 #include <iterator>
@@ -7,29 +7,22 @@
 namespace Denn
 {
 	//Mutation
-	Mutation::Mutation(const Parameters& parameters)
-	: m_clamp
-	([cmin = parameters.m_clamp_min
-	 ,cmax = parameters.m_clamp_max]
-	(Scalar value) -> Scalar
-	{
-		return Denn::clamp<Scalar>(value, cmin, cmax);
-	})
-	, m_parameters(parameters)
+	Mutation::Mutation(const DennAlgorithm& algorithm)
+	: m_algorithm(algorithm)
 	{
 	}
 
 	//map
 	std::unique_ptr< std::map< std::string, MutationFactory::CreateObject > > MutationFactory::m_cmap;
 	//public
-	Mutation::SPtr MutationFactory::create(const std::string& name, const Parameters& parameters)
+	Mutation::SPtr MutationFactory::create(const std::string& name, const DennAlgorithm& algorithm)
 	{
 		//map is alloc?
 		if (!m_cmap) return nullptr;
 		//find
 		auto it = m_cmap->find(name);
 		//return
-		return it->second(parameters);
+		return it->second(algorithm);
 	}
 	void MutationFactory::append(const std::string& name, MutationFactory::CreateObject fun, size_t size)
 	{
