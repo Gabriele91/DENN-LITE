@@ -3,7 +3,7 @@
 //  HCubo
 //
 //  Created by Gabriele on 09/07/176.
-//  Copyright © 2016 Gabriele. All rights reserved.
+//  Copyright © 2017 Gabriele. All rights reserved.
 //
 #pragma once
 #include "Config.h"
