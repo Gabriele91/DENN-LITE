@@ -515,157 +515,146 @@ namespace Denn
 			m_type = VR_NONE;
 		}
 
-		VariantRef(Variant& var)
-		{
-			m_ptr = (void*)var.get_ref();
-			m_type = var.get_type();
-		}
 
-		VariantRef(const Variant& var)
-		{
-			m_ptr = (void*)var.get_ref();
-			m_type = var.get_type();
-		}
-
-		VariantRef(char& c)
+		VariantRef(const char& c)
 		{
 			m_ptr = (void*)&c;
 			m_type = VR_CHAR;
 		}
 
-		VariantRef(short& s)
+		VariantRef(const short& s)
 		{
 			m_ptr = (void*)&s;
 			m_type = VR_SHORT;
 		}
 
-		VariantRef(int& i)
+		VariantRef(const int& i)
 		{
 			m_ptr = (void*)&i;
 			m_type = VR_INT;
 		}
 
-		VariantRef(long& l)
+		VariantRef(const long& l)
 		{
 			m_ptr = (void*)&l;
 			m_type = VR_LONG;
 		}
 
-		VariantRef(long long& l)
+		VariantRef(const long long& l)
 		{
 			m_ptr = (void*)&l;
 			m_type = VR_LONGLONG;
 		}
 
-		VariantRef(unsigned char& uc)
+		VariantRef(const unsigned char& uc)
 		{
 			m_ptr = (void*)&uc;
 			m_type = VR_UCHAR;
 		}
 
-		VariantRef(unsigned short& us)
+		VariantRef(const unsigned short& us)
 		{
 			m_ptr = (void*)&us;
 			m_type = VR_USHORT;
 		}
 
-		VariantRef(unsigned int& ui)
+		VariantRef(const unsigned int& ui)
 		{
 			m_ptr = (void*)&ui;
 			m_type = VR_UINT;
 		}
 
-		VariantRef(unsigned long& ul)
+		VariantRef(const unsigned long& ul)
 		{
 			m_ptr = (void*)&ul;
 			m_type = VR_ULONG;
 		}
 
-		VariantRef(unsigned long long& ull)
+		VariantRef(const unsigned long long& ull)
 		{
 			m_ptr = (void*)&ull;
 			m_type = VR_ULONGLONG;
 		}
 
-		VariantRef(float& f)
+		VariantRef(const float& f)
 		{
 			m_ptr = (void*)&f;
 			m_type = VR_FLOAT;
 		}
 
-		VariantRef(double& d)
+		VariantRef(const double& d)
 		{
 			m_ptr = (void*)&d;
 			m_type = VR_DOUBLE;
 		}
 
-		VariantRef(MatrixF& fm)
+		VariantRef(const MatrixF& fm)
 		{
 			m_ptr = (void*)&fm;
 			m_type = VR_FLOAT_MATRIX;
 		}
 
-		VariantRef(MatrixD& dm)
+		VariantRef(const MatrixD& dm)
 		{
 			m_ptr = (void*)&dm;
 			m_type = VR_DOUBLE_MATRIX;
 		}
 
-		VariantRef(MatrixLD& ldm)
+		VariantRef(const MatrixLD& ldm)
 		{
 			m_ptr = (void*)&ldm;
 			m_type = VR_LONG_DOUBLE_MATRIX;
 		}
 
-		VariantRef(Individual& i)
+		VariantRef(const Individual& i)
 		{
 			m_ptr = (void*)&i;
 			m_type = VR_INDIVIDUAL;
 		}
 
-		VariantRef(Population& pop)
+		VariantRef(const Population& pop)
 		{
 			m_ptr = (void*)&pop;
 			m_type = VR_POPULATION;
 		}
 
-		VariantRef(std::vector< int > & v_i)
+		VariantRef(const std::vector< int > & v_i)
 		{
 			m_ptr = (void*)&v_i;
 			m_type = VR_STD_VECTOR_INT;
 		}
 
-		VariantRef(std::vector< float > & v_f)
+		VariantRef(const std::vector< float > & v_f)
 		{
 			m_ptr = (void*)&v_f;
 			m_type = VR_STD_VECTOR_FLOAT;
 		}
 
-		VariantRef(std::vector< double > & v_d)
+		VariantRef(const std::vector< double > & v_d)
 		{
 			m_ptr = (void*)&v_d;
 			m_type = VR_STD_VECTOR_DOUBLE;
 		}
 
-		VariantRef(std::vector< long double > & v_ld)
+		VariantRef(const std::vector< long double > & v_ld)
 		{
 			m_ptr = (void*)&v_ld;
 			m_type = VR_STD_VECTOR_LONG_DOUBLE;
 		}
 
-		VariantRef(std::vector< MatrixF > & v_fm)
+		VariantRef(const std::vector< MatrixF > & v_fm)
 		{
 			m_ptr = (void*)&v_fm;
 			m_type = VR_STD_VECTOR_FLOAT_MATRIX;
 		}
 
-		VariantRef(std::vector< MatrixD > & v_dm)
+		VariantRef(const std::vector< MatrixD > & v_dm)
 		{
 			m_ptr = (void*)&v_dm;
 			m_type = VR_STD_VECTOR_DOUBLE_MATRIX;
 		}
 
-		VariantRef(std::vector< MatrixLD > & v_dm)
+		VariantRef(const std::vector< MatrixLD > & v_dm)
 		{
 			m_ptr = (void*)&v_dm;
 			m_type = VR_STD_VECTOR_LONG_DOUBLE_MATRIX;
@@ -677,22 +666,29 @@ namespace Denn
 			m_type = VR_C_STRING;
 		}
 
-		VariantRef(std::string& str)
+		VariantRef(const std::string& str)
 		{
 			m_ptr = (void*)&str;
 			m_type = VR_STD_STRING;
 		}
 
-		VariantRef(std::vector< std::string >& v_str)
+		VariantRef(const std::vector< std::string >& v_str)
 		{
 			m_ptr = (void*)&v_str;
 			m_type = VR_STD_VECTOR_STRING;
 		}
 
-		VariantRef(void*& ptr)
+		VariantRef(const void* ptr)
 		{
-			m_ptr = (void*)&ptr;
+			m_ptr = (void*)ptr;
 			m_type = VR_PTR;
+		}
+
+		//only if is explicit (shadowing the others constructors)
+		explicit VariantRef(const Variant& var) 
+		{
+			m_ptr = (void*)var.get_ref();
+			m_type = var.get_type();
 		}
 
 		template < class T >
