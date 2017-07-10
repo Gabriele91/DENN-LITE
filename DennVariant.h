@@ -752,24 +752,24 @@ namespace Denn
 		case VariantType::VR_FLOAT:    (*this) = ref.get<float>(); break;
 		case VariantType::VR_DOUBLE:   (*this) = ref.get<double>();  break;
 
-		case VariantType::VR_FLOAT_MATRIX:      (*this)  = (const MatrixF&)ref; break;
-		case VariantType::VR_DOUBLE_MATRIX:     (*this)  = (const MatrixD&)ref; break;
-		case VariantType::VR_LONG_DOUBLE_MATRIX: (*this) = (const MatrixLD&)ref; break;
+		case VariantType::VR_FLOAT_MATRIX:      (*this)  = ref.get<MatrixF>(); break;
+		case VariantType::VR_DOUBLE_MATRIX:     (*this)  = ref.get<MatrixD>(); break;
+		case VariantType::VR_LONG_DOUBLE_MATRIX: (*this) = ref.get<MatrixLD>(); break;
 
-		case VariantType::VR_INDIVIDUAL:         (*this) = (const Individual&)ref; break;
-		case VariantType::VR_POPULATION:         (*this) = (const Population&)ref; break;
+		case VariantType::VR_INDIVIDUAL:         (*this) = ref.get<Individual>(); break;
+		case VariantType::VR_POPULATION:         (*this) = ref.get<Population>(); break;
 
-		case VariantType::VR_STD_VECTOR_INT:               (*this) = (const std::vector<int>&)ref; break;
-		case VariantType::VR_STD_VECTOR_FLOAT:             (*this) = (const std::vector<float>&)ref; break;
-		case VariantType::VR_STD_VECTOR_DOUBLE:            (*this) = (const std::vector<double>&)ref; break;
-		case VariantType::VR_STD_VECTOR_LONG_DOUBLE:       (*this) = (const std::vector<long double>&)ref; break;
-		case VariantType::VR_STD_VECTOR_FLOAT_MATRIX:      (*this) = (const std::vector<MatrixF>&)ref; break;
-		case VariantType::VR_STD_VECTOR_DOUBLE_MATRIX:     (*this) = (const std::vector<MatrixD>&)ref; break;
-		case VariantType::VR_STD_VECTOR_LONG_DOUBLE_MATRIX:(*this) = (const std::vector<MatrixLD>&)ref; break;
+		case VariantType::VR_STD_VECTOR_INT:               (*this) = ref.get< std::vector<int> >(); break;
+		case VariantType::VR_STD_VECTOR_FLOAT:             (*this) = ref.get< std::vector<float> >(); break;
+		case VariantType::VR_STD_VECTOR_DOUBLE:            (*this) = ref.get< std::vector<double> >(); break;
+		case VariantType::VR_STD_VECTOR_LONG_DOUBLE:       (*this) = ref.get< std::vector<long double> >(); break;
+		case VariantType::VR_STD_VECTOR_FLOAT_MATRIX:      (*this) = ref.get< std::vector<MatrixF> >(); break;
+		case VariantType::VR_STD_VECTOR_DOUBLE_MATRIX:     (*this) = ref.get< std::vector<MatrixD> >(); break;
+		case VariantType::VR_STD_VECTOR_LONG_DOUBLE_MATRIX:(*this) = ref.get< std::vector<MatrixLD> >(); break;
 
 		case VariantType::VR_C_STRING:
-		case VariantType::VR_STD_STRING:           (*this) = (const std::string&)ref; break;
-		case VariantType::VR_STD_VECTOR_STRING:    (*this) = (const std::vector<std::string>&)ref; break;
+		case VariantType::VR_STD_STRING:           (*this) = ref.get< std::string >(); break;
+		case VariantType::VR_STD_VECTOR_STRING:    (*this) = ref.get< std::vector<std::string> >(); break;
 
 		case VariantType::VR_PTR:				   (*this) = (void*)ref.get_ptr<void>(); break;
 		default: break;
