@@ -21,10 +21,11 @@ def main():
     with open('job.csv', newline='') as csvfile:
         jobs = csv.reader(csvfile, delimiter=' ')
         for task in jobs:
-            logging.info("Execute command -> \"{}\"".format(" ".join(task)))
-            cur_task = Popen(task, cwd=working_dir, universal_newlines=True)
-            return_code = cur_task.wait()
-            logging.info("Job exited with code {}".format(return_code))
+            if len(task) != 0 and task[0] != "#":
+                logging.info("Execute command -> \"{}\"".format(" ".join(task)))
+                cur_task = Popen(task, cwd=working_dir, universal_newlines=True)
+                return_code = cur_task.wait()
+                logging.info("Job exited with code {}".format(return_code))
 
 if __name__ == '__main__':
     main()
