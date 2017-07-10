@@ -14,7 +14,7 @@ from time import time
 def main():
     if not exists("results") or not isdir("results"):
         mkdir("results")
-    logging.basicConfig(filename='results/job-{}.log'.format(time()),level=logging.DEBUG)
+    logging.basicConfig(filename='results/job-{}.log'.format(int(time())),level=logging.DEBUG)
 
     working_dir = dirname(abspath(__file__))
     logging.info("Open Job file")
