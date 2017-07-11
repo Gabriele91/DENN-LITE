@@ -2,7 +2,7 @@
 # ./Release/DENN-float -t 20000 -s 300 -np 50 -f 0.1 -cr 0.5 -jf 0.1 -jcr 0.1 -cmax 1.0 -cmin -1.0 -rmax 1.0 -rmin -1.0 -rc 6 -rd 0.001 -tp 16 -i ../DENN-dataset-samples/GasSensorArrayDrift_46x240_1s.gz -o results/GASS_240_hl_1.json -co interm -hl 256
 # ./Release/DENN-float -t 20000 -s 300 -np 50 -f 0.1 -cr 0.5 -jf 0.1 -jcr 0.1 -cmax 1.0 -cmin -1.0 -rmax 1.0 -rmin -1.0 -rc 6 -rd 0.001 -tp 16 -i ../DENN-dataset-samples/GasSensorArrayDrift_46x240_1s.gz -o results/GASS_240_hl_2.json -co interm -hl 256 256
 
-./Release/DENN-float -t 3000 -s 10 -np 100 -f 0.1 -cr 0.5 -jf 0.1 -jcr 0.1 -cmax 1 -cmin -1 -rmax 1.0 -rmin -1.0 -rc 5 -rd 0.01 -tp 16 -i ../DENN-dataset-samples/JULY_MNIST_0_540x100_1s.gz -o results/MNIST_100_hl_0.json -co interm
+./Release/DENN-float -t 800 -s 200 -np 80 -f 0.1 -cr 0.5 -jf 0.1 -jcr 0.1 -cmax 0.25 -cmin -0.25 -rmax 0.25 -rmin -0.25 -rc 3 -rd 0.01 -tp 4 -i ../DENN-dataset-samples/JULY_MNIST_0_540x100_1s.gz -o results/MNIST_100_hl_0.csv -co bin_interm
 # ./Release/DENN-float -t 20000 -s 300 -np 50 -f 0.1 -cr 0.5 -jf 0.1 -jcr 0.1 -cmax 1.0 -cmin -1.0 -rmax 1.0 -rmin -1.0 -rc 6 -rd 0.001 -tp 16 -i ../DENN-dataset-samples/ARTICLE_mnist_minibatch_v004_576x100_1s.gz -o results/MNIST_100_hl_0.json -co interm
 # ./Release/DENN-float -t 20000 -s 300 -np 50 -f 0.1 -cr 0.5 -jf 0.1 -jcr 0.1 -cmax 1.0 -cmin -1.0 -rmax 1.0 -rmin -1.0 -rc 6 -rd 0.001 -tp 16 -i ../DENN-dataset-samples/ARTICLE_mnist_minibatch_v004_576x100_1s.gz -o results/MNIST_100_hl_1.json -co interm -hl 1568
 # ./Release/DENN-float -t 20000 -s 300 -np 50 -f 0.1 -cr 0.5 -jf 0.1 -jcr 0.1 -cmax 1.0 -cmin -1.0 -rmax 1.0 -rmin -1.0 -rc 6 -rd 0.001 -tp 16 -i ../DENN-dataset-samples/ARTICLE_mnist_minibatch_v004_576x100_1s.gz -o results/MNIST_100_hl_2.json -co interm -hl 1568 1568

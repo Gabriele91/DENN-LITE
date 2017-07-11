@@ -9,6 +9,7 @@ from os.path import isdir
 from os import mkdir
 import logging
 from time import time
+import sys
 
 
 def pretty_cmd(cmd):
@@ -34,6 +35,7 @@ def main():
             if len(task) != 0 and task[0] != "#":
                 logging.info("Execute command -> \"{}\"".format(" ".join(task)))
                 print("+++ TASK -> {}".format(pretty_cmd(task)))
+                sys.stdout.flush()
                 cur_task = Popen(task, cwd=working_dir, universal_newlines=True)
                 return_code = cur_task.wait()
                 logging.info("Job exited with code {}".format(return_code))

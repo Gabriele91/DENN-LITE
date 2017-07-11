@@ -87,6 +87,7 @@ public:
 	BenchOutput(std::ostream& stream=std::cerr) : Denn::RuntimeOutput(stream){}
 	
 	virtual bool is_enable() override  { return true; }
+	virtual bool is_enable_pass()	     { return false; }
 
 	virtual void start() override
 	{ 
@@ -102,7 +103,7 @@ public:
 		m_pass_time  = Denn::Time::get_time(); 
 		m_n_pass 	 = 0;
 		//clean line
-		clean_line();
+		// clean_line();
 		//output
 		write_output(); 
 		output() << std::endl;
@@ -130,8 +131,7 @@ public:
 
 	virtual void write_output()
 	{
-		write_local_pass();
-		output() << " ->\tACC:" << cut_digits(m_global_pass.m_validation_eval)
+		output() << (m_global_pass.m_g_pass+1) * m_initialization.m_n_s_pass << " ->\tACC:" << cut_digits(m_global_pass.m_validation_eval)
 			     << "\tN_RESET:" << cut_digits(m_global_pass.m_n_restart);
 	}
 
