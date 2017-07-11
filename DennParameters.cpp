@@ -195,11 +195,15 @@ namespace Denn
             [this](Arguments& args) -> bool { m_threads_pop = args.get_int() ;  return true; } 
         },
         ParameterInfo{
-            "Print list of muation", { "--mutation-list",    "-mlist"  }, 
+            "Print list of evolution methods", { "--evolution_method-list", "--evolution-list",    "-elist"  }, 
+            [this](Arguments& args) -> bool { std::cout << EvolutionMethodFactory::names_of_evolution_methods() << std::endl; return true; } 
+        },
+        ParameterInfo{
+            "Print list of muations", { "--mutation-list",    "-mlist"  }, 
             [this](Arguments& args) -> bool { std::cout << MutationFactory::names_of_mutations() << std::endl; return true; } 
         },
         ParameterInfo{
-            "Print list of crossover", { "--crossover-list",    "-colist"  }, 
+            "Print list of crossovers", { "--crossover-list",    "-colist"  }, 
             [this](Arguments& args) -> bool { std::cout << CrossoverFactory::names_of_crossovers() << std::endl; return true; } 
         },
         ParameterInfo{
