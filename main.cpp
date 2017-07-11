@@ -177,9 +177,15 @@ int main(int argc,const char** argv)
 	DataSetLoaderGZ dataset((const std::string&)arguments.m_dataset_filename);
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	std::ofstream	ofile((const std::string&)arguments.m_output_filename);
+	//extension
+	std::string 
+	ext = *arguments.m_output_filename; 
+	ext = ext.substr(ext.find_last_of(".") + 1);
+	std::transform(ext.begin(),ext.end(), ext.begin(), ::tolower);
 	////////////////////////////////////////////////////////////////////////////////////////////////
-	auto runtime_out      = std::make_shared<CustomRuntimeOutput>()->get_ptr(); //default std::cerr
-	auto serialize_output = std::make_shared<JSONSerializeOutput>(ofile)->get_ptr();
+	RuntimeOutput::SPtr    runtime_out     = std::make_shared<CustomRuntimeOutput>()->get_ptr(); //default std::cerr
+	SerializeOutput::SPtr serialize_output = ext == "json" ? std::make_shared<JSONSerializeOutput>(ofile)->get_ptr() 
+													       : std::make_shared<CSVSerializeOutput>(ofile)->get_ptr();
 	//execute test
  	execute(arguments, dataset, uptr_thpool.get(), runtime_out, serialize_output);
 	

@@ -52,13 +52,13 @@ namespace Denn
 	}
 	Matrix& PerceptronLayer::operator[](size_t i)
 	{
-		if (i & 0x1) return  m_weights;
-		else		 return  m_baias;
+		if (i & 0x1) return  m_baias;
+		else		 return  m_weights;
 	}
 	const Matrix& PerceptronLayer::operator[](size_t i) const
 	{
-		if (i & 0x1) return  m_weights;
-		else		 return  m_baias;
+		if (i & 0x1) return  m_baias;
+		else		 return  m_weights;
 	}
 	//////////////////////////////////////////////////
 }

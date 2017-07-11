@@ -34,16 +34,16 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceRoot}/Debug/DENN",
+            "program": "${workspaceRoot}/Debug/DENN-float",
             "args": 
             [
                 "-t","8000",
                 "-s","1000",
-                "-np","96",
+                "-np","20",
                 "-f","0.9",
                 "-cr","0.9",
-                "-jf","0.1",
-                "-jcr","0.1",
+                "-em", "JADE",
+                "-as", "20",
                 "-cmin","-30.0",
                 "-cmax","30.0",
                 "-rmin","-2.0",
@@ -51,7 +51,8 @@
                 "-i","assets/ARTICLE_MNIST_5_12x4000_1s.gz",
                 "-o","ARTICLE_MNIST_5_12x4000_1s.json",
                 "-omp","0",
-                "-tp","4"
+                "-tp","4",
+                "-m", "curr_p_best"
                 /*
                 "-t", "5000",
                 "-s", "40",
