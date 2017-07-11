@@ -30,7 +30,8 @@ def main():
     BATCH_STEP = [50, 100]
     TOTAL_STEPS = [8000]
 
-    with open("job_JDE.csv", "w") as jde_file:
+    with open("job.csv", "w") as jde_file:
+    # with open("job_JDE.csv", "w") as jde_file:
         for num_db, dataset in enumerate(DATASETS):
             for total_step in TOTAL_STEPS:
                 for batch_step in BATCH_STEP:
@@ -59,13 +60,13 @@ def main():
                                         cmin=-clamp,
                                         rmax=clamp,
                                         rmin=-clamp,
-                                        restart=4,
+                                        restart=6,
                                         restart_delta=0.001,
                                         outname=outname
                                     ))
                                     jde_file.write("\n")
     
-    with open("job_JADE.csv", "w") as jde_file:
+    # with open("job_JADE.csv", "w") as jde_file:
         for num_db, dataset in enumerate(DATASETS):
             for total_step in TOTAL_STEPS:
                 for batch_step in BATCH_STEP:
@@ -94,7 +95,7 @@ def main():
                                         cmin=-clamp,
                                         rmax=clamp,
                                         rmin=-clamp,
-                                        restart=4,
+                                        restart=-1,
                                         restart_delta=0.001,
                                         outname=outname
                                     ))
