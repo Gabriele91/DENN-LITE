@@ -20,3 +20,6 @@
 
 //Denn
 #include  "DennAlgorithm.h"
+
+//Denn output
+#include "DennSerializeOutput.h"

@@ -33,8 +33,16 @@ namespace Denn
 	class Parameters
 	{
 
+		class generic_read_only
+		{
+		public:
+			virtual std::string name()  const = 0;
+			virtual Variant variant()   const = 0;
+			virtual bool serializable() const = 0;
+		};
+
 		template <class T>
-		class read_only 
+		class read_only : public generic_read_only
 		{
 		public:
 
@@ -46,11 +54,11 @@ namespace Denn
 			//no cast
 			const T& get() const { return m_data; }
 			//get variant
-			Variant variant() const	{ return get(); }
+			virtual Variant variant() const	  override { return get(); }
 			//get name
-			std::string name() const { return m_name; }
+			virtual std::string name() const  override { return m_name; }
 			//get if serializable
-			bool serializable() const { return serializable; }
+			virtual bool serializable() const override { return m_serializable; }
 			
 		private:
 
@@ -88,15 +96,51 @@ namespace Denn
 
 		struct ParameterInfo
 		{
+			const generic_read_only*		  m_associated_variable;
 			std::string				   		  m_description;
 			std::vector< std::string  > 	  m_arg_key;
 			std::function< bool(Arguments&) > m_action;
+
+			ParameterInfo() { }
+
+			ParameterInfo(  const generic_read_only&			associated_variable
+						  , const std::string&				   	description
+						  , const std::vector< std::string  >& 	arg_key
+						  , std::function< bool(Arguments&) >   action
+						  )
+			: m_associated_variable(&associated_variable)
+			, m_description(description)
+			, m_arg_key(arg_key)
+			, m_action(action)
+			{				
+			}
+
+			ParameterInfo(  const std::string&				   	description
+						  , const std::vector< std::string  >& 	arg_key
+						  , std::function< bool(Arguments&) >   action
+						  )
+			: m_associated_variable(nullptr)
+			, m_description(description)
+			, m_arg_key(arg_key)
+			, m_action(action)
+			{				
+			}
+
+			bool has_an_associated_variable() const 
+			{
+				return m_associated_variable != nullptr;
+			}
+
+			bool serializable() const
+			{
+				return has_an_associated_variable() && m_associated_variable->serializable();
+			}
 		};
 
 	public:
 
-		read_only<std::string>					  m_dataset_filename { "dataset" };
-		read_only<std::string> 					  m_output_filename  { "output" };
+		read_only<std::string>			m_dataset_filename { "dataset" };
+		read_only<std::string> 			m_output_filename  { "output" };
 		
 		read_only<size_t>	             m_generations   { "generation", size_t(1000)  };
 		read_only<size_t>	             m_sub_gens      { "sub_gens",size_t(100)   };
@@ -125,7 +169,7 @@ namespace Denn
 		read_only<std::string>           m_mutation_type { "mutation","rand/1" };
 		read_only<std::string>           m_crossover_type{ "crossover","bin" };
 		read_only<std::string>           m_evolution_type{ "evolution_method","JDE" };
-		read_only< std::vector<size_t> > m_hidden_layers { "hidden_layers" /* , none */ };
+		read_only< std::vector<int> >    m_hidden_layers { "hidden_layers" /* , none */ };
 
 		//params info
 		std::vector< ParameterInfo >     m_params_info;
