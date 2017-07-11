@@ -50,12 +50,22 @@ namespace Denn
         {			
             m_ostream << "\t\"arguments\" :" << std::endl;
 			m_ostream << "\t{" << std::endl;
-            for(auto& params : args.m_params_info) if(params.serializable())
+            //get only serializables
+            std::vector < const Denn::Parameters::ParameterInfo* > params_serializable;
+            for(auto& params : args.m_params_info)
+            if(params.serializable())  params_serializable.emplace_back(&params);
+            //serialize
+            for(size_t i=0; i!=params_serializable.size() ;++i)
             {
-                auto* variable = params.m_associated_variable;
-                std::cout << "\t\t\"" << variable->name() << "\"" << variant_to_str(variable->variant()) << std::endl;
+                auto* variable = params_serializable[i]->m_associated_variable;
+                m_ostream << "\t\t\""
+                 << variable->name() << "\" : "
+                 << variant_to_str(variable->variant()) 
+                 << ((i+1)!=params_serializable.size() ? "," : "")
+                 << std::endl;
             }
-			m_ostream << "\t}" << std::endl;
+
+			m_ostream << "\t}," << std::endl;
         }
 		
 		virtual void serialize_best(double time, Denn::Scalar accuracy, Denn::Scalar f, Denn::Scalar cr, const Denn::NeuralNetwork& network) override

@@ -32,7 +32,8 @@ namespace Denn
 
 	class Parameters
 	{
-
+	public:
+	
 		class generic_read_only
 		{
 		public:
@@ -136,8 +137,6 @@ namespace Denn
 				return has_an_associated_variable() && m_associated_variable->serializable();
 			}
 		};
-
-	public:
 
 		read_only<std::string>			m_dataset_filename { "dataset" };
 		read_only<std::string> 			m_output_filename  { "output" };
