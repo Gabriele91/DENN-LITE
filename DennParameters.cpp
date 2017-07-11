@@ -274,7 +274,7 @@ namespace Denn
         s_out << "Options:";				
         s_out << std::endl;
         //style
-        const size_t max_space_line         = 30;
+        const size_t max_space_line         = 42;
         const size_t padding_to_description = 2;
         const size_t padding_left           = 4;
         const std::string separetor(", ");
