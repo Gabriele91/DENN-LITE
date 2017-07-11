@@ -35,7 +35,7 @@ namespace Denn
 		//////////////////////////////////////////////////
 		virtual size_t size() const override;		
 		virtual Matrix& operator[](size_t i) override;
-		virtual const Matrix& operator[](size_t i) const override;
+		virtual const Matrix& operator[](size_t i) const;
 		//////////////////////////////////////////////////
 
 	protected:
