@@ -49,11 +49,11 @@ namespace Denn
     :m_params_info
     ({
         ParameterInfo{ 
-            "Global number of generation", { "--generation",    "-t"  }, 
+            "Global number of generation", { "--" + m_generations.name(),    "-t"  }, 
             [this](Arguments& args) -> bool { m_generations = args.get_int() ; return true; } 
         },
         ParameterInfo{ 
-            "Number of generation per batch", { "--sub_gens",    "-s"  }, 
+            "Number of generation per batch", { "--sub_gens" + m_sub_gens.name(),    "-s"  }, 
             [this](Arguments& args) -> bool { m_sub_gens = args.get_int() ; return true; }
         },
         ParameterInfo{
@@ -61,7 +61,7 @@ namespace Denn
             [this](Arguments& args) -> bool { m_np = args.get_int() ; return true; }
         },
         ParameterInfo{
-            "Type of evolution method [" + EvolutionMethodFactory::names_of_evolution_methods() + "]", { "--evolution_method", "--evolution",    "-em"  },
+            "Type of evolution method [" + EvolutionMethodFactory::names_of_evolution_methods() + "]", { "--" + m_evolution_type.name(), "--evolution",    "-em"  },
             [this](Arguments& args) -> bool  
             { 
                 std::string str_m_type = args.get_string() ;
@@ -74,7 +74,7 @@ namespace Denn
             }
         },
         ParameterInfo{
-            "Type of DE mutation [" + MutationFactory::names_of_mutations() + "]", { "--mutation",    "-m"  },
+            "Type of DE mutation [" + MutationFactory::names_of_mutations() + "]", { "--" + m_mutation_type.name(),    "-m"  },
             [this](Arguments& args) -> bool  
             { 
                 std::string str_m_type = args.get_string() ;
@@ -87,7 +87,7 @@ namespace Denn
             }
         },
         ParameterInfo{
-            "Type of DE crossover [" + CrossoverFactory::names_of_crossovers() + "]", { "--crossover",    "-co"  },
+            "Type of DE crossover [" + CrossoverFactory::names_of_crossovers() + "]", { "--" + m_crossover_type.name(),    "-co"  },
             [this](Arguments& args) -> bool 
             { 
                 std::string str_c_type = args.get_string();
@@ -101,55 +101,55 @@ namespace Denn
         },
 
         ParameterInfo{ 
-            "Default F factor for DE", { "--f_default",    "-f"  }, 
+            "Default F factor for DE", { "--" + m_default_f.name() ,    "-f"  }, 
             [this](Arguments& args) -> bool { m_default_f = args.get_double() ;  return true; } 
         },
         ParameterInfo{ 
-            "Default CR factor for DE", { "--cr_default",    "-cr"  }, 
+            "Default CR factor for DE", { "--" + m_default_cr.name() ,    "-cr"  }, 
             [this](Arguments& args) -> bool { m_default_cr = args.get_double() ;  return true; }
         },
                             
         ParameterInfo{ 
-            "Probability of change of F (JDE)", { "--f_jde",    "-jf"  }, 
+            "Probability of change of F (JDE)", { "--" + m_jde_f.name(),    "-jf"  }, 
             [this](Arguments& args) -> bool { m_jde_f = args.get_double() ;  return true; } 
         },
         ParameterInfo{ 
-            "Probability of change of CR (JDE)", { "--cr_jde",    "-jcr"  }, 
+            "Probability of change of CR (JDE)", { "--" + m_jde_cr.name(),    "-jcr"  }, 
             [this](Arguments& args) -> bool { m_jde_cr = args.get_double() ;  return true; } 
         },
 				
 		ParameterInfo{
-			"Archive size (JADE)",{ "--archive_size",    "-as" },
+			"Archive size (JADE)",{ "--" + m_archive_size.name(),    "-as" },
 			[this](Arguments& args) -> bool { m_archive_size = args.get_int();  return true; }
 		},				
 		ParameterInfo{
-			"Auto adaptation factor of f and c parameters (JADE)",{ "--adapt_f_cr",    "-afcr" },
+			"Auto adaptation factor of f and c parameters (JADE)",{ "--" + m_f_cr_adapt.name(),    "-afcr" },
 			[this](Arguments& args) -> bool { m_f_cr_adapt = args.get_double();  return true; }
 		},		
 
 		ParameterInfo{
-			"Percentage of best (Current P Best/JADE)",{ "--perc_of_best",    "-pob" },
+			"Percentage of best (Current P Best/JADE)",{ "--" + m_perc_of_best.name(),    "-pob" },
 			[this](Arguments& args) -> bool { m_perc_of_best = args.get_double();  return true; }
 		},
 
         ParameterInfo{ 
-            "Minimum size of weight", { "--clamp_min",    "-cmin"  }, 
+            "Minimum size of weight", { "--" + m_clamp_min.name(),    "-cmin"  }, 
             [this](Arguments& args) -> bool { m_clamp_min = args.get_double() ; return true;  } 
         },
         ParameterInfo{ 
-            "Maximum size of weight", { "--clamp_min",    "-cmax"  }, 
+            "Maximum size of weight", { "--" + m_clamp_max.name(),    "-cmax"  }, 
             [this](Arguments& args) -> bool { m_clamp_max = args.get_double() ; return true;  } 
         },
         ParameterInfo{ 
-            "Minimum size of weight in random initialization", { "--random_min",    "-rmin"  }, 
+            "Minimum size of weight in random initialization", { "--" + m_range_min.name(),    "-rmin"  }, 
             [this](Arguments& args) -> bool { m_range_min = args.get_double() ;  return true; } 
         },
         ParameterInfo{ 
-            "Maximum size of weight in random initialization", { "--random_max",    "-rmax"  }, 
+            "Maximum size of weight in random initialization", { "--" + m_range_max.name(),    "-rmax"  }, 
             [this](Arguments& args) -> bool { m_range_max = args.get_double() ;  return true; } 
         },
         ParameterInfo{ 
-            "Number of change of batches before restart (if accuracy not increase)", { "--restart_count",    "-rc"  }, 
+            "Number of change of batches before restart (if accuracy not increase)", { "--" + m_restart_count.name(),    "-rc"  }, 
             [this](Arguments& args) -> bool  
             { 
                 m_restart_count = args.get_int() ; 
@@ -158,7 +158,7 @@ namespace Denn
             } 
         },
         ParameterInfo{ 
-            "Delta factor to determine if accuracy is increased", { "--restart_delta",    "-rd"  }, 
+            "Delta factor to determine if accuracy is increased", { "--" + m_restart_delta.name(),    "-rd"  }, 
             [this](Arguments& args) -> bool 
             {
                 m_restart_delta = args.get_double() ; 
@@ -167,7 +167,7 @@ namespace Denn
             } 
         },
         ParameterInfo{
-            "Size of hidden layers", { "--hidden_layers",    "-hl"  },
+            "Size of hidden layers", { "--" + m_hidden_layers.name(),    "-hl"  },
             [this](Arguments& args) -> bool 
             { 
                 while(args.remaining() && !args.start_with_minus())
@@ -179,19 +179,19 @@ namespace Denn
             }
         },
         ParameterInfo{
-            "Path of dataset file (gz)", { "--dataset", "-d", "-i" }, 
+            "Path of dataset file (gz)", { "--" + m_dataset_filename.name(), "-d", "-i" }, 
             [this](Arguments& args) -> bool {  m_dataset_filename = args.get_string();  return true; } 
         },
         ParameterInfo{ 
-            "Path of output file (json)", { "--output", "-o" }, 
+            "Path of output file (json)", { "--" + m_output_filename.name(), "-o" }, 
             [this](Arguments& args) {  m_output_filename = args.get_string(); return true;  } 
         },
         ParameterInfo{ 
-            "Number of threads using by OpenMP", { "--threads_omp",    "-omp"  }, 
+            "Number of threads using by OpenMP", { "--" + m_threads_omp.name(),    "-omp"  }, 
             [this](Arguments& args) -> bool { m_threads_omp = args.get_int() ;  return true; } 
         },
         ParameterInfo{ 
-            "Number of threads using for  generate a new population", { "--threads_pop",    "-tp"  }, 
+            "Number of threads using for  generate a new population", { "--" + m_threads_pop.name(),    "-tp"  }, 
             [this](Arguments& args) -> bool { m_threads_pop = args.get_int() ;  return true; } 
         },
         ParameterInfo{
