@@ -80,6 +80,83 @@ protected:
 
 };
 
+class BenchOutput : public Denn::RuntimeOutput
+{
+public:
+
+	BenchOutput(std::ostream& stream=std::cerr) : Denn::RuntimeOutput(stream){}
+	
+	virtual bool is_enable() override  { return true; }
+
+	virtual void start() override
+	{ 
+		output() << "=== START ===" << std::endl;
+		m_start_time = Denn::Time::get_time();
+		m_pass_time  = Denn::Time::get_time(); 
+		m_n_pass = 0;
+	}
+
+	virtual void update_best() override 
+	{ 
+		//reset
+		m_pass_time  = Denn::Time::get_time(); 
+		m_n_pass 	 = 0;
+		//clean line
+		clean_line();
+		//output
+		write_output(); 
+		output() << std::endl;
+	}
+
+	virtual void update_pass() override 
+	{ 
+		++m_n_pass;
+		//compute pass time
+		double pass_per_sec = (double(m_n_pass) / (Denn::Time::get_time() - m_pass_time));
+		//clean line
+		clean_line();
+		//write output
+		write_output();
+		output() << " ...\t" << double(long(pass_per_sec*10.))/10.0 << " [it/s] ";
+		output() << "\r";
+	}
+
+	virtual void end() override
+	{ 
+		output() << "+ TEST\t" << m_end_of_iterations.m_test_result << std::endl;
+		output() << "+ TIME\t" << Denn::Time::get_time() - m_start_time << std::endl;
+		output() << "=== END ===" << std::endl;
+	}
+
+	virtual void write_output()
+	{
+		write_local_pass();
+		output() << " ->\tACC:" << cut_digits(m_global_pass.m_validation_eval)
+			     << "\tN_RESET:" << cut_digits(m_global_pass.m_n_restart);
+	}
+
+	virtual void clean_line()
+	{
+		//clean line
+		for(short i=0;i!=11;++i) 
+			output() << "          ";
+		//end row
+		output() << "\r";
+	}
+
+	static double cut_digits(double val)
+	{
+		return double(long(val * 1000)) / 1000;
+	}
+
+protected:
+
+	double m_start_time;
+	double m_pass_time;
+	long   m_n_pass;
+
+};
+
 void execute
 (
 	  const Denn::Parameters& parameters
@@ -183,7 +260,7 @@ int main(int argc,const char** argv)
 	ext = ext.substr(ext.find_last_of(".") + 1);
 	std::transform(ext.begin(),ext.end(), ext.begin(), ::tolower);
 	////////////////////////////////////////////////////////////////////////////////////////////////
-	RuntimeOutput::SPtr    runtime_out     = std::make_shared<CustomRuntimeOutput>()->get_ptr(); //default std::cerr
+	RuntimeOutput::SPtr    runtime_out     = std::make_shared<BenchOutput>()->get_ptr(); //default std::cerr
 	SerializeOutput::SPtr serialize_output = ext == "json" ? std::make_shared<JSONSerializeOutput>(ofile)->get_ptr() 
 													       : std::make_shared<CSVSerializeOutput>(ofile)->get_ptr();
 	//execute test

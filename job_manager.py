@@ -11,6 +11,16 @@ import logging
 from time import time
 
 
+def pretty_cmd(cmd):
+    string = cmd[0]
+    for elm in cmd[1:]:
+        if elm[0] == "-" and elm[1].isalpha():
+            string += "\n+ {}".format(elm)
+        else:
+            string += "\t{}".format(elm)
+    return string
+
+
 def main():
     if not exists("results") or not isdir("results"):
         mkdir("results")
@@ -23,6 +33,7 @@ def main():
         for task in jobs:
             if len(task) != 0 and task[0] != "#":
                 logging.info("Execute command -> \"{}\"".format(" ".join(task)))
+                print("+++ TASK -> {}".format(pretty_cmd(task)))
                 cur_task = Popen(task, cwd=working_dir, universal_newlines=True)
                 return_code = cur_task.wait()
                 logging.info("Job exited with code {}".format(return_code))
