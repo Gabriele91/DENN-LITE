@@ -111,6 +111,8 @@ namespace Denn
 		override
 		{
 			//Compute F
+			//JADE REF:  Cauchy  distribution  with  location  parameter μF and scale parameter 0.1
+			//           Fi=randci(μF,0.1) and  then  truncated  to  be  1  if Fi≥1  or  regenerated  if Fi ≤ 0
 			Scalar v;
 			do v = Random::cauchy(m_mutation_f, 0.1); while (v <= 0);
 			i_output.m_f = Denn::sature(v);
@@ -139,7 +141,7 @@ namespace Denn
 						}
 						else if (Random::uniform() < 0.5)
 						{
-							m_archive[Random::irand(m_archive.size())] = father->copy();
+							(*m_archive[Random::irand(m_archive.size())]) = (*father);
 						}
 					}
 					sum_f  += son->m_f;
