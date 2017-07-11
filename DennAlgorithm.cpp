@@ -160,6 +160,7 @@ namespace Denn
 				, ctx_restart.m_count
 				, double(ctx_best.m_eval)
 				, double(ctx_best.m_best->m_eval)
+				, double(execute_test(*(ctx_best.m_best)))
 			);
 		}
 	}

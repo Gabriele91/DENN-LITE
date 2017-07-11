@@ -19,6 +19,7 @@ protected:
 		size_t m_n_restart      {  0         };
 		double m_validation_eval{ 0.0        };
 		double m_target_eval    { 0.0        };
+		double m_test_eval      { 0.0        };	
 	};
     struct PassInfo
 	{
@@ -95,12 +96,14 @@ public:
 		, size_t n_restart
 		, double validation_eval
 		, double target_eval
+		, double test_eval
 	)
 	{
 		m_global_pass.m_g_pass = g_pass;
 		m_global_pass.m_n_restart = n_restart;
 		m_global_pass.m_validation_eval = validation_eval;
 		m_global_pass.m_target_eval = target_eval;
+		m_global_pass.m_test_eval = test_eval;
 		//
 		update_best();
 	}
@@ -140,7 +143,9 @@ public:
 		<< open 
 		<< m_global_pass.m_validation_eval
 		<< separetor 
-		<< m_global_pass.m_target_eval 
+		<< m_global_pass.m_target_eval
+		<< separetor 
+		<< m_global_pass.m_test_eval
 		<< closer;
 	}
 
