@@ -12,8 +12,8 @@ def main():
     DATASETS = [
         "../DENN-dataset-samples/JULY_MNIST_0_540x100_1s.gz",
         "../DENN-dataset-samples/JULY_MNIST_1_540x100_1s.gz",
-        "../DENN-dataset-samples/JULY_GasSensorArrayDrift_0_185x60_1s",
-        "../DENN-dataset-samples/JULY_GasSensorArrayDrift_1_185x60_1s"
+        "../DENN-dataset-samples/JULY_GasSensorArrayDrift_0_185x60_1s.gz",
+        "../DENN-dataset-samples/JULY_GasSensorArrayDrift_1_185x60_1s.gz"
     ]
     DATASET_NAMES = [
         "MNIST_0",
