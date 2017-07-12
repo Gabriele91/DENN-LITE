@@ -3,7 +3,7 @@
 def main():
     EXECUTABLE = "./Release/DENN-float"
     
-    CMD_JDE = "{exe} -t {total_step} -s {batch_step} -np {population_size} -f 0.1 -cr 0.5 -jf 0.1 -jcr 0.1 -cmax {cmax} -cmin {cmin} -rmax {cmax} -rmin {cmin} -rc {restart} -rd {restart_delta} -tp 16 -i {dataset} -o results/{outname} -co {crossover} -m {mutation}"
+    CMD_JDE = "{exe} -t {total_step} -s {batch_step} -np {population_size} -f 0.1 -cr 0.5 -jf 0.1 -jcr 0.1 -cmax {cmax} -cmin {cmin} -rmax {cmax} -rmin {cmin} -rc {restart} -rd {restart_delta} -tp 16 -i {dataset} -o results/{outname} -co {crossover} -m {mutation} -em JDE"
     CMD_JADE = "{exe} -t {total_step} -s {batch_step} -np {population_size} -f 0.1 -cr 0.5 -jf 0.1 -jcr 0.1 -cmax {cmax} -cmin {cmin} -rmax {cmax} -rmin {cmin} -rc {restart} -rd {restart_delta} -tp 16 -i {dataset} -o results/{outname} -co {crossover} -m curr_p_best -em JADE -as {archive_size}"
     
     OUTNAME_JDE = "JDE_{dataset_name}_{total_step}_{batch_step}_{population_size}_{mutation}_{crossover}_{clamp}.json"
