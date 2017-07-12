@@ -44,7 +44,7 @@ def main():
                                         total_step=total_step,
                                         batch_step=batch_step,
                                         population_size=pop_size,
-                                        mutation=mutation,
+                                        mutation=mutation.replace("/", ""),
                                         crossover=cross,
                                         clamp=clamp
                                     )
