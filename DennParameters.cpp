@@ -197,8 +197,21 @@ namespace Denn
             [this](Arguments& args) {  m_output_filename = args.get_string(); return true;  } 
         },
         ParameterInfo{
-            m_np, "Select type of runtime output", { "--" + m_runtime_output_type.name(),    "-ro"  }, 
+            m_runtime_output_type, "Select type of runtime output", { "--" + m_runtime_output_type.name(),    "-ro"  }, 
             [this](Arguments& args) -> bool { m_runtime_output_type = args.get_string() ; return true; }
+        },
+        ParameterInfo{
+            m_compute_test_per_pass, "Compute the test accuracy for each pass", { "--" + m_compute_test_per_pass.name(),    "-ctps"  }, 
+            [this](Arguments& args) -> bool 
+            { 
+                std::string arg(args.get_string());
+                m_compute_test_per_pass = 
+                    arg == std::string("true") 
+                ||  arg == std::string("yes") 
+                ||  arg == std::string("t")
+                ||  arg == std::string("y") ; 
+                return true; 
+            }
         },
 
         ParameterInfo{ 

@@ -139,6 +139,7 @@ namespace Denn
             switch (value.get_type())
             {
             case VariantType::VR_NONE:     return "null";       break;
+            case VariantType::VR_BOOL:     return value.get<bool>() ? "true" : "false";break;
             case VariantType::VR_CHAR:     return std::to_string(value.get<char>());  break;
             case VariantType::VR_SHORT:    return std::to_string(value.get<short>()); break;
             case VariantType::VR_INT:      return std::to_string(value.get<int>());   break;
@@ -284,7 +285,8 @@ namespace Denn
             Eigen::IOFormat matrix_to_json_array(Eigen::FullPrecision, Eigen::DontAlignCols, ", ", ", ", "[", "]", "[", "]");
             switch (value.get_type())
             {
-            case VariantType::VR_NONE:     return "null";       break;
+            case VariantType::VR_NONE:     return "null";                              break;
+            case VariantType::VR_BOOL:     return value.get<bool>() ? "true" : "false";break;
             case VariantType::VR_CHAR:     return std::to_string(value.get<char>());  break;
             case VariantType::VR_SHORT:    return std::to_string(value.get<short>()); break;
             case VariantType::VR_INT:      return std::to_string(value.get<int>());   break;

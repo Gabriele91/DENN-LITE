@@ -118,8 +118,8 @@ int main(int argc,const char** argv)
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	RuntimeOutput::SPtr runtime_out = RuntimeOutputFactory::create(*arguments.m_runtime_output_type, std::cout, arguments);
 	////////////////////////////////////////////////////////////////////////////////////////////////
-	SerializeOutput::SPtr serialize_output = ext == "json" ? std::make_shared<JSONSerializeOutput>(ofile)->get_ptr() 
-													       : std::make_shared<CSVSerializeOutput>(ofile)->get_ptr();
+	SerializeOutput::SPtr serialize_output = ext == ".json" ? std::make_shared<JSONSerializeOutput>(ofile)->get_ptr() 
+													        : std::make_shared<CSVSerializeOutput>(ofile)->get_ptr();
 	//execute test
  	execute(arguments, dataset, uptr_thpool.get(), runtime_out, serialize_output);
 	

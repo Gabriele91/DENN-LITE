@@ -18,6 +18,7 @@ namespace Denn
 	enum VariantType
 	{
 		VR_NONE,
+		VR_BOOL,
 		VR_CHAR,
 		VR_SHORT,
 		VR_INT,
@@ -63,6 +64,7 @@ namespace Denn
 	//get type
 	template < class T > inline VariantType static_variant_type() { return VR_NONE; };
 	//template specialization 
+	template <> inline VariantType static_variant_type<bool>() { return VR_BOOL; };
 	template <> inline VariantType static_variant_type<char>() { return VR_CHAR; };
 	template <> inline VariantType static_variant_type<short>() { return VR_SHORT; };
 	template <> inline VariantType static_variant_type<int>() { return VR_INT; };
@@ -122,6 +124,12 @@ namespace Denn
 		~Variant()
 		{
 			set_type(VR_NONE);
+		}
+
+		Variant(bool b)
+		{
+			set_type(VR_BOOL);
+			m_b = b;
 		}
 
 		Variant(char c)
@@ -441,6 +449,7 @@ namespace Denn
 		//native type
 		union alignas(16)
 		{
+			bool       m_b;
 			char       m_c;
 			short      m_s;
 			int        m_i;
@@ -524,6 +533,12 @@ namespace Denn
 			m_type = VR_NONE;
 		}
 
+
+		VariantRef(const bool& b)
+		{
+			m_ptr = (void*)&b;
+			m_type = VR_BOOL;
+		}
 
 		VariantRef(const char& c)
 		{
@@ -754,6 +769,7 @@ namespace Denn
 		switch (ref.get_type())
 		{
 		case VariantType::VR_NONE:     (*this) = Variant();        break;
+		case VariantType::VR_BOOL:     (*this) = ref.get<bool>();  break;
 		case VariantType::VR_CHAR:     (*this) = ref.get<char>();  break;
 		case VariantType::VR_SHORT:    (*this) = ref.get<short>(); break;
 		case VariantType::VR_INT:      (*this) = ref.get<int>();   break;
