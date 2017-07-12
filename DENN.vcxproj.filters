@@ -84,6 +84,9 @@
     <ClInclude Include="DennVariant.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="DennSerializeOutput.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">

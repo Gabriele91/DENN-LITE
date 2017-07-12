@@ -171,19 +171,16 @@ namespace Random
 			m_target       = target;
 			m_neighborhood = neighborhood;
 			//init deck
-			long lo  = ((long)m_target - (long)m_neighborhood) % (long)g_size;
-			long hi  = ((long)m_target + (long)m_neighborhood) % (long)g_size;
-			long min = std::min(lo,hi);
-			long max = std::max(lo,hi);
+			long ring_hi_end = (((long)m_target + (long)m_neighborhood) + (long)g_size) % (long)g_size;
 			//for
-			long   v=min + 1; 
-			size_t i=0;
-			for(;v!=max; ++v, ++i)
+			long   v = ring_hi_end + 1;
+			size_t i = 0;
+			for(;i != m_size; ++v, ++i)
 			{
 				//debug
 				assert(i < m_size);	
 				//set value
-				m_deck[i]=v;
+				m_deck[i] = v % (long)g_size;
 			} 	
 		}
 	}

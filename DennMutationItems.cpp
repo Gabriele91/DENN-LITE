@@ -254,7 +254,7 @@ namespace Denn
 			//https://pdfs.semanticscholar.org/5523/8adbd3d78dc83cf906240727be02f6560470.pdf
 			//alias
 			const auto& f = i_final.m_f;
-			Scalar scalar_weight=  m_algorithm.parameters().m_degl_scalar_weight;	
+			Scalar scalar_weight= *m_algorithm.parameters().m_degl_scalar_weight;
 			size_t neighborhood = *m_algorithm.parameters().m_degl_neighborhood;
 			//target
 			const Individual& i_target = *population[id_target];
@@ -270,7 +270,7 @@ namespace Denn
 			Individual::SPtr ptr_l_best =  population[id_target];
 			for(long k=-nn; k!=nn; ++k)
 			{
-				long i = (k + id_target) % np;
+				long i = ((k + id_target) + np) % np;
 				auto individual = population[i];
 				if(individual->m_eval < ptr_l_best->m_eval) ptr_l_best = individual;
 			}
@@ -292,8 +292,8 @@ namespace Denn
 					rand_deck.reset();
 					rand_ring_deck.reset();
 					//do cross + mutation
-					const Individual& nn_g_a = *population[rand_deck.get_random_id(id_g_best)];
-					const Individual& nn_g_b = *population[rand_deck.get_random_id(id_g_best)];
+					const Individual& nn_g_a = *population[rand_deck.get_random_id(id_target)]; //a != i
+					const Individual& nn_g_b = *population[rand_deck.get_random_id(id_target)]; //b != i
 					//
 					const Individual& nn_l_a = *population[rand_ring_deck.get_random_id()];
 					const Individual& nn_l_b = *population[rand_ring_deck.get_random_id()];
@@ -309,22 +309,23 @@ namespace Denn
 					const Matrix& x_l_b = nn_l_b[i_layer][m];
 
 					//global
-					Matrix g_m = ( w_target + ((w_g_best - w_target) + (x_g_a - x_g_b)) * f ).unaryExpr(m_algorithm.clamp_function());
+					Matrix g_m = ( w_target + ((w_g_best - w_target) + (x_g_a - x_g_b)) * f );
 
 					//local
-					Matrix l_m = ( w_target + ((w_l_best - w_target) + (x_l_a - x_l_b)) * f ).unaryExpr(m_algorithm.clamp_function());
+					Matrix l_m = ( w_target + ((w_l_best - w_target) + (x_l_a - x_l_b)) * f );
 
 					//final (lerp)
+					//from the DEGL's peper
+					//lambda = 1 -> g_m (aka rand-to-best/1)
+					//lambda = 0 -> l_m
 					Scalar* w_final_array = w_final.data();
 					Scalar* w_g_m_array   = g_m.data();
 					Scalar* w_l_m_array   = l_m.data();
 					for(Matrix::Index i=0;i!=w_final.size();++i)
-					{
-						//from the DEGL's peper
-						//lambda = 1 -> g_m (aka rand-to-best/1)
-						//lambda = 0 -> l_m
 						w_final_array[i] = Denn::lerp(w_l_m_array[i], w_g_m_array[i], scalar_weight);
-					}
+
+					//clamp
+					w_final.unaryExpr(m_algorithm.clamp_function());
 				}
 			}
 		}
