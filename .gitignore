@@ -372,4 +372,5 @@ __pycache__/
 
 # Results
 results/
+results*/
 results*.zip
