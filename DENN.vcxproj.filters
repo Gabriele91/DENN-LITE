@@ -19,6 +19,9 @@
     <Filter Include="File di risorse\shell">
       <UniqueIdentifier>{765bdb3c-a276-4381-b970-89cf093801c2}</UniqueIdentifier>
     </Filter>
+    <Filter Include="File di risorse\tests">
+      <UniqueIdentifier>{8fee7666-dbb8-4e29-b354-8a53b15d5f26}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NeuralNetwork.h">
@@ -171,6 +174,15 @@
     </None>
     <None Include="run_bench.sh">
       <Filter>File di risorse\shell</Filter>
+    </None>
+    <None Include="job.csv">
+      <Filter>File di risorse\tests</Filter>
+    </None>
+    <None Include="job_bench.csv">
+      <Filter>File di risorse\tests</Filter>
+    </None>
+    <None Include="results.csv">
+      <Filter>File di risorse\tests</Filter>
     </None>
   </ItemGroup>
 </Project>
