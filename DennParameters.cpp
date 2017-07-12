@@ -2,6 +2,7 @@
 #include "DennMutation.h"
 #include "DennCrossover.h"
 #include "DennEvolutionMethod.h"
+#include "DennRuntimeOutput.h"
 
 namespace Denn
 {
@@ -195,6 +196,11 @@ namespace Denn
             m_output_filename, "Path of output file (json)", { "--" + m_output_filename.name(), "-o" }, 
             [this](Arguments& args) {  m_output_filename = args.get_string(); return true;  } 
         },
+        ParameterInfo{
+            m_np, "Select type of runtime output", { "--" + m_runtime_output_type.name(),    "-ro"  }, 
+            [this](Arguments& args) -> bool { m_runtime_output_type = args.get_string() ; return true; }
+        },
+
         ParameterInfo{ 
             m_threads_omp, "Number of threads using by OpenMP", { "--" + m_threads_omp.name(),    "-omp"  }, 
             [this](Arguments& args) -> bool { m_threads_omp = args.get_int() ;  return true; } 
@@ -214,6 +220,10 @@ namespace Denn
         ParameterInfo{
             "Print list of crossovers", { "--crossover-list",    "-colist"  }, 
             [this](Arguments& args) -> bool { std::cout << CrossoverFactory::names_of_crossovers() << std::endl; return true; } 
+        },
+        ParameterInfo{
+            "Print list of runtime output", { "--runtime_output-list",    "-rolist"  }, 
+            [this](Arguments& args) -> bool { std::cout << RuntimeOutputFactory::names_of_runtime_outputs() << std::endl; return true; } 
         },
         ParameterInfo{
             "Print the help", { "--help",    "-h"  }, 

@@ -6,7 +6,7 @@ namespace Denn
 {
 	//parameters
 	class DennAlgorithm;
-	//mutation
+	//crossover
 	class Crossover : public std::enable_shared_from_this< Crossover >
 	{
 		public:

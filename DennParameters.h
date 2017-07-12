@@ -138,8 +138,9 @@ namespace Denn
 			}
 		};
 
-		read_only<std::string>			m_dataset_filename { "dataset" };
-		read_only<std::string> 			m_output_filename  { "output" };
+		read_only<std::string>			m_dataset_filename   { "dataset" };
+		read_only<std::string> 			m_output_filename    { "output"  };
+		read_only<std::string>		    m_runtime_output_type{ "runtime_output", "bench" };
 		
 		read_only<size_t>	             m_generations   { "generation", size_t(1000)  };
 		read_only<size_t>	             m_sub_gens      { "sub_gens",size_t(100)   };

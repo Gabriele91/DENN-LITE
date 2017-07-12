@@ -52,8 +52,9 @@ namespace Denn
 		PT_SIZE
 	};
 	//Double Population buffer
-	struct DoubleBufferPopulation
+	class DoubleBufferPopulation
 	{
+	public:
         //Pointer
         using IndividualPtr  = typename Denn::Individual::SPtr;
         using RandomFunction = std::function<Scalar(Scalar)>;

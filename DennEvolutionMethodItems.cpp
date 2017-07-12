@@ -120,7 +120,7 @@ namespace Denn
 			i_output.m_cr = Denn::sature(Random::normal(m_mutation_cr, 0.1));
 		}
 
-		virtual	void selection(DoubleBufferPopulation& dpopulation)
+		virtual	void selection(DoubleBufferPopulation& dpopulation) override
 		{
 			Scalar sum_f  = 0;
 			Scalar sum_f2 = 0;
