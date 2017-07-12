@@ -253,13 +253,21 @@ int main(int argc,const char** argv)
 		uptr_thpool = std::make_unique<ThreadPool>(*arguments.m_threads_pop);
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////
+	if(!Denn::Filesystem::exists((const std::string&)arguments.m_dataset_filename))
+	{
+		std::cerr << "input file: \"" << *arguments.m_dataset_filename << "\" not exists!" << std::endl;
+		return 1; //exit
+	}
 	DataSetLoaderGZ dataset((const std::string&)arguments.m_dataset_filename);
 	////////////////////////////////////////////////////////////////////////////////////////////////
+	if(!Denn::Filesystem::is_writable((const std::string&)arguments.m_output_filename))
+	{
+		std::cerr << "can't write into the file: \"" << *arguments.m_output_filename << "\"" << std::endl;
+		return 1; //exit
+	}
 	std::ofstream	ofile((const std::string&)arguments.m_output_filename);
 	//extension
-	std::string 
-	ext = *arguments.m_output_filename; 
-	ext = ext.substr(ext.find_last_of(".") + 1);
+	std::string ext = Denn::Filesystem::get_extension(*arguments.m_output_filename); 
 	std::transform(ext.begin(),ext.end(), ext.begin(), ::tolower);
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	RuntimeOutput::SPtr    runtime_out     = std::make_shared<BenchOutput>()->get_ptr(); //default std::cerr
