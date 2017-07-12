@@ -154,7 +154,9 @@ namespace Denn
 		read_only<Scalar>	             m_f_cr_adapt   { "f_cr_adapt", Scalar(0.1) };
 		//Current to P best
 		read_only<Scalar>	             m_perc_of_best { "perc_of_best", Scalar(0.1) };
-
+		//DEGL
+		read_only<Scalar>                m_degl_scalar_weight{ "degl_scalar_weight",Scalar(0.1) };
+		read_only<size_t>                m_degl_neighborhood { "degl_neighborhood", Scalar(1)   };
 
 		read_only<Scalar>	             m_clamp_max     { "clamp_max",  Scalar( 10.0) };
 		read_only<Scalar>	             m_clamp_min     { "clamp_min",  Scalar(-10.0) };

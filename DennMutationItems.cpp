@@ -102,9 +102,12 @@ namespace Denn
 			//alias
 			const auto& f = i_final.m_f;
 			//target
-			const Individual& i_target = *population[id_target];
+			const Individual& i_target = *population[id_target];			
 			//best
-			const Individual& i_best = *population.best();
+			size_t id_best;
+			Scalar eval_best;
+			population.best(id_best,eval_best);
+			const Individual& i_best = *population[id_best];
 			//init generator
 			static thread_local Random::RandomDeck rand_deck;
 			//set population size in deck
@@ -118,8 +121,8 @@ namespace Denn
 					//do rand
 					rand_deck.reset();
 					//do cross + mutation
-					const Individual& nn_a = *population[rand_deck.get_random_id(id_target)];
-					const Individual& nn_b = *population[rand_deck.get_random_id(id_target)];
+					const Individual& nn_a = *population[rand_deck.get_random_id(id_best)];
+					const Individual& nn_b = *population[rand_deck.get_random_id(id_best)];
 					//
 					Matrix& w_final      = i_final[i_layer][m];
 					const Matrix& x_best = i_best[i_layer][m];
@@ -145,7 +148,10 @@ namespace Denn
 			//target
 			const Individual& i_target = *population[id_target];
 			//best
-			const Individual& i_best = *population.best();
+			size_t id_best;
+			Scalar eval_best;
+			population.best(id_best,eval_best);
+			const Individual& i_best = *population[id_best];
 			//init generator
 			static thread_local Random::RandomDeck rand_deck;
 			//set population size in deck
@@ -159,10 +165,10 @@ namespace Denn
 					//do rand
 					rand_deck.reset();
 					//do cross + mutation
-					const Individual& nn_a = *population[rand_deck.get_random_id(id_target)];
-					const Individual& nn_b = *population[rand_deck.get_random_id(id_target)];
-					const Individual& nn_c = *population[rand_deck.get_random_id(id_target)];
-					const Individual& nn_d = *population[rand_deck.get_random_id(id_target)];
+					const Individual& nn_a = *population[rand_deck.get_random_id(id_best)];
+					const Individual& nn_b = *population[rand_deck.get_random_id(id_best)];
+					const Individual& nn_c = *population[rand_deck.get_random_id(id_best)];
+					const Individual& nn_d = *population[rand_deck.get_random_id(id_best)];
 					//
 					Matrix& w_final      = i_final[i_layer][m];
 					const Matrix& w_best = i_best[i_layer][m];
@@ -235,4 +241,93 @@ namespace Denn
 
 	};
 	REGISTERED_MUTATION(CurrentToPBest, "curr_p_best")
+
+	class DEGL : public Mutation
+	{
+	public:
+
+		DEGL(const DennAlgorithm& algorithm) :Mutation(algorithm) {}
+
+		virtual void operator()(const Population& population, int id_target, Individual& i_final)
+		{
+			//... page 6 
+			//https://pdfs.semanticscholar.org/5523/8adbd3d78dc83cf906240727be02f6560470.pdf
+			//alias
+			const auto& f = i_final.m_f;
+			Scalar scalar_weight=  m_algorithm.parameters().m_degl_scalar_weight;	
+			size_t neighborhood = *m_algorithm.parameters().m_degl_neighborhood;
+			//target
+			const Individual& i_target = *population[id_target];
+			//best
+			//best
+			size_t id_g_best;
+			Scalar eval_g_best;
+			population.best(id_g_best,eval_g_best);
+			const Individual& g_best = *population[id_g_best];
+			//local best
+			long nn                     =  (long)neighborhood;
+			long np                     =  (long)population.size();
+			Individual::SPtr ptr_l_best =  population[id_target];
+			for(long k=-nn; k!=nn; ++k)
+			{
+				long i = (k + id_target) % np;
+				auto individual = population[i];
+				if(individual->m_eval < ptr_l_best->m_eval) ptr_l_best = individual;
+			}
+			//local best ref
+			const Individual& l_best = *ptr_l_best;
+			//init generator
+			static thread_local Random::RandomDeck rand_deck;
+			static thread_local Random::RandomDeckRingTarget rand_ring_deck;
+			//set population size in deck
+			rand_deck.resize(population.size());
+			rand_ring_deck.reinit(population.size(), id_target, neighborhood);
+			//for each layers
+			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
+			{
+				//weights and baias
+				for (size_t m = 0; m != i_target[i_layer].size(); ++m)
+				{
+					//do rand
+					rand_deck.reset();
+					rand_ring_deck.reset();
+					//do cross + mutation
+					const Individual& nn_g_a = *population[rand_deck.get_random_id(id_g_best)];
+					const Individual& nn_g_b = *population[rand_deck.get_random_id(id_g_best)];
+					//
+					const Individual& nn_l_a = *population[rand_ring_deck.get_random_id()];
+					const Individual& nn_l_b = *population[rand_ring_deck.get_random_id()];
+					//									
+					const Matrix& w_target = i_target[i_layer][m];
+					const Matrix& w_g_best = g_best[i_layer][m];
+					const Matrix& w_l_best = l_best[i_layer][m];
+					      Matrix& w_final  = i_final[i_layer][m];
+
+					const Matrix& x_g_a = nn_g_a[i_layer][m];
+					const Matrix& x_g_b = nn_g_b[i_layer][m];					
+					const Matrix& x_l_a = nn_l_a[i_layer][m];
+					const Matrix& x_l_b = nn_l_b[i_layer][m];
+
+					//global
+					Matrix g_m = ( w_target + ((w_g_best - w_target) + (x_g_a - x_g_b)) * f ).unaryExpr(m_algorithm.clamp_function());
+
+					//local
+					Matrix l_m = ( w_target + ((w_l_best - w_target) + (x_l_a - x_l_b)) * f ).unaryExpr(m_algorithm.clamp_function());
+
+					//final (lerp)
+					Scalar* w_final_array = w_final.data();
+					Scalar* w_g_m_array   = g_m.data();
+					Scalar* w_l_m_array   = l_m.data();
+					for(Matrix::Index i=0;i!=w_final.size();++i)
+					{
+						//from the DEGL's peper
+						//lambda = 1 -> g_m (aka rand-to-best/1)
+						//lambda = 0 -> l_m
+						w_final_array[i] = Denn::lerp(w_l_m_array[i], w_g_m_array[i], scalar_weight);
+					}
+				}
+			}
+		}
+	};
+	REGISTERED_MUTATION(DEGL, "degl")
 }

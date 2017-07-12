@@ -130,7 +130,16 @@ namespace Denn
 		ParameterInfo{
 			m_perc_of_best, "Percentage of best (Current P Best/JADE)",{ "--" + m_perc_of_best.name(),    "-pob" },
 			[this](Arguments& args) -> bool { m_perc_of_best = args.get_double();  return true; }
-		},
+		},	
+
+		ParameterInfo{
+			m_degl_scalar_weight, "Scalar weight used to combinate local mutant with global mutant (DEGL)",{ "--" + m_degl_scalar_weight.name(),    "-gkw" },
+			[this](Arguments& args) -> bool { m_degl_scalar_weight = args.get_double();  return true; }
+		},				
+		ParameterInfo{
+			m_degl_neighborhood, "Neighborhood of target where is searched the best (DEGL)",{ "--" + m_degl_neighborhood.name(), "-glnn" },
+			[this](Arguments& args) -> bool { m_degl_neighborhood = args.get_int();  return true; }
+		},	
 
         ParameterInfo{ 
             m_clamp_min, "Minimum size of weight", { "--" + m_clamp_min.name(),    "-cmin"  }, 

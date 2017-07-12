@@ -199,7 +199,7 @@ void execute
 	//DENN
 	DennAlgorithm denn
 	(
-			&dataset
+		 &dataset
 		, parameters
 		, nn0
 		, cost_function

@@ -57,27 +57,27 @@ namespace Denn
 namespace Denn
 {
 	template<typename T, class Compare>
-	constexpr const T& clamp(const T& value, const T& lo, const T& hi, Compare comp)
+	inline constexpr T clamp(const T& value, const T& lo, const T& hi, Compare comp)
 	{
 		return assert(!comp(hi, lo)), comp(value, lo) ? lo : comp(hi, value) ? hi : value;
 	}
 
 	template< typename T >
-	constexpr const T& clamp(const T& value, const T& lo, const T& hi)
+	inline constexpr T clamp(const T& value, const T& lo, const T& hi)
 	{
 		return clamp(value, lo, hi, std::less<void>());
 	}	
 
 	template< typename T >
-	constexpr const T& sature(const T& v)
+	inline constexpr T sature(const T& v)
 	{
 		return clamp< T >(v, 0.0, 1.0);
 	}
 
-	template < typename T >
-	constexpr const T& lerp(const T& a, const T& b, const T& alpha)
+	template < typename T, typename S >
+	inline constexpr T lerp(const T& a, const T& b, const S& alpha)
 	{
-		return ( T(1.0) - alpha ) * a + b * alpha;
+		return a * ( T(1.0) - alpha ) + b * alpha;
 	}
 
 	inline std::string str_replace(std::string str, const std::string& old_str, const std::string& new_str)

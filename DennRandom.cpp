@@ -128,6 +128,64 @@ namespace Random
 			for(size_t i=0; i!=m_k; ++i) m_deck[i]=i;
 		}
 	}
-	////////////////////////////////////////////////////////////////////////////////////////////////////////
+	////////////////////////////////////////////////////////////////////////////////////////////////////////	
+	RandomDeckRingTarget::RandomDeckRingTarget(size_t g_size, size_t target, size_t neighborhood)
+	{
+		reinit(g_size, target, neighborhood);
+	}
+
+	size_t RandomDeckRingTarget::get_random_id()
+	{
+		size_t j=irand(m_k);
+		size_t r=m_deck[j];
+		//reduce indices region
+		--m_k;
+		//swap with last element
+		m_deck[j]  =m_deck[m_k];
+		m_deck[m_k]=r;
+		//return
+		return r;
+	}
+
+	void RandomDeckRingTarget::reset()
+	{
+		m_k = m_size;
+	}
+
+	void RandomDeckRingTarget::reinit(size_t g_size, size_t target, size_t neighborhood)
+	{		
+		//compute size
+		size_t l_size = g_size-(neighborhood*2+1);
+		//compute reinit
+		bool reinit = false;
+		//realloc
+		if(m_size!=l_size)
+		{
+			m_size = l_size;
+			m_k    = m_size;
+			m_deck = std::make_unique<size_t[]>(m_k);
+			reinit = true;
+		}
+		if(reinit || m_target != target || m_neighborhood != neighborhood)
+        {
+			m_target       = target;
+			m_neighborhood = neighborhood;
+			//init deck
+			long lo  = ((long)m_target - (long)m_neighborhood) % (long)g_size;
+			long hi  = ((long)m_target + (long)m_neighborhood) % (long)g_size;
+			long min = std::min(lo,hi);
+			long max = std::max(lo,hi);
+			//for
+			long   v=min + 1; 
+			size_t i=0;
+			for(;v!=max; ++v, ++i)
+			{
+				//debug
+				assert(i < m_size);	
+				//set value
+				m_deck[i]=v;
+			} 	
+		}
+	}
 }
 }
