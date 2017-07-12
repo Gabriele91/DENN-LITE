@@ -29,7 +29,10 @@ def main():
 
     working_dir = dirname(abspath(__file__))
     logging.info("Open Job file")
-    with open('job.csv', newline='') as csvfile:
+    job_file = 'job.csv'
+    if len(sys.argv) > 1:
+        job_file = sys.argv[1]
+    with open(job_file, newline='') as csvfile:
         jobs = csv.reader(csvfile, delimiter=' ')
         for task in jobs:
             if len(task) != 0 and task[0] != "#":
