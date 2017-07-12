@@ -133,7 +133,7 @@ namespace Denn
 		},	
 
 		ParameterInfo{
-			m_degl_scalar_weight, "Scalar weight used to combinate local mutant with global mutant (DEGL)",{ "--" + m_degl_scalar_weight.name(),    "-gkw" },
+			m_degl_scalar_weight, "Scalar weight used to combinate local mutant with global mutant (DEGL)",{ "--" + m_degl_scalar_weight.name(),    "-glw" },
 			[this](Arguments& args) -> bool { m_degl_scalar_weight = args.get_double();  return true; }
 		},				
 		ParameterInfo{
