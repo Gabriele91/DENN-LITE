@@ -115,13 +115,19 @@ int main(int argc,const char** argv)
 	//extension
 	std::string ext = Denn::Filesystem::get_extension(*arguments.m_output_filename); 
 	std::transform(ext.begin(),ext.end(), ext.begin(), ::tolower);
+	if (!SerializeOutputFactory::exists(ext))
+	{
+		std::cerr << "can't serialize a file with extension \"" << ext << "\"" << std::endl;
+		return 1; //exit
+	}
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	RuntimeOutput::SPtr runtime_out = RuntimeOutputFactory::create(*arguments.m_runtime_output_type, std::cout, arguments);
 	////////////////////////////////////////////////////////////////////////////////////////////////
-	SerializeOutput::SPtr serialize_output = ext == ".json" ? std::make_shared<JSONSerializeOutput>(ofile)->get_ptr() 
-													        : std::make_shared<CSVSerializeOutput>(ofile)->get_ptr();
+	SerializeOutput::SPtr serialize_output = SerializeOutputFactory::create(ext, ofile, arguments);
+	////////////////////////////////////////////////////////////////////////////////////////////////
 	//execute test
  	execute(arguments, dataset, uptr_thpool.get(), runtime_out, serialize_output);
+	////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	return 0;
 }

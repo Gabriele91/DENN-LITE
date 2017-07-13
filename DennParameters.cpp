@@ -3,6 +3,7 @@
 #include "DennCrossover.h"
 #include "DennEvolutionMethod.h"
 #include "DennRuntimeOutput.h"
+#include "DennSerializeOutput.h"
 
 namespace Denn
 {
@@ -213,6 +214,19 @@ namespace Denn
                 return true; 
             }
         },
+        ParameterInfo{
+            m_serialize_neural_network, "Serialize the neural network of best individual", { "--" + m_serialize_neural_network.name(),    "-snn"  },
+            [this](Arguments& args) -> bool 
+            { 
+                std::string arg(args.get_string());
+				m_serialize_neural_network =
+                    arg == std::string("true") 
+                ||  arg == std::string("yes") 
+                ||  arg == std::string("t")
+                ||  arg == std::string("y") ; 
+                return true; 
+            }
+        },
 
         ParameterInfo{ 
             m_threads_omp, "Number of threads using by OpenMP", { "--" + m_threads_omp.name(),    "-omp"  }, 
@@ -238,6 +252,10 @@ namespace Denn
             "Print list of runtime output", { "--runtime_output-list",    "-rolist"  }, 
             [this](Arguments& args) -> bool { std::cout << RuntimeOutputFactory::names_of_runtime_outputs() << std::endl; return true; } 
         },
+		ParameterInfo{
+			"Print list of serializer",{ "--serializer-list",    "-slist" },
+			[this](Arguments& args) -> bool { std::cout << SerializeOutputFactory::names_of_serialize_outputs() << std::endl; return true; }
+		},
         ParameterInfo{
             "Print the help", { "--help",    "-h"  }, 
             [this](Arguments& args) -> bool { std::cout << make_help();  return true; } 

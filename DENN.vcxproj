@@ -59,6 +59,8 @@
     <ClCompile Include="DennPopulation.cpp" />
     <ClCompile Include="DennRuntimeOutputFactory.cpp" />
     <ClCompile Include="DennRuntimeOutputItems.cpp" />
+    <ClCompile Include="DennSerializaOutputFactory.cpp" />
+    <ClCompile Include="DennSerializeOutputItems.cpp" />
     <ClCompile Include="Layer.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="NeuralNetwork.cpp" />
