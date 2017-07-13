@@ -27,7 +27,7 @@ namespace Denn
 			i_output.m_cr = i_target.m_cr;
 		}
 
-		virtual	void selection(DoubleBufferPopulation& population)
+		virtual	void selection(DoubleBufferPopulation& population) override
 		{
 			population.the_best_sons_become_parents();
 		}
@@ -65,7 +65,7 @@ namespace Denn
 				i_output.m_cr = i_target.m_cr;
 		}
 
-		virtual	void selection(DoubleBufferPopulation& population)
+		virtual	void selection(DoubleBufferPopulation& population) override
 		{
 			population.the_best_sons_become_parents();
 		}

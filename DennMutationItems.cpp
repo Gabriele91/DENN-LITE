@@ -267,21 +267,20 @@ namespace Denn
 			//local best
 			long nn                     =  (long)neighborhood;
 			long np                     =  (long)population.size();
-			Individual::SPtr ptr_l_best =  population[id_target];
-			for(long k=-nn; k!=nn; ++k)
+			long id_l_best				=  id_target;
+			for(long k=-nn; k!=(nn+1); ++k)
 			{
-				long i = ((k + id_target) + np) % np;
-				auto individual = population[i];
-				if(individual->m_eval < ptr_l_best->m_eval) ptr_l_best = individual;
+				long i = Denn::positive_mod(k + id_target, np);
+				if( population[i]->m_eval <  population[id_l_best]->m_eval) id_l_best = i;
 			}
 			//local best ref
-			const Individual& l_best = *ptr_l_best;
+			const Individual& l_best = *population[id_l_best];
 			//init generator
 			static thread_local Random::RandomDeck rand_deck;
-			static thread_local Random::RandomDeckRingTarget rand_ring_deck;
+			static thread_local Random::RandomDeckRingSegmentTarget rand_ring_segment_deck;
 			//set population size in deck
 			rand_deck.resize(population.size());
-			rand_ring_deck.reinit(population.size(), id_target, neighborhood);
+			rand_ring_segment_deck.reinit(population.size(), id_target, neighborhood);
 			//for each layers
 			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
 			{
@@ -290,13 +289,13 @@ namespace Denn
 				{
 					//do rand
 					rand_deck.reset();
-					rand_ring_deck.reset();
+					rand_ring_segment_deck.reset();
 					//do cross + mutation
-					const Individual& nn_g_a = *population[rand_deck.get_random_id(id_target)]; //a != i
-					const Individual& nn_g_b = *population[rand_deck.get_random_id(id_target)]; //b != i
-					//
-					const Individual& nn_l_a = *population[rand_ring_deck.get_random_id()];
-					const Individual& nn_l_b = *population[rand_ring_deck.get_random_id()];
+					const Individual& nn_g_a = *population[rand_deck.get_random_id(id_target)]; //a != target
+					const Individual& nn_g_b = *population[rand_deck.get_random_id(id_target)]; //b != target 
+
+					const Individual& nn_l_a = *population[rand_ring_segment_deck.get_random_id()];//local a != target
+					const Individual& nn_l_b = *population[rand_ring_segment_deck.get_random_id()];//local b != target
 					//									
 					const Matrix& w_target = i_target[i_layer][m];
 					const Matrix& w_g_best = g_best[i_layer][m];

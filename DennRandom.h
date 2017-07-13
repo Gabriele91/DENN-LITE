@@ -77,5 +77,29 @@ namespace Denn
 			void reinit(size_t size, size_t target, size_t neighborhood);
 
 		};
+
+		//random deck
+		class RandomDeckRingSegmentTarget
+		{
+			size_t 					     m_target       { 0 };
+			size_t 					     m_neighborhood { 0 };
+			size_t 					     m_global_size  { 0 };
+			size_t 					     m_size         { 0 };
+			size_t					     m_k            { 0 };
+			std::unique_ptr < size_t[] > m_deck{ nullptr };
+
+		public:
+
+			RandomDeckRingSegmentTarget(){}
+
+			RandomDeckRingSegmentTarget(size_t size, size_t target, size_t neighborhood);
+
+			size_t get_random_id();
+
+			void reset();
+
+			void reinit(size_t size, size_t m_target, size_t neighborhood);
+
+		};
 	};
 }

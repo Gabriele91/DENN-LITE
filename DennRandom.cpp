@@ -1,3 +1,4 @@
+#include "Config.h"
 #include "DennRandom.h"
 
 namespace Denn
@@ -182,6 +183,51 @@ namespace Random
 				//set value
 				m_deck[i] = v % (long)g_size;
 			} 	
+		}
+	}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////	
+	RandomDeckRingSegmentTarget::RandomDeckRingSegmentTarget(size_t g_size, size_t target, size_t neighborhood)
+	{
+		reinit(g_size, target, neighborhood);
+	}
+
+	size_t RandomDeckRingSegmentTarget::get_random_id()
+	{
+		size_t j=irand(m_k);
+		size_t r=m_deck[j];
+		//reduce indices region
+		--m_k;
+		//swap with last element
+		m_deck[j]  =m_deck[m_k];
+		m_deck[m_k]=r;
+		//all indices >= target are +1
+		//target is the center of the dack
+		//if r >= (m_neighborhood+1) then r++;
+		if( r > m_neighborhood ) r++;
+		//return
+		return Denn::positive_mod(long(r) + long(m_target) - long(m_neighborhood), long(m_global_size));
+	}
+
+	void RandomDeckRingSegmentTarget::reset()
+	{
+		m_k = m_size-1;
+	}
+
+	void RandomDeckRingSegmentTarget::reinit(size_t g_size, size_t target, size_t neighborhood)
+	{		
+		//compute size
+		size_t l_size = neighborhood*2+1;
+		//save pivot
+		m_global_size  = g_size;
+		m_target       = target;
+		m_neighborhood = neighborhood;
+		//realloc
+		if(m_size!=l_size)
+		{
+			m_size = l_size;
+			m_k    = l_size-1;
+			m_deck = std::make_unique<size_t[]>(m_k);
+			for(size_t i=0; i!=m_k; ++i) m_deck[i]=i;
 		}
 	}
 }
