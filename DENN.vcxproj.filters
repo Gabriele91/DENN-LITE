@@ -13,6 +13,15 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="File di risorse\python">
+      <UniqueIdentifier>{035da07f-7db1-499d-956f-4cae1ee5ed93}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="File di risorse\shell">
+      <UniqueIdentifier>{765bdb3c-a276-4381-b970-89cf093801c2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="File di risorse\tests">
+      <UniqueIdentifier>{8fee7666-dbb8-4e29-b354-8a53b15d5f26}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NeuralNetwork.h">
@@ -87,6 +96,9 @@
     <ClInclude Include="DennSerializeOutput.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="DennFilesystem.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -137,10 +149,46 @@
     <ClCompile Include="DennEvolutionMethodItems.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
+    <ClCompile Include="DennFilesystem.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="DennRuntimeOutputFactory.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="DennRuntimeOutputItems.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="DennSerializaOutputFactory.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="DennSerializeOutputItems.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="makefile">
       <Filter>File di risorse</Filter>
+    </None>
+    <None Include="job_creator.py">
+      <Filter>File di risorse\python</Filter>
+    </None>
+    <None Include="job_manager.py">
+      <Filter>File di risorse\python</Filter>
+    </None>
+    <None Include="job_results_to_csv.py">
+      <Filter>File di risorse\python</Filter>
+    </None>
+    <None Include="run_bench.sh">
+      <Filter>File di risorse\shell</Filter>
+    </None>
+    <None Include="job.csv">
+      <Filter>File di risorse\tests</Filter>
+    </None>
+    <None Include="job_bench.csv">
+      <Filter>File di risorse\tests</Filter>
+    </None>
+    <None Include="results.csv">
+      <Filter>File di risorse\tests</Filter>
     </None>
   </ItemGroup>
 </Project>
