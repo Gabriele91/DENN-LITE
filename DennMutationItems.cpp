@@ -183,6 +183,51 @@ namespace Denn
 	};
 	REGISTERED_MUTATION(BestTwo, "best/2")
 	
+	class CurrentToBest : public Mutation
+	{
+	public:
+
+		CurrentToBest(const DennAlgorithm& algorithm):Mutation(algorithm) 
+		{ 
+		}
+
+		virtual void operator()(const Population& population, int id_target, Individual& i_final)
+		{
+			//alias
+			const auto& f = i_final.m_f;
+			//target
+			const Individual& i_target = *population[id_target];
+			//best (n.b. JADE sort population from best to worst)
+			const Individual& i_best = *population.best();
+			//init generator
+			static thread_local Random::RandomDeck rand_deck;
+			//set population size in deck
+			rand_deck.resize(population.size());
+			//for each layers
+			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
+			{
+				//weights and baias
+				for (size_t m = 0; m != i_target[i_layer].size(); ++m)
+				{
+					//do rand
+					rand_deck.reset();
+					//do cross + mutation
+					const Individual& nn_a = *population[rand_deck.get_random_id(id_target)];
+					const Individual& nn_b = *population[rand_deck.get_random_id(id_target)];
+					//from_archive ? archive[r2] : father(r2);
+					const Matrix& w_target = i_target[i_layer][m];
+						  Matrix& w_final  = i_final[i_layer][m];
+					const Matrix& w_best   = i_best[i_layer][m];
+					const Matrix& x_a = nn_a[i_layer][m];
+					const Matrix& x_b = nn_b[i_layer][m];
+					w_final = ( w_target + ((w_best - w_target) + (x_a - x_b)) * f ).unaryExpr(m_algorithm.clamp_function());
+				}
+			}
+		}
+
+	};
+	REGISTERED_MUTATION(CurrentToBest, "current_to_best/1")
+
 	class CurrentToPBest : public Mutation
 	{
 	public:
