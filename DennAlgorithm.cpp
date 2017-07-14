@@ -11,6 +11,7 @@ namespace Denn
 		, RuntimeOutput::SPtr output
 		, ThreadPool*		  thpool
 	)
+	:m_main_random(*params.m_seed)
 	{
 		m_dataset_loader = dataset_loader;
 		m_default = std::make_shared<Individual>(m_params.m_default_f, m_params.m_default_cr, nn_default);
@@ -18,11 +19,6 @@ namespace Denn
 		m_params = params;
 		m_output = output;
 		m_thpool = thpool;
-		//methods of mutation and crossover
-		m_e_method  = EvolutionMethodFactory::create(m_params.m_evolution_type, *this);
-		//functions
-		m_random_function = gen_random_func();
-		m_clamp_function = gen_clamp_func();
 		//init all
 		start();
 	}
@@ -36,20 +32,36 @@ namespace Denn
 		success &= m_dataset_loader->start_read_batch();
 		//batch
 		success &= m_dataset_loader->read_batch(m_dataset_batch);
+		//init random engine
+		m_main_random.reinit(*m_params.m_seed);
+		//clear random engines
+		m_population_random.clear();
+		//init random engines
+		for(size_t i=0; i!=(size_t)m_params.m_np ;++i)
+		{
+			m_population_random.emplace_back(main_random().uirand());
+		}
+		//gen random function
+		m_random_function = gen_random_func();
+		//gen clamp functions
+		m_clamp_function = gen_clamp_func();
 		//if success //init pop
 		if (success)
 		{
+			//init pop
 			m_population.init
 			(
 				m_params.m_np,
 				m_default,
 				m_dataset_batch,
-				random_function(),
+				m_random_function,
 				m_target_function
 			);
+			//method of evoluction
+			m_e_method = EvolutionMethodFactory::create(m_params.m_evolution_type, *this);
+			//reset method
+			m_e_method->start();
 		}
-		//reset method
-		m_e_method->start();
 		//true
 		return success;
 	}
@@ -214,11 +226,12 @@ namespace Denn
 		{
 			m_population.restart
 			(
-				ctx_best.m_best
-				, m_default
-				, m_dataset_batch
-				, random_function()
-				, m_target_function
+				  ctx_best.m_best							  //best
+				, main_random().irand(size_t(m_params.m_np)) //where put
+				, m_default									  //default individual
+				, m_dataset_batch							  //current batch
+				, m_random_function						      //random generator
+				, m_target_function						      //fitness function	  
 			);
 			ctx.m_test_count = 0;
 			ctx.m_last_eval = ctx_best.m_eval;
@@ -266,14 +279,10 @@ namespace Denn
 	}
 	void DennAlgorithm::execute_generation_task(size_t i)
 	{
-		//ref to parents
-		auto& parents = m_population.parents();
 		//ref to sons
 		auto& sons = m_population.sons();
 		//get temp individual
 		auto& new_son = sons[i];
-		//Copy default params
-		/* new_son->copy_attributes(*m_default); */ 
 		//Compute new individual
 		m_e_method->create_a_individual(m_population, i, *new_son);
 		//eval
@@ -342,9 +351,9 @@ namespace Denn
 	{
 		Scalar min = m_params.m_range_min;
 		Scalar max = m_params.m_range_max;
-		return [=](Scalar x) -> Scalar
+		return [this,min,max](Scalar x) -> Scalar
 		{
-			return Scalar(Random::uniform(min, max));
+			return Scalar(main_random().uniform(min, max));
 		};
 	}
 	//gen clamp function	
@@ -352,7 +361,7 @@ namespace Denn
 	{
 		Scalar min = m_params.m_clamp_min;
 		Scalar max = m_params.m_clamp_max;
-		return [=](Scalar x) -> Scalar
+		return [min,max](Scalar x) -> Scalar
 		{
 			return Denn::clamp<Scalar>(x, min, max);
 		};

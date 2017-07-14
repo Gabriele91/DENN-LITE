@@ -3,15 +3,19 @@
 #include "DennPopulation.h"
 
 namespace Denn
-{
-	//parameters
+{	
+	//dec class
 	class DennAlgorithm;
+	class EvolutionMethod;
+	class Parameters;
+	class Random;
+
 	//crossover
 	class Crossover : public std::enable_shared_from_this< Crossover >
 	{
 		public:
 		//Crossover info
-		Crossover(const DennAlgorithm& algorithm) : m_algorithm(algorithm) {}
+		Crossover(const DennAlgorithm& algorithm);
 		//ref to Crossover
 		using SPtr = std::shared_ptr<Crossover>;
 		//operator
@@ -21,7 +25,17 @@ namespace Denn
 
 	protected:
 		//attributes
-		const DennAlgorithm& m_algorithm;
+		const DennAlgorithm& m_algorithm;	
+
+		//easy access
+		const Parameters& parameters() const;
+		const EvolutionMethod& evolution_method() const;
+	
+		Random& population_random(size_t i)  const;
+		Random& main_random()  const;
+		
+		Random& random(size_t i)  const;
+		Random& random()  const;
 	};
 
 	//class factory of Crossover methods

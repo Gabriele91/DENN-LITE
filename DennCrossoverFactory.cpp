@@ -1,11 +1,28 @@
 #include "DennCrossover.h"
-#include "DennParameters.h"
+#include "DennAlgorithm.h"
 #include <algorithm>
 #include <sstream>
 #include <iterator>
 
 namespace Denn
 {
+	//EvolutionMethod
+	Crossover::Crossover(const DennAlgorithm& algorithm)
+	: m_algorithm(algorithm)
+	{
+	}
+	//easy access
+	const Parameters& Crossover::parameters()            const { return m_algorithm.parameters();        }
+
+	const EvolutionMethod& Crossover::evolution_method() const	{ return m_algorithm.evolution_method();  }
+
+	Random& Crossover::population_random(size_t i)       const { return m_algorithm.population_random(i);}
+
+	Random& Crossover::main_random()					 const { return m_algorithm.main_random(); }
+
+	Random& Crossover::random(size_t i)			         const { return m_algorithm.random(i); }
+
+	Random& Crossover::random()					         const { return m_algorithm.random(); }
 	//map
 	std::unique_ptr< std::map< std::string, CrossoverFactory::CreateObject > > CrossoverFactory::m_cmap;
 	//public

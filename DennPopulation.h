@@ -82,10 +82,11 @@ namespace Denn
 		void restart
 		(
 			  Individual::SPtr best
+			, const size_t            where_put_best
 			, const Individual::SPtr& i_default
-			, const DataSet& dataset
-			, const RandomFunction random_func
-			, CostFunction target_function
+			, const DataSet&          dataset
+			, const RandomFunction    random_func
+			, CostFunction            target_function
 		);
 	};
 }

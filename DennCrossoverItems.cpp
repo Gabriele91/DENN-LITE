@@ -11,7 +11,7 @@ namespace Denn
 
 		virtual void operator()(const Population& population, int id_target, Individual& i_mutant)
 		{
-			//no op
+			//none
 		}
 	};
 	REGISTERED_CROSSOVER(None, "none")
@@ -36,13 +36,13 @@ namespace Denn
 					auto w_target = i_target[i_layer][m].array();
 					auto w_mutant = i_mutant[i_layer][m].array();
 					//random i
-					size_t e_rand = Random::index_rand(w_target.size());
+					size_t e_rand = random(id_target).index_rand(w_target.size());
 					//CROSS
 					for (decltype(w_target.size()) e = 0; e != w_target.size(); ++e)
 					{
 						//crossover
 						//!(RandomIndices::random() < cr || e_rand == e)
-						if (e_rand != e && cr <= Random::uniform())
+						if (e_rand != e && cr <= random(id_target).uniform())
 						{
 							w_mutant(e) = w_target(e);
 						}
@@ -73,8 +73,8 @@ namespace Denn
 					auto w_target = i_target[i_layer][m].array();
 					auto w_mutant = i_mutant[i_layer][m].array();
 					//random i
-					size_t e_rand = Random::index_rand(w_target.size());
-					size_t e_start = Random::index_rand(w_target.size());
+					size_t e_rand = random(id_target).index_rand(w_target.size());
+					size_t e_start = random(id_target).index_rand(w_target.size());
 					//event
 					bool copy_event = false;
 					//CROSS
@@ -84,7 +84,7 @@ namespace Denn
 						size_t e_circ = (e_start + e) % w_target.size();
 						//crossover
 						//!(RandomIndices::random() < cr || e_rand == e)
-						copy_event |= (e_rand != e_circ && cr <= Random::uniform());
+						copy_event |= (e_rand != e_circ && cr <= random(id_target).uniform());
 						//copy all vector
 						if (copy_event)
 						{
@@ -119,7 +119,7 @@ namespace Denn
 					//CROSS
 					for (decltype(w_target.size()) e = 0; e != w_target.size(); ++e)
 					{
-						Scalar factor = Random::uniform();
+						Scalar factor = random(id_target).uniform();
 						w_mutant(e) = w_target(e) + factor * (w_mutant(e) - w_target(e));
 					}
 				}
@@ -148,15 +148,15 @@ namespace Denn
 					auto w_target = i_target[i_layer][m].array();
 					auto w_mutant = i_mutant[i_layer][m].array();
 					//random i
-					size_t e_rand = Random::index_rand(w_target.size());
+					size_t e_rand = random(id_target).index_rand(w_target.size());
 					//CROSS
 					for (decltype(w_target.size()) e = 0; e != w_target.size(); ++e)
 					{
 						//crossover
 						//!(RandomIndices::random() < cr || e_rand == e)
-						if (e_rand != e && cr <= Random::uniform())
+						if (e_rand != e && cr <= random(id_target).uniform())
 						{
-							Scalar factor = Scalar(Random::uniform());
+							Scalar factor = Scalar(random(id_target).uniform());
 							w_mutant(e) = w_target(e) + factor * (w_mutant(e) - w_target(e));
 						}
 					}

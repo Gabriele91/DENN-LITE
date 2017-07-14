@@ -1,5 +1,5 @@
 #include "DennEvolutionMethod.h"
-#include "DennParameters.h"
+#include "DennAlgorithm.h"
 #include <algorithm>
 #include <sstream>
 #include <iterator>
@@ -11,7 +11,18 @@ namespace Denn
 	: m_algorithm(algorithm)
 	{
 	}
+	//easy access
+	const Parameters& EvolutionMethod::parameters()            const { return m_algorithm.parameters();        }
 
+	const EvolutionMethod& EvolutionMethod::evolution_method() const { return m_algorithm.evolution_method();  }
+
+	Random& EvolutionMethod::population_random(size_t i)       const { return m_algorithm.population_random(i);}
+
+	Random& EvolutionMethod::main_random()					   const { return m_algorithm.main_random(); }
+
+	Random& EvolutionMethod::random(size_t i)			       const { return m_algorithm.random(i); }
+
+	Random& EvolutionMethod::random()					       const { return m_algorithm.random(); }
 	//map
 	std::unique_ptr< std::map< std::string, EvolutionMethodFactory::CreateObject > > EvolutionMethodFactory::m_cmap;
 	//public

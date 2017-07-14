@@ -8,6 +8,38 @@
 
 namespace Denn
 {
+	class NoneMethod : public EvolutionMethod
+	{
+	public:
+
+		NoneMethod(const DennAlgorithm& algorithm) : EvolutionMethod(algorithm) {}
+
+		virtual void start() override
+		{
+			//none
+		}
+
+		virtual void create_a_individual
+		(
+			  DoubleBufferPopulation& population
+			, int i_target
+			, Individual& i_output
+		)
+		override
+		{
+			//none
+		}
+
+		virtual	void selection(DoubleBufferPopulation& population) override
+		{
+			//none
+		}
+
+	private:
+
+	};
+	REGISTERED_EVOLUTION_METHOD(NoneMethod,"NONE")
+
 	class DEMethod : public EvolutionMethod
 	{
 	public:
@@ -23,21 +55,21 @@ namespace Denn
 
 		virtual void create_a_individual
 		(
-			DoubleBufferPopulation& population
-			, int target
+			  DoubleBufferPopulation& population
+			, int i_target
 			, Individual& i_output
 		)
 		override
 		{
-			const Population& parents  = population.parents();
-			const Individual& i_target = *parents[target];
+			const Population& parents= population.parents();
+			const Individual& target = *parents[i_target];
 			//copy
-			i_output.m_f  = i_target.m_f;
-			i_output.m_cr = i_target.m_cr;
+			i_output.m_f  = target.m_f;
+			i_output.m_cr = target.m_cr;
 			//call muation
-			(*m_mutation) (parents, target, i_output);
+			(*m_mutation) (parents, i_target, i_output);
 			//call crossover
-			(*m_crossover)(parents, target, i_output);
+			(*m_crossover)(parents, i_target, i_output);
 		}
 
 		virtual	void selection(DoubleBufferPopulation& population) override
@@ -69,29 +101,29 @@ namespace Denn
 		virtual void create_a_individual
 		(     
 			  DoubleBufferPopulation& dpopulation
-			, int target
+			, int i_target
 			, Individual& i_output
 		) 
 		override
 		{
 			//vectors
 			const Population& parents    = dpopulation.parents();
-			const Individual& i_target   = *parents[target];
+			const Individual& target     = *parents[i_target];
 			const Parameters& parameters = m_algorithm.parameters();
 			//f JDE
-			if (Random::uniform() < Scalar(parameters.m_jde_f))
-				i_output.m_f = Scalar(Random::uniform(0.0, 2.0));
+			if (random(i_target).uniform() < Scalar(parameters.m_jde_f))
+				i_output.m_f = Scalar(random(i_target).uniform(0.0, 2.0));
 			else
-				i_output.m_f = i_target.m_f;
+				i_output.m_f = target.m_f;
 			//cr JDE
-			if (Random::uniform() < Scalar(parameters.m_jde_cr))
-				i_output.m_cr = Scalar(Random::uniform());
+			if (random(i_target).uniform() < Scalar(parameters.m_jde_cr))
+				i_output.m_cr = Scalar(random(i_target).uniform());
 			else
-				i_output.m_cr = i_target.m_cr;
+				i_output.m_cr = target.m_cr;
 			//call muation
-			(*m_mutation) (parents, target, i_output);
+			(*m_mutation) (parents, i_target, i_output);
 			//call crossover
-			(*m_crossover)(parents, target, i_output);
+			(*m_crossover)(parents, i_target, i_output);
 		}
 
 		virtual	void selection(DoubleBufferPopulation& population) override
@@ -146,7 +178,7 @@ namespace Denn
 		virtual void create_a_individual
 		(
 			  DoubleBufferPopulation& dpopulation
-			, int target
+			, int i_target
 			, Individual& i_output
 		)
 		override
@@ -155,14 +187,14 @@ namespace Denn
 			//JADE REF:  Cauchy  distribution  with  location  parameter μF and scale parameter 0.1
 			//           Fi=randci(μF,0.1) and  then  truncated  to  be  1  if Fi≥1  or  regenerated  if Fi ≤ 0
 			Scalar v;
-			do v = Random::cauchy(m_mutation_f, 0.1); while (v <= 0);
+			do v = random(i_target).cauchy(m_mutation_f, 0.1); while (v <= 0);
 			i_output.m_f = Denn::sature(v);
 			//Cr
-			i_output.m_cr = Denn::sature(Random::normal(m_mutation_cr, 0.1));
+			i_output.m_cr = Denn::sature(random(i_target).normal(m_mutation_cr, 0.1));
 			//call muation
-			(*m_mutation) (dpopulation.parents(), target, i_output);
+			(*m_mutation) (dpopulation.parents(), i_target, i_output);
 			//call crossover
-			(*m_crossover)(dpopulation.parents(), target, i_output);
+			(*m_crossover)(dpopulation.parents(), i_target, i_output);
 		}
 
 		virtual	void selection(DoubleBufferPopulation& dpopulation) override
@@ -184,9 +216,9 @@ namespace Denn
 						{
 							m_archive.push_back(father->copy());
 						}
-						else if (Random::uniform() < 0.5)
+						else if (random().uniform() < 0.5)
 						{
-							(*m_archive[Random::irand(m_archive.size())]) = (*father);
+							(*m_archive[random().uirand(m_archive.size())]) = (*father);
 						}
 					}
 					sum_f  += son->m_f;
@@ -219,6 +251,7 @@ namespace Denn
 	};
 	REGISTERED_EVOLUTION_METHOD(JADEMethod, "JADE")
 
+	#if 0
 	class SaDEMethod : public EvolutionMethod
 	{
 	public:
@@ -301,5 +334,6 @@ namespace Denn
 
 	};
 	REGISTERED_EVOLUTION_METHOD(SaDEMethod, "SADE")
+	#endif 
 
 }

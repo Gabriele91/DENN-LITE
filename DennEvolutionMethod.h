@@ -4,8 +4,11 @@
 
 namespace Denn
 {
-	//parameters
+	//dec class
 	class DennAlgorithm;
+	class EvolutionMethod;
+	class Parameters;
+	class Random;
 	class DoubleBufferPopulation;
 	class Individual;
 
@@ -32,6 +35,17 @@ namespace Denn
 	protected:
 		//attributes
 		const DennAlgorithm& m_algorithm;
+
+		//easy access
+		const Parameters& parameters() const;
+		const EvolutionMethod& evolution_method() const;
+	
+		Random& population_random(size_t i)  const;
+		Random& main_random()  const;
+		
+		Random& random(size_t i)  const;
+		Random& random()  const;
+
 	};
 
 	//class factory of Evolution methods

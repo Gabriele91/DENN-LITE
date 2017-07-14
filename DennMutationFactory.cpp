@@ -12,6 +12,19 @@ namespace Denn
 	{
 	}
 
+	//easy access
+	const Parameters& Mutation::parameters()            const { return m_algorithm.parameters();        }
+
+	const EvolutionMethod& Mutation::evolution_method() const	{ return m_algorithm.evolution_method();  }
+
+	Random& Mutation::population_random(size_t i)       const { return m_algorithm.population_random(i);}
+
+	Random& Mutation::main_random()					  const { return m_algorithm.main_random(); }
+
+	Random& Mutation::random(size_t i)			      const { return m_algorithm.random(i); }
+
+	Random& Mutation::random()					      const { return m_algorithm.random(); }
+
 	//map
 	std::unique_ptr< std::map< std::string, MutationFactory::CreateObject > > MutationFactory::m_cmap;
 	//public

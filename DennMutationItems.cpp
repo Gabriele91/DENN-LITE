@@ -6,6 +6,19 @@
 #include <assert.h>
 namespace Denn
 {
+	class NoneMutation : public Mutation
+	{
+	public:
+
+		NoneMutation(const DennAlgorithm& algorithm) :Mutation(algorithm) {}
+
+		virtual void operator()(const Population& population, int id_target, Individual& i_final)
+		{
+			//target
+			i_final = *population[id_target];
+		}
+	};
+	REGISTERED_MUTATION(NoneMutation, "none")
 
 	class RandOne : public Mutation
 	{
@@ -20,9 +33,9 @@ namespace Denn
 			//target
 			const Individual& i_target = *population[id_target];
 			//init generator
-			static thread_local Random::RandomDeck rand_deck;
+			auto& rand_deck = random(id_target).deck();
 			//set population size in deck
-			rand_deck.resize(population.size());
+			rand_deck.reinit(population.size());
 			//for each layers
 			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
 			{
@@ -59,10 +72,10 @@ namespace Denn
 			const auto& f = i_final.m_f;
 			//target
 			const Individual& i_target = *population[id_target];
-			//init generator
-			static thread_local Random::RandomDeck rand_deck;
+			//get generator
+			auto& rand_deck = random(id_target).deck();
 			//set population size in deck
-			rand_deck.resize(population.size());
+			rand_deck.reinit(population.size());
 			//for each layers
 			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
 			{
@@ -108,10 +121,10 @@ namespace Denn
 			Scalar eval_best;
 			population.best(id_best,eval_best);
 			const Individual& i_best = *population[id_best];
-			//init generator
-			static thread_local Random::RandomDeck rand_deck;
+			//get generator
+			auto& rand_deck = random(id_target).deck();
 			//set population size in deck
-			rand_deck.resize(population.size());
+			rand_deck.reinit(population.size());
 			//for each layers
 			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
 			{
@@ -152,10 +165,10 @@ namespace Denn
 			Scalar eval_best;
 			population.best(id_best,eval_best);
 			const Individual& i_best = *population[id_best];
-			//init generator
-			static thread_local Random::RandomDeck rand_deck;
+			//get generator
+			auto& rand_deck = random(id_target).deck();
 			//set population size in deck
-			rand_deck.resize(population.size());
+			rand_deck.reinit(population.size());
 			//for each layers
 			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
 			{
@@ -199,10 +212,10 @@ namespace Denn
 			const Individual& i_target = *population[id_target];
 			//best (n.b. JADE sort population from best to worst)
 			const Individual& i_best = *population.best();
-			//init generator
-			static thread_local Random::RandomDeck rand_deck;
+			//get generator
+			auto& rand_deck = random(id_target).deck();
 			//set population size in deck
-			rand_deck.resize(population.size());
+			rand_deck.reinit(population.size());
 			//for each layers
 			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
 			{
@@ -249,11 +262,11 @@ namespace Denn
 			//target
 			const Individual& i_target = *population[id_target];
 			//best (n.b. JADE sort population from best to worst)
-			const Individual& i_best = *population[Random::irand(size_t(m_perc_of_best*(Scalar)population.size()))];
-			//init generator
-			static thread_local Random::RandomDeck rand_deck;
+			const Individual& i_best = *population[random(id_target).irand(size_t(m_perc_of_best*(Scalar)population.size()))];
+			//get generator
+			auto& rand_deck = random(id_target).deck();
 			//set population size in deck
-			rand_deck.resize(population.size());
+			rand_deck.reinit(population.size());
 			//for each layers
 			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
 			{
@@ -263,7 +276,7 @@ namespace Denn
 					//do rand
 					rand_deck.reset();
 					//archive
-					size_t rand_b = Random::irand(m_archive->size() + population.size() - 2);
+					size_t rand_b = random(id_target).irand(m_archive->size() + population.size() - 2);
 					bool get_from_archive = rand_b < m_archive->size();
 					//do cross + mutation
 					const Individual& nn_a = *population[rand_deck.get_random_id(id_target)];
@@ -319,13 +332,13 @@ namespace Denn
 				if( population[i]->m_eval <  population[id_l_best]->m_eval) id_l_best = i;
 			}
 			//local best ref
-			const Individual& l_best = *population[id_l_best];
-			//init generator
-			static thread_local Random::RandomDeck rand_deck;
-			static thread_local Random::RandomDeckRingSegmentTarget rand_ring_segment_deck;
+			const Individual& l_best = *population[id_l_best];	
+			//get generator
+			auto& rand_deck				 = random(id_target).deck();
+			auto& rand_deck_ring_segment = random(id_target).deck_ring_segment();
 			//set population size in deck
-			rand_deck.resize(population.size());
-			rand_ring_segment_deck.reinit(population.size(), id_target, neighborhood);
+			rand_deck.reinit(population.size());
+			rand_deck_ring_segment.reinit(population.size(), id_target, neighborhood);
 			//for each layers
 			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
 			{
@@ -334,13 +347,13 @@ namespace Denn
 				{
 					//do rand
 					rand_deck.reset();
-					rand_ring_segment_deck.reset();
+					rand_deck_ring_segment.reset();
 					//do cross + mutation
 					const Individual& nn_g_a = *population[rand_deck.get_random_id(id_target)]; //a != target
 					const Individual& nn_g_b = *population[rand_deck.get_random_id(id_target)]; //b != target 
 
-					const Individual& nn_l_a = *population[rand_ring_segment_deck.get_random_id()];//local a != target
-					const Individual& nn_l_b = *population[rand_ring_segment_deck.get_random_id()];//local b != target
+					const Individual& nn_l_a = *population[rand_deck_ring_segment.get_random_id()];//local a != target
+					const Individual& nn_l_b = *population[rand_deck_ring_segment.get_random_id()];//local b != target
 					//									
 					const Matrix& w_target = i_target[i_layer][m];
 					const Matrix& w_g_best = g_best[i_layer][m];

@@ -28,6 +28,8 @@ public:
 	using PromiseList    = std::vector< std::future<void> >;
 	//Ref mutation crossover
 	using ClampFunction  = std::function<Scalar(Scalar)>;
+	//Vector of random
+	using RandomList     = std::vector< Random >;
 	//Ref mutation
 	////////////////////////////////////////////////////////////////////////
 	//structs utilities
@@ -62,7 +64,7 @@ public:
 	////////////////////////////////////////////////////////////////////////
 	DennAlgorithm
 	(
-		DataSetLoader*      dataset_loader
+		  DataSetLoader*      dataset_loader
 		, const Parameters&   params
 		, const NeuralNetwork nn_default
 		, CostFunction		  target_function
@@ -96,14 +98,29 @@ public:
 		return *m_e_method;
 	}
 
-	const RandomFunction& random_function() const
-	{
-		return m_random_function;
-	}	
-
-	const RandomFunction& clamp_function() const
+	const ClampFunction& clamp_function() const
 	{
 		return m_clamp_function;
+	}
+
+	Random& population_random(size_t i) const
+	{
+		return m_population_random[i];
+	}
+
+	Random& main_random() const
+	{
+		return m_main_random;
+	}
+
+	Random& random(size_t i) const
+	{
+		return m_population_random[i];
+	}
+
+	Random& random() const
+	{
+		return m_main_random;
 	}
 
 protected:
@@ -132,6 +149,9 @@ protected:
 	//load next batch
 	bool next_batch();
 	/////////////////////////////////////////////////////////////////
+	//Random engine
+	mutable Random 		  m_main_random;
+	mutable RandomList    m_population_random;
 	//serach space
 	DBPopulation          m_population;
 	PromiseList	          m_promises;

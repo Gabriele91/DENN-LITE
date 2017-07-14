@@ -4,8 +4,12 @@
 
 namespace Denn
 {	
-	//parameters
+	//dec class
 	class DennAlgorithm;
+	class EvolutionMethod;
+	class Parameters;
+	class Random;
+
 	//mutation
     class Mutation : public std::enable_shared_from_this< Mutation >
 	{ 
@@ -20,8 +24,19 @@ namespace Denn
 		virtual void operator()(const Population& population,int id_target,Individual& output)= 0; 
 
 		protected:
+		
 		//attributes
 		const DennAlgorithm& m_algorithm;
+
+		//easy access		
+		const Parameters& parameters() const;
+		const EvolutionMethod& evolution_method() const;
+	
+		Random& population_random(size_t i)  const;
+		Random& main_random()  const;
+		
+		Random& random(size_t i)  const;
+		Random& random()  const;
 	};
 
 	//class factory of Mutation methods

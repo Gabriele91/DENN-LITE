@@ -83,11 +83,11 @@ namespace Denn
 		Population& population = parents();
 		//random init
 		for (auto& individual : population)
-			for (auto& layer : individual->m_network)
-				for (auto& matrix : *layer)
-				{
-					matrix = matrix.unaryExpr(random_func);
-				}
+		for (auto& layer : individual->m_network)
+		for (auto& matrix : *layer)
+		{
+			matrix = matrix.unaryExpr(random_func);
+		}
 		//eval
 		for (size_t i = 0; i != population.size(); ++i)
 		{
@@ -154,10 +154,11 @@ namespace Denn
 	void DoubleBufferPopulation::restart
 	(
 		  Individual::SPtr best
+		, const size_t            where_put_best
 		, const Individual::SPtr& i_default
-		, const DataSet& dataset
-		, const RandomFunction random_func
-		, CostFunction target_function
+		, const DataSet&          dataset
+		, const RandomFunction    random_func
+		, CostFunction            target_function
 	)
 	{
 		//ref to current
@@ -169,15 +170,13 @@ namespace Denn
 			individual->copy_attributes(*i_default);
 			//Reinit layers
 			for (auto& layer : individual->m_network)
-				for (auto& matrix : *layer)
-				{
-					matrix = matrix.unaryExpr(random_func);
-				}
+			for (auto& matrix : *layer)
+			{
+				matrix = matrix.unaryExpr(random_func);
+			}
 		}
-		//add best
-		size_t rand_i = Random::irand(population.size());
 		//must copy, The Best Individual can't to be changed during the DE process
-		population[rand_i] = best->copy();
+		population[where_put_best] = best->copy();
 		//eval
 		for (size_t i = 0; i != population.size(); ++i)
 		{
