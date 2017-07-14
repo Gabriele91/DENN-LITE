@@ -8,7 +8,16 @@
             "program": "${workspaceRoot}/Debug/DENN-float",
             "args": 
             [
-             "-t","8000","-s","60","-np","60","-f","0.1","-cr","0.5","-jf","0.1","-jcr","0.1","-cmax","1.0","-cmin","-1.0","-rmax","1.0","-rmin","-1.0","-rc","6","-rd","0.001",
+             "-t","8000",
+             "-s","60",
+             "-np","60",
+             "-f","0.1",
+             "-cr","0.5",
+             "-jf","0.1",
+             "-jcr","0.1",
+             "-cmax","1.0","-cmin","-1.0",
+             "-rmax","1.0","-rmin","-1.0",
+             "-rc","6","-rd","0.001",
              "-tp","1",
              "-i","../DENN-dataset-samples/JULY_GasSensorArrayDrift_1_185x60_1s.gz",
              "-o","JDE_DEGL_GASS_60_hl0_x1_run_0.json",
