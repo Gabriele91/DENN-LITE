@@ -1,12 +1,12 @@
 #!/bin/bash
 import csv
 from subprocess import Popen
-from subprocess import PIPE
-from os.path import abspath
-from os.path import dirname
 from os.path import exists
 from os.path import isdir
+from os import getcwd
 from os import mkdir
+from os import path
+from os import pardir
 import logging
 from time import time
 import sys
@@ -25,21 +25,21 @@ def pretty_cmd(cmd):
 def main():
     if not exists("results") or not isdir("results"):
         mkdir("results")
-    logging.basicConfig(filename='results/job-{}.log'.format(int(time())),level=logging.DEBUG)
+    logging.basicConfig(filename='./results/job-{}.log'.format(int(time())),level=logging.DEBUG)
 
-    working_dir = dirname(abspath(__file__))
     logging.info("Open Job file")
-    job_file = 'job.csv'
+    job_file = path.join(pardir, "jobs", 'job.csv')
     if len(sys.argv) > 1:
         job_file = sys.argv[1]
     with open(job_file, newline='') as csvfile:
         jobs = csv.reader(csvfile, delimiter=' ')
         for task in jobs:
             if len(task) != 0 and task[0] != "#":
+                task[0] = path.join("Release", task[0])
                 logging.info("Execute command -> \"{}\"".format(" ".join(task)))
                 print("+++ TASK -> {}".format(pretty_cmd(task)))
                 sys.stdout.flush()
-                cur_task = Popen(task, cwd=working_dir, universal_newlines=True)
+                cur_task = Popen(task, cwd=getcwd(), universal_newlines=True)
                 return_code = cur_task.wait()
                 logging.info("Job exited with code {}".format(return_code))
 
