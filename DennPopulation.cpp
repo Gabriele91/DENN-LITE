@@ -6,17 +6,17 @@ namespace Denn
 	//vector methods 		
 	size_t Population::size() const { return m_individuals.size(); }
 	void   Population::resize(size_t i) { m_individuals.resize(i); }
-	void   Population::push_back(const IndividualPtr& i) { m_individuals.push_back(i); }
+	void   Population::push_back(const Individual::SPtr& i) { m_individuals.push_back(i); }
 	void   Population::clear() { m_individuals.clear(); }
 	//vector operator
-	Population::IndividualPtr&       Population::operator[](size_t i) { return m_individuals[i]; }
-	const Population::IndividualPtr& Population::operator[](size_t i) const { return m_individuals[i]; }
+	Individual::SPtr&       Population::operator[](size_t i) { return m_individuals[i]; }
+	const Individual::SPtr& Population::operator[](size_t i) const { return m_individuals[i]; }
 
 	//iterator
-	typename std::vector < Population::IndividualPtr >::iterator       Population::begin() { return m_individuals.begin(); }
-	typename std::vector < Population::IndividualPtr >::const_iterator Population::begin() const { return m_individuals.begin(); }
-	typename std::vector < Population::IndividualPtr >::iterator       Population::end() { return m_individuals.end(); }
-	typename std::vector < Population::IndividualPtr >::const_iterator Population::end() const { return m_individuals.end(); }
+	typename std::vector < Individual::SPtr >::iterator       Population::begin()       { return m_individuals.begin(); }
+	typename std::vector < Individual::SPtr >::const_iterator Population::begin() const { return m_individuals.begin(); }
+	typename std::vector < Individual::SPtr >::iterator       Population::end()         { return m_individuals.end(); }
+	typename std::vector < Individual::SPtr >::const_iterator Population::end() const   { return m_individuals.end(); }
 
 	//costum
 	void Population::best(size_t& out_i, Scalar& out_eval) const
@@ -37,7 +37,7 @@ namespace Denn
 		out_i = best_i;
 		out_eval = best_eval;
 	}
-	Population::IndividualPtr Population::best() const
+	Individual::SPtr Population::best() const
 	{
 		//values
 		size_t best_i;
@@ -62,7 +62,7 @@ namespace Denn
 	//init population
 	void DoubleBufferPopulation::init(
 		size_t np
-		, const IndividualPtr& i_default
+		, const Individual::SPtr& i_default
 		, const DataSet& dataset
 		, const RandomFunction random_func
 		, CostFunction target_function
@@ -74,7 +74,7 @@ namespace Denn
 			//size
 			population.resize(np);
 			//init
-			for (auto& i_individual : population)
+			for (Individual::SPtr& i_individual : population)
 			{
 				i_individual = i_default->copy();
 			}
@@ -126,7 +126,7 @@ namespace Denn
 	{
 		parents().best(best_i, out_eval);
 	}
-	DoubleBufferPopulation::IndividualPtr DoubleBufferPopulation::best() const
+	Individual::SPtr DoubleBufferPopulation::best() const
 	{
 		return parents().best();
 	}
@@ -153,8 +153,8 @@ namespace Denn
 	//restart
 	void DoubleBufferPopulation::restart
 	(
-		  IndividualPtr best
-		, const IndividualPtr& i_default
+		  Individual::SPtr best
+		, const Individual::SPtr& i_default
 		, const DataSet& dataset
 		, const RandomFunction random_func
 		, CostFunction target_function

@@ -20,17 +20,15 @@ namespace Denn
 		m_thpool = thpool;
 		//methods of mutation and crossover
 		m_e_method  = EvolutionMethodFactory::create(m_params.m_evolution_type, *this);
-		m_mutation  = MutationFactory::create(m_params.m_mutation_type, *this);
-		m_crossover = CrossoverFactory::create(m_params.m_crossover_type, *this);
 		//functions
 		m_random_function = gen_random_func();
 		m_clamp_function = gen_clamp_func();
 		//init all
-		reset();
+		start();
 	}
 
 	//init
-	bool DennAlgorithm::reset()
+	bool DennAlgorithm::start()
 	{
 		//success flag
 		bool success = m_dataset_loader != nullptr;
@@ -51,13 +49,13 @@ namespace Denn
 			);
 		}
 		//reset method
-		m_e_method->reset();
+		m_e_method->start();
 		//true
 		return success;
 	}
 
 	//big loop
-	DennAlgorithm::IndividualPtr DennAlgorithm::execute()
+	Individual::SPtr DennAlgorithm::execute()
 	{
 		//global info
 		const size_t n_global_pass = ((size_t)m_params.m_generations / (size_t)m_params.m_sub_gens);
@@ -111,7 +109,7 @@ namespace Denn
 	}
 
 	//find best individual (validation test)
-	DennAlgorithm::IndividualPtr DennAlgorithm::find_best(Scalar& out_eval)
+	Individual::SPtr DennAlgorithm::find_best(Scalar& out_eval)
 	{
 		//best 
 		size_t best_i;
@@ -275,13 +273,9 @@ namespace Denn
 		//get temp individual
 		auto& new_son = sons[i];
 		//Copy default params
-		new_son->copy_attributes(*m_default);
-		//compute jde
-		m_e_method->update_f_cr(m_population, i, *new_son);
-		//call muation
-		(*m_mutation)(parents, i, *new_son);
-		//call crossover
-		(*m_crossover)(parents, i, *new_son);
+		/* new_son->copy_attributes(*m_default); */ 
+		//Compute new individual
+		m_e_method->create_a_individual(m_population, i, *new_son);
 		//eval
 		auto y = new_son->m_network.apply(m_dataset_batch.m_features);
 		new_son->m_eval = m_target_function(m_dataset_batch.m_labels, y);

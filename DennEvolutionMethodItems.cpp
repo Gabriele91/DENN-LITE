@@ -3,6 +3,8 @@
 #include "DennPopulation.h"
 #include "DennAlgorithm.h"
 #include "DennEvolutionMethod.h"
+#include "DennMutation.h"
+#include "DennCrossover.h"
 
 namespace Denn
 {
@@ -12,7 +14,14 @@ namespace Denn
 
 		DEMethod(const DennAlgorithm& algorithm) : EvolutionMethod(algorithm) {}
 
-		virtual void update_f_cr
+		virtual void start() override
+		{
+			//create mutation/crossover
+			m_mutation = MutationFactory::create(m_algorithm.parameters().m_mutation_type, m_algorithm);
+			m_crossover = CrossoverFactory::create(m_algorithm.parameters().m_crossover_type, m_algorithm);
+		}
+
+		virtual void create_a_individual
 		(
 			DoubleBufferPopulation& population
 			, int target
@@ -20,17 +29,26 @@ namespace Denn
 		)
 		override
 		{
-			const Population& parents = population.parents();
+			const Population& parents  = population.parents();
 			const Individual& i_target = *parents[target];
 			//copy
-			i_output.m_f = i_target.m_f;
+			i_output.m_f  = i_target.m_f;
 			i_output.m_cr = i_target.m_cr;
+			//call muation
+			(*m_mutation) (parents, target, i_output);
+			//call crossover
+			(*m_crossover)(parents, target, i_output);
 		}
 
 		virtual	void selection(DoubleBufferPopulation& population) override
 		{
 			population.the_best_sons_become_parents();
 		}
+
+	private:
+
+		Mutation::SPtr  m_mutation;
+		Crossover::SPtr m_crossover;
 
 	};
 	REGISTERED_EVOLUTION_METHOD(DEMethod,"DE")
@@ -40,18 +58,25 @@ namespace Denn
 	public:
 
 		JDEMethod(const DennAlgorithm& algorithm) : EvolutionMethod(algorithm) {}
+	
+		virtual void start() override
+		{
+			//create mutation/crossover
+			m_mutation = MutationFactory::create(m_algorithm.parameters().m_mutation_type, m_algorithm);
+			m_crossover = CrossoverFactory::create(m_algorithm.parameters().m_crossover_type, m_algorithm);
+		}
 
-		virtual void update_f_cr
+		virtual void create_a_individual
 		(     
-			  DoubleBufferPopulation& population
+			  DoubleBufferPopulation& dpopulation
 			, int target
 			, Individual& i_output
 		) 
 		override
 		{
 			//vectors
-			const Population& parents = population.parents();
-			const Individual& i_target = *parents[target];
+			const Population& parents    = dpopulation.parents();
+			const Individual& i_target   = *parents[target];
 			const Parameters& parameters = m_algorithm.parameters();
 			//f JDE
 			if (Random::uniform() < Scalar(parameters.m_jde_f))
@@ -63,12 +88,21 @@ namespace Denn
 				i_output.m_cr = Scalar(Random::uniform());
 			else
 				i_output.m_cr = i_target.m_cr;
+			//call muation
+			(*m_mutation) (parents, target, i_output);
+			//call crossover
+			(*m_crossover)(parents, target, i_output);
 		}
 
 		virtual	void selection(DoubleBufferPopulation& population) override
 		{
 			population.the_best_sons_become_parents();
 		}
+
+	protected:
+
+		Mutation::SPtr  m_mutation;
+		Crossover::SPtr m_crossover;
 
 	};
 	REGISTERED_EVOLUTION_METHOD(JDEMethod, "JDE")
@@ -86,9 +120,16 @@ namespace Denn
 			m_mutation_cr      = Scalar(0.5);
 		}
 		
-		virtual void reset() override
+		virtual void start() override
 		{
+			//reinit
+			m_mutation_f = Scalar(0.5);
+			m_mutation_cr = Scalar(0.5);
+			//clear
 			m_archive.clear();
+			//create mutation/crossover
+			m_mutation = MutationFactory::create(m_algorithm.parameters().m_mutation_type, m_algorithm);
+			m_crossover = CrossoverFactory::create(m_algorithm.parameters().m_crossover_type, m_algorithm);
 		}
 
 		virtual void start_a_gen_pass(DoubleBufferPopulation& dpopulation) override
@@ -102,7 +143,7 @@ namespace Denn
 			dpopulation.parents().sort();
 		}
 
-		virtual void update_f_cr
+		virtual void create_a_individual
 		(
 			  DoubleBufferPopulation& dpopulation
 			, int target
@@ -118,6 +159,10 @@ namespace Denn
 			i_output.m_f = Denn::sature(v);
 			//Cr
 			i_output.m_cr = Denn::sature(Random::normal(m_mutation_cr, 0.1));
+			//call muation
+			(*m_mutation) (dpopulation.parents(), target, i_output);
+			//call crossover
+			(*m_crossover)(dpopulation.parents(), target, i_output);
 		}
 
 		virtual	void selection(DoubleBufferPopulation& dpopulation) override
@@ -162,13 +207,99 @@ namespace Denn
 		}
 
 	protected:		
-		size_t     m_archive_max_size{ false };
-		Scalar     m_c_adapt         { 1.0 };
-		Scalar     m_mutation_f      { 0   };
-		Scalar     m_mutation_cr     { 0   };
-		Population m_archive;
+
+		size_t          m_archive_max_size{ false };
+		Scalar          m_c_adapt         { Scalar(1.0) };
+		Scalar          m_mutation_f      { Scalar(0.5) };
+		Scalar          m_mutation_cr     { Scalar(0.5) };
+		Population	    m_archive;
+		Mutation::SPtr  m_mutation;
+		Crossover::SPtr m_crossover;
 
 	};
 	REGISTERED_EVOLUTION_METHOD(JADEMethod, "JADE")
+
+	class SaDEMethod : public EvolutionMethod
+	{
+	public:
+
+		SaDEMethod(const DennAlgorithm& algorithm) : EvolutionMethod(algorithm)
+		{
+			//m_epoct = m_algorithm.parameters().m_epoct;
+		}
+
+		virtual void start() override
+		{
+			//reinit
+			for (size_t i = 0; i != 2; ++i)
+			{
+				m_nfalse[i] = 0;
+				m_ntesut[i] = 0;
+				m_p[i]	    = Scalar(0.5);
+			}
+			//restart counter
+			m_curr_epoct = m_epoct;
+			//create mutation/crossover
+			m_mutation[0] = MutationFactory::create("rand/1", m_algorithm);
+			m_mutation[1] = MutationFactory::create("current_to_best/1", m_algorithm);
+			m_crossover   = CrossoverFactory::create(m_algorithm.parameters().m_crossover_type, m_algorithm);
+		}
+
+		virtual void start_a_gen_pass(DoubleBufferPopulation& dpopulation) override
+		{
+			//Update F/CR??
+		}
+
+		virtual void start_a_subgen_pass(DoubleBufferPopulation& dpopulation) override
+		{
+			//none
+		}
+
+		virtual void create_a_individual
+		(
+			DoubleBufferPopulation& dpopulation
+			, int target
+			, Individual& i_output
+		)
+		override
+		{
+			//todo
+		}
+
+		virtual	void selection(DoubleBufferPopulation& dpopulation) override
+		{
+			//todo
+			for (size_t i = 0; i != dpopulation.sons().size(); ++i)
+			{
+				Individual::SPtr father = dpopulation.parents()[i];
+				Individual::SPtr son = dpopulation.sons()[i];
+				if (father->m_eval >= son->m_eval)
+				{
+					//todo
+					dpopulation.swap(i);
+				}
+			}
+			//todo
+		}
+
+		virtual const VariantRef get_context_data() const override
+		{
+			//todo
+			return VariantRef();
+		}
+
+	protected:
+
+		size_t			   m_epoct     { 50   };
+		size_t			   m_curr_epoct{ 50   };
+		size_t             m_nfalse[2] { 0, 0 };
+		size_t             m_ntesut[2] { 0, 0 };
+		Scalar			   m_p[2]      { Scalar(0.5), Scalar(0.5) };
+		Population	       m_archive;
+		Mutation::SPtr     m_mutation[2];
+		Crossover::SPtr    m_crossover;
+
+	};
+	REGISTERED_EVOLUTION_METHOD(SaDEMethod, "SADE")
 
 }
