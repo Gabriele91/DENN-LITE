@@ -89,7 +89,7 @@ namespace Denn
 			//name/data/serializable
 			std::string m_name;
 			T m_data;
-			bool m_serializable;
+			bool m_serializable { true };
 
 			friend class Parameters;
 
