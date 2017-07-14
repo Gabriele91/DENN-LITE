@@ -60,6 +60,11 @@
         "cstdarg": "cpp",
         "codecvt": "cpp",
         "slist": "cpp",
-        "cassert": "cpp"
+        "cassert": "cpp",
+        "__functional_03": "cpp",
+        "__tuple": "cpp",
+        "locale": "cpp",
+        "valarray": "cpp",
+        "set": "cpp"
     }
 }
