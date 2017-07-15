@@ -41,11 +41,12 @@ namespace Denn
 		const EvolutionMethod& evolution_method() const;
 	
 		Random& population_random(size_t i)  const;
-		Random& main_random()  const;
-		
 		Random& random(size_t i)  const;
-		Random& random()  const;
 
+		Random& main_random()  const;
+		#ifndef RANDOM_SAFE_EVOLUTION_METHOD
+		Random& random()  const;
+		#endif	
 	};
 
 	//class factory of Evolution methods

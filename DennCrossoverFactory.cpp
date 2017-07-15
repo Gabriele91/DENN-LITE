@@ -18,11 +18,13 @@ namespace Denn
 
 	Random& Crossover::population_random(size_t i)       const { return m_algorithm.population_random(i);}
 
-	Random& Crossover::main_random()					 const { return m_algorithm.main_random(); }
-
 	Random& Crossover::random(size_t i)			         const { return m_algorithm.random(i); }
 
+	#ifndef RANDOM_SAFE_CROSSOVER
+	Random& Crossover::main_random()					 const { return m_algorithm.main_random(); }
+
 	Random& Crossover::random()					         const { return m_algorithm.random(); }
+	#endif
 	//map
 	std::unique_ptr< std::map< std::string, CrossoverFactory::CreateObject > > CrossoverFactory::m_cmap;
 	//public

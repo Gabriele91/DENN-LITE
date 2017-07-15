@@ -216,9 +216,9 @@ namespace Denn
 						{
 							m_archive.push_back(father->copy());
 						}
-						else if (random().uniform() < 0.5)
+						else if (main_random().uniform() < 0.5)
 						{
-							(*m_archive[random().uirand(m_archive.size())]) = (*father);
+							(*m_archive[main_random().uirand(m_archive.size())]) = (*father);
 						}
 					}
 					sum_f  += son->m_f;

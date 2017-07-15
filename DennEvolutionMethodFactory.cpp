@@ -18,11 +18,13 @@ namespace Denn
 
 	Random& EvolutionMethod::population_random(size_t i)       const { return m_algorithm.population_random(i);}
 
-	Random& EvolutionMethod::main_random()					   const { return m_algorithm.main_random(); }
-
 	Random& EvolutionMethod::random(size_t i)			       const { return m_algorithm.random(i); }
 
+	Random& EvolutionMethod::main_random()					   const { return m_algorithm.main_random(); }
+
+	#ifndef RANDOM_SAFE_EVOLUTION_METHOD
 	Random& EvolutionMethod::random()					       const { return m_algorithm.random(); }
+	#endif
 	//map
 	std::unique_ptr< std::map< std::string, EvolutionMethodFactory::CreateObject > > EvolutionMethodFactory::m_cmap;
 	//public

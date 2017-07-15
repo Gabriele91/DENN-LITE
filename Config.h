@@ -17,6 +17,9 @@
 #include "DennRandom.h"
 //defines
 #define USE_CROSS_ENTROPY_SAFE
+#define RANDOM_SAFE_MUTATION
+#define RANDOM_SAFE_CROSSOVER
+#define RANDOM_SAFE_EVOLUTION_METHOD
 //macro
 #define MESSAGE( _msg_ ) std::cout<< _msg_ <<std::endl;
 //MSMACRO

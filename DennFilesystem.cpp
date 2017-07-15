@@ -57,7 +57,7 @@ namespace Filesystem
     bool exists(const std::string& filepath)
     {
         #if _WIN32
-            return PathFileExistsA(get_fullpath(filepath).m_path.c_str()) == 1;
+            return PathFileExistsA(get_fullpath(filepath).m_path.c_str()) == TRUE;
         #else
             struct stat buf;
             return (stat(filepath.c_str(), &buf) == 0);
