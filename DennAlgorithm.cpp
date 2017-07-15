@@ -11,14 +11,18 @@ namespace Denn
 		, RuntimeOutput::SPtr output
 		, ThreadPool*		  thpool
 	)
-	:m_main_random(*params.m_seed)
+	: m_main_random(*params.m_seed)
+	, m_target_function(target_function)
+	, m_output(output)
+	, m_default(std::make_shared<Individual>
+	    ( *params.m_default_f
+		, *params.m_default_cr
+		, nn_default
+		))
+	, m_dataset_loader(dataset_loader)
+	, m_thpool(thpool)
+	, m_params(params)
 	{
-		m_dataset_loader = dataset_loader;
-		m_default = std::make_shared<Individual>(m_params.m_default_f, m_params.m_default_cr, nn_default);
-		m_target_function = target_function;
-		m_params = params;
-		m_output = output;
-		m_thpool = thpool;
 		//init all
 		start();
 	}

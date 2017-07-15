@@ -155,8 +155,8 @@ protected:
 	//serach space
 	DBPopulation          m_population;
 	PromiseList	          m_promises;
+	CostFunction          m_target_function;	
 	RuntimeOutput::SPtr   m_output;
-	CostFunction          m_target_function;
 	//dataset
 	Individual::SPtr      m_default;
 	DataSetLoader*		  m_dataset_loader;
