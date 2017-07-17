@@ -5,7 +5,6 @@
 #include "DennEvolutionMethod.h"
 #include "DennMutation.h"
 #include "DennCrossover.h"
-#include <iostream>
 namespace Denn
 {
 	class NoneMethod : public EvolutionMethod
