@@ -3,7 +3,6 @@
 
 namespace Denn
 {
-	static size_t id_seed = 0; 
 	Random::Random(unsigned int seed) 
 	: m_generator (seed)
 	, m_deck(*this)
