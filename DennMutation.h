@@ -22,6 +22,8 @@ namespace Denn
 		Mutation(const DennAlgorithm& algorithm);
 		//operation
 		virtual void operator()(const Population& population,int id_target,Individual& output)= 0; 
+		//required sort (default false)
+		virtual bool required_sort() const { return false; }
 
 		protected:
 		

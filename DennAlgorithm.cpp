@@ -261,7 +261,7 @@ namespace Denn
 			execute_generation_task(i);
 		}
 		//swap
-		m_population.the_best_sons_become_parents();
+		m_e_method->selection(m_population);
 	}
 	void DennAlgorithm::parallel_execute_pass(ThreadPool& thpool)
 	{
@@ -279,7 +279,7 @@ namespace Denn
 		//wait
 		for (auto& promise : m_promises) promise.wait();
 		//swap
-		m_population.the_best_sons_become_parents();
+		m_e_method->selection(m_population);
 	}
 	void DennAlgorithm::execute_generation_task(size_t i)
 	{

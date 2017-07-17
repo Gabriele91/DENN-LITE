@@ -5,7 +5,7 @@
 #include "DennEvolutionMethod.h"
 #include "DennMutation.h"
 #include "DennCrossover.h"
-
+#include <iostream>
 namespace Denn
 {
 	class NoneMethod : public EvolutionMethod
@@ -172,7 +172,7 @@ namespace Denn
 		virtual void start_a_subgen_pass(DoubleBufferPopulation& dpopulation) override
 		{
 			//sort parents
-			dpopulation.parents().sort();
+			if(m_mutation->required_sort()) dpopulation.parents().sort();
 		}
 
 		virtual void create_a_individual

@@ -245,6 +245,9 @@ namespace Denn
 	{
 	public:
 
+		//required sort
+		virtual bool required_sort() const override { return true; }
+
 		CurrentToPBest(const DennAlgorithm& algorithm):Mutation(algorithm) 
 		{ 
 			//JADE REQUIRED
