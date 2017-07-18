@@ -263,10 +263,11 @@ namespace Denn
 		{
 			//alias
 			const auto& f = i_final.m_f;
+			const auto& p = i_final.m_p;
 			//target
 			const Individual& i_target = *population[id_target];
 			//best (n.b. sort population from best to worst)
-			const Individual& i_best = *population[random(id_target).irand(size_t(m_perc_of_best*(Scalar)population.size()))];
+			const Individual& i_best = *population[random(id_target).irand(size_t(p*(Scalar)population.size()))];
 			//get generator
 			auto& rand_deck = random(id_target).deck();
 			//set population size in deck

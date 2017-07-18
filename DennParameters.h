@@ -154,9 +154,11 @@ namespace Denn
 		//JDE
 		read_only<Scalar>	             m_jde_f         { "f_jde", Scalar(0.1)   };
 		read_only<Scalar>	             m_jde_cr        { "cr_jde", Scalar(0.1)   };
-		//JADE
+		//JADE/SHADE
 		read_only<size_t>	             m_archive_size { "archive_size", size_t(0) };
 		read_only<Scalar>	             m_f_cr_adapt   { "f_cr_adapt", Scalar(0.1) };
+		//SHADE
+		read_only<size_t>	             m_shade_h      { "shade_h", size_t(10) };
 		//Current to P best
 		read_only<Scalar>	             m_perc_of_best { "perc_of_best", Scalar(0.1) };
 		//DEGL

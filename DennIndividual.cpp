@@ -11,10 +11,11 @@ namespace Denn
 	}
 	//init
 	Individual::Individual() {}
-	Individual::Individual(Scalar f, Scalar cr, const NeuralNetwork& network)
+	Individual::Individual(Scalar f, Scalar cr, Scalar p, const NeuralNetwork& network)
 	{
-		m_f = f;
+		m_f  = f;
 		m_cr = cr;
+		m_p  = p;
 		m_network = network;
 	}
 	//copy attributes from a other individual
@@ -22,6 +23,7 @@ namespace Denn
 	{
 		m_f       = individual.m_f;
 		m_cr      = individual.m_cr;
+		m_p        = individual.m_p;
 		m_eval    = individual.m_eval;
 		m_network = individual.m_network;
 	}
@@ -29,6 +31,7 @@ namespace Denn
 	{
 		m_f    = individual.m_f;
 		m_cr   = individual.m_cr;
+		m_p    = individual.m_p;
 		m_eval = individual.m_eval;
 	}
 	//cast

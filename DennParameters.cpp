@@ -125,16 +125,21 @@ namespace Denn
         },
 				
 		ParameterInfo{
-			m_archive_size, "Archive size (JADE)",{ "--" + m_archive_size.name(),    "-as" },
+			m_archive_size, "Archive size (JADE/SHADE)",{ "--" + m_archive_size.name(),    "-as" },
 			[this](Arguments& args) -> bool { m_archive_size = args.get_int();  return true; }
 		},				
 		ParameterInfo{
 			m_f_cr_adapt, "Auto adaptation factor of f and c parameters (JADE)",{ "--" + m_f_cr_adapt.name(),    "-afcr" },
 			[this](Arguments& args) -> bool { m_f_cr_adapt = args.get_double();  return true; }
-		},		
+		},
 
 		ParameterInfo{
-			m_perc_of_best, "Percentage of best (Current P Best/JADE)",{ "--" + m_perc_of_best.name(),    "-pob" },
+			m_shade_h, "Size of archive of mu_f and mu_cr in SHADE",{ "--" + m_shade_h.name(),    "-shah" },
+			[this](Arguments& args) -> bool { m_shade_h = args.get_int();  return true; }
+		},
+
+		ParameterInfo{
+			m_perc_of_best, "Percentage of best (Current P Best/NO SHADE)",{ "--" + m_perc_of_best.name(), "-pob", "-p" },
 			[this](Arguments& args) -> bool { m_perc_of_best = args.get_double();  return true; }
 		},	
 

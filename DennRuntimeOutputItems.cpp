@@ -154,7 +154,7 @@ namespace Denn
 
         static double cut_digits(double val)
         {
-            return double(long(val * 1000)) / 1000;
+            return double(long(std::round(val * 10000))) / 10000;
         }
 
     protected:

@@ -17,6 +17,7 @@ namespace Denn
 	, m_default(std::make_shared<Individual>
 	    ( *params.m_default_f
 		, *params.m_default_cr
+	    , *params.m_perc_of_best
 		, nn_default
 		))
 	, m_dataset_loader(dataset_loader)
