@@ -130,6 +130,10 @@ public:
 
 protected:
 	/////////////////////////////////////////////////////////////////
+	//tests
+	bool serial_find_best(size_t& out_i, Scalar& out_eval);
+	bool parallel_find_best(ThreadPool& thpool, size_t& out_i, Scalar& out_eval);
+	/////////////////////////////////////////////////////////////////
 	//Intermedie steps
 	virtual void execute_a_pass(size_t pass, size_t n_sub_pass, BestContext& ctx_best, RestartContext& ctx_restart);
 	void execute_a_sub_pass(size_t pass, size_t sub_pass);

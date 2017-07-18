@@ -17,12 +17,13 @@ namespace Denn
 		SPtr copy() const;
 		//attributes
 		Scalar m_eval{ std::numeric_limits<Scalar>::max() };
-		Scalar m_f{ 1.0 };
-		Scalar m_cr{ 1.0 };
+		Scalar m_f { Scalar(1.0) };
+		Scalar m_cr{ Scalar(1.0) };
+		Scalar m_p { Scalar(0.1) };
 		NeuralNetwork m_network;
 		//init
 		Individual();
-		Individual(Scalar f, Scalar cr, const NeuralNetwork& network);
+		Individual(Scalar f, Scalar cr, Scalar p, const NeuralNetwork& network);
 		//copy attributes from a other individual
 		void copy_from(const Individual& individual);
 		void copy_attributes(const Individual& individual);

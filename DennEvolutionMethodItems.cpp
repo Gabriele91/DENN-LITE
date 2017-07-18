@@ -147,15 +147,15 @@ namespace Denn
 		{
 			m_archive_max_size = m_algorithm.parameters().m_archive_size;
 			m_c_adapt          = m_algorithm.parameters().m_f_cr_adapt;
-			m_mutation_f       = Scalar(0.5);
-			m_mutation_cr      = Scalar(0.5);
+			m_mu_f       = Scalar(0.5);
+			m_mu_cr      = Scalar(0.5);
 		}
 		
 		virtual void start() override
 		{
 			//reinit
-			m_mutation_f = Scalar(0.5);
-			m_mutation_cr = Scalar(0.5);
+			m_mu_f = Scalar(0.5);
+			m_mu_cr = Scalar(0.5);
 			//clear
 			m_archive.clear();
 			//create mutation/crossover
@@ -186,10 +186,10 @@ namespace Denn
 			//JADE REF:  Cauchy  distribution  with  location  parameter μF and scale parameter 0.1
 			//           Fi=randci(μF,0.1) and  then  truncated  to  be  1  if Fi≥1  or  regenerated  if Fi ≤ 0
 			Scalar v;
-			do v = random(i_target).cauchy(m_mutation_f, 0.1); while (v <= 0);
+			do v = random(i_target).cauchy(m_mu_f, 0.1); while (v <= 0);
 			i_output.m_f = Denn::sature(v);
 			//Cr
-			i_output.m_cr = Denn::sature(random(i_target).normal(m_mutation_cr, 0.1));
+			i_output.m_cr = Denn::sature(random(i_target).normal(m_mu_cr, 0.1));
 			//call muation
 			(*m_mutation) (dpopulation.parents(), i_target, i_output);
 			//call crossover
@@ -215,8 +215,8 @@ namespace Denn
 
 		size_t          m_archive_max_size{ false };
 		Scalar          m_c_adapt         { Scalar(1.0) };
-		Scalar          m_mutation_f      { Scalar(0.5) };
-		Scalar          m_mutation_cr     { Scalar(0.5) };
+		Scalar          m_mu_f      { Scalar(0.5) };
+		Scalar          m_mu_cr     { Scalar(0.5) };
 		Population	    m_archive;
 		Mutation::SPtr  m_mutation;
 		Crossover::SPtr m_crossover;
@@ -258,8 +258,8 @@ namespace Denn
 			//safe compute muF and muCR 
 			if(n_discarded)
 			{
-				m_mutation_cr = Denn::lerp(m_mutation_cr, sum_cr / n_discarded, m_c_adapt);
-				m_mutation_f = Denn::lerp(m_mutation_f, sum_f2 / sum_f, m_c_adapt);
+				m_mu_cr = Denn::lerp(m_mu_cr, sum_cr / n_discarded, m_c_adapt);
+				m_mu_f = Denn::lerp(m_mu_f, sum_f2 / sum_f, m_c_adapt);
 			}
 		}
 		//jade standard
@@ -287,8 +287,8 @@ namespace Denn
 			//safe compute muF and muCR 
 			if(n_discarded)
 			{
-				m_mutation_cr = Denn::lerp(m_mutation_cr, sum_cr / n_discarded, m_c_adapt);
-				m_mutation_f = Denn::lerp(m_mutation_f, sum_f2 / sum_f, m_c_adapt);
+				m_mu_cr = Denn::lerp(m_mu_cr, sum_cr / n_discarded, m_c_adapt);
+				m_mu_f = Denn::lerp(m_mu_f, sum_f2 / sum_f, m_c_adapt);
 			}
 			//reduce A
 			while (m_archive_max_size < m_archive.size())
@@ -301,6 +301,175 @@ namespace Denn
 	};
 	REGISTERED_EVOLUTION_METHOD(JADEMethod, "JADE")
 
+	class SHADEMethod : public EvolutionMethod
+	{
+	public:
+
+		SHADEMethod(const DennAlgorithm& algorithm) : EvolutionMethod(algorithm)
+		{
+			m_archive_max_size = m_algorithm.parameters().m_archive_size;
+			m_c_adapt = m_algorithm.parameters().m_f_cr_adapt;
+			m_h = m_algorithm.parameters().m_shade_h;
+			m_pmin = Scalar(2) / Scalar(*m_algorithm.parameters().m_np);
+		}
+
+		virtual void start() override
+		{
+			//H size
+			m_mu_f = std::vector<Scalar>(m_h, Scalar(0.5));
+			m_mu_cr = std::vector<Scalar>(m_h, Scalar(0.5));
+			m_k = 0;
+			//clear
+			m_archive.clear();
+			//create mutation/crossover
+			m_mutation = MutationFactory::create(m_algorithm.parameters().m_mutation_type, m_algorithm);
+			m_crossover = CrossoverFactory::create(m_algorithm.parameters().m_crossover_type, m_algorithm);
+		}
+
+		virtual void start_a_gen_pass(DoubleBufferPopulation& dpopulation) override
+		{
+			//Update F/CR??
+		}
+
+		virtual void start_a_subgen_pass(DoubleBufferPopulation& dpopulation) override
+		{
+			//sort parents
+			if (m_mutation->required_sort()) dpopulation.parents().sort();
+		}
+
+		virtual void create_a_individual
+		(
+			  DoubleBufferPopulation& dpopulation
+			, int i_target
+			, Individual& i_output
+		)
+		override
+		{
+			//take tou
+			size_t tou_i = random(i_target).uirand(m_mu_f.size());
+			//Compute F
+			Scalar v;
+			do v = random(i_target).cauchy(m_mu_f[tou_i], 0.1); while (v <= 0);
+			i_output.m_f = Denn::sature(v);
+			//Cr
+			i_output.m_cr = Denn::sature(random(i_target).normal(m_mu_cr[tou_i], 0.1));
+			//P
+			i_output.m_p = random(i_target).uniform(m_pmin, 0.2);
+			//call muation
+			(*m_mutation) (dpopulation.parents(), i_target, i_output);
+			//call crossover
+			(*m_crossover)(dpopulation.parents(), i_target, i_output);
+		}
+
+		virtual	void selection(DoubleBufferPopulation& dpopulation) override
+		{
+			//#define SHADE_FAST
+#ifdef SHADE_FAST
+			selection_shade_fast(dpopulation);
+#else
+			selection_shade_standard(dpopulation);
+#endif	
+		}
+
+		virtual const VariantRef get_context_data() const override
+		{
+			return VariantRef(m_archive);
+		}
+
+	protected:
+
+		size_t				m_h{ 0 };
+		size_t				m_k{ 0 };
+		size_t              m_archive_max_size{ false };
+		Scalar              m_c_adapt{ Scalar(1.0) };
+		Scalar				m_pmin   { Scalar(0.0) };
+		std::vector<Scalar> m_mu_f;
+		std::vector<Scalar> m_mu_cr;
+		Population	        m_archive;
+		Mutation::SPtr      m_mutation;
+		Crossover::SPtr     m_crossover;
+
+		//jade fast
+		inline void selection_shade_fast(DoubleBufferPopulation& dpopulation)
+		{
+			Scalar sum_f = 0;
+			Scalar sum_f2 = 0;
+			Scalar sum_cr = 0;
+			size_t n_discarded = 0;
+
+			for (size_t i = 0; i != dpopulation.sons().size(); ++i)
+			{
+				Individual::SPtr father = dpopulation.parents()[i];
+				Individual::SPtr son = dpopulation.sons()[i];
+				if (son->m_eval < father->m_eval)
+				{
+					sum_f += son->m_f;
+					sum_f2 += son->m_f * son->m_f;
+					sum_cr += son->m_cr;
+					++n_discarded;
+					//
+					if (m_archive_max_size)
+					{
+						if (m_archive.size() < m_archive_max_size)
+						{
+							m_archive.push_back(father->copy());
+						}
+						else if (main_random().uniform() < Scalar(m_archive_max_size) / Scalar(m_archive_max_size + n_discarded))
+						{
+							m_archive[main_random().uirand(m_archive_max_size)]->copy_from(*father);
+						}
+					}
+					//
+					dpopulation.swap(i);
+				}
+			}
+			//safe compute muF and muCR 
+			if (n_discarded)
+			{
+				m_mu_cr[m_k] = sum_cr / n_discarded;
+				m_mu_f[m_k]  = sum_f2 / sum_f;
+				m_k = (m_k + 1) % m_mu_f.size();
+			}
+		}
+		//jade standard
+		inline void selection_shade_standard(DoubleBufferPopulation& dpopulation)
+		{
+			Scalar sum_f = 0;
+			Scalar sum_f2 = 0;
+			Scalar sum_cr = 0;
+			size_t n_discarded = 0;
+			//swap
+			for (size_t i = 0; i != dpopulation.sons().size(); ++i)
+			{
+				Individual::SPtr father = dpopulation.parents()[i];
+				Individual::SPtr son = dpopulation.sons()[i];
+				if (son->m_eval < father->m_eval)
+				{
+					if (m_archive_max_size) m_archive.push_back(father->copy());
+					sum_f += son->m_f;
+					sum_f2 += son->m_f * son->m_f;
+					sum_cr += son->m_cr;
+					++n_discarded;
+					dpopulation.swap(i);
+				}
+			}
+			//safe compute muF and muCR 
+			if (n_discarded)
+			{
+				m_mu_cr[m_k] = sum_cr / n_discarded;
+				m_mu_f[m_k] = sum_f2 / sum_f;
+				m_k = (m_k + 1) % m_mu_f.size();
+			}
+			//reduce A
+			while (m_archive_max_size < m_archive.size())
+			{
+				m_archive[main_random().uirand(m_archive.size())] = m_archive.last();
+				m_archive.pop_back();
+			}
+		}
+
+	};
+	REGISTERED_EVOLUTION_METHOD(SHADEMethod, "SHADE")
 	#if 0
 	class SaDEMethod : public EvolutionMethod
 	{
