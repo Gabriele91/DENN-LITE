@@ -24,10 +24,11 @@ namespace Denn
 		Individual();
 		Individual(Scalar f, Scalar cr, const NeuralNetwork& network);
 		//copy attributes from a other individual
-		void copy_attributes(const Individual& i);
+		void copy_from(const Individual& individual);
+		void copy_attributes(const Individual& individual);
 		//cast
-		operator NeuralNetwork&();
-		operator const NeuralNetwork& () const;
+		explicit operator NeuralNetwork&();
+		explicit operator const NeuralNetwork& () const;
 		//like Network
 		Layer& operator[](size_t i);
 		const Layer& operator[](size_t i) const;

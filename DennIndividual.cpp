@@ -18,11 +18,18 @@ namespace Denn
 		m_network = network;
 	}
 	//copy attributes from a other individual
-	void Individual::copy_attributes(const Individual& i)
+	void Individual::copy_from(const Individual& individual)
 	{
-		m_f = i.m_f;
-		m_cr = i.m_cr;
-		m_eval = i.m_eval;
+		m_f       = individual.m_f;
+		m_cr      = individual.m_cr;
+		m_eval    = individual.m_eval;
+		m_network = individual.m_network;
+	}
+	void Individual::copy_attributes(const Individual& individual)
+	{
+		m_f    = individual.m_f;
+		m_cr   = individual.m_cr;
+		m_eval = individual.m_eval;
 	}
 	//cast
 	Individual::operator NeuralNetwork&()

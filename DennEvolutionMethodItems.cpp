@@ -198,38 +198,12 @@ namespace Denn
 
 		virtual	void selection(DoubleBufferPopulation& dpopulation) override
 		{
-			Scalar sum_f  = 0;
-			Scalar sum_f2 = 0;
-			Scalar sum_cr = 0;
-			size_t n_discarded = 0;
-
-			for (size_t i=0; i!= dpopulation.sons().size(); ++i)
-			{
-				Individual::SPtr father = dpopulation.parents()[i];
-				Individual::SPtr son    = dpopulation.sons()[i];
-				if (son->m_eval < father->m_eval)
-				{
-					if (m_archive_max_size)
-					{
-						if (m_archive.size() < m_archive_max_size)
-						{
-							m_archive.push_back(father->copy());
-						}
-						else if (main_random().uniform() < 0.5)
-						{
-							(*m_archive[main_random().uirand(m_archive.size())]) = (*father);
-						}
-					}
-					sum_f  += son->m_f;
-					sum_f2 += son->m_f * son->m_f;
-					sum_cr += son->m_cr;
-					++n_discarded;
-					dpopulation.swap(i);
-				}
-			}
-			//
-			m_mutation_cr  = Denn::lerp(m_mutation_cr, sum_cr / n_discarded, m_c_adapt);
-			m_mutation_f   = Denn::lerp(m_mutation_f,  sum_f2 / sum_f, m_c_adapt);
+			#define JADE_FAST
+			#ifdef JADE_FAST
+			selection_jade_fast(dpopulation);
+			#else
+			selection_jade_standard(dpopulation);
+			#endif	
 		}
 
 		virtual const VariantRef get_context_data() const override
@@ -246,6 +220,77 @@ namespace Denn
 		Population	    m_archive;
 		Mutation::SPtr  m_mutation;
 		Crossover::SPtr m_crossover;
+
+		//jade fast
+		inline void selection_jade_fast(DoubleBufferPopulation& dpopulation)
+		{
+			Scalar sum_f = 0;
+			Scalar sum_f2 = 0;
+			Scalar sum_cr = 0;
+			size_t n_discarded = 0;
+
+			for (size_t i = 0; i != dpopulation.sons().size(); ++i)
+			{
+				Individual::SPtr father = dpopulation.parents()[i];
+				Individual::SPtr son = dpopulation.sons()[i];
+				if (son->m_eval < father->m_eval)
+				{
+					sum_f += son->m_f;
+					sum_f2 += son->m_f * son->m_f;
+					sum_cr += son->m_cr;
+					++n_discarded;
+					//
+					if (m_archive_max_size)
+					{
+						if (m_archive.size() < m_archive_max_size)
+						{
+							m_archive.push_back(father->copy());
+						}
+						else if (main_random().uniform() < Scalar(m_archive_max_size + n_discarded) / Scalar(m_archive_max_size))
+						{
+							m_archive[main_random().uirand(m_archive_max_size)]->copy_from(*father);
+						}
+					}
+					//
+					dpopulation.swap(i);
+				}
+			}
+			//
+			m_mutation_cr = Denn::lerp(m_mutation_cr, sum_cr / n_discarded, m_c_adapt);
+			m_mutation_f = Denn::lerp(m_mutation_f, sum_f2 / sum_f, m_c_adapt);
+		}
+		//jade standard
+		inline void selection_jade_standard(DoubleBufferPopulation& dpopulation)
+		{
+			Scalar sum_f = 0;
+			Scalar sum_f2 = 0;
+			Scalar sum_cr = 0;
+			size_t n_discarded = 0;
+			//swap
+			for (size_t i = 0; i != dpopulation.sons().size(); ++i)
+			{
+				Individual::SPtr father = dpopulation.parents()[i];
+				Individual::SPtr son = dpopulation.sons()[i];
+				if (son->m_eval < father->m_eval)
+				{
+					if (m_archive_max_size) m_archive.push_back(father->copy());
+					sum_f += son->m_f;
+					sum_f2 += son->m_f * son->m_f;
+					sum_cr += son->m_cr;
+					++n_discarded;
+					dpopulation.swap(i);
+				}
+			}
+			//
+			m_mutation_cr = Denn::lerp(m_mutation_cr, sum_cr / n_discarded, m_c_adapt);
+			m_mutation_f = Denn::lerp(m_mutation_f, sum_f2 / sum_f, m_c_adapt);
+			//reduce A
+			while (m_archive_max_size < m_archive.size())
+			{
+				m_archive[main_random().uirand(m_archive.size())] = m_archive.last();
+				m_archive.pop_back();
+			}
+		}
 
 	};
 	REGISTERED_EVOLUTION_METHOD(JADEMethod, "JADE")

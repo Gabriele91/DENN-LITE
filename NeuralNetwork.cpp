@@ -11,21 +11,21 @@ namespace Denn
 	NeuralNetwork::NeuralNetwork(const NeuralNetwork& nn)
 	{
 		//alloc
-		m_layers.resize(nn.size());
+		m_layers.clear();
 		//copy all layers
-		for (size_t i = 0; i != size(); ++i)
+		for (size_t i = 0; i != nn.size(); ++i)
 		{
-			m_layers[i] = std::move(std::unique_ptr<Layer>(nn[i].copy()));
+			m_layers.push_back(std::unique_ptr<Layer>(nn[i].copy()));
 		}
 	}
 	NeuralNetwork& NeuralNetwork::operator= (const NeuralNetwork & nn)
 	{
 		//alloc
-		m_layers.resize(nn.size());
+		m_layers.clear();
 		//copy all layers
-		for (size_t i = 0; i != size(); ++i)
+		for (size_t i = 0; i != nn.size(); ++i)
 		{
-			m_layers[i] = std::move(std::unique_ptr<Layer>(nn[i].copy()));
+			m_layers.push_back(std::unique_ptr<Layer>(nn[i].copy()));
 		}
 		//self return
 		return *this;

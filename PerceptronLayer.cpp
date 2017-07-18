@@ -39,8 +39,9 @@ namespace Denn
 	Matrix PerceptronLayer::apply(const Matrix& input) 
 	{
 		//get output
-		Matrix layer_output = (input * m_weights).rowwise()
-			+ RowVector(Eigen::Map<RowVector>(m_baias.data(), m_baias.cols()*m_baias.rows()));
+		//Matrix layer_output = (input * m_weights).rowwise() + RowVector(Eigen::Map<RowVector>(m_baias.data(), m_baias.cols()*m_baias.rows()));
+		Matrix layer_output = (input * m_weights).rowwise() + Eigen::Map<RowVector>(m_baias.data(), m_baias.cols()*m_baias.rows());
+		//Matrix layer_output = Eigen::Map<RowVector>(m_baias.data(), m_baias.cols()*m_baias.rows()) + (input * m_weights).rowwise();
 		//activation function?
 		if (m_active_function) return m_active_function(layer_output);
 		else                   return layer_output;
