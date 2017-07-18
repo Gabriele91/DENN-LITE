@@ -281,7 +281,8 @@ namespace Denn
 					rand_deck.reset();
 					//do cross + mutation
 					const Individual& nn_a      = *population[rand_deck.get_random_id(id_target)];
-					const Individual::SPtr nn_b = nullptr;
+					//b from archive  or pop
+					Individual::SPtr nn_b = nullptr;
 					//b from archive (JADE)
 					if(m_archive)
 					{
