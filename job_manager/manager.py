@@ -33,10 +33,15 @@ def main():
         job_file = sys.argv[1]
     with open(job_file, newline='') as csvfile:
         jobs = csv.reader(csvfile, delimiter=' ')
-        for task in jobs:
+        jobs = list(jobs)
+        for idx, task in enumerate(jobs, 1):
             if len(task) != 0 and task[0] != "#":
                 task[0] = path.join("Release", task[0])
-                logging.info("Execute command -> \"{}\"".format(" ".join(task)))
+                logging.info("Execute task {}/{} -> \"{}\"".format(
+                    idx,
+                    len(jobs),
+                    " ".join(task)
+                ))
                 print("+++ TASK -> {}".format(pretty_cmd(task)))
                 sys.stdout.flush()
                 cur_task = Popen(task, cwd=getcwd(), universal_newlines=True)
