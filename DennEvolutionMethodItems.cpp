@@ -255,9 +255,12 @@ namespace Denn
 					dpopulation.swap(i);
 				}
 			}
-			//
-			m_mutation_cr = Denn::lerp(m_mutation_cr, sum_cr / n_discarded, m_c_adapt);
-			m_mutation_f = Denn::lerp(m_mutation_f, sum_f2 / sum_f, m_c_adapt);
+			//safe compute muF and muCR 
+			if(n_discarded)
+			{
+				m_mutation_cr = Denn::lerp(m_mutation_cr, sum_cr / n_discarded, m_c_adapt);
+				m_mutation_f = Denn::lerp(m_mutation_f, sum_f2 / sum_f, m_c_adapt);
+			}
 		}
 		//jade standard
 		inline void selection_jade_standard(DoubleBufferPopulation& dpopulation)
@@ -281,9 +284,12 @@ namespace Denn
 					dpopulation.swap(i);
 				}
 			}
-			//
-			m_mutation_cr = Denn::lerp(m_mutation_cr, sum_cr / n_discarded, m_c_adapt);
-			m_mutation_f = Denn::lerp(m_mutation_f, sum_f2 / sum_f, m_c_adapt);
+			//safe compute muF and muCR 
+			if(n_discarded)
+			{
+				m_mutation_cr = Denn::lerp(m_mutation_cr, sum_cr / n_discarded, m_c_adapt);
+				m_mutation_f = Denn::lerp(m_mutation_f, sum_f2 / sum_f, m_c_adapt);
+			}
 			//reduce A
 			while (m_archive_max_size < m_archive.size())
 			{
