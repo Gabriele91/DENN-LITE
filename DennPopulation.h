@@ -16,9 +16,12 @@ namespace Denn
 		size_t size() const;
 		void   resize(size_t i);
 		void   push_back(const Individual::SPtr& i);
+		void   pop_back();
 		void   clear();
 
 		//vector operator
+		Individual::SPtr& first();
+		Individual::SPtr& last();
 		Individual::SPtr& operator[](size_t i);
 		const Individual::SPtr& operator[](size_t i) const;
 		

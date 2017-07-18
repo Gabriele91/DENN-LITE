@@ -4,11 +4,15 @@ namespace Denn
 	////////////////////////////////////////////////////////////////////////
 	//Population
 	//vector methods 		
-	size_t Population::size() const { return m_individuals.size(); }
-	void   Population::resize(size_t i) { m_individuals.resize(i); }
-	void   Population::push_back(const Individual::SPtr& i) { m_individuals.push_back(i); }
-	void   Population::clear() { m_individuals.clear(); }
+	size_t Population::size() const                         { return m_individuals.size(); }
+	void   Population::resize(size_t i)                     { m_individuals.resize(i);     }
+	void   Population::push_back(const Individual::SPtr& i) { m_individuals.push_back(i);  }
+	void   Population::pop_back()                           { m_individuals.pop_back();    }
+	void   Population::clear()                              { m_individuals.clear();	   }		
+
 	//vector operator
+	Individual::SPtr&       Population::first() { return m_individuals[0];        }
+	Individual::SPtr&       Population::last()  { return m_individuals[size()-1]; }
 	Individual::SPtr&       Population::operator[](size_t i) { return m_individuals[i]; }
 	const Individual::SPtr& Population::operator[](size_t i) const { return m_individuals[i]; }
 

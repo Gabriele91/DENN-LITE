@@ -98,6 +98,11 @@ public:
 		return *m_e_method;
 	}
 
+	const Individual::SPtr get_default_individual() const
+	{
+		return m_default;
+	}
+
 	const ClampFunction& clamp_function() const
 	{
 		return m_clamp_function;
