@@ -15,7 +15,7 @@ namespace Denn
 		//copy all layers
 		for (size_t i = 0; i != nn.size(); ++i)
 		{
-			m_layers.push_back(std::unique_ptr<Layer>(nn[i].copy()));
+			m_layers.push_back(nn[i].copy()->get_ptr());
 		}
 	}
 	NeuralNetwork& NeuralNetwork::operator= (const NeuralNetwork & nn)
@@ -25,7 +25,7 @@ namespace Denn
 		//copy all layers
 		for (size_t i = 0; i != nn.size(); ++i)
 		{
-			m_layers.push_back(std::unique_ptr<Layer>(nn[i].copy()));
+			m_layers.push_back(nn[i].copy()->get_ptr());
 		}
 		//self return
 		return *this;

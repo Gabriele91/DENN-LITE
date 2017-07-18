@@ -29,7 +29,7 @@ namespace Denn
 		const Matrix& weights() const;
 		const Matrix& baias()   const;
 		//////////////////////////////////////////////////
-		virtual Layer* copy() const override;
+		virtual Layer::SPtr copy() const override;
 		//////////////////////////////////////////////////
 		virtual Matrix apply(const Matrix& input) override;
 		//////////////////////////////////////////////////

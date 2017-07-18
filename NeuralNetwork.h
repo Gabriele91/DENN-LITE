@@ -8,7 +8,7 @@ class NeuralNetwork
 {
 public:
 	////////////////////////////////////////////////////////////////
-	using LayerList			 = std::vector < std::unique_ptr<Layer> >;
+	using LayerList			 = std::vector < Layer::SPtr >;
 	using LayerIterator		 = typename LayerList::iterator;
 	using LayerConstIterator = typename LayerList::const_iterator;
 	////////////////////////////////////////////////////////////////
@@ -27,9 +27,7 @@ public:
 	template < typename DerivateLayer >
 	void add_layer(const DerivateLayer& layer)
 	{
-		m_layers.push_back(std::move(
-			std::unique_ptr<Layer>(std::make_unique<DerivateLayer>(layer))
-		));
+		m_layers.push_back(std::static_pointer_cast<Layer>(std::make_shared<DerivateLayer>(layer)));
 	}
 	template < typename ...Layers >
 	void add_layer(const Layer& layer, Layers ...layers)

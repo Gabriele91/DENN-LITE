@@ -2,6 +2,8 @@
 
 namespace Denn
 {
+	//shared this
+	Layer::SPtr Layer::get_ptr() { return this->shared_from_this(); }
 	///////////////////////////////////////////////////////////////////////////
 	Layer::Iterator::Iterator(const Iterator& it)               :m_layer(it.m_layer), m_index(it.m_index) {}
 	Layer::Iterator::Iterator(Layer& layer, size_t index)       :m_layer((Layer*)&layer), m_index(index)  {}

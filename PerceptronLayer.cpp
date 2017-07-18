@@ -31,9 +31,9 @@ namespace Denn
 	const Matrix& PerceptronLayer::weights() const { return m_weights; }
 	const Matrix& PerceptronLayer::baias()   const { return m_baias; }
 	//////////////////////////////////////////////////
-	Layer* PerceptronLayer::copy() const
+	Layer::SPtr PerceptronLayer::copy() const
 	{
-		return (Layer*)new PerceptronLayer(*this);
+		return std::static_pointer_cast<Layer>(std::make_shared<PerceptronLayer>(*this));
 	}
 	//////////////////////////////////////////////////
 	Matrix PerceptronLayer::apply(const Matrix& input) 

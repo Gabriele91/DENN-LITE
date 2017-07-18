@@ -198,7 +198,7 @@ namespace Denn
 
 		virtual	void selection(DoubleBufferPopulation& dpopulation) override
 		{
-			#define JADE_FAST
+			//#define JADE_FAST
 			#ifdef JADE_FAST
 			selection_jade_fast(dpopulation);
 			#else
@@ -246,7 +246,7 @@ namespace Denn
 						{
 							m_archive.push_back(father->copy());
 						}
-						else if (main_random().uniform() < Scalar(m_archive_max_size + n_discarded) / Scalar(m_archive_max_size))
+						else if (main_random().uniform() < Scalar(m_archive_max_size) / Scalar(m_archive_max_size+n_discarded))
 						{
 							m_archive[main_random().uirand(m_archive_max_size)]->copy_from(*father);
 						}

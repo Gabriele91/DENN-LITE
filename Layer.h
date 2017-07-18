@@ -3,11 +3,17 @@
 
 namespace Denn
 {
-	class Layer 
-	{
-	public:		
+	class Layer : public std::enable_shared_from_this< Layer >
+	{ 
+	public:
+		//ref to Layer
+		using SPtr = std::shared_ptr<Layer>;
+		//return ptr
+		SPtr get_ptr();
 		///////////////////////////////////////////////////////////////////////////
-		virtual Layer* copy() const  					= 0;
+		//EIGEN_MAKE_ALIGNED_OPERATOR_NEW	
+		///////////////////////////////////////////////////////////////////////////
+		virtual Layer::SPtr copy() const  				= 0;
 		virtual Matrix apply(const Matrix& input)       = 0;
 		virtual size_t size() const                     = 0;
 		virtual Matrix& operator[](size_t i)            = 0;
