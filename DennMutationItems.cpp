@@ -12,7 +12,7 @@ namespace Denn
 
 		NoneMutation(const DennAlgorithm& algorithm) :Mutation(algorithm) {}
 
-		virtual void operator()(const Population& population, int id_target, Individual& i_final)
+		virtual void operator()(const Population& population, int id_target, Individual& i_final) override
 		{
 			//target
 			i_final = *population[id_target];
@@ -26,7 +26,7 @@ namespace Denn
 
 		RandOne(const DennAlgorithm& algorithm) :Mutation(algorithm) {}
 
-		virtual void operator()(const Population& population, int id_target, Individual& i_final)
+		virtual void operator()(const Population& population, int id_target, Individual& i_final) override
 		{
 			//alias
 			const auto& f = i_final.m_f;
@@ -66,7 +66,7 @@ namespace Denn
 
 		RandTwo(const DennAlgorithm& algorithm) :Mutation(algorithm) {}
 
-		virtual void operator()(const Population& population, int id_target, Individual& i_final)
+		virtual void operator()(const Population& population, int id_target, Individual& i_final) override
 		{
 			//alias
 			const auto& f = i_final.m_f;
@@ -110,7 +110,7 @@ namespace Denn
 
 		BestOne(const DennAlgorithm& algorithm) :Mutation(algorithm) {}
 
-		virtual void operator()(const Population& population, int id_target, Individual& i_final)
+		virtual void operator()(const Population& population, int id_target, Individual& i_final) override
 		{
 			//alias
 			const auto& f = i_final.m_f;
@@ -154,7 +154,7 @@ namespace Denn
 
 		BestTwo(const DennAlgorithm& algorithm) :Mutation(algorithm) {}
 
-		virtual void operator()(const Population& population, int id_target, Individual& i_final)
+		virtual void operator()(const Population& population, int id_target, Individual& i_final) override
 		{
 			//alias
 			const auto& f = i_final.m_f;
@@ -204,7 +204,7 @@ namespace Denn
 		{ 
 		}
 
-		virtual void operator()(const Population& population, int id_target, Individual& i_final)
+		virtual void operator()(const Population& population, int id_target, Individual& i_final) override
 		{
 			//alias
 			const auto& f = i_final.m_f;
@@ -239,7 +239,7 @@ namespace Denn
 		}
 
 	};
-	REGISTERED_MUTATION(CurrentToBest, "current_to_best/1")
+	REGISTERED_MUTATION(CurrentToBest, "curr_best")
 
 	class CurrentToPBest : public Mutation
 	{
@@ -250,21 +250,22 @@ namespace Denn
 
 		CurrentToPBest(const DennAlgorithm& algorithm):Mutation(algorithm) 
 		{ 
-			//JADE REQUIRED
-			assert(*m_algorithm.parameters().m_evolution_type == "JADE");
 			//Get JADE archive
-			m_archive = m_algorithm.evolution_method().get_context_data().get_ptr<Population>();
+			if(*m_algorithm.parameters().m_evolution_type == "JADE")
+			{
+				m_archive = m_algorithm.evolution_method().get_context_data().get_ptr<Population>();
+			}
 			//Get percentage of best individuals
 			m_perc_of_best = m_algorithm.parameters().m_perc_of_best;
 		}
 
-		virtual void operator()(const Population& population, int id_target, Individual& i_final)
+		virtual void operator()(const Population& population, int id_target, Individual& i_final) override
 		{
 			//alias
 			const auto& f = i_final.m_f;
 			//target
 			const Individual& i_target = *population[id_target];
-			//best (n.b. JADE sort population from best to worst)
+			//best (n.b. sort population from best to worst)
 			const Individual& i_best = *population[random(id_target).irand(size_t(m_perc_of_best*(Scalar)population.size()))];
 			//get generator
 			auto& rand_deck = random(id_target).deck();
@@ -278,18 +279,26 @@ namespace Denn
 				{
 					//do rand
 					rand_deck.reset();
-					//archive
-					size_t rand_b = random(id_target).irand(m_archive->size() + population.size() - 2);
-					bool get_from_archive = rand_b < m_archive->size();
 					//do cross + mutation
-					const Individual& nn_a = *population[rand_deck.get_random_id(id_target)];
-					const Individual& nn_b = get_from_archive ? *(*m_archive)[rand_b] : *population[rand_deck.get_random_id(id_target)];
+					const Individual& nn_a      = *population[rand_deck.get_random_id(id_target)];
+					const Individual::SPtr nn_b = nullptr;
+					//b from archive (JADE)
+					if(m_archive)
+					{
+						size_t rand_b = random(id_target).irand(m_archive->size() + population.size() - 2);
+						bool get_from_archive = rand_b < m_archive->size();
+						Individual::SPtr nn_b = get_from_archive ? (*m_archive)[rand_b] : population[rand_deck.get_random_id(id_target)];
+					}
+					else 
+					{
+						Individual::SPtr nn_b =  population[rand_deck.get_random_id(id_target)];
+					}
 					//from_archive ? archive[r2] : father(r2);
 					const Matrix& w_target = i_target[i_layer][m];
 						  Matrix& w_final  = i_final[i_layer][m];
 					const Matrix& w_best   = i_best[i_layer][m];
-					const Matrix& x_a = nn_a[i_layer][m];
-					const Matrix& x_b = nn_b[i_layer][m];
+					const Matrix& x_a 	   = nn_a[i_layer][m];
+					const Matrix& x_b 	   = (*nn_b)[i_layer][m];
 					w_final = ( w_target + ((w_best - w_target) + (x_a - x_b)) * f ).unaryExpr(m_algorithm.clamp_function());
 				}
 			}
@@ -298,7 +307,7 @@ namespace Denn
 	protected:
 
 		Scalar m_perc_of_best;
-		const Population* m_archive;
+		const Population* m_archive{ nullptr };
 
 	};
 	REGISTERED_MUTATION(CurrentToPBest, "curr_p_best")
@@ -309,7 +318,7 @@ namespace Denn
 
 		DEGL(const DennAlgorithm& algorithm) :Mutation(algorithm) {}
 
-		virtual void operator()(const Population& population, int id_target, Individual& i_final)
+		virtual void operator()(const Population& population, int id_target, Individual& i_final) override
 		{
 			//... page 6 
 			//https://pdfs.semanticscholar.org/5523/8adbd3d78dc83cf906240727be02f6560470.pdf
