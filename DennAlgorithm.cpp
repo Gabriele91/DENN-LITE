@@ -96,34 +96,6 @@ namespace Denn
 		return ctx_best.m_best;
 	}
 
-	//find best individual (validation test)
-	bool DennAlgorithm::find_best(size_t& out_i, Scalar& out_eval)
-	{
-		//ref to pop
-		auto population = m_population.parents();
-		//validation
-		DataSetScalar validation;
-		m_dataset_loader->read_validation(validation);
-		//best
-		Scalar best_eval;
-		size_t	   best_i;
-		//find best
-		for (size_t i = 0; i != population.size(); ++i)
-		{
-			auto y = population[i]->m_network.apply(validation.m_features);
-			Scalar eval = Denn::CostFunction::accuracy(validation.m_labels, y);
-			//maximize (accuracy)
-			if (!i || best_eval < eval)
-			{
-				best_i = i;
-				best_eval = eval;
-			}
-		}
-		out_i = best_i;
-		out_eval = best_eval;
-		return true;
-
-	}
 
 	//find best individual (validation test)
 	Individual::SPtr DennAlgorithm::find_best(Scalar& out_eval)
@@ -134,6 +106,8 @@ namespace Denn
 		//return best
 		return m_population.parents()[best_i];
 	}
+
+
 
 	//using the test set on a individual
 	Scalar DennAlgorithm::execute_test(Individual& individual)
@@ -148,6 +122,80 @@ namespace Denn
 		return eval;
 	}
 
+	/////////////////////////////////////////////////////////////////
+	//test
+	//find best individual (validation test)
+	bool DennAlgorithm::find_best(size_t& out_i, Scalar& out_eval)
+	{
+		if(m_thpool) return parallel_find_best(*m_thpool,out_i,out_eval);
+		else return serial_find_best(out_i, out_eval);
+	}
+	bool DennAlgorithm::serial_find_best(size_t& out_i, Scalar& out_eval)
+	{
+		//ref to pop
+		auto& population = m_population.parents();
+		//validation
+		DataSetScalar validation;
+		m_dataset_loader->read_validation(validation);
+		//best
+		Scalar best_eval;
+		size_t	   best_i;
+		//find best
+		for (size_t i = 0; i != population.size(); ++i)
+		{
+			auto y = population[i]->m_network.apply(validation.m_features);
+			Scalar eval = Denn::CostFunction::accuracy(validation.m_labels, y);
+			//safe
+			if (std::isnan(eval)) eval = std::numeric_limits<Scalar>::max();
+			//maximize (accuracy)
+			if (!i || best_eval < eval)
+			{
+				best_i = i;
+				best_eval = eval;
+			}
+		}
+		out_i = best_i;
+		out_eval = best_eval;
+		return true;
+
+	}
+	bool DennAlgorithm::parallel_find_best(ThreadPool& thpool, size_t& out_i, Scalar& out_eval)
+	{
+		//ref to pop
+		auto& population = m_population.parents();
+		//validation
+		DataSetScalar validation;
+		m_dataset_loader->read_validation(validation);
+		//list eval
+		std::vector<Scalar> validation_evals(population.size(), std::numeric_limits<Scalar>::max());
+		//alloc promises
+		m_promises.resize(m_params.m_np);
+		//for all
+		for (size_t i = 0; i != population.size(); ++i)
+		{
+			//ref to target
+			auto& i_target = *population[i];
+			auto& eval     = validation_evals[i];
+			//add
+			m_promises[i] = thpool.push_task([this, &i_target, &eval, &validation]()
+			{
+				//test
+				auto y = i_target.m_network.apply(validation.m_features);
+				eval = Denn::CostFunction::accuracy(validation.m_labels, y);
+				//safe
+				if (std::isnan(eval)) eval = std::numeric_limits<Scalar>::max();
+			});
+		}
+		//wait
+		for (auto& promise : m_promises) promise.wait();
+		//find best
+		//maximize (accuracy)
+		out_i    = std::distance(validation_evals.begin(), std::max_element(validation_evals.begin(), validation_evals.end()));
+		out_eval = validation_evals[out_i];
+		return true;
+
+	}
+	
 	/////////////////////////////////////////////////////////////////
 	//Intermedie steps
 	void DennAlgorithm::execute_a_pass(size_t pass, size_t n_sub_pass, BestContext& ctx_best, RestartContext& ctx_restart)
@@ -327,14 +375,14 @@ namespace Denn
 		//np
 		size_t np = (size_t)m_params.m_np;
 		//pop ref
-		auto& popolation = m_population.parents();
+		auto& population = m_population.parents();
 		//alloc promises
 		m_promises.resize(np);
 		//for all
 		for (size_t i = 0; i != np; ++i)
 		{
 			//ref to target
-			auto& i_target = *popolation[i];
+			auto& i_target = *population[i];
 			//add
 			m_promises[i] = thpool.push_task([this, &i_target]()
 			{
