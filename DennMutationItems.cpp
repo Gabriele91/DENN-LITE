@@ -287,11 +287,11 @@ namespace Denn
 					{
 						size_t rand_b = random(id_target).irand(m_archive->size() + population.size() - 2);
 						bool get_from_archive = rand_b < m_archive->size();
-						Individual::SPtr nn_b = get_from_archive ? (*m_archive)[rand_b] : population[rand_deck.get_random_id(id_target)];
+						nn_b = get_from_archive ? (*m_archive)[rand_b] : population[rand_deck.get_random_id(id_target)];
 					}
 					else 
 					{
-						Individual::SPtr nn_b =  population[rand_deck.get_random_id(id_target)];
+						nn_b =  population[rand_deck.get_random_id(id_target)];
 					}
 					//from_archive ? archive[r2] : father(r2);
 					const Matrix& w_target = i_target[i_layer][m];
