@@ -228,8 +228,9 @@ namespace Denn
 			Scalar sum_f2 = 0;
 			Scalar sum_cr = 0;
 			size_t n_discarded = 0;
+			size_t np = current_np();
 
-			for (size_t i = 0; i != dpopulation.sons().size(); ++i)
+			for (size_t i = 0; i != np; ++i)
 			{
 				Individual::SPtr father = dpopulation.parents()[i];
 				Individual::SPtr son = dpopulation.sons()[i];
@@ -269,8 +270,9 @@ namespace Denn
 			Scalar sum_f2 = 0;
 			Scalar sum_cr = 0;
 			size_t n_discarded = 0;
-			//swap
-			for (size_t i = 0; i != dpopulation.sons().size(); ++i)
+			size_t np = current_np();
+
+			for (size_t i = 0; i != np; ++i)
 			{
 				Individual::SPtr father = dpopulation.parents()[i];
 				Individual::SPtr son = dpopulation.sons()[i];
@@ -310,7 +312,6 @@ namespace Denn
 			m_archive_max_size = m_algorithm.parameters().m_archive_size;
 			m_c_adapt = m_algorithm.parameters().m_f_cr_adapt;
 			m_h = m_algorithm.parameters().m_shade_h;
-			m_pmin = Scalar(2) / Scalar(*m_algorithm.parameters().m_np);
 		}
 
 		virtual void start() override
@@ -319,6 +320,7 @@ namespace Denn
 			m_mu_f = std::vector<Scalar>(m_h, Scalar(0.5));
 			m_mu_cr = std::vector<Scalar>(m_h, Scalar(0.5));
 			m_k = 0;
+			m_pmin = Scalar(2) / Scalar(current_np());
 			//clear
 			m_archive.clear();
 			//create mutation/crossover
@@ -396,8 +398,9 @@ namespace Denn
 			Scalar sum_f2 = 0;
 			Scalar sum_cr = 0;
 			size_t n_discarded = 0;
+			size_t np = current_np();
 
-			for (size_t i = 0; i != dpopulation.sons().size(); ++i)
+			for (size_t i = 0; i != np; ++i)
 			{
 				Individual::SPtr father = dpopulation.parents()[i];
 				Individual::SPtr son = dpopulation.sons()[i];
@@ -438,8 +441,9 @@ namespace Denn
 			Scalar sum_f2 = 0;
 			Scalar sum_cr = 0;
 			size_t n_discarded = 0;
-			//swap
-			for (size_t i = 0; i != dpopulation.sons().size(); ++i)
+			size_t np = current_np();
+
+			for (size_t i = 0; i != np; ++i)
 			{
 				Individual::SPtr father = dpopulation.parents()[i];
 				Individual::SPtr son = dpopulation.sons()[i];
