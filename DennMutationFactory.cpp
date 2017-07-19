@@ -14,12 +14,12 @@ namespace Denn
 
 	//easy access
 	const Parameters& Mutation::parameters()            const { return m_algorithm.parameters();        }
-
 	const EvolutionMethod& Mutation::evolution_method() const	{ return m_algorithm.evolution_method();  }
 
-	Random& Mutation::population_random(size_t i)       const { return m_algorithm.population_random(i);}
+	const size_t Mutation::current_np()                  const   { return m_algorithm.current_np(); }
+	const DoubleBufferPopulation& Mutation::population() const   { return m_algorithm.population(); }
 
-
+	Random& Mutation::population_random(size_t i)     const { return m_algorithm.population_random(i);}
 	Random& Mutation::random(size_t i)			      const { return m_algorithm.random(i); }
 
 	#ifndef RANDOM_SAFE_MUTATION

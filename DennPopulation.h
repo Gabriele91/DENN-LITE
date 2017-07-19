@@ -67,6 +67,8 @@ namespace Denn
 			, const RandomFunction random_func
 			, CostFunction target_function
 		);
+		//size
+		size_t size() const;
 		//current
 		Population& parents();
 		const Population& parents() const;

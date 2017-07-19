@@ -93,6 +93,16 @@ public:
 		return m_params;
 	}
 
+	const size_t current_np() const
+	{
+		return m_population.size();
+	}
+
+	const DBPopulation& population() const
+	{
+		return m_population;
+	}
+
 	const EvolutionMethod& evolution_method() const
 	{
 		return *m_e_method;

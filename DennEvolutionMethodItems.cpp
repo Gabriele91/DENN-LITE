@@ -228,8 +228,9 @@ namespace Denn
 			Scalar sum_f2 = 0;
 			Scalar sum_cr = 0;
 			size_t n_discarded = 0;
+			size_t np = current_np();
 
-			for (size_t i = 0; i != dpopulation.sons().size(); ++i)
+			for (size_t i = 0; i != np; ++i)
 			{
 				Individual::SPtr father = dpopulation.parents()[i];
 				Individual::SPtr son = dpopulation.sons()[i];
@@ -269,8 +270,9 @@ namespace Denn
 			Scalar sum_f2 = 0;
 			Scalar sum_cr = 0;
 			size_t n_discarded = 0;
-			//swap
-			for (size_t i = 0; i != dpopulation.sons().size(); ++i)
+			size_t np = current_np();
+
+			for (size_t i = 0; i != np; ++i)
 			{
 				Individual::SPtr father = dpopulation.parents()[i];
 				Individual::SPtr son = dpopulation.sons()[i];
@@ -310,7 +312,6 @@ namespace Denn
 			m_archive_max_size = m_algorithm.parameters().m_archive_size;
 			m_c_adapt = m_algorithm.parameters().m_f_cr_adapt;
 			m_h = m_algorithm.parameters().m_shade_h;
-			m_pmin = Scalar(2) / Scalar(*m_algorithm.parameters().m_np);
 		}
 
 		virtual void start() override
@@ -319,6 +320,7 @@ namespace Denn
 			m_mu_f = std::vector<Scalar>(m_h, Scalar(0.5));
 			m_mu_cr = std::vector<Scalar>(m_h, Scalar(0.5));
 			m_k = 0;
+			m_pmin = Scalar(2) / Scalar(current_np());
 			//clear
 			m_archive.clear();
 			//create mutation/crossover
@@ -392,22 +394,35 @@ namespace Denn
 		//jade fast
 		inline void selection_shade_fast(DoubleBufferPopulation& dpopulation)
 		{
+			//F
 			Scalar sum_f = 0;
 			Scalar sum_f2 = 0;
-			Scalar sum_cr = 0;
+			//CR
+			std::vector<Scalar> s_cr;
+			std::vector<Scalar> s_delta_f;
+			Scalar delta_f = 0;
+			Scalar sum_delta_f = 0;
 			size_t n_discarded = 0;
+			//pop
+			size_t np = current_np();
 
-			for (size_t i = 0; i != dpopulation.sons().size(); ++i)
+			for (size_t i = 0; i != np; ++i)
 			{
 				Individual::SPtr father = dpopulation.parents()[i];
 				Individual::SPtr son = dpopulation.sons()[i];
 				if (son->m_eval < father->m_eval)
 				{
-					sum_f += son->m_f;
+					//F
+					sum_f  += son->m_f;
 					sum_f2 += son->m_f * son->m_f;
-					sum_cr += son->m_cr;
+					//w_k (for mean of Scr)
+					delta_f = std::abs(son->m_eval - father->m_eval);
+					s_delta_f.push_back(delta_f);
+					sum_delta_f += delta_f;
+					//Scr
+					s_cr.push_back(son->m_cr);
 					++n_discarded;
-					//
+					//->A
 					if (m_archive_max_size)
 					{
 						if (m_archive.size() < m_archive_max_size)
@@ -419,44 +434,70 @@ namespace Denn
 							m_archive[main_random().uirand(m_archive_max_size)]->copy_from(*father);
 						}
 					}
-					//
+					//SWAP
 					dpopulation.swap(i);
 				}
 			}
 			//safe compute muF and muCR 
 			if (n_discarded)
 			{
-				m_mu_cr[m_k] = sum_cr / n_discarded;
-				m_mu_f[m_k]  = sum_f2 / sum_f;
+				Scalar mean_w_scr = 0;
+				for(size_t k=0;k!=n_discarded;++k)
+				{
+					//mean_ca(Scr) = sum_0-k( Scr_k   * w_k )
+					mean_w_scr += s_cr[k] * (s_delta_f[k]/sum_delta_f);
+				}
+				m_mu_cr[m_k] = mean_w_scr;
+				m_mu_f[m_k] = sum_f2 / sum_f;
 				m_k = (m_k + 1) % m_mu_f.size();
 			}
 		}
 		//jade standard
 		inline void selection_shade_standard(DoubleBufferPopulation& dpopulation)
 		{
+			//F
 			Scalar sum_f = 0;
 			Scalar sum_f2 = 0;
-			Scalar sum_cr = 0;
+			//CR
+			std::vector<Scalar> s_cr;
+			std::vector<Scalar> s_delta_f;
+			Scalar delta_f = 0;
+			Scalar sum_delta_f = 0;
 			size_t n_discarded = 0;
-			//swap
-			for (size_t i = 0; i != dpopulation.sons().size(); ++i)
+			//pop
+			size_t np = current_np();
+
+			for (size_t i = 0; i != np; ++i)
 			{
 				Individual::SPtr father = dpopulation.parents()[i];
 				Individual::SPtr son = dpopulation.sons()[i];
 				if (son->m_eval < father->m_eval)
 				{
 					if (m_archive_max_size) m_archive.push_back(father->copy());
-					sum_f += son->m_f;
+					//F
+					sum_f  += son->m_f;
 					sum_f2 += son->m_f * son->m_f;
-					sum_cr += son->m_cr;
+					//w_k (for mean of Scr)
+					delta_f = std::abs(son->m_eval - father->m_eval);
+					s_delta_f.push_back(delta_f);
+					sum_delta_f += delta_f;
+					//Scr
+					s_cr.push_back(son->m_cr);
 					++n_discarded;
+					//SWAP
 					dpopulation.swap(i);
 				}
 			}
 			//safe compute muF and muCR 
 			if (n_discarded)
 			{
-				m_mu_cr[m_k] = sum_cr / n_discarded;
+				Scalar mean_w_scr = 0;
+				for(size_t k=0;k!=n_discarded;++k)
+				{
+					//mean_ca(Scr) = sum_0-k( Scr_k   * w_k )
+					mean_w_scr += s_cr[k] * (s_delta_f[k]/sum_delta_f);
+				}
+				m_mu_cr[m_k] = mean_w_scr;
 				m_mu_f[m_k] = sum_f2 / sum_f;
 				m_k = (m_k + 1) % m_mu_f.size();
 			}
