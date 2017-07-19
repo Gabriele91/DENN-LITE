@@ -13,11 +13,12 @@ namespace Denn
 	}
 	//easy access
 	const Parameters& EvolutionMethod::parameters()            const { return m_algorithm.parameters();        }
-
 	const EvolutionMethod& EvolutionMethod::evolution_method() const { return m_algorithm.evolution_method();  }
 
-	Random& EvolutionMethod::population_random(size_t i)       const { return m_algorithm.population_random(i);}
+	const size_t EvolutionMethod::current_np()                  const   { return m_algorithm.current_np(); }
+	const DoubleBufferPopulation& EvolutionMethod::population() const   { return m_algorithm.population(); }
 
+	Random& EvolutionMethod::population_random(size_t i)       const { return m_algorithm.population_random(i);}
 	Random& EvolutionMethod::random(size_t i)			       const { return m_algorithm.random(i); }
 
 	Random& EvolutionMethod::main_random()					   const { return m_algorithm.main_random(); }

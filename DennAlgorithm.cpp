@@ -37,12 +37,14 @@ namespace Denn
 		success &= m_dataset_loader->start_read_batch();
 		//batch
 		success &= m_dataset_loader->read_batch(m_dataset_batch);
+		//get np
+		size_t np = (size_t)m_params.m_np; //init current_np();
 		//init random engine
 		m_main_random.reinit(*m_params.m_seed);
 		//clear random engines
 		m_population_random.clear();
 		//init random engines
-		for(size_t i=0; i!=(size_t)m_params.m_np ;++i)
+		for(size_t i=0; i != np ;++i)
 		{
 			m_population_random.emplace_back(main_random().uirand());
 		}
@@ -56,7 +58,7 @@ namespace Denn
 			//init pop
 			m_population.init
 			(
-				m_params.m_np,
+				np,
 				m_default,
 				m_dataset_batch,
 				m_random_function,
@@ -141,7 +143,7 @@ namespace Denn
 		Scalar best_eval;
 		size_t	   best_i;
 		//find best
-		for (size_t i = 0; i != population.size(); ++i)
+		for (size_t i = 0; i != current_np(); ++i)
 		{
 			auto y = population[i]->m_network.apply(validation.m_features);
 			Scalar eval = Denn::CostFunction::accuracy(validation.m_labels, y);
@@ -163,15 +165,17 @@ namespace Denn
 	{
 		//ref to pop
 		auto& population = m_population.parents();
+		//get np
+		size_t np = current_np();
 		//validation
 		DataSetScalar validation;
 		m_dataset_loader->read_validation(validation);
 		//list eval
 		std::vector<Scalar> validation_evals(population.size(), std::numeric_limits<Scalar>::max());
 		//alloc promises
-		m_promises.resize(m_params.m_np);
+		m_promises.resize(np);
 		//for all
-		for (size_t i = 0; i != population.size(); ++i)
+		for (size_t i = 0; i != np; ++i)
 		{
 			//ref to target
 			auto& i_target = *population[i];
@@ -279,12 +283,12 @@ namespace Denn
 		{
 			m_population.restart
 			(
-				  ctx_best.m_best							  //best
-				, main_random().irand(size_t(m_params.m_np)) //where put
-				, m_default									  //default individual
-				, m_dataset_batch							  //current batch
-				, m_random_function						      //random generator
-				, m_target_function						      //fitness function	  
+				  ctx_best.m_best					     //best
+				, main_random().irand(current_np())      //where put
+				, m_default							     //default individual
+				, m_dataset_batch						 //current batch
+				, m_random_function				         //random generator
+				, m_target_function				         //fitness function	  
 			);
 			ctx.m_test_count = 0;
 			ctx.m_last_eval = ctx_best.m_eval;
@@ -304,8 +308,10 @@ namespace Denn
 	}
 	void DennAlgorithm::serial_execute_pass()
 	{
+		//get np
+		size_t np = current_np();
 		//for all
-		for (size_t i = 0; i != (size_t)m_params.m_np; ++i)
+		for (size_t i = 0; i != np; ++i)
 		{
 			execute_generation_task(i);
 		}
@@ -314,10 +320,12 @@ namespace Denn
 	}
 	void DennAlgorithm::parallel_execute_pass(ThreadPool& thpool)
 	{
+		//get np
+		size_t np = current_np();
 		//alloc promises
-		m_promises.resize(m_params.m_np);
+		m_promises.resize(np);
 		//execute
-		for (size_t i = 0; i != (size_t)m_params.m_np; ++i)
+		for (size_t i = 0; i != np; ++i)
 		{
 			//add
 			m_promises[i] = thpool.push_task([this, i]()
@@ -354,7 +362,7 @@ namespace Denn
 	void DennAlgorithm::serial_execute_target_function_on_all_population()
 	{
 		//np
-		size_t np = (size_t)m_params.m_np;
+		size_t np = current_np();
 		//pop ref
 		auto& popolation = m_population.parents();
 		//for all
@@ -372,8 +380,8 @@ namespace Denn
 	}
 	void DennAlgorithm::parallel_execute_target_function_on_all_population(ThreadPool& thpool)
 	{
-		//np
-		size_t np = (size_t)m_params.m_np;
+		//get np
+		size_t np = current_np();
 		//pop ref
 		auto& population = m_population.parents();
 		//alloc promises

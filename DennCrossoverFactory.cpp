@@ -13,16 +13,16 @@ namespace Denn
 	}
 	//easy access
 	const Parameters& Crossover::parameters()            const { return m_algorithm.parameters();        }
-
 	const EvolutionMethod& Crossover::evolution_method() const	{ return m_algorithm.evolution_method();  }
 
-	Random& Crossover::population_random(size_t i)       const { return m_algorithm.population_random(i);}
+	const size_t Crossover::current_np()                  const   { return m_algorithm.current_np(); }
+	const DoubleBufferPopulation& Crossover::population() const   { return m_algorithm.population(); }
 
+	Random& Crossover::population_random(size_t i)       const { return m_algorithm.population_random(i);}
 	Random& Crossover::random(size_t i)			         const { return m_algorithm.random(i); }
 
 	#ifndef RANDOM_SAFE_CROSSOVER
 	Random& Crossover::main_random()					 const { return m_algorithm.main_random(); }
-
 	Random& Crossover::random()					         const { return m_algorithm.random(); }
 	#endif
 	//map
