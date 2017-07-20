@@ -267,7 +267,8 @@ namespace Denn
 			//target
 			const Individual& i_target = *population[id_target];
 			//best (n.b. sort population from best to worst)
-			const Individual& i_best = *population[random(id_target).irand(size_t(p*(Scalar)population.size()))];
+			size_t           id_best = random(id_target).irand(size_t(p*Scalar(current_np())));
+			const Individual& i_best = *population[id_best];
 			//get generator
 			auto& rand_deck = random(id_target).deck();
 			//set population size in deck
@@ -281,9 +282,9 @@ namespace Denn
 					//do rand
 					rand_deck.reset();
 					//do cross + mutation
-					const Individual& nn_a      = *population[rand_deck.get_random_id(id_target)];
+					const Individual& nn_a = *population[rand_deck.get_random_id(id_target)];
 					//b from archive  or pop
-					Individual::SPtr nn_b = nullptr;
+					Individual::SPtr nn_b  = nullptr;
 					//b from archive (JADE)
 					if(m_archive)
 					{

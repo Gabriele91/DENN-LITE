@@ -65,7 +65,7 @@ namespace Denn
 	////////////////////////////////////////////////////////////////////////
 	//init population
 	void DoubleBufferPopulation::init(
-		size_t np
+		  size_t np
 		, const Individual::SPtr& i_default
 		, const DataSet& dataset
 		, const RandomFunction random_func
@@ -98,6 +98,11 @@ namespace Denn
 			auto y = population[i]->m_network.apply(dataset.features());
 			population[i]->m_eval = target_function(dataset.labels(), y);
 		}
+	}
+	//size
+	size_t DoubleBufferPopulation::size() const
+	{
+		return m_pop_buffer[0].size();
 	}
 	//current
 	Population& DoubleBufferPopulation::parents()

@@ -30,7 +30,10 @@ namespace Denn
 		//easy access
 		const Parameters& parameters() const;
 		const EvolutionMethod& evolution_method() const;
-	
+
+		const size_t current_np() const;
+		const DoubleBufferPopulation& population() const;
+
 		Random& population_random(size_t i)  const;
 		Random& random(size_t i)  const;
 
