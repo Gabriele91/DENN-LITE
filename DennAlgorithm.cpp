@@ -138,7 +138,7 @@ namespace Denn
 		DataSetScalar validation;
 		m_dataset_loader->read_validation(validation);
 		//best
-		Scalar best_eval;
+		Scalar best_eval = std::numeric_limits<Scalar>::min();
 		size_t	   best_i;
 		//find best
 		for (size_t i = 0; i != population.size(); ++i)
@@ -146,7 +146,7 @@ namespace Denn
 			auto y = population[i]->m_network.apply(validation.m_features);
 			Scalar eval = Denn::CostFunction::accuracy(validation.m_labels, y);
 			//safe
-			if (std::isnan(eval)) eval = std::numeric_limits<Scalar>::max();
+			if (std::isnan(eval)) eval = std::numeric_limits<Scalar>::min();
 			//maximize (accuracy)
 			if (!i || best_eval < eval)
 			{
@@ -167,7 +167,7 @@ namespace Denn
 		DataSetScalar validation;
 		m_dataset_loader->read_validation(validation);
 		//list eval
-		std::vector<Scalar> validation_evals(population.size(), std::numeric_limits<Scalar>::max());
+		std::vector<Scalar> validation_evals(population.size(), std::numeric_limits<Scalar>::min());
 		//alloc promises
 		m_promises.resize(m_params.m_np);
 		//for all
@@ -183,7 +183,7 @@ namespace Denn
 				auto y = i_target.m_network.apply(validation.m_features);
 				eval = Denn::CostFunction::accuracy(validation.m_labels, y);
 				//safe
-				if (std::isnan(eval)) eval = std::numeric_limits<Scalar>::max();
+				if (std::isnan(eval)) eval = std::numeric_limits<Scalar>::min();
 			});
 		}
 		//wait
