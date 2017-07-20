@@ -34,6 +34,7 @@ def main():
     with open(job_file, newline='') as csvfile:
         jobs = csv.reader(csvfile, delimiter=' ')
         jobs = list(jobs)
+        time_sum = 0
         for idx, task in enumerate(jobs, 1):
             if len(task) != 0 and task[0] != "#":
                 task[0] = path.join("Release", task[0])
@@ -44,9 +45,14 @@ def main():
                 ))
                 print("+++ TASK -> {}".format(pretty_cmd(task)))
                 sys.stdout.flush()
+                start = time()
                 cur_task = Popen(task, cwd=getcwd(), universal_newlines=True)
                 return_code = cur_task.wait()
-                logging.info("Job exited with code {}".format(return_code))
+                end = time()
+                tot_time = end - start
+                time_sum += tot_time
+                logging.info("Job exited with code {} in {} sec.".format(return_code, end-start))
+                logging.info("Estimated time to complete jobs: {} sec.".format((tot_time / idx) * (len(jobs) - idx)))
 
 if __name__ == '__main__':
     main()
