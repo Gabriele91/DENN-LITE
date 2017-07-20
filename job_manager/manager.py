@@ -52,7 +52,7 @@ def main():
                 tot_time = end - start
                 time_sum += tot_time
                 logging.info("Job exited with code {} in {} sec.".format(return_code, end-start))
-                logging.info("Estimated time to complete jobs: {} sec.".format((tot_time / idx) * (len(jobs) - idx)))
+                logging.info("Estimated time to complete jobs: {} sec.".format((time_sum / idx) * (len(jobs) - idx)))
 
 if __name__ == '__main__':
     main()
