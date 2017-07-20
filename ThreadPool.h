@@ -34,7 +34,31 @@ namespace Denn
 			}
 		}
 
-		//add a task
+		//add simple task
+		template<class function>
+		inline auto push_task(function&& fun_task)
+		{
+			//get return
+			using return_type = typename std::result_of<function()>::type;
+			//make task
+			auto task = std::make_shared < std::packaged_task<return_type()> >(fun_task);
+			//return future result
+			std::future<return_type> res = task->get_future();
+			{
+				//lock m_woker_tasks
+				std::unique_lock<std::mutex> lock(this->m_workers_mutex);
+				// don't allow enqueueing after stopping the pool
+				if (this->m_workers_stop) throw std::runtime_error("push a task on stopped thread pool");
+				//push
+				this->m_workers_tasks.emplace([task]() { (*task)(); });
+			}
+			//notify push
+			m_workers_condition.notify_one();
+			//return promise
+			return res;
+		}
+
+		//add a task + args
 		template<class function, class... arguments>
 		inline auto push_task(function&& f, arguments&&... args)
 			->std::future<typename std::result_of<function(arguments...)>::type>
@@ -61,6 +85,7 @@ namespace Denn
 			//return promise
 			return res;
 		}
+
 
 #if 0
 		//wait complate all tasks

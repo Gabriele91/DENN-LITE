@@ -181,7 +181,7 @@ namespace Denn
 			auto& i_target = *population[i];
 			auto& eval     = validation_evals[i];
 			//add
-			m_promises[i] = thpool.push_task([this, &i_target, &eval, &validation]()
+			m_promises[i] = thpool.push_task([&]()
 			{
 				//test
 				auto y = i_target.m_network.apply(validation.m_features);
