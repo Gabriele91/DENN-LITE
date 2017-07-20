@@ -141,7 +141,7 @@ namespace Denn
 		m_dataset_loader->read_validation(validation);
 		//best
 		Scalar best_eval = std::numeric_limits<Scalar>::min();
-		size_t	   best_i;
+		size_t	   best_i= 0;
 		//find best
 		for (size_t i = 0; i != current_np(); ++i)
 		{
