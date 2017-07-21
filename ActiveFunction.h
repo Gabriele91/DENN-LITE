@@ -44,6 +44,12 @@ namespace PointFunction
 	{
 		return std::tanh(a);
 	}
+
+	template < typename ScalarType = double >
+	inline ScalarType relu(const ScalarType& a)
+	{
+		return std::max(a, ScalarType(0));
+	}
 }
 
 namespace ActiveFunction
@@ -82,6 +88,13 @@ namespace ActiveFunction
 	inline Matrix& logit(Matrix& inout_matrix)
 	{
 		inout_matrix.unaryExpr(&Denn::PointFunction::logit<typename Matrix::Scalar>);
+		return inout_matrix;
+	}
+
+	template < typename Matrix >
+	inline Matrix& relu(Matrix& inout_matrix)
+	{
+		inout_matrix.unaryExpr(&Denn::PointFunction::relu<typename Matrix::Scalar>);
 		return inout_matrix;
 	}
 
@@ -125,6 +138,8 @@ namespace ActiveFunction
 	static Ptr<MatrixF>  logitF	   = &logit   <MatrixF>;
 	static Ptr<MatrixD>  softmaxD  = &softmax <MatrixD>;
 	static Ptr<MatrixF>  softmaxF  = &softmax <MatrixF>;
+	static Ptr<MatrixD>  reluD     = &relu    <MatrixD>;
+	static Ptr<MatrixF>  reluF     = &relu    <MatrixF>;
 }
 	
 }
