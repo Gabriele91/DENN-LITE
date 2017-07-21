@@ -85,10 +85,14 @@ namespace Denn
 
         virtual void clean_line()
         {
+            #ifdef _WIN32
             //clean line
             for(short i=0;i!=11;++i) output() << "          ";
             //end row
             output() << "\r";
+            #else 
+            ::printf("%c[2K", 27);
+            #endif
         }
 
 		virtual void write_local_pass() 
@@ -226,10 +230,14 @@ namespace Denn
 
         virtual void clean_line()
         {
+            #ifdef _WIN32
             //clean line
             for(short i=0;i!=11;++i) output() << "          ";
             //end row
             output() << "\r";
+            #else 
+            ::printf("%c[2K", 27);
+            #endif
         }
 
         static double cut_digits(double val)
