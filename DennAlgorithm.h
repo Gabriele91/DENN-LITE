@@ -35,7 +35,7 @@ public:
 	//structs utilities
 	struct RestartContext
 	{
-		Scalar m_last_eval;
+		Scalar     m_last_eval;
 		size_t	   m_test_count;
 		size_t	   m_count;
         //
@@ -53,12 +53,12 @@ public:
 	struct BestContext
 	{
 		Individual::SPtr m_best;
-		Scalar    m_eval;
+		Scalar           m_eval;
         //
-		BestContext(Individual::SPtr best = nullptr, Individual::SPtr eval = 0)
+		BestContext(Individual::SPtr best = nullptr, Scalar eval = 0)
 		{
 			m_best = best;
-			m_eval = 0;
+			m_eval = eval;
 		}
 	};
 	////////////////////////////////////////////////////////////////////////
@@ -68,7 +68,7 @@ public:
 		, const Parameters&   params
 		, const NeuralNetwork nn_default
 		, CostFunction		  target_function
-		, RuntimeOutput::SPtr output
+		, std::ostream&       output
 		, ThreadPool*		  thpool = nullptr
 	);
 	
@@ -85,7 +85,8 @@ public:
 	Individual::SPtr find_best(Scalar& out_eval);
 
 	//using the test set on a individual
-	Scalar execute_test(Individual& individual);
+	Scalar execute_test() const;
+	Scalar execute_test(Individual& individual) const;
 
 	//info
 	const Parameters& parameters() const
@@ -118,6 +119,16 @@ public:
 		return m_clamp_function;
 	}
 
+	const BestContext& best_context() const
+	{
+		return m_best_ctx;
+	}
+
+	const RestartContext& restart_context() const
+	{
+		return m_restart_ctx;
+	}
+
 	Random& population_random(size_t i) const
 	{
 		return m_population_random[i];
@@ -145,10 +156,10 @@ protected:
 	bool parallel_find_best(ThreadPool& thpool, size_t& out_i, Scalar& out_eval);
 	/////////////////////////////////////////////////////////////////
 	//Intermedie steps
-	virtual void execute_a_pass(size_t pass, size_t n_sub_pass, BestContext& ctx_best, RestartContext& ctx_restart);
+	virtual void execute_a_pass(size_t pass, size_t n_sub_pass);
 	void execute_a_sub_pass(size_t pass, size_t sub_pass);
-	void  execute_update_best(BestContext& ctx_best);
-	void  execute_update_restart(size_t pass, const BestContext& ctx_best, RestartContext& ctx);
+	void  execute_update_best();
+	void  execute_update_restart(size_t pass);
 	/////////////////////////////////////////////////////////////////
 	//execute a pass
 	void execute_pass();
@@ -182,6 +193,9 @@ protected:
 	DataSetScalar	      m_dataset_batch;
 	//threads
 	ThreadPool*			  m_thpool;
+	//Execution Context
+	BestContext		      m_best_ctx;
+	RestartContext		  m_restart_ctx;
 	//params of DE
 	Parameters 		      m_params;
 	EvolutionMethod::SPtr m_e_method;

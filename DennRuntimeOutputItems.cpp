@@ -1,5 +1,5 @@
 #include "DennRuntimeOutput.h"
-#include "DennParameters.h"
+#include "DennAlgorithm.h"
 
 namespace Denn
 {
@@ -7,36 +7,44 @@ namespace Denn
     {
     public:
 
-		FullOutput(std::ostream& stream,const Parameters& params):RuntimeOutput(stream,params) {}
+		FullOutput(std::ostream& stream,const DennAlgorithm& algorithm):RuntimeOutput(stream, algorithm) {}
         
-        virtual bool is_enable() override             { return true;  }
-		virtual bool is_enable_compute_test() override { return false; }
-
         virtual void start() override
         { 
             output() << "Denn start" << std::endl;
             m_start_time = Denn::Time::get_time();
-            m_pass_time  = Denn::Time::get_time(); 
-            m_n_pass = 0;
+            m_n_sub_pass = 0;
+            m_n_pass     = 0;      
+            //clean line
+            clean_line();
+            //output
+            write_output(); 
+            output() << std::endl;     
         }
 
-        virtual void update_best() override 
+        virtual void start_a_pass() override 
         { 
             //reset
-            m_pass_time  = Denn::Time::get_time(); 
-            m_n_pass 	 = 0;
+            m_sub_pass_time  = Denn::Time::get_time(); 
+            m_n_sub_pass     = 0;
+        }
+
+        virtual void end_a_pass() override 
+        { 
             //clean line
             clean_line();
             //output
             write_output(); 
             output() << std::endl;
+            //count
+            ++m_n_pass;
         }
 
-        virtual void update_pass() override 
+        virtual void end_a_sub_pass() override 
         { 
-            ++m_n_pass;
+            ++m_n_sub_pass;
             //compute pass time
-            double pass_per_sec = (double(m_n_pass) / (Denn::Time::get_time() - m_pass_time));
+            double pass_per_sec = (double(m_n_sub_pass) / (Denn::Time::get_time() - m_sub_pass_time));
             //clean line
             clean_line();
             //write output
@@ -47,14 +55,24 @@ namespace Denn
 
         virtual void end() override
         { 
+            double time_of_execution = Denn::Time::get_time() - m_start_time ;
+            Scalar test_result = m_algorithm.execute_test(*m_algorithm.best_context().m_best);
             output() 
             << "Denn end [ test: " 
-            << m_end_of_iterations.m_test_result 
+            << test_result
             << ", time: " 
-            << Denn::Time::get_time() - m_start_time 
+            << time_of_execution
             << " ]" 
             << std::endl;
         }
+
+
+    protected:
+
+        double m_start_time;
+        double m_sub_pass_time;
+        long   m_n_pass;
+        long   m_n_sub_pass;
 
         virtual void write_output()
         {
@@ -68,17 +86,51 @@ namespace Denn
         virtual void clean_line()
         {
             //clean line
-            for(short i=0;i!=11;++i) 
-                output() << "          ";
+            for(short i=0;i!=11;++i) output() << "          ";
             //end row
             output() << "\r";
         }
 
-    protected:
+		virtual void write_local_pass() 
+		{
+            size_t n_sub_pass = *parameters().m_sub_gens;
+			output() << (n_sub_pass * m_n_pass + m_n_sub_pass);
+		}
 
-        double m_start_time;
-        double m_pass_time;
-        long   m_n_pass;
+        virtual void write_global_best
+        (
+			const std::string& open="[ ", 
+			const std::string& separetor=", ", 
+			const std::string& closer=" ]"
+		) 
+		{
+			output() 
+			<< open 
+			<< m_algorithm.best_context().m_eval 
+            << separetor 
+            << m_algorithm.best_context().m_best->m_eval 
+            << closer;
+		}
+
+		virtual void write_pass_best
+        (
+			const std::string& open="[ ", 
+			const std::string& separetor=", ", 
+			const std::string& closer=" ]"
+		) 
+		{
+            ///////////////////////////////////////
+            size_t id; 
+            Scalar eval;
+            m_algorithm.population().best(id,eval);
+            ///////////////////////////////////////
+			output()
+            << open 
+            << id 
+            << separetor 
+            << eval 
+            << closer;
+		}
 
     };
     REGISTERED_RUNTIME_OUTPUT(FullOutput,"full")
@@ -87,38 +139,49 @@ namespace Denn
     {
     public:
 
-		BenchOutput(std::ostream& stream,const Parameters& params):RuntimeOutput(stream,params) {}
+		BenchOutput(std::ostream& stream,const DennAlgorithm& algorithm):RuntimeOutput(stream, algorithm) {}
         
-        bool is_enable() override              { return true;  }
-        bool is_enable_pass() override         { return false; }
-        bool is_enable_compute_test() override { return *parameters().m_compute_test_per_pass;  }
-
-
         virtual void start() override
         { 
             output() << "=== START ===" << std::endl;
             m_start_time = Denn::Time::get_time();
-            m_pass_time  = Denn::Time::get_time(); 
             m_n_pass = 0;
-        }
-
-        virtual void update_best() override 
-        { 
-            //reset
-            m_pass_time  = Denn::Time::get_time(); 
-            m_n_pass 	 = 0;
+            m_n_restart = 0;
             //clean line
-            // clean_line();
+            clean_line();
             //output
             write_output(); 
             output() << std::endl;
         }
 
-        virtual void update_pass() override 
+        virtual void start_a_pass() override 
         { 
+            //reset
+            m_sub_pass_time = Denn::Time::get_time(); 
+            m_n_sub_pass    = 0;
+        }
+
+        virtual void end_a_pass() override 
+        { 
+            //count
             ++m_n_pass;
+            //clean line
+            clean_line();
+            //output
+            write_output(); 
+            output() << std::endl;
+        }
+
+        virtual void restart()
+        {
+            ++m_n_restart;
+        }
+
+        virtual void start_a_sub_pass() override 
+        { 
+            ++m_n_sub_pass;
             //compute pass time
-            double pass_per_sec = (double(m_n_pass) / (Denn::Time::get_time() - m_pass_time));
+            double pass_per_sec = (double(m_n_sub_pass) / (Denn::Time::get_time() - m_sub_pass_time));
             //clean line
             clean_line();
             //write output
@@ -129,25 +192,42 @@ namespace Denn
 
         virtual void end() override
         { 
-            output() << "+ TEST\t" << m_end_of_iterations.m_test_result << std::endl;
-            output() << "+ TIME\t" << Denn::Time::get_time() - m_start_time << std::endl;
+            double time_of_execution = Denn::Time::get_time() - m_start_time ;
+            Scalar test_result = m_algorithm.execute_test(*m_algorithm.best_context().m_best);
+            output() << "+ TEST\t" << test_result       << std::endl;
+            output() << "+ TIME\t" << time_of_execution << std::endl;
             output() << "=== END ===" << std::endl;
         }
 
+    protected:
+
+        double m_start_time;
+        double m_sub_pass_time;
+        long   m_n_pass;
+        long   m_n_sub_pass;
+        long   m_n_restart;
+
+
         virtual void write_output()
         {
-            output() << "|-[" << (m_global_pass.m_g_pass+1) * m_initialization.m_n_s_pass; 
-            output() << "]->[ACC_VAL:" << cut_digits(m_global_pass.m_validation_eval) << "]";
+            //////////////////////////////////////////////////////////
+            size_t n_sub_pass = *parameters().m_sub_gens;
+            Scalar validation =  m_algorithm.best_context().m_eval;
+            ///////////////////////////////////////////////////////////
+            output() << "|-[" << (m_n_pass) * n_sub_pass; 
+            output() << "]->[ACC_VAL:" << cut_digits(validation) << "]";
             if(*parameters().m_compute_test_per_pass)
-                output() << "[ACC_TEST:" << cut_digits(m_global_pass.m_test_eval) << "]";
-            output() << "[N_RESET:" << cut_digits(m_global_pass.m_n_restart) << "]";
+            {
+                Scalar test_result = m_algorithm.execute_test(*m_algorithm.best_context().m_best);
+                output() << "[ACC_TEST:" << cut_digits(test_result) << "]";
+            }
+            output() << "[N_RESET:" << cut_digits(m_n_restart) << "]";
         }
 
         virtual void clean_line()
         {
             //clean line
-            for(short i=0;i!=11;++i) 
-                output() << "          ";
+            for(short i=0;i!=11;++i) output() << "          ";
             //end row
             output() << "\r";
         }
@@ -156,12 +236,6 @@ namespace Denn
         {
             return double(long(std::round(val * 10000))) / 10000;
         }
-
-    protected:
-
-        double m_start_time;
-        double m_pass_time;
-        long   m_n_pass;
 
     };
     REGISTERED_RUNTIME_OUTPUT(BenchOutput,"bench")

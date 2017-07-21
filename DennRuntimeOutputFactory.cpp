@@ -1,5 +1,5 @@
 #include "DennRuntimeOutput.h"
-#include "DennParameters.h"
+#include "DennAlgorithm.h"
 #include <algorithm>
 #include <sstream>
 #include <iterator>
@@ -8,15 +8,20 @@ namespace Denn
 {
     //map
 	std::unique_ptr< std::map< std::string, RuntimeOutputFactory::CreateObject > > RuntimeOutputFactory::m_cmap;
+	//easy access		
+	const EvolutionMethod&        RuntimeOutput::evolution_method() const{ return m_algorithm.evolution_method();  }
+	const Parameters&             RuntimeOutput::parameters()       const{ return m_algorithm.parameters();        }
+	const DoubleBufferPopulation& RuntimeOutput::population()       const{ return m_algorithm.population(); }
+	const size_t                  RuntimeOutput::current_np()       const{ return m_algorithm.current_np(); }
 	//public
-	RuntimeOutput::SPtr RuntimeOutputFactory::create(const std::string& name, std::ostream& stream,const Parameters& params)
+	RuntimeOutput::SPtr RuntimeOutputFactory::create(const std::string& name, std::ostream& stream, const DennAlgorithm& algorithm)
 	{
 		//map is alloc?
 		if (!m_cmap) return nullptr;
 		//find
 		auto it = m_cmap->find(name);
 		//return
-		return it->second(stream,params);
+		return it->second(stream,algorithm);
 	}
 	void RuntimeOutputFactory::append(const std::string& name, RuntimeOutputFactory::CreateObject fun, size_t size)
 	{

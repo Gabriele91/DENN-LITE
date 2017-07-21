@@ -6,10 +6,10 @@
 
 void execute
 (
-	  const Denn::Parameters& parameters
-	, Denn::DataSetLoader& dataset
-	, Denn::ThreadPool* ptr_thpool
-	, Denn::RuntimeOutput::SPtr runtime_output
+	  const Denn::Parameters&     parameters
+	, Denn::DataSetLoader&        dataset
+	, Denn::ThreadPool*           ptr_thpool
+    , std::ostream&               output
 	, Denn::SerializeOutput::SPtr serialize_output
 )
 {
@@ -40,6 +40,7 @@ void execute
 	}
 	//Function ptr
 	auto cost_function = CostFunction::softmax_cross_entropy_with_logit< Matrix >;
+	////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//DENN
 	DennAlgorithm denn
@@ -49,7 +50,7 @@ void execute
 		, nn0
 		, cost_function
 		//output
-		, runtime_output
+		, std::cout
 		//thread pool
 		, ptr_thpool
 	);
@@ -121,12 +122,10 @@ int main(int argc,const char** argv)
 		return 1; //exit
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////
-	RuntimeOutput::SPtr runtime_out = RuntimeOutputFactory::create(*arguments.m_runtime_output_type, std::cout, arguments);
-	////////////////////////////////////////////////////////////////////////////////////////////////
 	SerializeOutput::SPtr serialize_output = SerializeOutputFactory::create(ext, ofile, arguments);
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	//execute test
- 	execute(arguments, dataset, uptr_thpool.get(), runtime_out, serialize_output);
+ 	execute(arguments, dataset, uptr_thpool.get(), std::cout, serialize_output);
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	return 0;

@@ -8,12 +8,12 @@ namespace Denn
 		, const Parameters&   params
 		, const NeuralNetwork nn_default
 		, CostFunction		  target_function
-		, RuntimeOutput::SPtr output
+		, std::ostream&       output
 		, ThreadPool*		  thpool
 	)
 	: m_main_random(*params.m_seed)
 	, m_target_function(target_function)
-	, m_output(output)
+	, m_output(RuntimeOutputFactory::create(*params.m_runtime_output_type, output, *this))
 	, m_default(std::make_shared<Individual>
 	    ( *params.m_default_f
 		, *params.m_default_cr
@@ -24,8 +24,6 @@ namespace Denn
 	, m_thpool(thpool)
 	, m_params(params)
 	{
-		//init all
-		start();
 	}
 
 	//init
@@ -76,26 +74,29 @@ namespace Denn
 	//big loop
 	Individual::SPtr DennAlgorithm::execute()
 	{
+		//init all
+		start();
 		//global info
 		const size_t n_global_pass = ((size_t)m_params.m_generations / (size_t)m_params.m_sub_gens);
 		const size_t n_sub_pass = m_params.m_sub_gens;
 		//restart init
-		RestartContext ctx_restart;
+		m_restart_ctx = RestartContext();
 		//best
-		BestContext ctx_best(m_default->copy());
+		m_best_ctx = BestContext(nullptr, -std::numeric_limits<Scalar>::max());
+		execute_update_best();
 		//start output
-		if (m_output->is_enable()) m_output->send_start(n_global_pass, n_sub_pass);
+		if (m_output) m_output->start();
 		//main loop
 		for (size_t pass = 0; pass != n_global_pass; ++pass)
 		{
-			execute_a_pass(pass, n_sub_pass, ctx_best, ctx_restart);
+			execute_a_pass(pass, n_sub_pass);
 			//next
 			next_batch();
 		}
 		//end output
-		if (m_output->is_enable()) m_output->send_end(double(execute_test(*(ctx_best.m_best))));
+		if (m_output) m_output->end();
 		//result
-		return ctx_best.m_best;
+		return m_best_ctx.m_best;
 	}
 
 
@@ -110,9 +111,19 @@ namespace Denn
 	}
 
 
-
 	//using the test set on a individual
-	Scalar DennAlgorithm::execute_test(Individual& individual)
+	Scalar DennAlgorithm::execute_test() const 
+	{
+		//validation
+		DataSetScalar test;
+		m_dataset_loader->read_test(test);
+		//compute
+		auto y = m_best_ctx.m_best->m_network.apply(test.m_features);
+		Scalar eval = Denn::CostFunction::accuracy(test.m_labels, y);
+		//return
+		return eval;
+	}
+	Scalar DennAlgorithm::execute_test(Individual& individual) const 
 	{
 		//validation
 		DataSetScalar test;
@@ -202,9 +213,11 @@ namespace Denn
 	
 	/////////////////////////////////////////////////////////////////
 	//Intermedie steps
-	void DennAlgorithm::execute_a_pass(size_t pass, size_t n_sub_pass, BestContext& ctx_best, RestartContext& ctx_restart)
+	void DennAlgorithm::execute_a_pass(size_t pass, size_t n_sub_pass)
 	{
 		execute_target_function_on_all_population();
+		//output
+		if(m_output) m_output->start_a_pass();
 		//start pass
 		m_e_method->start_a_gen_pass(m_population);
 		//sub pass
@@ -215,85 +228,71 @@ namespace Denn
 		//end pass
 		m_e_method->end_a_gen_pass(m_population);
 		//update context
-		execute_update_best(ctx_best);
+		execute_update_best();
 		//restart
-		execute_update_restart(pass, ctx_best, ctx_restart);
+		execute_update_restart(pass);
 		//output
-		if (m_output->is_enable_best())
-		{
-			m_output->send_best
-			(
-				pass
-				, ctx_restart.m_count
-				, double(ctx_best.m_eval)
-				, double(ctx_best.m_best->m_eval)
-				,(m_output->is_enable_compute_test()
-				  ? double(execute_test(*(ctx_best.m_best)))
-				  : double(0.0))
-			);
-		}
+		if(m_output) m_output->end_a_pass();
 	}
 	void DennAlgorithm::execute_a_sub_pass(size_t pass, size_t sub_pass)
 	{
+		//output
+		if(m_output) m_output->start_a_sub_pass();
 		//pass
 		execute_pass();
 		//output
-		if (m_output->is_enable_pass())
-		{
-			size_t id_best;
-			Scalar val_best;
-			m_population.parents().best(id_best, val_best);
-			m_output->sent_pass(pass, sub_pass, id_best, val_best);
-		}
+		if(m_output) m_output->end_a_sub_pass();
 	}
-	void DennAlgorithm::execute_update_best(BestContext& ctx_best)
+	void DennAlgorithm::execute_update_best()
 	{
 		//find best
 		Scalar curr_eval;
 		auto curr = find_best(curr_eval);
 		//maximize (accuracy)
-		if (ctx_best.m_eval < curr_eval)
+		if (m_best_ctx.m_eval < curr_eval)
 		{
 			//must copy because "restart" 
 			//not copy element then 
 			//it can change the values of the best individual
-			ctx_best.m_best = curr->copy();
+			m_best_ctx.m_best = curr->copy();
 			//save eval (on validation) of best
-			ctx_best.m_eval = curr_eval;
+			m_best_ctx.m_eval = curr_eval;
 		}
 	}
-	void DennAlgorithm::execute_update_restart(size_t pass, const BestContext& ctx_best, RestartContext& ctx)
+	void DennAlgorithm::execute_update_restart(size_t pass)
 	{
 		//if not enabled then not reset
 		if(!*m_params.m_restart_enable) return ;
 		//inc count
-		if ((ctx_best.m_eval - ctx.m_last_eval) <= (Scalar)m_params.m_restart_delta)
+		if ((m_best_ctx.m_eval - m_restart_ctx.m_last_eval) <= (Scalar)m_params.m_restart_delta)
 		{
-			++ctx.m_test_count;
+			++m_restart_ctx.m_test_count;
 		}
 		else
 		{
-			ctx.m_test_count = 0;
-			ctx.m_last_eval = ctx_best.m_eval;
+			m_restart_ctx.m_test_count = 0;
+			m_restart_ctx.m_last_eval = m_best_ctx.m_eval;
 		}
 		//first
-		if (!pass) ctx.m_last_eval = ctx_best.m_eval;
+		if (!pass) m_restart_ctx.m_last_eval = m_best_ctx.m_eval;
 		//test
-		if ((Scalar)m_params.m_restart_count <= ctx.m_test_count)
+		if ((Scalar)m_params.m_restart_count <= m_restart_ctx.m_test_count)
 		{
 			m_population.restart
 			(
-				  ctx_best.m_best					     //best
+				  m_best_ctx.m_best					     //best
 				, main_random().irand(current_np())      //where put
 				, m_default							     //default individual
 				, m_dataset_batch						 //current batch
 				, m_random_function				         //random generator
 				, m_target_function				         //fitness function	  
 			);
-			ctx.m_test_count = 0;
-			ctx.m_last_eval = ctx_best.m_eval;
+			m_restart_ctx.m_test_count = 0;
+			m_restart_ctx.m_last_eval = m_best_ctx.m_eval;
 			//restart inc
-			++ctx.m_count;
+			++m_restart_ctx.m_count;
+			//output
+			if(m_output) m_output->restart();
 		}
 	}
 	
