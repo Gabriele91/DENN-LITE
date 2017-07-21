@@ -1,4 +1,4 @@
-#include "PerceptronLayer.h"
+#include "DennPerceptronLayer.h"
 
 namespace Denn
 {
@@ -15,7 +15,7 @@ namespace Denn
 
 	PerceptronLayer::PerceptronLayer
 	(
-		ActiveFunction::Ptr<Matrix> active_function
+		  ActiveFunction active_function
 		, size_t features
 		, size_t clazz
 	)

@@ -1,7 +1,6 @@
 #pragma once
 #include "Config.h"
-#include "CostFunction.h"
-#include "NeuralNetwork.h"
+#include "DennNeuralNetwork.h"
 
 namespace Denn
 {

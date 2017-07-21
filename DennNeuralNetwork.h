@@ -1,6 +1,6 @@
 #pragma once
 #include "Config.h"
-#include "Layer.h"
+#include "DennLayer.h"
 
 namespace Denn
 {

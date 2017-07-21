@@ -1,4 +1,4 @@
-#include "NeuralNetwork.h"
+#include "DennNeuralNetwork.h"
 
 namespace Denn
 {	

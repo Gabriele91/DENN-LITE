@@ -1,8 +1,7 @@
 #pragma once
 #include "Config.h"
-#include "CostFunction.h"
 #include "DennDataset.h"
-#include "NeuralNetwork.h"
+#include "DennNeuralNetwork.h"
 #include "DennIndividual.h"
 
 namespace Denn

@@ -1,10 +1,10 @@
 #include "DennParameters.h"
 #include "DennMutation.h"
 #include "DennCrossover.h"
+#include "DennActiveFunction.h"
 #include "DennEvolutionMethod.h"
 #include "DennRuntimeOutput.h"
 #include "DennSerializeOutput.h"
-
 namespace Denn
 {
     Arguments::Arguments(int nargs, const char** vargs)
@@ -199,6 +199,24 @@ namespace Denn
             }
         },
         ParameterInfo{
+            m_active_functions, "Activation functions of hidden layers [" + ActiveFunctionFactory::names_of_active_functions() + "]", { "--" + m_active_functions.name(), "--activation_functions" ,  "-hlaf"  },
+            [this](Arguments& args) -> bool 
+            { 
+                while(args.remaining() && !args.start_with_minus())
+                {
+                    std::string str_c_type = args.get_string();
+                    //all lower case
+                    std::transform(str_c_type.begin(),str_c_type.end(), str_c_type.begin(), ::tolower);
+                    //test
+                    if(!ActiveFunctionFactory::exists(str_c_type)) return false;
+                    //push
+                    m_active_functions.get().push_back(str_c_type);
+                }
+                //ok
+                return m_active_functions.get().size() != 0; 
+            }
+        },
+        ParameterInfo{
             m_dataset_filename, "Path of dataset file (gz)", { "--" + m_dataset_filename.name(), "-d", "-i" }, 
             [this](Arguments& args) -> bool {  m_dataset_filename = args.get_string();  return true; } 
         },
@@ -256,6 +274,10 @@ namespace Denn
         ParameterInfo{
             "Print list of crossovers", { "--crossover-list",    "-colist"  }, 
             [this](Arguments& args) -> bool { std::cout << CrossoverFactory::names_of_crossovers() << std::endl; return true; } 
+        },
+        ParameterInfo{
+            "Print list of activation functions", { "--active_functions-list", "--activation_functions-list",    "-aflist"  }, 
+            [this](Arguments& args) -> bool { std::cout << ActiveFunctionFactory::names_of_active_functions() << std::endl; return true; } 
         },
         ParameterInfo{
             "Print list of runtime output", { "--runtime_output-list",    "-rolist"  }, 
@@ -333,7 +355,7 @@ namespace Denn
         s_out << "Options:";				
         s_out << std::endl;
         //style
-        const size_t max_space_line         = 42;
+        const size_t max_space_line         = 50;
         const size_t padding_to_description = 2;
         const size_t padding_left           = 4;
         const std::string separetor(", ");

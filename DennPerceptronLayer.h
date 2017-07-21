@@ -1,7 +1,7 @@
 #pragma once
 #include "Config.h"
-#include "Layer.h"
-#include "ActiveFunction.h"
+#include "DennLayer.h"
+#include "DennActiveFunction.h"
 
 namespace Denn
 {
@@ -18,7 +18,7 @@ namespace Denn
 
 		PerceptronLayer
 		(
-			ActiveFunction::Ptr<Matrix> active_function
+			  ActiveFunction active_function
 			, size_t features
 			, size_t clazz
 		);
@@ -40,8 +40,8 @@ namespace Denn
 
 	protected:
 
-		Matrix m_weights;
-		Matrix m_baias;
-		ActiveFunction::Ptr<Matrix> m_active_function{ nullptr };
+		Matrix         m_weights;
+		Matrix         m_baias;
+		ActiveFunction m_active_function{ nullptr };
 	};
 }

@@ -3,16 +3,16 @@
 //main includes
 #include  "Config.h"
 #include  "TicksTime.h"
-#include  "Constants.h"
 #include  "IOFileWrapper.h"
+#include  "DennConstants.h"
 #include  "DennRandom.h"
 
 //NeuralNetwork includes
-#include  "ActiveFunction.h"
-#include  "Layer.h"
-#include  "PerceptronLayer.h"
-#include  "NeuralNetwork.h"
-#include  "CostFunction.h"
+#include  "DennActiveFunction.h"
+#include  "DennLayer.h"
+#include  "DennPerceptronLayer.h"
+#include  "DennNeuralNetwork.h"
+#include  "DennCostFunction.h"
 
 //Dataset includes
 #include  "DennDatasetLoader.h"

@@ -20,6 +20,7 @@ void execute
 	NeuralNetwork nn0;
 	//hidden layer list
 	const auto& hidden_layers = (*parameters.m_hidden_layers);
+	const auto& active_layers = (*parameters.m_active_functions);
 	//push all hidden layers
 	if(hidden_layers.size())
 	{
@@ -28,10 +29,37 @@ void execute
 		//add next layers
 		for(size_t i = 0; i != hidden_layers.size() - 1;++i)
 		{
-			nn0.add_layer( PerceptronLayer(hidden_layers[i], hidden_layers[i+1]) );
+			if(active_layers.size() < i)
+			{
+				nn0.add_layer(PerceptronLayer(
+					      ActiveFunctionFactory::get(active_layers[i])
+						, hidden_layers[i]
+						, hidden_layers[i+1]
+				));
+			}
+			else
+			{
+				nn0.add_layer(PerceptronLayer(
+					  hidden_layers[i]
+					, hidden_layers[i+1]
+				));
+			}
 		}
 		//add last layer
-		nn0.add_layer( PerceptronLayer(hidden_layers[hidden_layers.size()-1], n_class) );
+		if(active_layers.size() == hidden_layers.size())
+		{
+			nn0.add_layer(PerceptronLayer(
+				  ActiveFunctionFactory::get(active_layers[hidden_layers.size()-1]) 
+				, hidden_layers[hidden_layers.size()-1]
+				, n_class
+			));
+		}
+		else 
+		{
+			nn0.add_layer( 
+				PerceptronLayer(hidden_layers[hidden_layers.size()-1], n_class)
+			);
+		}
 	}
 	//else add only input layer
 	else 

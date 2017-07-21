@@ -1,6 +1,6 @@
 #pragma once
 #include "Config.h"
-#include "ActiveFunction.h"
+#include "DennPointFunction.h"
 
 namespace Denn
 {
@@ -29,10 +29,37 @@ namespace CostFunction
 	}
 
 	template < typename Matrix >
+	inline Matrix& softmax(Matrix& inout_matrix)
+	{
+		const auto	                  N   = inout_matrix.rows();
+		const typename Matrix::Scalar max = inout_matrix.maxCoeff();
+#if 1
+		//compute e^(M-max)
+		inout_matrix = (inout_matrix.array() - max).exp();
+		// M(r,n)/ SUM_r(M(n))
+		for (int n = 0; n < N; n++)
+		{
+			//reduce
+			typename Matrix::Scalar sum = inout_matrix.row(n).sum();
+			//no nan
+			if (sum) inout_matrix.row(n) /= sum;
+		}
+#else  //standard
+		for (int n = 0; n < N; n++)
+		{
+			// e^(M_r-max)/ SUM_r(e^(M_r-max))
+			inout_matrix.row(n) = (inout_matrix.row(n).array() - max).exp();
+			inout_matrix.row(n) /= inout_matrix.row(n).sum();
+		}
+#endif
+		return inout_matrix;
+	}
+
+	template < typename Matrix >
 	typename Matrix::Scalar softmax_cross_entropy(const Matrix& x, const Matrix& y)
 	{
 		Matrix y_softmax(y);
-		ActiveFunction::softmax(y_softmax);
+		softmax(y_softmax);
 		return cross_entropy(x, y_softmax);
 	}
 
@@ -40,8 +67,11 @@ namespace CostFunction
 	typename Matrix::Scalar softmax_cross_entropy_with_logit(const Matrix& x, const Matrix& y)
 	{
 		Matrix y_softmax_logistic(y);
-		ActiveFunction::logit(y_softmax_logistic);
-		ActiveFunction::softmax(y_softmax_logistic);
+		//logit
+		y_softmax_logistic.unaryExpr(&Denn::PointFunction::logit<typename Matrix::Scalar>);
+		//soft max
+		softmax(y_softmax_logistic);
+		//
 		return cross_entropy(x, y_softmax_logistic);
 	}
 
