@@ -1,3 +1,11 @@
+#remove dataset files
+*.gz
+#remove report files
+*.7z
+*.zip
+*.tar.gz
+#remove result files
+*.json
 
 # Created by https://www.gitignore.io/api/macos,linux,windows,visualstudio,visualstudiocode
 
