@@ -7,7 +7,7 @@ namespace Denn
     {
     public:
 
-		FullOutput(std::ostream& stream,const DennAlgorithm& algorithm):RuntimeOutput(stream, algorithm) {}
+	FullOutput(std::ostream& stream,const DennAlgorithm& algorithm):RuntimeOutput(stream, algorithm) {}
         
         virtual void start() override
         { 
@@ -95,46 +95,46 @@ namespace Denn
             #endif
         }
 
-		virtual void write_local_pass() 
-		{
+	virtual void write_local_pass() 
+	{
             size_t n_sub_pass = *parameters().m_sub_gens;
-			output() << (n_sub_pass * m_n_pass + m_n_sub_pass);
-		}
+	    output() << (n_sub_pass * m_n_pass + m_n_sub_pass);
+	}
 
         virtual void write_global_best
         (
-			const std::string& open="[ ", 
-			const std::string& separetor=", ", 
-			const std::string& closer=" ]"
-		) 
-		{
-			output() 
-			<< open 
-			<< m_algorithm.best_context().m_eval 
+		const std::string& open="[ ", 
+		const std::string& separetor=", ", 
+		const std::string& closer=" ]"
+	) 
+	{
+	    output() 
+	    << open 
+	    << m_algorithm.best_context().m_eval 
             << separetor 
             << m_algorithm.best_context().m_best->m_eval 
             << closer;
-		}
+	}
 
-		virtual void write_pass_best
+	virtual void write_pass_best
         (
-			const std::string& open="[ ", 
-			const std::string& separetor=", ", 
-			const std::string& closer=" ]"
-		) 
-		{
+		const std::string& open="[ ", 
+		const std::string& separetor=", ", 
+		const std::string& closer=" ]"
+	) 
+	{
             ///////////////////////////////////////
             size_t id; 
             Scalar eval;
             m_algorithm.population().best(id,eval);
             ///////////////////////////////////////
-			output()
+	    output()
             << open 
             << id 
             << separetor 
             << eval 
             << closer;
-		}
+	}
 
     };
     REGISTERED_RUNTIME_OUTPUT(FullOutput,"full")
@@ -143,7 +143,7 @@ namespace Denn
     {
     public:
 
-		BenchOutput(std::ostream& stream,const DennAlgorithm& algorithm):RuntimeOutput(stream, algorithm) {}
+	BenchOutput(std::ostream& stream,const DennAlgorithm& algorithm):RuntimeOutput(stream, algorithm) {}
         
         virtual void start() override
         { 
@@ -176,7 +176,7 @@ namespace Denn
             output() << std::endl;
         }
 
-        virtual void restart()
+        virtual void restart() override
         {
             ++m_n_restart;
         }
