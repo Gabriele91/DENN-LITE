@@ -53,5 +53,20 @@ namespace Denn
 	}
     REGISTERED_ACTIVE_FUNCTION(relu<Matrix>, "relu")
 
+	template < typename Matrix >
+	inline Matrix& tanh(Matrix& inout_matrix)
+	{
+		inout_matrix.unaryExpr(&Denn::PointFunction::tanh<typename Matrix::Scalar>);
+		return inout_matrix;
+	}
+    REGISTERED_ACTIVE_FUNCTION(tanh<Matrix>, "tanh")
+	
+	template < typename Matrix >
+	inline Matrix& binary(Matrix& inout_matrix)
+	{
+		inout_matrix.unaryExpr(&Denn::PointFunction::binary<typename Matrix::Scalar>);
+		return inout_matrix;
+	}
+    REGISTERED_ACTIVE_FUNCTION(binary<Matrix>, "binary")
 
 }

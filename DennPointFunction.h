@@ -56,5 +56,11 @@ namespace Denn
 		{
 			return std::max(a, ScalarType(0));
 		}
+
+		template < typename ScalarType = double >
+		inline ScalarType binary(const ScalarType& a)
+		{
+			return (a < ScalarType(0) ?  ScalarType(0) :  ScalarType(1));
+		}
 	}
 }
