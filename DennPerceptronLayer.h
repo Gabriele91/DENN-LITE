@@ -10,6 +10,13 @@ namespace Denn
 	{
 	public:
 		///////////////////////////////////////
+		#if 0
+		PerceptronLayer
+		(
+		    const PerceptronLayer& perceptronLayer
+		);
+		#endif
+
 		PerceptronLayer
 		(
 			  int features

@@ -3,6 +3,18 @@
 namespace Denn
 {
 	///////////////////////////////////////
+	#if 0
+	PerceptronLayer::PerceptronLayer
+	(
+	    const PerceptronLayer& p_layer
+	)
+	{
+		m_active_function = p_layer.m_active_function;
+		m_weights         = p_layer.m_weights;
+		m_baias           = p_layer.m_baias;
+	}
+	#endif 
+	
 	PerceptronLayer::PerceptronLayer
 	(
 		  int features
