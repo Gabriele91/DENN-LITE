@@ -32,10 +32,10 @@ def main():
     out_names = []
 
     with open("jobs/job_JULY.csv", "w") as out_file:
-        for run in range(5):
-            for features, batch_size, dataset_name, dataset in DATASETS:
-                for method in METHODS:
-                    for mutation in MUTATIONS:
+        for features, batch_size, dataset_name, dataset in DATASETS:
+            for method in METHODS:
+                for mutation in MUTATIONS:
+                    for run in range(5):
                         hl = 0
                         outname = OUTNAME.format(
                             batch_step=batch_size,
@@ -67,11 +67,11 @@ def main():
                         )
                         out_file.write(cur_cmd)
                         out_file.write("\n")
-        for run in range(5):
-            for features, batch_size, dataset_name, dataset in DATASETS:
-                for method in METHODS:
-                    for mutation in MUTATIONS:
-                        for hl in HLS:
+        for features, batch_size, dataset_name, dataset in DATASETS:
+            for method in METHODS:
+                for mutation in MUTATIONS:
+                    for hl in HLS:
+                        for run in range(5):
                             if dataset_name != "MNIST":
                                 outname = OUTNAME.format(
                                     batch_step=batch_size,
