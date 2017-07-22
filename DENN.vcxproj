@@ -19,33 +19,36 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ActiveFunction.h" />
     <ClInclude Include="Config.h" />
-    <ClInclude Include="Constants.h" />
-    <ClInclude Include="CostFunction.h" />
-    <ClInclude Include="DennDatasetLoader.h" />
     <ClInclude Include="Denn.h" />
+    <ClInclude Include="DennActiveFunction.h" />
+    <ClInclude Include="DennConstants.h" />
+    <ClInclude Include="DennCostFunction.h" />
+    <ClInclude Include="DennDatasetLoader.h" />
     <ClInclude Include="DennAlgorithm.h" />
     <ClInclude Include="DennCrossover.h" />
     <ClInclude Include="DennDataSet.h" />
     <ClInclude Include="DennEvolutionMethod.h" />
     <ClInclude Include="DennFilesystem.h" />
     <ClInclude Include="DennIndividual.h" />
+    <ClInclude Include="DennLayer.h" />
     <ClInclude Include="DennMutation.h" />
+    <ClInclude Include="DennNeuralNetwork.h" />
     <ClInclude Include="DennParameters.h" />
+    <ClInclude Include="DennPerceptronLayer.h" />
+    <ClInclude Include="DennPointFunction.h" />
     <ClInclude Include="DennPopulation.h" />
     <ClInclude Include="DennRuntimeOutput.h" />
     <ClInclude Include="DennSerializeOutput.h" />
     <ClInclude Include="DennVariant.h" />
     <ClInclude Include="IOFileWrapper.h" />
-    <ClInclude Include="Layer.h" />
-    <ClInclude Include="NeuralNetwork.h" />
-    <ClInclude Include="PerceptronLayer.h" />
     <ClInclude Include="DennRandom.h" />
     <ClInclude Include="ThreadPool.h" />
     <ClInclude Include="TicksTime.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="DennActiveFunctionFactory.cpp" />
+    <ClCompile Include="DennActiveFunctionItems.cpp" />
     <ClCompile Include="DennAlgorithm.cpp" />
     <ClCompile Include="DennCrossoverFactory.cpp" />
     <ClCompile Include="DennCrossoverItems.cpp" />
@@ -53,18 +56,18 @@
     <ClCompile Include="DennEvolutionMethodItems.cpp" />
     <ClCompile Include="DennFilesystem.cpp" />
     <ClCompile Include="DennIndividual.cpp" />
+    <ClCompile Include="DennLayer.cpp" />
     <ClCompile Include="DennMutationFactory.cpp" />
     <ClCompile Include="DennMutationItems.cpp" />
+    <ClCompile Include="DennNeuralNetwork.cpp" />
     <ClCompile Include="DennParameters.cpp" />
+    <ClCompile Include="DennPerceptronLayer.cpp" />
     <ClCompile Include="DennPopulation.cpp" />
     <ClCompile Include="DennRuntimeOutputFactory.cpp" />
     <ClCompile Include="DennRuntimeOutputItems.cpp" />
     <ClCompile Include="DennSerializaOutputFactory.cpp" />
     <ClCompile Include="DennSerializeOutputItems.cpp" />
-    <ClCompile Include="Layer.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="NeuralNetwork.cpp" />
-    <ClCompile Include="PerceptronLayer.cpp" />
     <ClCompile Include="DennRandom.cpp" />
     <ClCompile Include="TicksTime.cpp" />
   </ItemGroup>

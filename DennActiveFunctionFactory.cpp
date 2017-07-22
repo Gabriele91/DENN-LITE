@@ -1,5 +1,6 @@
 #include "Config.h"
 #include "DennActiveFunction.h"
+#include <iterator>
 
 namespace Denn
 {

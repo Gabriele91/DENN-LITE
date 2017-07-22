@@ -24,22 +24,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="NeuralNetwork.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
-    <ClInclude Include="Constants.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
-    <ClInclude Include="ActiveFunction.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
-    <ClInclude Include="PerceptronLayer.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
     <ClInclude Include="Config.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
-    <ClInclude Include="CostFunction.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="IOFileWrapper.h">
@@ -52,9 +37,6 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="DennAlgorithm.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
-    <ClInclude Include="Denn.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="DennParameters.h">
@@ -73,9 +55,6 @@
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="DennRuntimeOutput.h">
-      <Filter>File di intestazione</Filter>
-    </ClInclude>
-    <ClInclude Include="Layer.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
     <ClInclude Include="DennIndividual.h">
@@ -99,21 +78,36 @@
     <ClInclude Include="DennFilesystem.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="Denn.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="DennActiveFunction.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="DennConstants.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="DennCostFunction.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="DennLayer.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="DennNeuralNetwork.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="DennPerceptronLayer.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="DennPointFunction.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="TicksTime.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
-    <ClCompile Include="NeuralNetwork.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
-    <ClCompile Include="Layer.cpp">
-      <Filter>File di origine</Filter>
-    </ClCompile>
-    <ClCompile Include="PerceptronLayer.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="DennIndividual.cpp">
@@ -162,6 +156,21 @@
       <Filter>File di origine</Filter>
     </ClCompile>
     <ClCompile Include="DennSerializeOutputItems.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="DennActiveFunctionFactory.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="DennActiveFunctionItems.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="DennLayer.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="DennNeuralNetwork.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
+    <ClCompile Include="DennPerceptronLayer.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>
