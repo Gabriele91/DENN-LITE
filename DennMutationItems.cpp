@@ -53,7 +53,7 @@ namespace Denn
 					const Matrix& x_a = nn_a[i_layer][m];
 					const Matrix& x_b = nn_b[i_layer][m];
 					const Matrix& x_c = nn_c[i_layer][m];
-					w_final = ((x_a - x_b) * f + x_c).unaryExpr(m_algorithm.clamp_function());
+					w_final = (x_a + (x_b - x_c) * f).unaryExpr(m_algorithm.clamp_function());
 				}
 			}
 		}
@@ -97,7 +97,7 @@ namespace Denn
 					const Matrix& x_c = nn_c[i_layer][m];
 					const Matrix& x_d = nn_d[i_layer][m];
 					const Matrix& x_e = nn_e[i_layer][m];
-					w_final = (((x_a - x_b) + (x_c - x_d)) * f + x_e).unaryExpr(m_algorithm.clamp_function());
+					w_final = (x_a + ((x_b - x_c) + (x_d - x_e)) * f).unaryExpr(m_algorithm.clamp_function());
 				}
 			}
 		}
@@ -141,7 +141,7 @@ namespace Denn
 					const Matrix& x_best = i_best[i_layer][m];
 					const Matrix& x_a    = nn_a[i_layer][m];
 					const Matrix& x_b    = nn_b[i_layer][m];
-					w_final = ((x_a - x_b) * f + x_best).unaryExpr(m_algorithm.clamp_function());
+					w_final = (x_best + (x_a - x_b) * f).unaryExpr(m_algorithm.clamp_function());
 				}
 			}
 		}
@@ -189,7 +189,7 @@ namespace Denn
 					const Matrix& x_b = nn_b[i_layer][m];
 					const Matrix& x_c = nn_c[i_layer][m];
 					const Matrix& x_d = nn_d[i_layer][m];
-					w_final = (((x_a - x_b) + (x_c - x_d)) * f + w_best).unaryExpr(m_algorithm.clamp_function());
+					w_final = (w_best + ((x_a - x_b) + (x_c - x_d)) * f).unaryExpr(m_algorithm.clamp_function());
 				}
 			}
 		}
