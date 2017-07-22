@@ -1,20 +1,9 @@
+#include "DennActiveFunction.h"
 #include "DennPerceptronLayer.h"
 
 namespace Denn
 {
-	///////////////////////////////////////
-	#if 0
-	PerceptronLayer::PerceptronLayer
-	(
-	    const PerceptronLayer& p_layer
-	)
-	{
-		m_active_function = p_layer.m_active_function;
-		m_weights         = p_layer.m_weights;
-		m_baias           = p_layer.m_baias;
-	}
-	#endif 
-	
+	///////////////////////////////////////	
 	PerceptronLayer::PerceptronLayer
 	(
 		  int features
@@ -32,7 +21,7 @@ namespace Denn
 		, size_t clazz
 	)
 	{
-		m_active_function = active_function;
+		m_active_function = ActiveFunctionFactory::name_of(active_function) == "linear" ? nullptr : active_function;
 		m_weights.resize(features, clazz);
 		m_baias.resize(1, clazz);
 	}

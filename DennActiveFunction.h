@@ -15,6 +15,7 @@ namespace Denn
 		//public
 		static ActiveFunction get(const std::string& name);
 		static void append(const std::string& name,const ActiveFunction& fun);
+		static std::string name_of(const ActiveFunction& fun);
 
 		//list of methods
 		static std::vector< std::string > list_of_active_functions();

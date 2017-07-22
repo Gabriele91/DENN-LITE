@@ -217,6 +217,19 @@ namespace Denn
             }
         },
         ParameterInfo{
+			m_output_active_function, "Activation function of input layer [" + ActiveFunctionFactory::names_of_active_functions() + "]", { "--" + m_output_active_function.name(), "--output_activation_functions" ,  "-oaf"  },
+            [this](Arguments& args) -> bool 
+            { 
+                std::string str_c_type = args.get_string();
+                //all lower case
+                std::transform(str_c_type.begin(),str_c_type.end(), str_c_type.begin(), ::tolower);
+                //test
+                if(!ActiveFunctionFactory::exists(str_c_type)) return false;
+                //push
+				m_output_active_function = str_c_type;
+            }
+        }, 
+        ParameterInfo{
             m_dataset_filename, "Path of dataset file (gz)", { "--" + m_dataset_filename.name(), "-d", "-i" }, 
             [this](Arguments& args) -> bool {  m_dataset_filename = args.get_string();  return true; } 
         },

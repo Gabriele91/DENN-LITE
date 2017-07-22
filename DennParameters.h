@@ -177,8 +177,9 @@ namespace Denn
 		read_only<std::string>           m_mutation_type { "mutation","rand/1" };
 		read_only<std::string>           m_crossover_type{ "crossover","bin" };
 		read_only<std::string>           m_evolution_type{ "evolution_method","JDE" };
-		read_only< std::vector<int> >          m_hidden_layers     { "hidden_layers"        /* , none */ };
-		read_only< std::vector<std::string> >  m_active_functions  { "active_functions" /* , none */ };
+		read_only< std::vector<int> >          m_hidden_layers         { "hidden_layers"         /* , none */ };
+		read_only< std::vector<std::string> >  m_active_functions      { "active_functions"      /* , none */ };
+		read_only< std::string >               m_output_active_function{ "output_active_function" ,  "linear" };
 
 		//params info
 		std::vector< ParameterInfo >     m_params_info;

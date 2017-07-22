@@ -11,7 +11,7 @@ namespace Denn
 	{
 		return inout_matrix;
 	}
-    REGISTERED_ACTIVE_FUNCTION(linear<Matrix>, "linear")
+	REGISTERED_ACTIVE_FUNCTION(linear<Matrix>, "linear")
 
 	template < typename Matrix >
 	inline Matrix& sigmoid(Matrix& inout_matrix)

@@ -14,7 +14,7 @@ namespace Denn
 		//find
 		auto it = m_cmap->find(name);
 		//return
-		return it->second;
+		return it != m_cmap->end() ? it->second : nullptr;
 	}
 	void ActiveFunctionFactory::append(const std::string& name,const ActiveFunction& fun)
 	{
@@ -22,6 +22,15 @@ namespace Denn
 		if (!m_cmap) m_cmap = std::move(std::make_unique< std::map< std::string, ActiveFunction > >());
 		//add
 		m_cmap->operator[](name) = fun;
+	}
+	std::string ActiveFunctionFactory::name_of(const ActiveFunction& fun)
+	{
+		//none
+		if (!m_cmap) return std::string();
+		//for all elements
+		for (auto it : *m_cmap) if(it.second == fun) return it.first;
+		//none
+		return std::string();
 	}
 	//list of methods
 	std::vector< std::string > ActiveFunctionFactory::list_of_active_functions()
