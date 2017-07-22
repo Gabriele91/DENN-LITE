@@ -281,7 +281,7 @@ namespace Denn
 			m_population.restart
 			(
 				  m_best_ctx.m_best					     //best
-				, main_random().irand(current_np())      //where put
+				, main_random().index_rand(current_np()) //where put
 				, m_default							     //default individual
 				, m_dataset_batch						 //current batch
 				, m_random_function				         //random generator

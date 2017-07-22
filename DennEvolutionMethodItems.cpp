@@ -21,7 +21,7 @@ namespace Denn
 		virtual void create_a_individual
 		(
 			  DoubleBufferPopulation& population
-			, int i_target
+			, size_t i_target
 			, Individual& i_output
 		)
 		override
@@ -55,7 +55,7 @@ namespace Denn
 		virtual void create_a_individual
 		(
 			  DoubleBufferPopulation& population
-			, int i_target
+			, size_t i_target
 			, Individual& i_output
 		)
 		override
@@ -93,14 +93,14 @@ namespace Denn
 		virtual void start() override
 		{
 			//create mutation/crossover
-			m_mutation = MutationFactory::create(m_algorithm.parameters().m_mutation_type, m_algorithm);
-			m_crossover = CrossoverFactory::create(m_algorithm.parameters().m_crossover_type, m_algorithm);
+			m_mutation = MutationFactory::create(parameters().m_mutation_type, m_algorithm);
+			m_crossover = CrossoverFactory::create(parameters().m_crossover_type, m_algorithm);
 		}
 
 		virtual void create_a_individual
 		(     
 			  DoubleBufferPopulation& dpopulation
-			, int i_target
+			, size_t i_target
 			, Individual& i_output
 		) 
 		override
@@ -108,14 +108,13 @@ namespace Denn
 			//vectors
 			const Population& parents    = dpopulation.parents();
 			const Individual& target     = *parents[i_target];
-			const Parameters& parameters = m_algorithm.parameters();
 			//f JDE
-			if (random(i_target).uniform() < Scalar(parameters.m_jde_f))
+			if (random(i_target).uniform() < Scalar(parameters().m_jde_f))
 				i_output.m_f = Scalar(random(i_target).uniform(0.0, 2.0));
 			else
 				i_output.m_f = target.m_f;
 			//cr JDE
-			if (random(i_target).uniform() < Scalar(parameters.m_jde_cr))
+			if (random(i_target).uniform() < Scalar(parameters().m_jde_cr))
 				i_output.m_cr = Scalar(random(i_target).uniform());
 			else
 				i_output.m_cr = target.m_cr;
@@ -145,8 +144,8 @@ namespace Denn
 
 		JADEMethod(const DennAlgorithm& algorithm) : EvolutionMethod(algorithm) 
 		{
-			m_archive_max_size = m_algorithm.parameters().m_archive_size;
-			m_c_adapt          = m_algorithm.parameters().m_f_cr_adapt;
+			m_archive_max_size = parameters().m_archive_size;
+			m_c_adapt          = parameters().m_f_cr_adapt;
 			m_mu_f       = Scalar(0.5);
 			m_mu_cr      = Scalar(0.5);
 		}
@@ -159,8 +158,8 @@ namespace Denn
 			//clear
 			m_archive.clear();
 			//create mutation/crossover
-			m_mutation = MutationFactory::create(m_algorithm.parameters().m_mutation_type, m_algorithm);
-			m_crossover = CrossoverFactory::create(m_algorithm.parameters().m_crossover_type, m_algorithm);
+			m_mutation = MutationFactory::create(parameters().m_mutation_type, m_algorithm);
+			m_crossover = CrossoverFactory::create(parameters().m_crossover_type, m_algorithm);
 		}
 
 		virtual void start_a_gen_pass(DoubleBufferPopulation& dpopulation) override
@@ -177,7 +176,7 @@ namespace Denn
 		virtual void create_a_individual
 		(
 			  DoubleBufferPopulation& dpopulation
-			, int i_target
+			, size_t i_target
 			, Individual& i_output
 		)
 		override
@@ -249,7 +248,7 @@ namespace Denn
 						}
 						else if (main_random().uniform() < Scalar(m_archive_max_size) / Scalar(m_archive_max_size+n_discarded))
 						{
-							m_archive[main_random().uirand(m_archive_max_size)]->copy_from(*father);
+							m_archive[main_random().index_rand(m_archive_max_size)]->copy_from(*father);
 						}
 					}
 					//
@@ -295,7 +294,7 @@ namespace Denn
 			//reduce A
 			while (m_archive_max_size < m_archive.size())
 			{
-				m_archive[main_random().uirand(m_archive.size())] = m_archive.last();
+				m_archive[main_random().index_rand(m_archive.size())] = m_archive.last();
 				m_archive.pop_back();
 			}
 		}
@@ -309,9 +308,9 @@ namespace Denn
 
 		SHADEMethod(const DennAlgorithm& algorithm) : EvolutionMethod(algorithm)
 		{
-			m_archive_max_size = m_algorithm.parameters().m_archive_size;
-			m_c_adapt = m_algorithm.parameters().m_f_cr_adapt;
-			m_h = m_algorithm.parameters().m_shade_h;
+			m_archive_max_size = parameters().m_archive_size;
+			m_c_adapt = parameters().m_f_cr_adapt;
+			m_h = parameters().m_shade_h;
 		}
 
 		virtual void start() override
@@ -324,8 +323,8 @@ namespace Denn
 			//clear
 			m_archive.clear();
 			//create mutation/crossover
-			m_mutation = MutationFactory::create(m_algorithm.parameters().m_mutation_type, m_algorithm);
-			m_crossover = CrossoverFactory::create(m_algorithm.parameters().m_crossover_type, m_algorithm);
+			m_mutation = MutationFactory::create(parameters().m_mutation_type, m_algorithm);
+			m_crossover = CrossoverFactory::create(parameters().m_crossover_type, m_algorithm);
 		}
 
 		virtual void start_a_gen_pass(DoubleBufferPopulation& dpopulation) override
@@ -342,13 +341,13 @@ namespace Denn
 		virtual void create_a_individual
 		(
 			  DoubleBufferPopulation& dpopulation
-			, int i_target
+			, size_t i_target
 			, Individual& i_output
 		)
 		override
 		{
 			//take tou
-			size_t tou_i = random(i_target).uirand(m_mu_f.size());
+			size_t tou_i = random(i_target).index_rand(m_mu_f.size());
 			//Compute F
 			Scalar v;
 			do v = random(i_target).cauchy(m_mu_f[tou_i], 0.1); while (v <= 0);
@@ -431,7 +430,7 @@ namespace Denn
 						}
 						else if (main_random().uniform() < Scalar(m_archive_max_size) / Scalar(m_archive_max_size + n_discarded))
 						{
-							m_archive[main_random().uirand(m_archive_max_size)]->copy_from(*father);
+							m_archive[main_random().index_rand(m_archive_max_size)]->copy_from(*father);
 						}
 					}
 					//SWAP
@@ -504,7 +503,7 @@ namespace Denn
 			//reduce A
 			while (m_archive_max_size < m_archive.size())
 			{
-				m_archive[main_random().uirand(m_archive.size())] = m_archive.last();
+				m_archive[main_random().index_rand(m_archive.size())] = m_archive.last();
 				m_archive.pop_back();
 			}
 		}
@@ -518,7 +517,7 @@ namespace Denn
 
 		SaDEMethod(const DennAlgorithm& algorithm) : EvolutionMethod(algorithm)
 		{
-			//m_epoct = m_algorithm.parameters().m_epoct;
+			//m_epoct = parameters().m_epoct;
 		}
 
 		virtual void start() override
@@ -550,8 +549,8 @@ namespace Denn
 
 		virtual void create_a_individual
 		(
-			DoubleBufferPopulation& dpopulation
-			, int target
+			  DoubleBufferPopulation& dpopulation
+			, size_t target
 			, Individual& i_output
 		)
 		override

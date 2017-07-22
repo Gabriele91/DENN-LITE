@@ -25,7 +25,7 @@ namespace Denn
 		virtual void start() {};
 		virtual void start_a_gen_pass(DoubleBufferPopulation& population) {};
 		virtual void start_a_subgen_pass(DoubleBufferPopulation& population) {};
-		virtual void create_a_individual(DoubleBufferPopulation& population, int target, Individual& i_output) = 0;
+		virtual void create_a_individual(DoubleBufferPopulation& population, size_t target, Individual& i_output) = 0;
 		virtual	void selection(DoubleBufferPopulation& population) = 0;
 		virtual void end_a_subgen_pass(DoubleBufferPopulation& population) {};
 		virtual void end_a_gen_pass(DoubleBufferPopulation& population) {};

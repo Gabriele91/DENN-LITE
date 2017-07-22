@@ -12,7 +12,7 @@ namespace Denn
 
 		NoneMutation(const DennAlgorithm& algorithm) :Mutation(algorithm) {}
 
-		virtual void operator()(const Population& population, int id_target, Individual& i_final) override
+		virtual void operator()(const Population& population, size_t id_target, Individual& i_final) override
 		{
 			//target
 			i_final = *population[id_target];
@@ -26,7 +26,7 @@ namespace Denn
 
 		RandOne(const DennAlgorithm& algorithm) :Mutation(algorithm) {}
 
-		virtual void operator()(const Population& population, int id_target, Individual& i_final) override
+		virtual void operator()(const Population& population, size_t id_target, Individual& i_final) override
 		{
 			//alias
 			const auto& f = i_final.m_f;
@@ -66,7 +66,7 @@ namespace Denn
 
 		RandTwo(const DennAlgorithm& algorithm) :Mutation(algorithm) {}
 
-		virtual void operator()(const Population& population, int id_target, Individual& i_final) override
+		virtual void operator()(const Population& population, size_t id_target, Individual& i_final) override
 		{
 			//alias
 			const auto& f = i_final.m_f;
@@ -110,7 +110,7 @@ namespace Denn
 
 		BestOne(const DennAlgorithm& algorithm) :Mutation(algorithm) {}
 
-		virtual void operator()(const Population& population, int id_target, Individual& i_final) override
+		virtual void operator()(const Population& population, size_t id_target, Individual& i_final) override
 		{
 			//alias
 			const auto& f = i_final.m_f;
@@ -154,7 +154,7 @@ namespace Denn
 
 		BestTwo(const DennAlgorithm& algorithm) :Mutation(algorithm) {}
 
-		virtual void operator()(const Population& population, int id_target, Individual& i_final) override
+		virtual void operator()(const Population& population, size_t id_target, Individual& i_final) override
 		{
 			//alias
 			const auto& f = i_final.m_f;
@@ -204,7 +204,7 @@ namespace Denn
 		{ 
 		}
 
-		virtual void operator()(const Population& population, int id_target, Individual& i_final) override
+		virtual void operator()(const Population& population, size_t id_target, Individual& i_final) override
 		{
 			//alias
 			const auto& f = i_final.m_f;
@@ -259,7 +259,7 @@ namespace Denn
 			m_perc_of_best = m_algorithm.parameters().m_perc_of_best;
 		}
 
-		virtual void operator()(const Population& population, int id_target, Individual& i_final) override
+		virtual void operator()(const Population& population, size_t id_target, Individual& i_final) override
 		{
 			//alias
 			const auto& f = i_final.m_f;
@@ -267,7 +267,7 @@ namespace Denn
 			//target
 			const Individual& i_target = *population[id_target];
 			//best (n.b. sort population from best to worst)
-			size_t           id_best = random(id_target).irand(size_t(p*Scalar(current_np())));
+			size_t           id_best = random(id_target).index_rand(size_t(p*Scalar(current_np())));
 			const Individual& i_best = *population[id_best];
 			//get generator
 			auto& rand_deck = random(id_target).deck();
@@ -321,7 +321,7 @@ namespace Denn
 
 		DEGL(const DennAlgorithm& algorithm) :Mutation(algorithm) {}
 
-		virtual void operator()(const Population& population, int id_target, Individual& i_final) override
+		virtual void operator()(const Population& population, size_t id_target, Individual& i_final) override
 		{
 			//... page 6 
 			//https://pdfs.semanticscholar.org/5523/8adbd3d78dc83cf906240727be02f6560470.pdf
@@ -340,10 +340,10 @@ namespace Denn
 			//local best
 			long nn                     =  (long)neighborhood;
 			long np                     =  (long)population.size();
-			long id_l_best				=  id_target;
+			long id_l_best				=  (long)id_target;
 			for(long k=-nn; k!=(nn+1); ++k)
 			{
-				long i = Denn::positive_mod(k + id_target, np);
+				long i = Denn::positive_mod(k + id_l_best, np);
 				if( population[i]->m_eval <  population[id_l_best]->m_eval) id_l_best = i;
 			}
 			//local best ref

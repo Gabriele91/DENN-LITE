@@ -9,7 +9,7 @@ namespace Denn
 	public:
 		None(const DennAlgorithm& algorithm) : Crossover(algorithm) {}
 
-		virtual void operator()(const Population& population, int id_target, Individual& i_mutant)
+		virtual void operator()(const Population& population, size_t id_target, Individual& i_mutant)
 		{
 			//none
 		}
@@ -21,7 +21,7 @@ namespace Denn
 	public:
 		Bin(const DennAlgorithm& algorithm) : Crossover(algorithm) {}
 
-		virtual void operator()(const Population& population, int id_target, Individual& i_mutant)
+		virtual void operator()(const Population& population, size_t id_target, Individual& i_mutant)
 		{
 			//baias
 			const auto& i_target = *population[id_target];
@@ -58,7 +58,7 @@ namespace Denn
 	public:
 		Exp(const DennAlgorithm& algorithm) : Crossover(algorithm) {}
 
-		virtual void operator()(const Population& population, int id_target, Individual& i_mutant)
+		virtual void operator()(const Population& population, size_t id_target, Individual& i_mutant)
 		{
 			//baias
 			const auto& i_target = *population[id_target];
@@ -102,7 +102,7 @@ namespace Denn
 	public:
 		Interm(const DennAlgorithm& algorithm) : Crossover(algorithm) {}
 
-		virtual void operator()(const Population& population, int id_target, Individual& i_mutant)
+		virtual void operator()(const Population& population, size_t id_target, Individual& i_mutant)
 		{
 			//baias
 			const auto& i_target = *population[id_target];
@@ -133,7 +133,7 @@ namespace Denn
 	public:
 		BinInterm(const DennAlgorithm& algorithm) : Crossover(algorithm) {}
 
-		virtual void operator()(const Population& population, int id_target, Individual& i_mutant)
+		virtual void operator()(const Population& population, size_t id_target, Individual& i_mutant)
 		{
 			//baias
 			const auto& i_target = *population[id_target];
