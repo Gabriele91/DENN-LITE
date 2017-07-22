@@ -13,6 +13,17 @@ namespace CostFunction
 		const Scalar min_const_ep = 1e-10 ;
 		return Denn::PointFunction::log<Scalar>(Denn::clamp(x,min_const_ep,Scalar(1.0)));
 	}
+	template < typename Scalar >
+	Scalar neg_safe_log(Scalar x)
+	{
+		const Scalar min_const_ep = 1e-10 ;
+		return -Denn::PointFunction::log<Scalar>(Denn::clamp(x,min_const_ep,Scalar(1.0)));
+	}
+	template < typename Scalar >
+	Scalar inverse_probability(Scalar x)
+	{
+		return Scalar(1.0) - x;
+	}
 
 	template < typename Matrix >
 	Matrix cross_entropy_by_rows(const Matrix& x, const Matrix& y)
@@ -26,6 +37,21 @@ namespace CostFunction
 	{
 		Matrix log_y = y.unaryExpr(&safe_log<typename Matrix::Scalar>);
 		return -(x.array() * log_y.array()).sum() / (typename Matrix::Scalar)y.rows();
+	}
+
+	template < typename Matrix >
+	typename Matrix::Scalar cross_entropy_logistic_regression (const Matrix& labels, const Matrix& predict)
+	{
+		using Scalar = typename Matrix::Scalar ;
+		Matrix evalout(labels.rows(),labels.cols()); 
+		for(typename Matrix::Index x = 0; x!=labels.cols(); ++x)
+		for(typename Matrix::Index y = 0; y!=labels.rows(); ++y)
+		{
+			Scalar log_y       = safe_log<typename Matrix::Scalar>(predict(y,x));
+			Scalar log_one_m_y = safe_log<typename Matrix::Scalar>(Scalar(1.0)-predict(y,x));
+			evalout(y,x)       = (labels(y,x) * log_y + (Scalar(1.0)-labels(y,x)) * (log_one_m_y));
+		}
+		return (-(evalout.rowwise().mean())).mean();
 	}
 
 	template < typename Matrix >
@@ -57,13 +83,9 @@ namespace CostFunction
 	template < typename Matrix >
 	typename Matrix::Scalar softmax_cross_entropy_with_logit(const Matrix& x, const Matrix& y)
 	{
-		Matrix y_softmax_logistic(y);
-		//logit
-		y_softmax_logistic.unaryExpr(&Denn::PointFunction::logit<typename Matrix::Scalar>);
-		//soft max
-		softmax(y_softmax_logistic);
-		//
-		return cross_entropy(x, y_softmax_logistic);
+		Matrix y_softmax(y);
+		softmax(y_softmax);
+		return cross_entropy_logistic_regression(x, y_softmax);
 	}
 
 	template < typename Matrix >

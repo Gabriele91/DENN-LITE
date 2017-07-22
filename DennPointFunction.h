@@ -30,6 +30,7 @@ namespace Denn
 		template < typename ScalarType = double >
 		inline ScalarType logistic(const ScalarType& a)
 		{
+			//(k = 1, x0 = 0, L = 1)
 			return ScalarType(1.0) / (ScalarType(1.0) + std::exp(-a));
 		}	
 		
@@ -42,7 +43,7 @@ namespace Denn
 		template < typename ScalarType = double >
 		inline ScalarType logit(const ScalarType& a)
 		{
-			return log<ScalarType>(a / (ScalarType(1.0) + a));
+			return log<ScalarType>(a / (ScalarType(1.0) - ScalarType(a)));
 		}
 
 		template < typename ScalarType = double >

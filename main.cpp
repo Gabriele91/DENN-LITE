@@ -53,7 +53,11 @@ void execute
 		nn0.add_layer( PerceptronLayer(ActiveFunctionFactory::get(active_output), n_features, n_class) );
 	}
 	//Function ptr
+	#if 1
 	auto cost_function = CostFunction::softmax_cross_entropy_with_logit< Matrix >;
+	#else
+	auto cost_function = CostFunction::softmax_cross_entropy< Matrix >;
+	#endif
 	////////////////////////////////////////////////////////////////////////////////////////////////
 
 	//DENN
