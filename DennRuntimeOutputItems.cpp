@@ -17,7 +17,7 @@ namespace Denn
     public:
 	    AllFitnessOutput(std::ostream& stream,const DennAlgorithm& algorithm):RuntimeOutput(stream, algorithm) {}
         
-        virtual void end_a_pass() override 
+        virtual void end_a_sub_pass() override 
         { 
             for(const Individual::SPtr& i : population().parents())
                 output() << i->m_eval << "; ";
