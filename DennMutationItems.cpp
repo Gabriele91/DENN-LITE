@@ -343,7 +343,7 @@ namespace Denn
 			long id_l_best				=  (long)id_target;
 			for(long k=-nn; k!=(nn+1); ++k)
 			{
-				long i = Denn::positive_mod(k + id_l_best, np);
+				long i = Denn::positive_mod(k + (long)id_target, np);
 				if( population[i]->m_eval <  population[id_l_best]->m_eval) id_l_best = i;
 			}
 			//local best ref
