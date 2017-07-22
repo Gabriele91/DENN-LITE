@@ -3,11 +3,35 @@
 
 namespace Denn
 {
+
+
+    class SilentOutput : public Denn::RuntimeOutput
+    {
+    public:
+	    SilentOutput(std::ostream& stream,const DennAlgorithm& algorithm):RuntimeOutput(stream, algorithm) {}
+    };
+    REGISTERED_RUNTIME_OUTPUT(SilentOutput,"silent")
+
+    class AllFitnessOutput : public Denn::RuntimeOutput
+    {
+    public:
+	    AllFitnessOutput(std::ostream& stream,const DennAlgorithm& algorithm):RuntimeOutput(stream, algorithm) {}
+        
+        virtual void end_a_pass() override 
+        { 
+            for(const Individual::SPtr& i : population().parents())
+                output() << i->m_eval << "; ";
+            output() << std::endl;
+        }
+    };
+    REGISTERED_RUNTIME_OUTPUT(AllFitnessOutput,"all-fitness")
+
+
     class FullOutput : public Denn::RuntimeOutput
     {
     public:
 
-	FullOutput(std::ostream& stream,const DennAlgorithm& algorithm):RuntimeOutput(stream, algorithm) {}
+        FullOutput(std::ostream& stream,const DennAlgorithm& algorithm):RuntimeOutput(stream, algorithm) {}
         
         virtual void start() override
         { 
@@ -101,8 +125,8 @@ namespace Denn
 	    output() << (n_sub_pass * m_n_pass + m_n_sub_pass);
 	}
 
-        virtual void write_global_best
-        (
+    virtual void write_global_best
+    (
 		const std::string& open="[ ", 
 		const std::string& separetor=", ", 
 		const std::string& closer=" ]"
@@ -116,8 +140,8 @@ namespace Denn
             << closer;
 	}
 
-	virtual void write_pass_best
-        (
+    virtual void write_pass_best
+    (
 		const std::string& open="[ ", 
 		const std::string& separetor=", ", 
 		const std::string& closer=" ]"
@@ -143,7 +167,7 @@ namespace Denn
     {
     public:
 
-	BenchOutput(std::ostream& stream,const DennAlgorithm& algorithm):RuntimeOutput(stream, algorithm) {}
+	    BenchOutput(std::ostream& stream,const DennAlgorithm& algorithm):RuntimeOutput(stream, algorithm) {}
         
         virtual void start() override
         { 

@@ -217,7 +217,7 @@ namespace Denn
             }
         },
         ParameterInfo{
-			m_output_active_function, "Activation function of input layer [" + ActiveFunctionFactory::names_of_active_functions() + "]", { "--" + m_output_active_function.name(), "--output_activation_functions" ,  "-oaf"  },
+			m_output_active_function, "Activation function of output layer [" + ActiveFunctionFactory::names_of_active_functions() + "]", { "--" + m_output_active_function.name(), "--output_activation_functions" ,  "-oaf"  },
             [this](Arguments& args) -> bool 
             { 
                 std::string str_c_type = args.get_string();
@@ -238,8 +238,12 @@ namespace Denn
             [this](Arguments& args) {  m_output_filename = args.get_string(); return true;  } 
         },
         ParameterInfo{
-            m_runtime_output_type, "Select type of runtime output", { "--" + m_runtime_output_type.name(),    "-ro"  }, 
+            m_runtime_output_type, "Select type of runtime output [" + RuntimeOutputFactory::names_of_runtime_outputs() + "]", { "--" + m_runtime_output_type.name(),    "-ro"  }, 
             [this](Arguments& args) -> bool { m_runtime_output_type = args.get_string() ; return true; }
+        },
+        ParameterInfo{
+            m_runtime_output_file, "Write the runtime output to stream [::cout, ::cerr, <file>]", { "--" + m_runtime_output_file.name(),    "-rof"  }, 
+            [this](Arguments& args) -> bool { m_runtime_output_file = args.get_string() ; return true; }
         },
         ParameterInfo{
             m_compute_test_per_pass, "Compute the test accuracy for each pass", { "--" + m_compute_test_per_pass.name(),    "-ctps"  }, 

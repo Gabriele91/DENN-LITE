@@ -68,7 +68,7 @@ void execute
 		, nn0
 		, cost_function
 		//output
-		, std::cout
+		, output
 		//thread pool
 		, ptr_thpool
 	);
@@ -124,6 +124,37 @@ int main(int argc,const char** argv)
 	}
 	DataSetLoaderGZ dataset((const std::string&)arguments.m_dataset_filename);
 	////////////////////////////////////////////////////////////////////////////////////////////////
+	std::ostream   runtime_output_stream(nullptr);
+	std::ofstream  runtime_output_file_stream;
+	std::string    runtime_output_arg = (*arguments.m_runtime_output_file);
+	//output
+	if(runtime_output_arg.size())
+	{
+		if(runtime_output_arg == "::cout")
+		{
+			runtime_output_stream.rdbuf(std::cout.rdbuf());
+		}
+		else if(runtime_output_arg == "::cerr")
+		{
+			runtime_output_stream.rdbuf(std::cerr.rdbuf());
+		}
+		else if(!Denn::Filesystem::exists((const std::string&)arguments.m_runtime_output_file) ||
+		         Denn::Filesystem::is_writable((const std::string&)arguments.m_runtime_output_file))
+		{
+			runtime_output_file_stream.open(*arguments.m_runtime_output_file);
+			runtime_output_stream.rdbuf(runtime_output_file_stream.rdbuf());
+		}
+		else
+		{
+			std::cerr << "can't write into the file: \"" << *arguments.m_runtime_output_file << "\"" << std::endl;
+			return 1; //exit
+		}
+	}
+	else
+	{
+		runtime_output_stream.rdbuf(std::cout.rdbuf());
+	}
+	////////////////////////////////////////////////////////////////////////////////////////////////
 	if(Denn::Filesystem::exists((const std::string&)arguments.m_output_filename) &&
 	  !Denn::Filesystem::is_writable((const std::string&)arguments.m_output_filename))
 	{
@@ -143,7 +174,7 @@ int main(int argc,const char** argv)
 	SerializeOutput::SPtr serialize_output = SerializeOutputFactory::create(ext, ofile, arguments);
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	//execute test
- 	execute(arguments, dataset, uptr_thpool.get(), std::cout, serialize_output);
+ 	execute(arguments, dataset, uptr_thpool.get(), runtime_output_stream, serialize_output);
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	return 0;

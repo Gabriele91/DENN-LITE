@@ -141,6 +141,7 @@ namespace Denn
 		read_only<std::string>			m_dataset_filename        { "dataset" };
 		read_only<std::string> 			m_output_filename         { "output"  };
 		read_only<std::string>		    m_runtime_output_type     { "runtime_output",            "bench",    true /*false?*/ };
+		read_only<std::string>		    m_runtime_output_file     { "runtime_output_file",            "",    true /*false?*/ };
 		read_only<bool>				    m_compute_test_per_pass   { "compute_test_per_pass",    bool(true),  true /*false?*/ };
 		read_only<bool>				    m_serialize_neural_network{ "serialize_neural_network", bool(true),  false /*true?*/ };
 		
