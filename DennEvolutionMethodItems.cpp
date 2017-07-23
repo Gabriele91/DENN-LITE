@@ -65,7 +65,9 @@ namespace Denn
 				for(size_t i=0; i!=current_np(); ++i)
 				{
 					if( population_tmp[i]->m_eval < g_population.parents()[i]->m_eval )
+					{
 						g_population.parents()[i] = population_tmp[i]->copy();
+					}
 				}
 			}
 			///////////////////////////////////////////////////////////////////////////////
@@ -100,6 +102,53 @@ namespace Denn
 	};
 	REGISTERED_EVOLUTION_METHOD(PHistoryMethod,"PHISTORY")
 
+
+	class P2HistoryMethod : public PHistoryMethod
+	{
+	public:
+
+		//PHistoryMethod
+		P2HistoryMethod(const DennAlgorithm& algorithm): PHistoryMethod(algorithm) {}
+
+		virtual void start_a_gen_pass(DoubleBufferPopulation& g_population) override
+		{ 
+			///////////////////////////////////////////////////////////////////////////////
+			// compere history with new population
+			for(Population& population_tmp : m_history)
+			{
+				m_algorithm.execute_fitness_on(population_tmp);
+			}				
+			//best of the best
+			for(const Population& population_tmp : m_history)
+			{
+				for(const Individual::SPtr& individual_tmp : population_tmp)
+				for(size_t u=0; u!=current_np(); ++u)				
+				{
+					if( individual_tmp->m_eval < g_population.parents()[u]->m_eval )
+					{
+						g_population.parents()[u] = individual_tmp->copy();
+						break;
+					}
+				}
+			}
+			///////////////////////////////////////////////////////////////////////////////
+			//copy
+			if(m_history.size() < m_max_size)
+			{
+				m_history.push_back(g_population.parents().copy());
+			}  
+			else
+			{
+				m_history[m_k] = g_population.parents().copy(); 
+				m_k = (m_k + 1) % m_max_size;
+			} 
+			///////////////////////////////////////////////////////////////////////////////
+			//start the pass
+			m_sub_method->start_a_gen_pass(g_population);
+		};
+
+	};
+	REGISTERED_EVOLUTION_METHOD(P2HistoryMethod,"P2HISTORY")
 
 	class DEMethod : public EvolutionMethod
 	{
