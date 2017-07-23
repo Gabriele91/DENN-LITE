@@ -126,9 +126,11 @@ namespace Filesystem
         std::fseek(file, 0, SEEK_END);
         size_t size = std::ftell(file);
         std::fseek(file, 0, SEEK_SET);
+        //no size:
+        if(!size) std::fclose(file);
         /////////////////////////////////////////////////////////////////////
         out.resize(size, 0);
-        std::fread(&out[0], size, 1, file);
+        assert(std::fread(&out[0], size, 1, file));
         /////////////////////////////////////////////////////////////////////
         std::fclose(file);
         //return
@@ -146,9 +148,11 @@ namespace Filesystem
         std::fseek(file, 0, SEEK_END);
         size_t size = std::ftell(file);
         std::fseek(file, 0, SEEK_SET);
+        //no size:
+        if(!size) std::fclose(file);
         /////////////////////////////////////////////////////////////////////
         out.resize(size);
-        std::fread(&out[0], size, 1, file);
+        assert(std::fread(&out[0], size, 1, file));
         /////////////////////////////////////////////////////////////////////
         std::fclose(file);
         //return

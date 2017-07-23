@@ -168,9 +168,9 @@ protected:
 	void  execute_generation_task(size_t i);
 	/////////////////////////////////////////////////////////////////
 	//eval all
-	void execute_target_function_on_all_population();
-	void serial_execute_target_function_on_all_population();
-	void parallel_execute_target_function_on_all_population(ThreadPool& thpool);
+	void execute_target_function_on_all_population(Population& population);
+	void serial_execute_target_function_on_all_population(Population& population);
+	void parallel_execute_target_function_on_all_population(Population& population,ThreadPool& thpool);
 	/////////////////////////////////////////////////////////////////
 	//gen random function
 	RandomFunction gen_random_func() const;

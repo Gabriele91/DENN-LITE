@@ -215,7 +215,7 @@ namespace Denn
 	//Intermedie steps
 	void DennAlgorithm::execute_a_pass(size_t pass, size_t n_sub_pass)
 	{
-		execute_target_function_on_all_population();
+		execute_target_function_on_all_population(m_population.parents());
 		//output
 		if(m_output) m_output->start_a_pass();
 		//start pass
@@ -352,23 +352,21 @@ namespace Denn
 	
 	/////////////////////////////////////////////////////////////////
 	//eval all
-	void DennAlgorithm::execute_target_function_on_all_population()
+	void DennAlgorithm::execute_target_function_on_all_population(Population& population)
 	{
 		//eval on batch
-		if (m_thpool) parallel_execute_target_function_on_all_population(*m_thpool);
-		else 		  serial_execute_target_function_on_all_population();
+		if (m_thpool) parallel_execute_target_function_on_all_population(population, *m_thpool);
+		else 		  serial_execute_target_function_on_all_population(population);
 	}
-	void DennAlgorithm::serial_execute_target_function_on_all_population()
+	void DennAlgorithm::serial_execute_target_function_on_all_population(Population& population)
 	{
 		//np
 		size_t np = current_np();
-		//pop ref
-		auto& popolation = m_population.parents();
 		//for all
 		for (size_t i = 0; i != np; ++i)
 		{
 			//ref to target
-			auto& i_target = *popolation[i];
+			auto& i_target = *population[i];
 			//eval
 			auto y = i_target.m_network.apply(m_dataset_batch.m_features);
 			i_target.m_eval = m_target_function(m_dataset_batch.m_labels, y);
@@ -377,12 +375,10 @@ namespace Denn
 				i_target.m_eval = std::numeric_limits<Scalar>::max();
 		}
 	}
-	void DennAlgorithm::parallel_execute_target_function_on_all_population(ThreadPool& thpool)
+	void DennAlgorithm::parallel_execute_target_function_on_all_population(Population& population, ThreadPool& thpool)
 	{
 		//get np
 		size_t np = current_np();
-		//pop ref
-		auto& population = m_population.parents();
 		//alloc promises
 		m_promises.resize(np);
 		//for all
