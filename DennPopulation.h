@@ -33,8 +33,12 @@ namespace Denn
 		//costum
 		void best(size_t& out_i, Scalar& out_eval) const;
 		Individual::SPtr best() const;
+		
 		//sort
 		void sort();
+
+		//copy
+		Population copy() const;
 	
 	protected:
 

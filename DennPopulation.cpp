@@ -62,6 +62,19 @@ namespace Denn
 		std::sort(m_individuals.begin(), m_individuals.end(), compare_individual);
 	}
 
+	Population Population::copy() const
+	{
+		//malloc 
+		Population new_pop;
+		new_pop.resize(size());
+		//init
+		for(size_t i = 0;i != size(); ++i)
+		{
+			new_pop[i] = m_individuals[i]->copy();
+		}
+		//return
+		return new_pop;
+	}
 	////////////////////////////////////////////////////////////////////////
 	//init population
 	void DoubleBufferPopulation::init(
