@@ -17,7 +17,7 @@ for arg in sys.argv[1:]:
     #    population.append([])
     #    population[base_col] = [-1.0 for x in range(len(population[0]))]
     #    base_col+=1
-    with open(sys.argv[1], 'r') as csvFile:
+    with open(arg, 'r') as csvFile:
         reader = csv_parser.reader(csvFile, delimiter=';')
         for row in reader:
             for col, val in enumerate(row):
