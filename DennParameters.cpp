@@ -80,6 +80,19 @@ namespace Denn
             }
         },
         ParameterInfo{
+            m_sub_evolution_type, "Type of sub evolution method [" + EvolutionMethodFactory::names_of_evolution_methods() + "] (PHISTORY)", { "--" + m_sub_evolution_type.name(), "--sub-evolution",    "-sem"  },
+            [this](Arguments& args) -> bool  
+            { 
+                std::string str_m_type = args.get_string() ;
+                //all lower case
+                std::transform(str_m_type.begin(),str_m_type.end(), str_m_type.begin(), ::toupper);
+                //save
+				m_sub_evolution_type = str_m_type;
+                //ok 
+                return EvolutionMethodFactory::exists(*m_sub_evolution_type);
+            }
+        },
+        ParameterInfo{
             m_mutation_type, "Type of DE mutation [" + MutationFactory::names_of_mutations() + "]", { "--" + m_mutation_type.name(),    "-m"  },
             [this](Arguments& args) -> bool  
             { 
@@ -104,6 +117,11 @@ namespace Denn
                 //ok
                 return CrossoverFactory::exists(*m_crossover_type); 
             }
+        },
+
+        ParameterInfo{
+            m_history_size, "Size of population history (PHISTORY)", { "--" + m_history_size.name(),    "-hs"  }, 
+            [this](Arguments& args) -> bool { m_history_size = args.get_int() ; return true; }
         },
 
         ParameterInfo{ 

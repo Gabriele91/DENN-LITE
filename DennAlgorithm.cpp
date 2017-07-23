@@ -216,6 +216,7 @@ namespace Denn
 	void DennAlgorithm::execute_a_pass(size_t pass, size_t n_sub_pass)
 	{
 		execute_target_function_on_all_population(m_population.parents());
+		///////////////////////////////////////////////////////////////////
 		//output
 		if(m_output) m_output->start_a_pass();
 		//start pass
@@ -351,14 +352,18 @@ namespace Denn
 	}
 	
 	/////////////////////////////////////////////////////////////////
-	//eval all
-	void DennAlgorithm::execute_target_function_on_all_population(Population& population)
+	//fitness function on a population
+	void DennAlgorithm::execute_fitness_on(Population& population) const
+	{
+		execute_target_function_on_all_population(population);
+	}
+	void DennAlgorithm::execute_target_function_on_all_population(Population& population) const
 	{
 		//eval on batch
 		if (m_thpool) parallel_execute_target_function_on_all_population(population, *m_thpool);
 		else 		  serial_execute_target_function_on_all_population(population);
 	}
-	void DennAlgorithm::serial_execute_target_function_on_all_population(Population& population)
+	void DennAlgorithm::serial_execute_target_function_on_all_population(Population& population) const
 	{
 		//np
 		size_t np = current_np();
@@ -375,7 +380,7 @@ namespace Denn
 				i_target.m_eval = std::numeric_limits<Scalar>::max();
 		}
 	}
-	void DennAlgorithm::parallel_execute_target_function_on_all_population(Population& population, ThreadPool& thpool)
+	void DennAlgorithm::parallel_execute_target_function_on_all_population(Population& population, ThreadPool& thpool) const
 	{
 		//get np
 		size_t np = current_np();
@@ -387,7 +392,7 @@ namespace Denn
 			//ref to target
 			auto& i_target = *population[i];
 			//add
-			m_promises[i] = thpool.push_task([this, &i_target]()
+			m_promises[i] = thpool.push_task([this,&i_target]()
 			{
 				//test
 				auto y = i_target.m_network.apply(m_dataset_batch.m_features);

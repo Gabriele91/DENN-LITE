@@ -4,15 +4,17 @@ import os
 import sys 
 
 population = []
-with open(sys.argv[1], 'r') as csvFile:
-    reader = csv_parser.reader(csvFile, delimiter=';')
-    for row in reader:
-        for col, val in enumerate(row):
-            if val.strip() == "":
-                continue
-            if len(population) <= col:
-                population.append([])
-            population[col].append(float(val))
+for arg in sys.argv[1:]:
+    base_col = len(population)
+    with open(sys.argv[1], 'r') as csvFile:
+        reader = csv_parser.reader(csvFile, delimiter=';')
+        for row in reader:
+            for col, val in enumerate(row):
+                if val.strip() == "":
+                    continue
+                if len(population)-base_col <= col:
+                    population.append([])
+                population[col+base_col].append(float(val))
 
 for individual in population:
     plt.plot(individual)

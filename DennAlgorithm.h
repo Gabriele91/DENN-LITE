@@ -84,6 +84,9 @@ public:
 	//find best individual (validation test)
 	Individual::SPtr find_best(Scalar& out_eval);
 
+	//fitness function on a population
+	void execute_fitness_on(Population& population) const;
+
 	//using the test set on a individual
 	Scalar execute_test() const;
 	Scalar execute_test(Individual& individual) const;
@@ -168,9 +171,9 @@ protected:
 	void  execute_generation_task(size_t i);
 	/////////////////////////////////////////////////////////////////
 	//eval all
-	void execute_target_function_on_all_population(Population& population);
-	void serial_execute_target_function_on_all_population(Population& population);
-	void parallel_execute_target_function_on_all_population(Population& population,ThreadPool& thpool);
+	void execute_target_function_on_all_population(Population& population) const;
+	void serial_execute_target_function_on_all_population(Population& population) const;
+	void parallel_execute_target_function_on_all_population(Population& population,ThreadPool& thpool) const;
 	/////////////////////////////////////////////////////////////////
 	//gen random function
 	RandomFunction gen_random_func() const;
@@ -182,17 +185,17 @@ protected:
 	//Random engine
 	mutable Random 		  m_main_random;
 	mutable RandomList    m_population_random;
+	//multi threads
+	ThreadPool*			  m_thpool;
+	mutable PromiseList	  m_promises;
 	//serach space
 	DBPopulation          m_population;
-	PromiseList	          m_promises;
 	CostFunction          m_target_function;	
 	RuntimeOutput::SPtr   m_output;
 	//dataset
 	Individual::SPtr      m_default;
 	DataSetLoader*		  m_dataset_loader;
 	DataSetScalar	      m_dataset_batch;
-	//threads
-	ThreadPool*			  m_thpool;
 	//Execution Context
 	BestContext		      m_best_ctx;
 	RestartContext		  m_restart_ctx;
