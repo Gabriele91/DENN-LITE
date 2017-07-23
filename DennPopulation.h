@@ -68,6 +68,9 @@ namespace Denn
 		);
 		//size
 		size_t size() const;
+		//get
+		Population&       operator[]      (size_t i){ return m_pop_buffer[i]; }
+		const Population& operator[] const(size_t i){ return m_pop_buffer[i]; }
 		//current
 		Population& parents();
 		const Population& parents() const;
