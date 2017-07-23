@@ -72,14 +72,19 @@
     <ClCompile Include="TicksTime.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="job.csv" />
-    <None Include="job_bench.csv" />
-    <None Include="job_creator.py" />
-    <None Include="job_manager.py" />
-    <None Include="job_results_to_csv.py" />
+    <None Include="jobs\job.csv" />
+    <None Include="jobs\job_bench.csv" />
+    <None Include="jobs\job_JULY.csv" />
+    <None Include="job_manager\creator.py" />
+    <None Include="job_manager\creator_JULY.py" />
+    <None Include="job_manager\manager.py" />
+    <None Include="job_manager\__init__.py" />
     <None Include="makefile" />
-    <None Include="results.csv" />
+    <None Include="plot_out_2D.py" />
+    <None Include="plot_out_3D.py" />
+    <None Include="README.md" />
     <None Include="run_bench.sh" />
+    <None Include="windows_space_to_unix.py" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

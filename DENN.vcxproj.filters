@@ -22,6 +22,9 @@
     <Filter Include="File di risorse\tests">
       <UniqueIdentifier>{8fee7666-dbb8-4e29-b354-8a53b15d5f26}</UniqueIdentifier>
     </Filter>
+    <Filter Include="File di risorse\python\job_manager">
+      <UniqueIdentifier>{3bf566dd-bfd9-42ed-8018-2aa4ffd1b093}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Config.h">
@@ -175,29 +178,44 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="makefile">
-      <Filter>File di risorse</Filter>
-    </None>
-    <None Include="job_creator.py">
-      <Filter>File di risorse\python</Filter>
-    </None>
-    <None Include="job_manager.py">
-      <Filter>File di risorse\python</Filter>
-    </None>
-    <None Include="job_results_to_csv.py">
-      <Filter>File di risorse\python</Filter>
-    </None>
     <None Include="run_bench.sh">
       <Filter>File di risorse\shell</Filter>
     </None>
-    <None Include="job.csv">
+    <None Include="README.md">
+      <Filter>File di risorse</Filter>
+    </None>
+    <None Include="plot_out_2D.py">
+      <Filter>File di risorse\python</Filter>
+    </None>
+    <None Include="plot_out_3D.py">
+      <Filter>File di risorse\python</Filter>
+    </None>
+    <None Include="makefile">
+      <Filter>File di risorse\shell</Filter>
+    </None>
+    <None Include="windows_space_to_unix.py">
+      <Filter>File di risorse\python</Filter>
+    </None>
+    <None Include="jobs\job.csv">
       <Filter>File di risorse\tests</Filter>
     </None>
-    <None Include="job_bench.csv">
+    <None Include="jobs\job_bench.csv">
       <Filter>File di risorse\tests</Filter>
     </None>
-    <None Include="results.csv">
+    <None Include="jobs\job_JULY.csv">
       <Filter>File di risorse\tests</Filter>
+    </None>
+    <None Include="job_manager\__init__.py">
+      <Filter>File di risorse\python\job_manager</Filter>
+    </None>
+    <None Include="job_manager\creator.py">
+      <Filter>File di risorse\python\job_manager</Filter>
+    </None>
+    <None Include="job_manager\creator_JULY.py">
+      <Filter>File di risorse\python\job_manager</Filter>
+    </None>
+    <None Include="job_manager\manager.py">
+      <Filter>File di risorse\python\job_manager</Filter>
     </None>
   </ItemGroup>
 </Project>
