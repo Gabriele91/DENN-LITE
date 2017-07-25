@@ -146,5 +146,11 @@ namespace CostFunction
 		#endif
 	}
 
+	template < typename Matrix >
+	typename Matrix::Scalar inverse_accuracy(const Matrix& x, const Matrix& y)
+	{
+		using Scalar = typename Matrix::Scalar;
+		return Scalar(1.0) - accuracy<Matrix>(x,y);
+	}
 }
 }
