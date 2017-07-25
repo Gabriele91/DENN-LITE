@@ -55,8 +55,10 @@ void execute
 	//Function ptr
 	#if 1
 	auto cost_function = CostFunction::softmax_cross_entropy_with_logit< Matrix >;
-	#else
+	#elif 0
 	auto cost_function = CostFunction::softmax_cross_entropy< Matrix >;
+	#else
+	auto cost_function = CostFunction::inverse_accuracy< Matrix >;
 	#endif
 	////////////////////////////////////////////////////////////////////////////////////////////////
 
