@@ -13,8 +13,8 @@ namespace Denn
 	{
 	protected:
 		//attributes
-		const DennAlgorithm& m_algorithm;
 		std::ostream&        m_stream;
+		const DennAlgorithm& m_algorithm;
 
 	public:
 		using SPtr = std::shared_ptr<RuntimeOutput>;

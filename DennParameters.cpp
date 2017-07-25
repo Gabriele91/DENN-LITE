@@ -243,8 +243,10 @@ namespace Denn
                 std::transform(str_c_type.begin(),str_c_type.end(), str_c_type.begin(), ::tolower);
                 //test
                 if(!ActiveFunctionFactory::exists(str_c_type)) return false;
-                //push
+                //save
 				m_output_active_function = str_c_type;
+                //ok
+                return true;
             }
         }, 
         ParameterInfo{
