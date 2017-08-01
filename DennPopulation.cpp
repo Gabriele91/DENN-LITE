@@ -117,6 +117,14 @@ namespace Denn
 	{
 		return m_pop_buffer[0].size();
 	}
+	void DoubleBufferPopulation::resize(size_t new_np)
+	{
+		for (Population& population : m_pop_buffer)
+		{
+			//new size
+			population.resize(new_np);
+		}
+	}
 	//current
 	Population& DoubleBufferPopulation::parents()
 	{

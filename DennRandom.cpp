@@ -80,7 +80,7 @@ namespace Denn
 
 	size_t Random::RandomDeck::get_random_id(size_t target)
 	{
-		size_t j=m_random.uirand(m_k);
+		size_t j=m_random.index_rand(m_k);
 		size_t r=m_deck[j];
 		//reduce indices region
 		--m_k;
@@ -117,7 +117,7 @@ namespace Denn
 
 	size_t Random::RandomDeckRingSegment::get_random_id()
 	{
-		size_t j=m_random.uirand(m_k);
+		size_t j=m_random.index_rand(m_k);
 		size_t r=m_deck[j];
 		//reduce indices region
 		--m_k;

@@ -154,10 +154,23 @@ namespace Denn
 		ParameterInfo{
 			m_shade_h, "Size of archive of mu_f and mu_cr in SHADE",{ "--" + m_shade_h.name(),    "-shah" },
 			[this](Arguments& args) -> bool { m_shade_h = args.get_int();  return true; }
+		}, 
+
+		ParameterInfo{
+			m_min_np, "Minimum number of parents (L-SHADE)",{ "--" + m_min_np.name(),    "-mnp" },
+			[this](Arguments& args) -> bool { m_min_np = args.get_int(); return true; }
+		},
+		ParameterInfo{
+				m_max_nfe, "Maximum number of fitness evaluation (L-SHADE)",{ "--" + m_max_nfe.name(),  "-mnfe" },
+			[this](Arguments& args) -> bool { m_max_nfe = args.get_int(); return true; }
+		},
+		ParameterInfo{
+			m_mu_cr_terminal_value, "Terminal value of MU Cr (L-SHADE)",{ "--" + m_mu_cr_terminal_value.name(),  "-mcrtv" },
+			[this](Arguments& args) -> bool { m_mu_cr_terminal_value = args.get_double(); return true; }
 		},
 
 		ParameterInfo{
-			m_perc_of_best, "Percentage of best (Current P Best/NO SHADE)",{ "--" + m_perc_of_best.name(), "-pob", "-p" },
+			m_perc_of_best, "Percentage of best (Current P Best/NO [L-]SHADE)",{ "--" + m_perc_of_best.name(), "-pob", "-p" },
 			[this](Arguments& args) -> bool { m_perc_of_best = args.get_double();  return true; }
 		},	
 
