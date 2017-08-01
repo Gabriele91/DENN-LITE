@@ -20,8 +20,11 @@ namespace Denn
 	{
 		//alloc
 		if (!m_cmap) m_cmap = std::move(std::make_unique< std::map< std::string, ActiveFunction > >());
+		//find
+		auto it = m_cmap->find(name);
 		//add
-		m_cmap->operator[](name) = fun;
+		if (it == m_cmap->end()) m_cmap->insert({ name,fun });
+		else					 m_cmap->operator[](name) = fun;
 	}
 	std::string ActiveFunctionFactory::name_of(const ActiveFunction& fun)
 	{
