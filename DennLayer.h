@@ -13,11 +13,12 @@ namespace Denn
 		///////////////////////////////////////////////////////////////////////////
 		//EIGEN_MAKE_ALIGNED_OPERATOR_NEW	
 		///////////////////////////////////////////////////////////////////////////
-		virtual Layer::SPtr copy() const  				= 0;
-		virtual Matrix apply(const Matrix& input)       = 0;
-		virtual size_t size() const                     = 0;
-		virtual Matrix& operator[](size_t i)            = 0;
-		virtual const Matrix& operator[](size_t i) const= 0;
+		virtual Layer::SPtr copy() const  				                             = 0;
+		virtual Matrix apply(const Matrix& input)							         = 0;		
+		virtual Matrix backpropagate(const Matrix& last_output, const Matrix& input) = 0;
+		virtual size_t size() const											         = 0;
+		virtual Matrix& operator[](size_t i)								         = 0;
+		virtual const Matrix& operator[](size_t i) const						     = 0;
 		///////////////////////////////////////////////////////////////////////////
 		class Iterator 
 		{

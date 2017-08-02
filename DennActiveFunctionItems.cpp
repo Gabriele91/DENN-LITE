@@ -21,7 +21,7 @@ namespace Denn
 	template < typename Matrix >
 	Matrix& dx_linear(Matrix& inout_matrix)
 	{
-		inout_matrix = Matrix::Constant(inout_matrix.rows(), inout_matrix.cols(), 1.0);
+		inout_matrix.fill(1.0);
 		return inout_matrix;
 	}
 	REGISTERED_ACTIVE_FUNCTION("linear", linear<Matrix>, dx_linear<Matrix>)

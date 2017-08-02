@@ -47,6 +47,25 @@ namespace Denn
 		if (m_active_function) return m_active_function(layer_output);
 		else                   return layer_output;
 	}
+	Matrix PerceptronLayer::backpropagate(const Matrix& ff_output, const Matrix& back_input)
+	{
+		//error py component
+		Matrix derivate_f(back_input);
+		//derivate of active function
+		if (m_active_function.exists_function_derivate())
+			derivate_f = m_active_function.derive(derivate_f);
+		else 
+			derivate_f.fill(1.0);
+		//get delta
+		Matrix delta = derivate_f.cwiseProduct(ff_output);
+
+		//Matrix layer_output = (input * m_weights).rowwise() + RowVector(Eigen::Map<RowVector>(m_baias.data(), m_baias.cols()*m_baias.rows()));
+		Matrix layer_output = (input * m_weights).rowwise() + Eigen::Map<RowVector>(m_baias.data(), m_baias.cols()*m_baias.rows());
+		//Matrix layer_output = Eigen::Map<RowVector>(m_baias.data(), m_baias.cols()*m_baias.rows()) + (input * m_weights).rowwise();
+		//activation function?
+		if (m_active_function) return m_active_function(layer_output);
+		else                   return layer_output;
+	}
 	//////////////////////////////////////////////////
 	size_t PerceptronLayer::size() const
 	{
