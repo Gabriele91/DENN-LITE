@@ -37,6 +37,14 @@ public:
 	}
 	/////////////////////////////////////////////////////////////////////////
 	Matrix apply(const Matrix& input);
+	//execute 
+	bool backpropagation_with_sgd(
+		  std::function<Matrix(const Matrix& x, const Matrix& y)> loss_function
+		, const Matrix& input
+		, const Matrix& y
+		, const Scalar learn_rate    = Scalar(0.5)
+	    , const Scalar regular_param = Scalar(1.0)
+	);
 	/////////////////////////////////////////////////////////////////////////
 	size_t size() const;
 

@@ -67,8 +67,12 @@
     <ClCompile Include="DennRuntimeOutputItems.cpp" />
     <ClCompile Include="DennSerializaOutputFactory.cpp" />
     <ClCompile Include="DennSerializeOutputItems.cpp" />
-    <ClCompile Include="main.cpp" />
+    <ClCompile Include="main.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="DennRandom.cpp" />
+    <ClCompile Include="main_backpropagation.cpp" />
     <ClCompile Include="TicksTime.cpp" />
   </ItemGroup>
   <ItemGroup>

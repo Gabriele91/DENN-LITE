@@ -32,7 +32,9 @@ namespace Denn
 		virtual Layer::SPtr copy() const override;
 		//////////////////////////////////////////////////
 		virtual Matrix apply(const Matrix& input) override;
-		virtual Matrix backpropagate(const Matrix& last_output, const Matrix& input) override;
+		virtual Matrix              feedforward(const Matrix& input, Matrix& ff_out)			                                              override;
+		virtual Matrix              backpropagate_delta   (const Matrix& bp_delta, const Matrix& ff_out)                                      override;
+		virtual std::vector<Matrix> backpropagate_gradient(const Matrix& bp_delta, const Matrix& ff_out, size_t input_samples, Scalar lambda) override;
 		//////////////////////////////////////////////////
 		virtual size_t size() const override;		
 		virtual Matrix& operator[](size_t i) override;

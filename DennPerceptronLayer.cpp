@@ -40,31 +40,40 @@ namespace Denn
 	Matrix PerceptronLayer::apply(const Matrix& input) 
 	{
 		//get output
-		//Matrix layer_output = (input * m_weights).rowwise() + RowVector(Eigen::Map<RowVector>(m_baias.data(), m_baias.cols()*m_baias.rows()));
 		Matrix layer_output = (input * m_weights).rowwise() + Eigen::Map<RowVector>(m_baias.data(), m_baias.cols()*m_baias.rows());
-		//Matrix layer_output = Eigen::Map<RowVector>(m_baias.data(), m_baias.cols()*m_baias.rows()) + (input * m_weights).rowwise();
 		//activation function?
 		if (m_active_function) return m_active_function(layer_output);
 		else                   return layer_output;
 	}
-	Matrix PerceptronLayer::backpropagate(const Matrix& ff_output, const Matrix& back_input)
-	{
-		//error py component
-		Matrix derivate_f(back_input);
-		//derivate of active function
-		if (m_active_function.exists_function_derivate())
-			derivate_f = m_active_function.derive(derivate_f);
-		else 
-			derivate_f.fill(1.0);
-		//get delta
-		Matrix delta = derivate_f.cwiseProduct(ff_output);
-
-		//Matrix layer_output = (input * m_weights).rowwise() + RowVector(Eigen::Map<RowVector>(m_baias.data(), m_baias.cols()*m_baias.rows()));
-		Matrix layer_output = (input * m_weights).rowwise() + Eigen::Map<RowVector>(m_baias.data(), m_baias.cols()*m_baias.rows());
-		//Matrix layer_output = Eigen::Map<RowVector>(m_baias.data(), m_baias.cols()*m_baias.rows()) + (input * m_weights).rowwise();
+	Matrix PerceptronLayer::feedforward(const Matrix& input, Matrix& ff_out)
+	{		
+		//get output
+		ff_out = (input * m_weights).rowwise() + Eigen::Map<RowVector>(m_baias.data(), m_baias.cols()*m_baias.rows());
 		//activation function?
-		if (m_active_function) return m_active_function(layer_output);
-		else                   return layer_output;
+		if (m_active_function) return m_active_function(Matrix(ff_out));
+		else                   return ff_out;
+	}
+	Matrix PerceptronLayer::backpropagate_delta(const Matrix& bp_delta, const Matrix& ff_out)
+	{
+		//////////////////////////////////////////////////////////////////////
+		Matrix g(ff_out);
+		//derivate of active function
+		if (m_active_function.exists_function_derivate()) m_active_function.derive(g); // g := D(f(x))
+		else											  g.fill(1.0); //f(x) = x, g := D(f(x)) => 1.0
+		//////////////////////////////////////////////////////////////////////
+		//return (m_weights.transpose() * bp_delta).colwise().cwiseProduct(g);
+		//return g.asDiagonal() * (bp_delta * m_weights.transpose());
+		return (bp_delta * m_weights.transpose()).cwiseProduct(g);
+		//////////////////////////////////////////////////////////////////////
+	}
+	std::vector<Matrix> PerceptronLayer::backpropagate_gradient(const Matrix& bp_delta, const Matrix& ff_out, size_t input_samples, Scalar lambda)
+	{
+		// add regularization to weights, bias weights are not regularized
+		Matrix dEdW = (ff_out.transpose() * bp_delta + lambda*m_weights) / Scalar(input_samples);
+		//Matrix dEdW = ((lambda*m_weights).colwise() + bp_delta.transpose() * ff_out) / Scalar(input_samples);
+		Matrix dEdb =  (bp_delta.colwise().sum() / Scalar(input_samples));
+		//J = Scalar(0.5) * lambda * m_weights.array().square().sum() / Scalar(input_samples);
+		return std::vector<Matrix>{dEdW /* this[0] = w */, dEdb /* this[1] = b */};
 	}
 	//////////////////////////////////////////////////
 	size_t PerceptronLayer::size() const
@@ -73,13 +82,15 @@ namespace Denn
 	}
 	Matrix& PerceptronLayer::operator[](size_t i)
 	{
-		if (i & 0x1) return  m_baias;
-		else		 return  m_weights;
+		assert(i < 2);
+		if (i & 0x1) return  m_baias;  //1
+		else		 return  m_weights;//0
 	}
 	const Matrix& PerceptronLayer::operator[](size_t i) const
 	{
-		if (i & 0x1) return  m_baias;
-		else		 return  m_weights;
+		assert(i < 2);
+		if (i & 0x1) return  m_baias;  //1
+		else		 return  m_weights;//0
 	}
 	//////////////////////////////////////////////////
 }
