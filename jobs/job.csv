@@ -45,5 +45,5 @@ DENN-float -t 20000 -s 200 -np 400 -em SHADE -f 0.5 -cr 0.9 -jf 0.1 -jcr 0.1 -cm
 DENN-float -t 20000 -s 200 -np 400 -em SHADE -f 0.5 -cr 0.9 -jf 0.1 -jcr 0.1 -cmax 1.0 -cmin -1.0 -rmax 1.0 -rmin -1.0 -rc 10 -rd 0.001 -tp 16 -i ../DENN-dataset-samples/JULY_MNIST_1_270x200_1s.gz -o results/SHADE_MNIST_200_400_curr_p_best_hl0_run2.json -ro bench -co interm -m curr_p_best
 
 # BEST
-DENN-float -t 20000 -s 200 -np 200 -em SHADE -f 0.5 -cr 0.9 -jf 0.1 -jcr 0.1 -cmax 0.4 -cmin -0.4 -rmax 0.4 -rmin -0.4 -rc -1 -rd 0.001 -tp 16 -i ../DENN-dataset-samples/JULY_MNIST_1_270x200_1s.gz -o results/SHADE_MNIST_200_400_curr_p_best_hl0_run0.best.json -ro bench -co interm -m curr_p_best -shah 1000 —seed 20
+DENN-float -t 20000 -s 200 -np 200 -em SHADE -f 0.5 -cr 0.9 -jf 0.1 -jcr 0.1 -cmax 0.4 -cmin -0.4 -rmax 0.4 -rmin -0.4 -rc -1 -rd 0.001 -tp 16 -i ../DENN-dataset-samples/JULY_MNIST_1_270x200_1s.gz -o results/SHADE_MNIST_200_400_curr_p_best_hl0_run0.best.json -ro bench -co interm -m curr_p_best -shah 1000 --seed 20
 DENN-float -t 20000 -s 200 -np 200 -em SHADE -f 0.5 -cr 0.9 -jf 0.1 -jcr 0.1 -cmax 0.4 -cmin -0.4 -rmax 0.4 -rmin -0.4 -rc -1 -rd 0.001 -tp 16 -i ../DENN-dataset-samples/JULY_MNIST_1_270x200_1s.gz -o results/SHADE_MNIST_200_400_curr_p_best_hl0_run0.best.json -ro bench -co interm -m curr_p_best -shah 1000
