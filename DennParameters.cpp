@@ -55,7 +55,7 @@ namespace Denn
             [this](Arguments& args) -> bool { m_generations = args.get_int() ; return true; } 
         },
         ParameterInfo{ 
-            m_sub_gens, "Number of generation per batch", { "--sub_gens" + m_sub_gens.name(),    "-s"  }, 
+            m_sub_gens, "Number of generation per batch", { "--" + m_sub_gens.name(),    "-s"  }, 
             [this](Arguments& args) -> bool { m_sub_gens = args.get_int() ; return true; }
         },
         ParameterInfo{
