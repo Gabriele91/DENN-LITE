@@ -17,6 +17,8 @@ def pretty_cmd(cmd):
     for elm in cmd[1:]:
         if elm[0] == "-" and elm[1].isalpha():
             string += "\n+ {}".format(elm)
+        elif elm[0] == "-" and elm[1] == "-" and elm[2].isalpha():
+            string += "\n+ {}".format(elm)
         else:
             string += "\t{}".format(elm)
     return string
