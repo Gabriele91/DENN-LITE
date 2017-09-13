@@ -250,6 +250,7 @@ namespace Denn
                 output() << "[ACC_TEST:" << cut_digits(test_result) << "]";
             }
             output() << "[N_RESET:" << cut_digits(m_n_restart) << "]";
+            output() << "[TIME:" << (Denn::Time::get_time() - m_start_time) << "]";
         }
 
         virtual void clean_line()
