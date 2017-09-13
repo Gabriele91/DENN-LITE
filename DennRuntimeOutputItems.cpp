@@ -178,7 +178,7 @@ namespace Denn
             //clean line
             clean_line();
             //output
-            write_output(); 
+            write_output(true); 
             output() << std::endl;
         }
 
@@ -196,7 +196,7 @@ namespace Denn
             //clean line
             clean_line();
             //output
-            write_output(); 
+            write_output(true); 
             output() << std::endl;
         }
 
@@ -236,7 +236,7 @@ namespace Denn
         long   m_n_restart;
 
 
-        virtual void write_output()
+        virtual void write_output(bool execute_test = false)
         {
             //////////////////////////////////////////////////////////
             size_t n_sub_pass = *parameters().m_sub_gens;
@@ -244,7 +244,7 @@ namespace Denn
             ///////////////////////////////////////////////////////////
             output() << "|-[" << (m_n_pass) * n_sub_pass; 
             output() << "]->[ACC_VAL:" << cut_digits(validation) << "]";
-            if(*parameters().m_compute_test_per_pass)
+            if(execute_test && *parameters().m_compute_test_per_pass)
             {
                 Scalar test_result = m_algorithm.execute_test(*m_algorithm.best_context().m_best);
                 output() << "[ACC_TEST:" << cut_digits(test_result) << "]";
