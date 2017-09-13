@@ -50,8 +50,15 @@ namespace Denn
 		//get output
 		ff_out = (input * m_weights).rowwise() + Eigen::Map<RowVector>(m_baias.data(), m_baias.cols()*m_baias.rows());
 		//activation function?
-		if (m_active_function) return m_active_function(Matrix(ff_out));
-		else                   return ff_out;
+		if (m_active_function)
+		{
+			Matrix out_matrix(ff_out);
+			return m_active_function(out_matrix);
+		} 
+		else
+		{ 
+			return ff_out; 
+		}
 	}
 	Matrix PerceptronLayer::backpropagate_delta(const Matrix& bp_delta, const Matrix& ff_out)
 	{

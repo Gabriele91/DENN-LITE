@@ -2,9 +2,9 @@
 #include <ctime>
 #include <fstream>
 #include "Denn.h"
+#define DISABLE_MAIN_BACKPROPAGATION
 
-
-void execute
+static void execute
 (
 	const Denn::Parameters&     parameters
 	, Denn::DataSetLoader&        dataset
@@ -121,6 +121,7 @@ void execute
 	);
 }
 
+#ifndef DISABLE_MAIN_BACKPROPAGATION
 int main(int argc, const char** argv)
 {
 	////////////////////////////////////////////////////////////////////////////////////////////////
@@ -210,3 +211,4 @@ int main(int argc, const char** argv)
 
 	return 0;
 }
+#endif
