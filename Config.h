@@ -25,8 +25,10 @@
 //MSMACRO
 #if defined( _MSC_VER )
 	#define ASPACKED( __Declaration__ ) __pragma( pack(push, 1) ) __Declaration__ __pragma( pack(pop) )
+	#define operator_override
 #else 
 	#define ASPACKED( __Declaration__ ) __Declaration__ __attribute__((__packed__))
+	#define operator_override override
 #endif
 //alias
 namespace Denn

@@ -36,9 +36,9 @@ namespace Denn
 		virtual Matrix              backpropagate_delta   (const Matrix& bp_delta, const Matrix& ff_out)                                      override;
 		virtual std::vector<Matrix> backpropagate_gradient(const Matrix& bp_delta, const Matrix& ff_out, size_t input_samples, Scalar lambda) override;
 		//////////////////////////////////////////////////
-		virtual size_t size() const override;		
-		virtual Matrix& operator[](size_t i) override;
-		virtual const Matrix& operator[](size_t i) const;
+		virtual size_t size() const operator_override;		
+		virtual Matrix& operator[](size_t i) operator_override;
+		virtual const Matrix& operator[](size_t i) const operator_override;
 		//////////////////////////////////////////////////
 
 	protected:
