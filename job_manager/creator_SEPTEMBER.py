@@ -8,10 +8,10 @@ def main():
     OUTNAME = "{method}_{dataset_name}_{batch_size}_{batch_step}_{population_size}_{mutation}_hl{hl}_run{run}.json"
 
     DATASETS = [
-        (10, 2, "MAGIC"),
-        (41, 2, "QSAR"),
-        (128, 6, "GASS"),
-        # (784, 10, "MNIST")
+        # (10, 2, "MAGIC"),
+        # (41, 2, "QSAR"),
+        # (128, 6, "GASS"),
+        (784, 10, "MNIST")
     ]
 
     DATASETS_DICT = {
@@ -47,8 +47,8 @@ def main():
 
     METHODS = ["JDE"]
     MUTATIONS = [
-        # "rand/1",
-        "degl"
+        "rand/1",
+        # "degl"
     ]
     HLS = []
     BATCH_FACTORS = [ 
