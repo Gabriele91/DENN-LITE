@@ -6,8 +6,8 @@ SOURCES += main.cpp
 
 RESOURCES += qml.qrc
 
-release: DESTDIR = $$PWD/../Release/uidenn/
-debug:   DESTDIR = $$PWD/../Debug/uidenn/
+release: DESTDIR = $$PWD/../../Release/uidenn/
+debug:   DESTDIR = $$PWD/../../Debug/uidenn/
 
 OBJECTS_DIR = $$DESTDIR/.obj
 MOC_DIR = $$DESTDIR/.moc
@@ -25,20 +25,20 @@ macx {
 unix {
     denn_float.CONFIG += recursive
     denn_float.target = denn_float_executable
-    denn_float.commands = make -C $$PWD/../ release SCALAR=FLOAT
-    denn_float.files = $$PWD/../Release/DENN-float
+    denn_float.commands = make -C $$PWD/../../ release SCALAR=FLOAT
+    denn_float.files = $$PWD/../../Release/DENN-float
     denn_float.path = $${OUTPUT_TARGET}
 
     denn_double.CONFIG += recursive
     denn_double.target = denn_double_executable
-    denn_double.commands = make -C $$PWD/../ release SCALAR=DOUBLE
-    denn_double.files = $$PWD/../Release/DENN-double
+    denn_double.commands = make -C $$PWD/../../ release SCALAR=DOUBLE
+    denn_double.files = $$PWD/../../Release/DENN-double
     denn_double.path = $${OUTPUT_TARGET}
 
     denn_longdouble.CONFIG += recursive
     denn_longdouble.target = denn_longdouble_executable
-    denn_longdouble.commands = make -C $$PWD/../ release SCALAR=LONG_DOUBLE
-    denn_longdouble.files = $$PWD/../Release/DENN-long-double
+    denn_longdouble.commands = make -C $$PWD/../../ release SCALAR=LONG_DOUBLE
+    denn_longdouble.files = $$PWD/../../Release/DENN-long-double
     denn_longdouble.path = $${OUTPUT_TARGET}
 
     #add target
@@ -76,27 +76,27 @@ macx {
 win32 {
 
     build_denn_float = \
-            MSBuild ../DENN.sln \
+            MSBuild ../../DENN.sln \
            /p:Configuration=Release \
            /p:DefineConstants=USE_FLOAT \
            /p:OutDir=\"$$DESTDIR\" \
-           /p:IntermediateOutputPath=\"$$PWD/Release/Release-float/\" \
+           /p:IntermediateOutputPath=\"$$PWD/../../Release/Release-float/\" \
            /p:AssemblyName=\"DENN-float\"
 
     build_denn_double = \
-            MSBuild ../DENN.sln \
+            MSBuild ../../DENN.sln \
            /p:Configuration=Release \
            /p:DefineConstants=USE_DOUBLE \
            /p:OutDir=\"$$DESTDIR\" \
-           /p:IntermediateOutputPath=\"$$PWD/Release/Release-double/\" \
+           /p:IntermediateOutputPath=\"$$PWD/../../Release/Release-double/\" \
            /p:AssemblyName=\"DENN-double\"
 
     build_denn_long_double = \
-            MSBuild ../DENN.sln \
+            MSBuild ../../DENN.sln \
            /p:Configuration=Release \
            /p:DefineConstants=USE_LONG_DOUBLE \
            /p:OutDir=\"$$DESTDIR\" \
-           /p:IntermediateOutputPath=\"$$PWD/Release/Release-long-double/\" \
+           /p:IntermediateOutputPath=\"$$PWD/../../Release/Release-long-double/\" \
            /p:AssemblyName=\"DENN-long-double\"
 
     system($$build_denn_float)

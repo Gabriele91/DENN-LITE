@@ -39,7 +39,7 @@ def main():
         time_sum = 0
         for idx, task in enumerate(jobs, 1):
             if len(task) != 0 and task[0] != "#":
-                task[0] = path.join("Release", task[0])
+                task[0] = path.join(pardir, "Release", task[0])
                 logging.info("Execute task {}/{} -> \"{}\"".format(
                     idx,
                     len(jobs),

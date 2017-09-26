@@ -16,32 +16,32 @@ def main():
 
     DATASETS_DICT = {
         "MAGIC": {
-            10: "../DENN-dataset-samples/JULY_MAGIC_1_1521x10_1s.gz",
-            20: "../DENN-dataset-samples/JULY_MAGIC_1_760x20_1s.gz",
-            40: "../DENN-dataset-samples/JULY_MAGIC_1_380x40_1s.gz",
-            60: "../DENN-dataset-samples/JULY_MAGIC_1_253x60_1s.gz",
-            100: "../DENN-dataset-samples/JULY_MAGIC_1_152x100_1s.gz"
+            10: "../../DENN-dataset-samples/JULY_MAGIC_1_1521x10_1s.gz",
+            20: "../../DENN-dataset-samples/JULY_MAGIC_1_760x20_1s.gz",
+            40: "../../DENN-dataset-samples/JULY_MAGIC_1_380x40_1s.gz",
+            60: "../../DENN-dataset-samples/JULY_MAGIC_1_253x60_1s.gz",
+            100: "../../DENN-dataset-samples/JULY_MAGIC_1_152x100_1s.gz"
         },
         "QSAR": {
-            10: "../DENN-dataset-samples/JULY_QSAR_1_84x10_1s.gz",
-            20: "../DENN-dataset-samples/JULY_QSAR_1_42x20_1s.gz",
-            40: "../DENN-dataset-samples/JULY_QSAR_1_21x40_1s.gz",
-            60: "../DENN-dataset-samples/JULY_QSAR_1_14x60_1s.gz",
-            100: "../DENN-dataset-samples/JULY_QSAR_1_8x100_1s.gz"
+            10: "../../DENN-dataset-samples/JULY_QSAR_1_84x10_1s.gz",
+            20: "../../DENN-dataset-samples/JULY_QSAR_1_42x20_1s.gz",
+            40: "../../DENN-dataset-samples/JULY_QSAR_1_21x40_1s.gz",
+            60: "../../DENN-dataset-samples/JULY_QSAR_1_14x60_1s.gz",
+            100: "../../DENN-dataset-samples/JULY_QSAR_1_8x100_1s.gz"
         },
         "GASS": {
-            30: "../DENN-dataset-samples/JULY_GasSensorArrayDrift_1_370x30_1s.gz",
-            60: "../DENN-dataset-samples/JULY_GasSensorArrayDrift_1_185x60_1s.gz",
-            120: "../DENN-dataset-samples/JULY_GasSensorArrayDrift_1_92x120_1s.gz",
-            180: "../DENN-dataset-samples/JULY_GasSensorArrayDrift_1_61x180_1s.gz",
-            300: "../DENN-dataset-samples/JULY_GasSensorArrayDrift_1_37x300_1s.gz"
+            30: "../../DENN-dataset-samples/JULY_GasSensorArrayDrift_1_370x30_1s.gz",
+            60: "../../DENN-dataset-samples/JULY_GasSensorArrayDrift_1_185x60_1s.gz",
+            120: "../../DENN-dataset-samples/JULY_GasSensorArrayDrift_1_92x120_1s.gz",
+            180: "../../DENN-dataset-samples/JULY_GasSensorArrayDrift_1_61x180_1s.gz",
+            300: "../../DENN-dataset-samples/JULY_GasSensorArrayDrift_1_37x300_1s.gz"
         },
         "MNIST": {
-            50: "../DENN-dataset-samples/JULY_MNIST_1_1080x50_1s.gz",
-            100: "../DENN-dataset-samples/JULY_MNIST_1_540x100_1s.gz",
-            200: "../DENN-dataset-samples/JULY_MNIST_1_270x200_1s.gz",
-            300: "../DENN-dataset-samples/JULY_MNIST_1_180x300_1s.gz",
-            500: "../DENN-dataset-samples/JULY_MNIST_1_108x500_1s.gz"
+            50: "../../DENN-dataset-samples/JULY_MNIST_1_1080x50_1s.gz",
+            100: "../../DENN-dataset-samples/JULY_MNIST_1_540x100_1s.gz",
+            200: "../../DENN-dataset-samples/JULY_MNIST_1_270x200_1s.gz",
+            300: "../../DENN-dataset-samples/JULY_MNIST_1_180x300_1s.gz",
+            500: "../../DENN-dataset-samples/JULY_MNIST_1_108x500_1s.gz"
         }
     }
 

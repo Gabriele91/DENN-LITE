@@ -10,10 +10,10 @@ def main():
     OUTNAME_JADE = "JADE_{dataset_name}_{total_step}_{batch_step}_{population_size}_{archive_size}_{crossover}_{clamp}.json"
 
     DATASETS = [
-        "../DENN-dataset-samples/JULY_MNIST_0_540x100_1s.gz",
-        "../DENN-dataset-samples/JULY_MNIST_1_540x100_1s.gz",
-        "../DENN-dataset-samples/JULY_GasSensorArrayDrift_0_185x60_1s.gz",
-        "../DENN-dataset-samples/JULY_GasSensorArrayDrift_1_185x60_1s.gz"
+        "../../DENN-dataset-samples/JULY_MNIST_0_540x100_1s.gz",
+        "../../DENN-dataset-samples/JULY_MNIST_1_540x100_1s.gz",
+        "../../DENN-dataset-samples/JULY_GasSensorArrayDrift_0_185x60_1s.gz",
+        "../../DENN-dataset-samples/JULY_GasSensorArrayDrift_1_185x60_1s.gz"
     ]
     DATASET_NAMES = [
         "MNIST_0",

@@ -5,8 +5,8 @@ TOP           ?=$(shell pwd)
 USE_ASM_JS    ?=no
 #program name
 S_DIR_EMSCRIPTEN  = $(TOP)
-S_DIR          = $(TOP)/../
-S_INC          = $(TOP)/../
+S_DIR          = $(TOP)/../source
+S_INC          = $(TOP)/../include
 O_DEBUG_DIR    = $(TOP)/Debug/obj
 O_RELEASE_DIR  = $(TOP)/Release/obj
 O_DEBUG_PROG   = $(TOP)/DENN.js
@@ -16,7 +16,11 @@ O_RELEASE_PROG = $(TOP)/DENN.js
 DIPS_INCLUDE = $(TOP)/../dips/include/
 
 # C++ files
-SOURCE_FILES = $(S_DIR_EMSCRIPTEN)/main_web.cpp $(S_DIR)/TicksTime.cpp $(S_DIR)/RandomIndices.cpp
+SOURCE_FILES = $(S_DIR_EMSCRIPTEN)/main_web.cpp $(wildcard $(S_DIR)/*.cpp)
+# remove default main
+SOURCE_FILES = $(filter-out $(S_DIR)/main.cpp, $(SRC_FILES))
+SOURCE_FILES = $(filter-out $(S_DIR)/main_backpropagation.cpp, $(SRC_FILES))
+# C++ objects
 SOURCE_DEBUG_OBJS = $(addprefix $(O_DEBUG_DIR)/,$(notdir $(SOURCE_FILES:.cpp=.o)))
 SOURCE_RELEASE_OBJS = $(addprefix $(O_RELEASE_DIR)/,$(notdir $(SOURCE_FILES:.cpp=.o)))
 
@@ -109,6 +113,10 @@ show_release_flags:
 	$(call colorecho,$(COLOR_YELLOW),"[ Release flags: $(C_FLAGS) $(CC_FLAGS) $(RELEASE_FLAGS) ]")
 
 $(O_DEBUG_DIR)/%.o: $(S_DIR)/%.cpp
+	$(call colorecho,$(COLOR_GREEN),"[ Make debug object: $(@) ]")
+	@$(COMPILER) $(C_FLAGS) $(CC_FLAGS) $(DEBUG_FLAGS) -c $< -o $@
+
+$(O_DEBUG_DIR)/%.o: $(S_DIR_EMSCRIPTEN)/%.cpp
 	$(call colorecho,$(COLOR_GREEN),"[ Make debug object: $(@) ]")
 	@$(COMPILER) $(C_FLAGS) $(CC_FLAGS) $(DEBUG_FLAGS) -c $< -o $@
 
