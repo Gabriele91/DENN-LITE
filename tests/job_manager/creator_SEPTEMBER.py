@@ -3,7 +3,7 @@
 def main():
     EXECUTABLE = "DENN-float"
 
-    CMD = "{exe} -t 20000 -s {batch_step} -np {population_size} -f 0.5 -cr 0.9 -cmax {cmax} -cmin {cmin} -rmax {rmax} -rmin {rmin} -rc 10 -rd 0.001 -tp 17 -i {dataset} -o results/{outname} -co bin -m {mutation} -em {method} --compute_test_per_pass no -ro bench"
+    CMD = "{exe} -t 20000 -s {batch_step} -np {population_size} -f 0.5 -cr 0.9 -cmax {cmax} -cmin {cmin} -rmax {rmax} -rmin {rmin} -rc -1 -rd 0.001 -tp 17 -i {dataset} -o results/{outname} -co bin -m {mutation} -em {method} --compute_test_per_pass no -ro bench"
 
     OUTNAME = "{method}_{dataset_name}_{batch_size}_{batch_step}_{population_size}_{mutation}_hl{hl}_run{run}.json"
 
