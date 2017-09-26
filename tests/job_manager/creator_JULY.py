@@ -8,21 +8,21 @@ def main():
     OUTNAME = "{method}_{dataset_name}_{batch_step}_{population_size}_{mutation}_hl{hl}_run{run}.json"
 
     DATASETS = [
-        (10, 10, "MAGIC", "../DENN-dataset-samples/JULY_MAGIC_1_1521x10_1s.gz"),
-        (10, 20, "MAGIC", "../DENN-dataset-samples/JULY_MAGIC_1_760x20_1s.gz"),
-        (10, 40, "MAGIC", "../DENN-dataset-samples/JULY_MAGIC_1_380x40_1s.gz"),
-        (41, 10, "QSAR", "../DENN-dataset-samples/JULY_QSAR_1_84x10_1s.gz"),
-        (41, 20, "QSAR", "../DENN-dataset-samples/JULY_QSAR_1_42x20_1s.gz"),
-        (41, 40, "QSAR", "../DENN-dataset-samples/JULY_QSAR_1_21x40_1s.gz"),
-        (19, 10, "BANK", "../DENN-dataset-samples/JULY_BANK_1_3707x10_1s.gz"),
-        (19, 20, "BANK", "../DENN-dataset-samples/JULY_BANK_1_1853x20_1s.gz"),
-        (19, 40, "BANK", "../DENN-dataset-samples/JULY_BANK_1_926x40_1s.gz"),
-        (128, 30, "GASS", "../DENN-dataset-samples/JULY_GasSensorArrayDrift_1_370x30_1s.gz"),
-        (128, 60, "GASS", "../DENN-dataset-samples/JULY_GasSensorArrayDrift_1_185x60_1s.gz"),
-        (128, 120, "GASS", "../DENN-dataset-samples/JULY_GasSensorArrayDrift_1_92x120_1s.gz"),
-        (784, 50, "MNIST", "../DENN-dataset-samples/JULY_MNIST_1_1080x50_1s.gz"),
-        (784, 100, "MNIST", "../DENN-dataset-samples/JULY_MNIST_1_540x100_1s.gz"),
-        (784, 200, "MNIST", "../DENN-dataset-samples/JULY_MNIST_1_270x200_1s.gz")
+        (10, 10, "MAGIC", "../../DENN-dataset-samples/JULY_MAGIC_1_1521x10_1s.gz"),
+        (10, 20, "MAGIC", "../../DENN-dataset-samples/JULY_MAGIC_1_760x20_1s.gz"),
+        (10, 40, "MAGIC", "../../DENN-dataset-samples/JULY_MAGIC_1_380x40_1s.gz"),
+        (41, 10, "QSAR", "../../DENN-dataset-samples/JULY_QSAR_1_84x10_1s.gz"),
+        (41, 20, "QSAR", "../../DENN-dataset-samples/JULY_QSAR_1_42x20_1s.gz"),
+        (41, 40, "QSAR", "../../DENN-dataset-samples/JULY_QSAR_1_21x40_1s.gz"),
+        (19, 10, "BANK", "../../DENN-dataset-samples/JULY_BANK_1_3707x10_1s.gz"),
+        (19, 20, "BANK", "../../DENN-dataset-samples/JULY_BANK_1_1853x20_1s.gz"),
+        (19, 40, "BANK", "../../DENN-dataset-samples/JULY_BANK_1_926x40_1s.gz"),
+        (128, 30, "GASS", "../../DENN-dataset-samples/JULY_GasSensorArrayDrift_1_370x30_1s.gz"),
+        (128, 60, "GASS", "../../DENN-dataset-samples/JULY_GasSensorArrayDrift_1_185x60_1s.gz"),
+        (128, 120, "GASS", "../../DENN-dataset-samples/JULY_GasSensorArrayDrift_1_92x120_1s.gz"),
+        (784, 50, "MNIST", "../../DENN-dataset-samples/JULY_MNIST_1_1080x50_1s.gz"),
+        (784, 100, "MNIST", "../../DENN-dataset-samples/JULY_MNIST_1_540x100_1s.gz"),
+        (784, 200, "MNIST", "../../DENN-dataset-samples/JULY_MNIST_1_270x200_1s.gz")
     ]
 
     METHODS = ["DE", "JDE"]
