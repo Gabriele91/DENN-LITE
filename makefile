@@ -13,8 +13,8 @@ ifeq ($(HAVE_TERM),dumb)
 	HAVE_TERM = none
 endif
 #program name
-S_DIR  = $(TOP)/
-S_INC  = $(TOP)/
+S_DIR  = $(TOP)/source/
+S_INC  = $(TOP)/include/
 
 #global include
 DIPS_INCLUDE = $(TOP)/dips/include/
@@ -27,7 +27,7 @@ SOURCE_RELEASE_OBJS = $(addprefix $(O_RELEASE_DIR)/,$(notdir $(SOURCE_FILES:.cpp
 # C FLAGS
 C_FLAGS = -fPIC -D_FORCE_INLINES
 # CPP FLAGS
-CC_FLAGS = -std=c++14 -I $(DIPS_INCLUDE)
+CC_FLAGS = -std=c++14 -I $(DIPS_INCLUDE) -I $(S_INC)
 # RELEASE_FLAGS
 RELEASE_FLAGS = -O3
 # DEBUG_FLAGS
