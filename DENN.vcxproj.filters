@@ -27,197 +27,197 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Config.h">
+    <ClInclude Include="include\Config.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="IOFileWrapper.h">
+    <ClInclude Include="include\IOFileWrapper.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="TicksTime.h">
+    <ClInclude Include="include\TicksTime.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="ThreadPool.h">
+    <ClInclude Include="include\ThreadPool.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="DennAlgorithm.h">
+    <ClInclude Include="include\DennAlgorithm.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="DennParameters.h">
+    <ClInclude Include="include\DennParameters.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="DennPopulation.h">
+    <ClInclude Include="include\DennPopulation.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="DennCrossover.h">
+    <ClInclude Include="include\DennCrossover.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="DennDataSet.h">
+    <ClInclude Include="include\DennDataSet.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="DennMutation.h">
+    <ClInclude Include="include\DennMutation.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="DennRuntimeOutput.h">
+    <ClInclude Include="include\DennRuntimeOutput.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="DennIndividual.h">
+    <ClInclude Include="include\DennIndividual.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="DennDatasetLoader.h">
+    <ClInclude Include="include\DennDatasetLoader.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="DennRandom.h">
+    <ClInclude Include="include\DennRandom.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="DennEvolutionMethod.h">
+    <ClInclude Include="include\DennEvolutionMethod.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="DennVariant.h">
+    <ClInclude Include="include\DennVariant.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="DennSerializeOutput.h">
+    <ClInclude Include="include\DennSerializeOutput.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="DennFilesystem.h">
+    <ClInclude Include="include\DennFilesystem.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="Denn.h">
+    <ClInclude Include="include\Denn.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="DennActiveFunction.h">
+    <ClInclude Include="include\DennActiveFunction.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="DennConstants.h">
+    <ClInclude Include="include\DennConstants.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="DennCostFunction.h">
+    <ClInclude Include="include\DennCostFunction.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="DennLayer.h">
+    <ClInclude Include="include\DennLayer.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="DennNeuralNetwork.h">
+    <ClInclude Include="include\DennNeuralNetwork.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="DennPerceptronLayer.h">
+    <ClInclude Include="include\DennPerceptronLayer.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
-    <ClInclude Include="DennPointFunction.h">
+    <ClInclude Include="include\DennPointFunction.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="TicksTime.cpp">
+    <ClCompile Include="source\TicksTime.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="DennIndividual.cpp">
+    <ClCompile Include="source\DennIndividual.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="DennPopulation.cpp">
+    <ClCompile Include="source\DennPopulation.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="DennAlgorithm.cpp">
+    <ClCompile Include="source\DennAlgorithm.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="DennCrossoverItems.cpp">
+    <ClCompile Include="source\DennCrossoverItems.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="DennCrossoverFactory.cpp">
+    <ClCompile Include="source\DennCrossoverFactory.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="DennMutationFactory.cpp">
+    <ClCompile Include="source\DennMutationFactory.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="DennMutationItems.cpp">
+    <ClCompile Include="source\DennMutationItems.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="DennParameters.cpp">
+    <ClCompile Include="source\DennParameters.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="DennRandom.cpp">
+    <ClCompile Include="source\DennRandom.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="DennEvolutionMethodFactory.cpp">
+    <ClCompile Include="source\DennEvolutionMethodFactory.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="DennEvolutionMethodItems.cpp">
+    <ClCompile Include="source\DennEvolutionMethodItems.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="DennFilesystem.cpp">
+    <ClCompile Include="source\DennFilesystem.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="DennRuntimeOutputFactory.cpp">
+    <ClCompile Include="source\DennRuntimeOutputFactory.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="DennRuntimeOutputItems.cpp">
+    <ClCompile Include="source\DennRuntimeOutputItems.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="DennSerializaOutputFactory.cpp">
+    <ClCompile Include="source\DennSerializaOutputFactory.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="DennSerializeOutputItems.cpp">
+    <ClCompile Include="source\DennSerializeOutputItems.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="DennActiveFunctionFactory.cpp">
+    <ClCompile Include="source\DennActiveFunctionFactory.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="DennActiveFunctionItems.cpp">
+    <ClCompile Include="source\DennActiveFunctionItems.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="DennLayer.cpp">
+    <ClCompile Include="source\DennLayer.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="DennNeuralNetwork.cpp">
+    <ClCompile Include="source\DennNeuralNetwork.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="DennPerceptronLayer.cpp">
+    <ClCompile Include="source\DennPerceptronLayer.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="main_backpropagation.cpp">
+    <ClCompile Include="source\main_backpropagation.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="source\main.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="run_bench.sh">
+    <None Include="tests\run_bench.sh">
       <Filter>File di risorse\shell</Filter>
     </None>
     <None Include="README.md">
       <Filter>File di risorse</Filter>
     </None>
-    <None Include="plot_out_2D.py">
+    <None Include="tests\plot_out_2D.py">
       <Filter>File di risorse\python</Filter>
     </None>
-    <None Include="plot_out_3D.py">
+    <None Include="tests\plot_out_3D.py">
       <Filter>File di risorse\python</Filter>
     </None>
     <None Include="makefile">
       <Filter>File di risorse\shell</Filter>
     </None>
-    <None Include="windows_space_to_unix.py">
+    <None Include="tests\windows_space_to_unix.py">
       <Filter>File di risorse\python</Filter>
     </None>
-    <None Include="jobs\job.csv">
+    <None Include="tests\jobs\job.csv">
       <Filter>File di risorse\tests</Filter>
     </None>
-    <None Include="jobs\job_bench.csv">
+    <None Include="tests\jobs\job_bench.csv">
       <Filter>File di risorse\tests</Filter>
     </None>
-    <None Include="jobs\job_JULY.csv">
+    <None Include="tests\jobs\job_JULY.csv">
       <Filter>File di risorse\tests</Filter>
     </None>
-    <None Include="job_manager\__init__.py">
+    <None Include="tests\job_manager\__init__.py">
       <Filter>File di risorse\python\job_manager</Filter>
     </None>
-    <None Include="job_manager\creator.py">
+    <None Include="tests\job_manager\creator.py">
       <Filter>File di risorse\python\job_manager</Filter>
     </None>
-    <None Include="job_manager\creator_JULY.py">
+    <None Include="tests\job_manager\creator_JULY.py">
       <Filter>File di risorse\python\job_manager</Filter>
     </None>
-    <None Include="job_manager\manager.py">
+    <None Include="tests\job_manager\manager.py">
       <Filter>File di risorse\python\job_manager</Filter>
     </None>
   </ItemGroup>

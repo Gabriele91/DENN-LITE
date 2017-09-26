@@ -19,76 +19,76 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Config.h" />
-    <ClInclude Include="Denn.h" />
-    <ClInclude Include="DennActiveFunction.h" />
-    <ClInclude Include="DennConstants.h" />
-    <ClInclude Include="DennCostFunction.h" />
-    <ClInclude Include="DennDatasetLoader.h" />
-    <ClInclude Include="DennAlgorithm.h" />
-    <ClInclude Include="DennCrossover.h" />
-    <ClInclude Include="DennDataSet.h" />
-    <ClInclude Include="DennEvolutionMethod.h" />
-    <ClInclude Include="DennFilesystem.h" />
-    <ClInclude Include="DennIndividual.h" />
-    <ClInclude Include="DennLayer.h" />
-    <ClInclude Include="DennMutation.h" />
-    <ClInclude Include="DennNeuralNetwork.h" />
-    <ClInclude Include="DennParameters.h" />
-    <ClInclude Include="DennPerceptronLayer.h" />
-    <ClInclude Include="DennPointFunction.h" />
-    <ClInclude Include="DennPopulation.h" />
-    <ClInclude Include="DennRuntimeOutput.h" />
-    <ClInclude Include="DennSerializeOutput.h" />
-    <ClInclude Include="DennVariant.h" />
-    <ClInclude Include="IOFileWrapper.h" />
-    <ClInclude Include="DennRandom.h" />
-    <ClInclude Include="ThreadPool.h" />
-    <ClInclude Include="TicksTime.h" />
+    <ClInclude Include="include\Config.h" />
+    <ClInclude Include="include\Denn.h" />
+    <ClInclude Include="include\DennActiveFunction.h" />
+    <ClInclude Include="include\DennConstants.h" />
+    <ClInclude Include="include\DennCostFunction.h" />
+    <ClInclude Include="include\DennDatasetLoader.h" />
+    <ClInclude Include="include\DennAlgorithm.h" />
+    <ClInclude Include="include\DennCrossover.h" />
+    <ClInclude Include="include\DennDataSet.h" />
+    <ClInclude Include="include\DennEvolutionMethod.h" />
+    <ClInclude Include="include\DennFilesystem.h" />
+    <ClInclude Include="include\DennIndividual.h" />
+    <ClInclude Include="include\DennLayer.h" />
+    <ClInclude Include="include\DennMutation.h" />
+    <ClInclude Include="include\DennNeuralNetwork.h" />
+    <ClInclude Include="include\DennParameters.h" />
+    <ClInclude Include="include\DennPerceptronLayer.h" />
+    <ClInclude Include="include\DennPointFunction.h" />
+    <ClInclude Include="include\DennPopulation.h" />
+    <ClInclude Include="include\DennRuntimeOutput.h" />
+    <ClInclude Include="include\DennSerializeOutput.h" />
+    <ClInclude Include="include\DennVariant.h" />
+    <ClInclude Include="include\IOFileWrapper.h" />
+    <ClInclude Include="include\DennRandom.h" />
+    <ClInclude Include="include\ThreadPool.h" />
+    <ClInclude Include="include\TicksTime.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="DennActiveFunctionFactory.cpp" />
-    <ClCompile Include="DennActiveFunctionItems.cpp" />
-    <ClCompile Include="DennAlgorithm.cpp" />
-    <ClCompile Include="DennCrossoverFactory.cpp" />
-    <ClCompile Include="DennCrossoverItems.cpp" />
-    <ClCompile Include="DennEvolutionMethodFactory.cpp" />
-    <ClCompile Include="DennEvolutionMethodItems.cpp" />
-    <ClCompile Include="DennFilesystem.cpp" />
-    <ClCompile Include="DennIndividual.cpp" />
-    <ClCompile Include="DennLayer.cpp" />
-    <ClCompile Include="DennMutationFactory.cpp" />
-    <ClCompile Include="DennMutationItems.cpp" />
-    <ClCompile Include="DennNeuralNetwork.cpp" />
-    <ClCompile Include="DennParameters.cpp" />
-    <ClCompile Include="DennPerceptronLayer.cpp" />
-    <ClCompile Include="DennPopulation.cpp" />
-    <ClCompile Include="DennRuntimeOutputFactory.cpp" />
-    <ClCompile Include="DennRuntimeOutputItems.cpp" />
-    <ClCompile Include="DennSerializaOutputFactory.cpp" />
-    <ClCompile Include="DennSerializeOutputItems.cpp" />
-    <ClCompile Include="main.cpp">
+    <ClCompile Include="source\DennActiveFunctionFactory.cpp" />
+    <ClCompile Include="source\DennActiveFunctionItems.cpp" />
+    <ClCompile Include="source\DennAlgorithm.cpp" />
+    <ClCompile Include="source\DennCrossoverFactory.cpp" />
+    <ClCompile Include="source\DennCrossoverItems.cpp" />
+    <ClCompile Include="source\DennEvolutionMethodFactory.cpp" />
+    <ClCompile Include="source\DennEvolutionMethodItems.cpp" />
+    <ClCompile Include="source\DennFilesystem.cpp" />
+    <ClCompile Include="source\DennIndividual.cpp" />
+    <ClCompile Include="source\DennLayer.cpp" />
+    <ClCompile Include="source\DennMutationFactory.cpp" />
+    <ClCompile Include="source\DennMutationItems.cpp" />
+    <ClCompile Include="source\DennNeuralNetwork.cpp" />
+    <ClCompile Include="source\DennParameters.cpp" />
+    <ClCompile Include="source\DennPerceptronLayer.cpp" />
+    <ClCompile Include="source\DennPopulation.cpp" />
+    <ClCompile Include="source\DennRuntimeOutputFactory.cpp" />
+    <ClCompile Include="source\DennRuntimeOutputItems.cpp" />
+    <ClCompile Include="source\DennSerializaOutputFactory.cpp" />
+    <ClCompile Include="source\DennSerializeOutputItems.cpp" />
+    <ClCompile Include="source\main.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
-    <ClCompile Include="DennRandom.cpp" />
-    <ClCompile Include="main_backpropagation.cpp" />
-    <ClCompile Include="TicksTime.cpp" />
+    <ClCompile Include="source\DennRandom.cpp" />
+    <ClCompile Include="source\main_backpropagation.cpp" />
+    <ClCompile Include="source\TicksTime.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="jobs\job.csv" />
-    <None Include="jobs\job_bench.csv" />
-    <None Include="jobs\job_JULY.csv" />
-    <None Include="job_manager\creator.py" />
-    <None Include="job_manager\creator_JULY.py" />
-    <None Include="job_manager\manager.py" />
-    <None Include="job_manager\__init__.py" />
+    <None Include="tests\jobs\job.csv" />
+    <None Include="tests\jobs\job_bench.csv" />
+    <None Include="tests\jobs\job_JULY.csv" />
+    <None Include="tests\job_manager\creator.py" />
+    <None Include="tests\job_manager\creator_JULY.py" />
+    <None Include="tests\job_manager\manager.py" />
+    <None Include="tests\job_manager\__init__.py" />
     <None Include="makefile" />
-    <None Include="plot_out_2D.py" />
-    <None Include="plot_out_3D.py" />
+    <None Include="tests\plot_out_2D.py" />
+    <None Include="tests\plot_out_3D.py" />
     <None Include="README.md" />
-    <None Include="run_bench.sh" />
-    <None Include="windows_space_to_unix.py" />
+    <None Include="tests\run_bench.sh" />
+    <None Include="tests\windows_space_to_unix.py" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>
