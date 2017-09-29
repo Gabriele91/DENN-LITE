@@ -40,7 +40,8 @@ namespace Denn
 		template < typename ScalarType = double >
 		inline ScalarType dx_sigmoid(const ScalarType& a)
 		{
-			return sigmoid(a) * (ScalarType(1.0) - sigmoid(a));
+            ScalarType sigmoid_a = sigmoid(a);
+            return sigmoid_a * (ScalarType(1.0) - sigmoid_a);
 		}
 
 		template < typename ScalarType = double >

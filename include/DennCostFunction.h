@@ -38,7 +38,22 @@ namespace CostFunction
 		Matrix log_y = y.unaryExpr(&safe_log<typename Matrix::Scalar>);
 		return -(x.array() * log_y.array()).sum() / (typename Matrix::Scalar)y.rows();
 	}
-
+    
+    template < typename Matrix >
+    Matrix cross_entropy_logistic_by_rows (const Matrix& labels, const Matrix& predict)
+    {
+        using Scalar = typename Matrix::Scalar ;
+        Matrix evalout(labels.rows(),labels.cols());
+        for(typename Matrix::Index x = 0; x!=labels.cols(); ++x)
+        for(typename Matrix::Index y = 0; y!=labels.rows(); ++y)
+        {
+            Scalar log_y       = safe_log<typename Matrix::Scalar>(predict(y,x));
+            Scalar log_one_m_y = safe_log<typename Matrix::Scalar>(Scalar(1.0)-predict(y,x));
+            evalout(y,x)       = (labels(y,x) * log_y + (Scalar(1.0)-labels(y,x)) * (log_one_m_y));
+        }
+        return evalout;
+    }
+    
 	template < typename Matrix >
 	typename Matrix::Scalar cross_entropy_logistic_regression (const Matrix& labels, const Matrix& predict)
 	{

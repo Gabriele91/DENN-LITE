@@ -53,36 +53,49 @@ namespace Denn
 		if (m_active_function)
 		{
 			Matrix out_matrix(ff_out);
-			return m_active_function(out_matrix);
+            m_active_function(out_matrix);
+			return out_matrix;
 		} 
 		else
 		{ 
 			return ff_out; 
 		}
 	}
-	Matrix PerceptronLayer::backpropagate_delta(const Matrix& bp_delta, const Matrix& ff_out)
-	{
-		//////////////////////////////////////////////////////////////////////
-		Matrix g(ff_out);
-		//derivate of active function
-		if (m_active_function.exists_function_derivate()) m_active_function.derive(g); // g := D(f(x))
-		else											  g.fill(1.0); //f(x) = x, g := D(f(x)) => 1.0
-		//////////////////////////////////////////////////////////////////////
-		//return (m_weights.transpose() * bp_delta).colwise().cwiseProduct(g);
-		//return g.asDiagonal() * (bp_delta * m_weights.transpose());
-		return (bp_delta * m_weights.transpose()).cwiseProduct(g);
-		//////////////////////////////////////////////////////////////////////
-	}
-	std::vector<Matrix> PerceptronLayer::backpropagate_gradient(const Matrix& bp_delta, const Matrix& ff_out, size_t input_samples, Scalar lambda)
-	{
-		// add regularization to weights, bias weights are not regularized
-		Matrix dEdW = (ff_out.transpose() * bp_delta + lambda*m_weights) / Scalar(input_samples);
-		//Matrix dEdW = ((lambda*m_weights).colwise() + bp_delta.transpose() * ff_out) / Scalar(input_samples);
-		Matrix dEdb =  (bp_delta.colwise().sum() / Scalar(input_samples));
-		//J = Scalar(0.5) * lambda * m_weights.array().square().sum() / Scalar(input_samples);
-		return std::vector<Matrix>{dEdW /* this[0] = w */, dEdb /* this[1] = b */};
-	}
-	//////////////////////////////////////////////////
+    Matrix PerceptronLayer::backpropagate_delta(const Matrix& bp_delta, const Matrix& ff_out)
+    {
+        //////////////////////////////////////////////////////////////////////
+        if (m_active_function.exists_function_derivate())
+        {
+            //derivate of active function
+            Matrix d_f(ff_out);
+            d_f = m_active_function.derive(d_f); // g := D_f(x))
+            return d_f.transpose().cwiseProduct(m_weights * bp_delta);
+        }
+        else
+        {
+            //f(x) = x, g := D_f(x) => 1.0
+            return m_weights * bp_delta;
+        } 
+        //////////////////////////////////////////////////////////////////////
+    }
+    std::vector<Matrix> PerceptronLayer::backpropagate_gradient(
+          const Matrix& delta
+        , const Matrix& lout
+        , size_t input_samples
+        , Scalar regular_param
+    )
+    {
+        Scalar inv_input_samples = Scalar(1.0) / Scalar(input_samples);
+        // add regularization to weights, bias weights are not regularized
+        Matrix dEdW = ((delta * lout).transpose()) * inv_input_samples;
+        Matrix dEdb = (delta.transpose().colwise().sum()) * inv_input_samples;
+        //add regular factor
+        if (regular_param != Scalar(0.0)) dEdW += (regular_param * inv_input_samples)*m_weights;
+        //return
+        return std::vector<Matrix>{dEdW /* this[0] = w */, dEdb /* this[1] = b */};
+        //J = Scalar(0.5) * lambda * m_weights.array().square().sum() / Scalar(input_samples);
+    }
+    //////////////////////////////////////////////////
 	size_t PerceptronLayer::size() const
 	{
 		return 2;

@@ -2,7 +2,6 @@
 #include <ctime>
 #include <fstream>
 #include "Denn.h"
-#define DISABLE_MAIN_BACKPROPAGATION
 
 static void execute
 (
@@ -54,10 +53,12 @@ static void execute
 	}
 	//random
 	for (auto& layer  : nn0)
-	for (auto& matrix : *layer)
-	{
-		matrix  = (Matrix::Random(matrix.rows(), matrix.cols()) * 2.0);
-	}
+    {
+        for(auto& matrix :  (*layer))
+        {
+            matrix = (  Matrix::Random(matrix.rows(), matrix.cols()) ) * 0.05;
+        }
+    }
 	//Function ptr
 #if 1
 	auto cost_function = CostFunction::softmax_cross_entropy_with_logit< Matrix >;
@@ -69,16 +70,18 @@ static void execute
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	NeuralNetwork result = nn0;
 	double execute_time = Time::get_time();
-	size_t n_batch = 1000;
+	size_t n_batch = 10000;
 	size_t n_on_a_batch = 1;
-	Scalar learn_rate = 0.1;
-	Scalar regular_param = 1.0;
+	Scalar learn_rate = 0.05;
+	Scalar regular_param = 0.0;
 	dataset.start_read_batch();
 	//test
 	Denn::DataSetScalar test;
 	dataset.read_test(test);
 	//accuracy
 	auto acc_init_test = Denn::CostFunction::accuracy(result.apply(test.features()), test.labels());
+    //context
+    NeuralNetwork::BackpropagationContext_sptr context = nullptr;
 	//backpropagation
 	for(int b_i = 0; b_i != n_batch; ++b_i)
 	{
@@ -88,16 +91,21 @@ static void execute
 		{
 			for (int a_i = 0; a_i != n_on_a_batch; ++a_i)
 			{
-				result.backpropagation_with_sgd(
+				context =
+                result.backpropagation_with_sgd(
 					[](const Matrix& predict, const Matrix& y)
 					{
-						return predict - y;
+                        Matrix softmax_predict(predict);
+                        Denn::CostFunction::softmax(softmax_predict);
+                        return softmax_predict - y;
 					}
 					, batch.features()
 					, batch.labels()
 					, learn_rate
 					, regular_param
+                    , context
 				);
+                context = nullptr;
 			}
 		}
 		else
@@ -121,7 +129,6 @@ static void execute
 	);
 }
 
-#ifndef DISABLE_MAIN_BACKPROPAGATION
 int main(int argc, const char** argv)
 {
 	////////////////////////////////////////////////////////////////////////////////////////////////
@@ -211,4 +218,3 @@ int main(int argc, const char** argv)
 
 	return 0;
 }
-#endif
