@@ -50,12 +50,25 @@ namespace Denn
     Parameters::Parameters() 
     :m_params_info
     ({
+        ParameterInfo{
+			m_use_backpropagation, "Use backpropagation with SGD", { "--" + m_use_backpropagation.name(),    "-bp"  },
+            [this](Arguments& args) -> bool 
+            { 
+                std::string arg(args.get_string());
+				m_use_backpropagation =
+                    arg == std::string("true") 
+                ||  arg == std::string("yes") 
+                ||  arg == std::string("t")
+                ||  arg == std::string("y") ; 
+                return true; 
+            }
+        },
         ParameterInfo{ 
-            m_generations, "Global number of generation", { "--" + m_generations.name(),    "-t"  }, 
+            m_generations, "Global number of generation [or backpropagation pass]", { "--" + m_generations.name(), "-t", "-g"  }, 
             [this](Arguments& args) -> bool { m_generations = args.get_int() ; return true; } 
         },
         ParameterInfo{ 
-            m_sub_gens, "Number of generation per batch", { "--" + m_sub_gens.name(),    "-s"  }, 
+            m_sub_gens, "Number of generation [or backpropagation pass] per batch", { "--" + m_sub_gens.name(), "-s" , "-sg" },
             [this](Arguments& args) -> bool { m_sub_gens = args.get_int() ; return true; }
         },
         ParameterInfo{
@@ -215,6 +228,22 @@ namespace Denn
                 m_restart_delta = args.get_double() ; 
                 if(*m_restart_delta<0) m_restart_enable = false;
                  return true; 
+            } 
+        },
+        ParameterInfo{ 
+			m_learning_rate, "Learning rate of backpropagation for each pass", { "--" + m_learning_rate.name(),    "-lrbp"  },
+            [this](Arguments& args) -> bool 
+            {
+				m_learning_rate = args.get_double() ;
+                return Scalar(0.0) <= *m_learning_rate;
+            } 
+        },
+        ParameterInfo{ 
+			m_regularize, "Regularize of backpropagation for each pass", { "--" + m_regularize.name(),    "-rbp"  },
+            [this](Arguments& args) -> bool 
+            {
+				m_regularize = args.get_double() ;
+                return Scalar(0.0) <= *m_regularize;
             } 
         },
         ParameterInfo{

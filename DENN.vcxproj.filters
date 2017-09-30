@@ -105,6 +105,9 @@
     <ClInclude Include="include\DennPointFunction.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="include\DennMainUtils.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\TicksTime.cpp">
@@ -173,10 +176,10 @@
     <ClCompile Include="source\DennPerceptronLayer.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="source\main_backpropagation.cpp">
+    <ClCompile Include="source\main.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
-    <ClCompile Include="source\main.cpp">
+    <ClCompile Include="source\DennMainUtils.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
   </ItemGroup>

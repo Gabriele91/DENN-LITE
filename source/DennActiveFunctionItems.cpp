@@ -2,17 +2,11 @@
 #include "DennConstants.h"
 #include "DennPointFunction.h"
 #include "DennActiveFunction.h"
+#include "DennCostFunction.h"
 
 namespace Denn
 {
-	#define POINTF_AS_ACTIVEF(ufunc)\
-    template < typename Matrix >\
-    Matrix& ufunc(Matrix& inout_matrix)\
-	{\
-		inout_matrix = inout_matrix.unaryExpr(&Denn::PointFunction:: ufunc <typename Matrix::Scalar>);\
-        return inout_matrix;\
-	}
-    //ActiveFunction
+    //ActiveFunction linear (none)
 	template < typename Matrix >
 	Matrix& linear(Matrix& inout_matrix)
 	{
@@ -25,6 +19,18 @@ namespace Denn
 		return inout_matrix;
 	}
 	REGISTERED_ACTIVE_FUNCTION("linear", linear<Matrix>, dx_linear<Matrix>)
+
+	//ActiveFunction (local)
+	REGISTERED_ACTIVE_FUNCTION("softmax", CostFunction::softmax<Matrix>)
+
+	//ActiveFunction (point)
+	#define POINTF_AS_ACTIVEF(ufunc)\
+    template < typename Matrix >\
+    Matrix& ufunc(Matrix& inout_matrix)\
+	{\
+		inout_matrix = inout_matrix.unaryExpr(&Denn::PointFunction:: ufunc <typename Matrix::Scalar>);\
+        return inout_matrix;\
+	}
 
 	POINTF_AS_ACTIVEF(sigmoid)
 	POINTF_AS_ACTIVEF(dx_sigmoid)
@@ -48,5 +54,5 @@ namespace Denn
 
 	POINTF_AS_ACTIVEF(binary)
     REGISTERED_ACTIVE_FUNCTION("binary", binary<Matrix>)
-
+		
 }

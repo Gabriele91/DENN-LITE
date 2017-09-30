@@ -27,7 +27,7 @@ namespace Denn
 	}
 
 	//init
-	bool DennAlgorithm::start()
+	bool DennAlgorithm::init()
 	{
 		//success flag
 		bool success = m_dataset_loader != nullptr;
@@ -35,68 +35,108 @@ namespace Denn
 		success &= m_dataset_loader->start_read_batch();
 		//batch
 		success &= m_dataset_loader->read_batch(m_dataset_batch);
-		//get np
-		size_t np = (size_t)m_params.m_np; //init current_np();
 		//init random engine
 		m_main_random.reinit(*m_params.m_seed);
+		//gen random function
+		m_random_function = gen_random_func();
+		//gen clamp functions
+		m_clamp_function = gen_clamp_func();
 		//clear random engines
 		m_population_random.clear();
+		//true
+		return success;
+	}
+
+	bool DennAlgorithm::init_population()
+	{
+		//get np
+		size_t np = (size_t)m_params.m_np; //init current_np();
+		//min size
+		if (!np) return false;
 		//init random engines
 		for(size_t i=0; i != np ;++i)
 		{
 			m_population_random.emplace_back(main_random().uirand());
 		}
-		//gen random function
-		m_random_function = gen_random_func();
-		//gen clamp functions
-		m_clamp_function = gen_clamp_func();
-		//if success //init pop
-		if (success)
-		{
-			//init pop
-			m_population.init
-			(
-				np,
-				m_default,
-				m_dataset_batch,
-				m_random_function,
-				m_target_function
-			);
-			//method of evoluction
-			m_e_method = EvolutionMethodFactory::create(m_params.m_evolution_type, *this);
-			//reset method
-			m_e_method->start();
-		}
+		//init pop
+		m_population.init
+		(
+			np,
+			m_default,
+			m_dataset_batch,
+			m_random_function,
+			m_target_function
+		);
+		//method of evoluction
+		m_e_method = EvolutionMethodFactory::create(m_params.m_evolution_type, *this);
+		//reset method
+		m_e_method->start();
 		//true
-		return success;
+		return true;
 	}
 
 	//big loop
 	Individual::SPtr DennAlgorithm::execute()
 	{
-		//init all
-		start();
-		//global info
-		const size_t n_global_pass = ((size_t)m_params.m_generations / (size_t)m_params.m_sub_gens);
-		const size_t n_sub_pass = m_params.m_sub_gens;
-		//restart init
-		m_restart_ctx = RestartContext();
-		//best
-		m_best_ctx = BestContext(nullptr, -std::numeric_limits<Scalar>::max());
-		execute_update_best();
-		//start output
-		if (m_output) m_output->start();
-		//main loop
-		for (size_t pass = 0; pass != n_global_pass; ++pass)
+		if (m_params.m_use_backpropagation)
 		{
-			execute_a_pass(pass, n_sub_pass);
-			//next
-			next_batch();
+			//init all
+			if (!init()) return false;
+			//global info
+			const size_t n_global_pass  = ((size_t)m_params.m_generations / (size_t)m_params.m_sub_gens);
+			const size_t n_sub_pass     = m_params.m_sub_gens;
+			const Scalar learning_rate = m_params.m_learning_rate;
+			const Scalar regularize = m_params.m_regularize;
+			//best
+			m_best_ctx = BestContext(m_default->copy(), -std::numeric_limits<Scalar>::max());
+			//rand init
+			for (auto& layer :  m_best_ctx.m_best->m_network)
+			for (auto& matrix : *layer)
+			{
+				matrix = matrix.unaryExpr(m_random_function);
+			}
+			//start output
+			if (m_output) m_output->start();
+			//main loop
+			for (size_t pass = 0; pass != n_global_pass; ++pass)
+			{
+				execute_backpropagation(pass, n_sub_pass, learning_rate, regularize);
+				//next
+				next_batch();
+			}
+			//end output
+			if (m_output) m_output->end();
+			//result
+			return m_best_ctx.m_best;
 		}
-		//end output
-		if (m_output) m_output->end();
-		//result
-		return m_best_ctx.m_best;
+		else
+		{
+			//init all
+			if (!init()) return false;
+			if (!init_population()) return false;
+			//global info
+			const size_t n_global_pass = ((size_t)m_params.m_generations / (size_t)m_params.m_sub_gens);
+			const size_t n_sub_pass = m_params.m_sub_gens;
+			//restart init
+			m_restart_ctx = RestartContext();
+			//best
+			m_best_ctx = BestContext(nullptr, -std::numeric_limits<Scalar>::max());
+			execute_update_best();
+			//start output
+			if (m_output) m_output->start();
+			//main loop
+			for (size_t pass = 0; pass != n_global_pass; ++pass)
+			{
+				execute_a_pass(pass, n_sub_pass);
+				//next
+				next_batch();
+			}
+			//end output
+			if (m_output) m_output->end();
+			//result
+			return m_best_ctx.m_best;
+		}
+
 	}
 
 
@@ -134,7 +174,40 @@ namespace Denn
 		//return
 		return eval;
 	}
-
+	/////////////////////////////////////////////////////////////////
+	void DennAlgorithm::execute_backpropagation(size_t pass, size_t n_sub_pass, Scalar learning_rate, Scalar regularize)
+	{
+		///////////////////////////////////////////////////////////////////
+		//output
+		if (m_output) m_output->start_a_pass();
+		//sub pass
+		for (size_t sub_pass = 0; sub_pass != n_sub_pass; ++sub_pass)
+		{
+			//output
+			if (m_output) m_output->start_a_sub_pass();
+			//pass
+			m_best_ctx.m_best->m_network.backpropagation_with_sgd
+			(
+				[](const Matrix& predict, const Matrix& y)
+				{
+					return predict - y;
+				}
+				, m_dataset_batch.m_features
+				, m_dataset_batch.m_labels
+				, learning_rate
+				, regularize
+			);
+			//update eval
+			auto y = m_best_ctx.m_best->m_network.apply(m_dataset_batch.m_features);
+			m_best_ctx.m_eval		  =
+			m_best_ctx.m_best->m_eval = m_target_function(m_dataset_batch.m_labels, y);
+			//TODO, COMPUTE ERROR BACKPROPAGATION
+			//output
+			if (m_output) m_output->end_a_sub_pass();
+		}
+		//output
+		if (m_output) m_output->end_a_pass();
+	}
 	/////////////////////////////////////////////////////////////////
 	//test
 	//find best individual (validation test)

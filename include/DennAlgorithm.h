@@ -70,11 +70,7 @@ public:
 		, CostFunction		  target_function
 		, std::ostream&       output
 		, ThreadPool*		  thpool = nullptr
-	);
-	
-	//init
-	bool start();
-	
+	);	
 	//big loop
 	virtual Individual::SPtr execute();
 
@@ -153,13 +149,18 @@ public:
 	}
 
 protected:
+	//init
+	bool init();
+	bool init_population();
+	/////////////////////////////////////////////////////////////////
+	void execute_backpropagation(size_t pass, size_t n_sub_pass, Scalar learning_rate, Scalar regularize);
 	/////////////////////////////////////////////////////////////////
 	//tests
 	bool serial_find_best(size_t& out_i, Scalar& out_eval);
 	bool parallel_find_best(ThreadPool& thpool, size_t& out_i, Scalar& out_eval);
 	/////////////////////////////////////////////////////////////////
 	//Intermedie steps
-	virtual void execute_a_pass(size_t pass, size_t n_sub_pass);
+	void execute_a_pass(size_t pass, size_t n_sub_pass);
 	void execute_a_sub_pass(size_t pass, size_t sub_pass);
 	void  execute_update_best();
 	void  execute_update_restart(size_t pass);

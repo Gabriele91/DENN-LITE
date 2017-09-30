@@ -140,15 +140,16 @@ namespace Denn
 
 		read_only<std::string>			m_dataset_filename        { "dataset" };
 		read_only<std::string> 			m_output_filename         { "output"  };
-		read_only<std::string>		    m_runtime_output_type     { "runtime_output",            "bench",    true /*false?*/ };
-		read_only<std::string>		    m_runtime_output_file     { "runtime_output_file",            "",    true /*false?*/ };
-		read_only<bool>				    m_compute_test_per_pass   { "compute_test_per_pass",    bool(true),  true /*false?*/ };
-		read_only<bool>				    m_serialize_neural_network{ "serialize_neural_network", bool(true),  false /*true?*/ };
-		
-		read_only<unsigned int>	         m_seed          { "seed", (unsigned int)(std::random_device{}())  };
+		read_only<std::string>		    m_runtime_output_type     { "runtime_output",            "bench",    true /* false? */ };
+		read_only<std::string>		    m_runtime_output_file     { "runtime_output_file",            "",    true /* false? */ };
+		read_only<bool>				    m_compute_test_per_pass   { "compute_test_per_pass",    bool(true),  true /* false? */ };
+		read_only<bool>				    m_serialize_neural_network{ "serialize_neural_network", bool(true),  false /* true? */ };
+		read_only<bool>	                m_use_backpropagation     { "use_backpropagation"     , bool(false), true /* false? */ };
+
+		read_only<unsigned int>	         m_seed				{ "seed", (unsigned int)(std::random_device{}())  };
 
 		read_only<size_t>	             m_generations   { "generation", size_t(1000)  };
-		read_only<size_t>	             m_sub_gens      { "sub_gens",size_t(100)   };
+		read_only<size_t>	             m_sub_gens      { "sub_gens"  , size_t(100)   };
 		read_only<size_t>	             m_np            { "number_parents",size_t(16) };
 		//DE
 		read_only<Scalar>	             m_default_f     { "f_default",Scalar(1.0)   };
@@ -185,9 +186,11 @@ namespace Denn
 		read_only<std::string>           m_crossover_type{ "crossover","bin" };
 		read_only<std::string>           m_evolution_type    { "evolution_method","JDE" };
 		read_only<std::string>           m_sub_evolution_type{ "sub_evolution_method","JDE" };
+		read_only<Scalar>					   m_learning_rate		   { "learning_rate", Scalar(0.05) };
+		read_only<Scalar>					   m_regularize			   { "regularize", Scalar(0.0) };
 		read_only< std::vector<int> >          m_hidden_layers         { "hidden_layers"         /* , none */ };
 		read_only< std::vector<std::string> >  m_active_functions      { "active_functions"      /* , none */ };
-		read_only< std::string >               m_output_active_function{ "output_active_function" ,  "linear" };
+		read_only< std::string >               m_output_active_function{ "output_active_function" ,  "softmax" };
 
 		//params info
 		std::vector< ParameterInfo >     m_params_info;
