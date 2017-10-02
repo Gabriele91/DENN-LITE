@@ -267,12 +267,13 @@ namespace Denn
 			//target
 			const Individual& i_target = *population[id_target];
 			//best (n.b. sort population from best to worst)
-			size_t           id_best = random(id_target).index_rand(size_t(p*Scalar(current_np())));
-			const Individual& i_best = *population[id_best];
+			size_t			range_best = size_t(p*Scalar(current_np()));
+			size_t           id_best   = range_best ? random(id_target).index_rand(range_best) : size_t(0);
+			const Individual& i_best   = *population[id_best];
 			//get generator
 			auto& rand_deck = random(id_target).deck();
 			//set population size in deck
-			rand_deck.reinit(population.size());
+			rand_deck.reinit(current_np());
 			//for each layers
 			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
 			{

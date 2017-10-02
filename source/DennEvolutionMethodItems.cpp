@@ -669,10 +669,16 @@ namespace Denn
 		void reduce_population(DoubleBufferPopulation& dpopulation)
 		{
 			using FPSize_t = double;
-			size_t new_np = std::round(
-				((FPSize_t(*parameters().m_min_np) - FPSize_t(*parameters().m_np)) / FPSize_t(*parameters().m_max_nfe)) * FPSize_t(m_curr_nfe) + FPSize_t(*parameters().m_np)
-			);
-			if (current_np() != new_np)
+			//compute new np
+			size_t new_np = size_t(std::round(
+				((FPSize_t(*parameters().m_min_np) - FPSize_t(*parameters().m_np)) / FPSize_t(*parameters().m_max_nfe)) 
+				* FPSize_t(m_curr_nfe) 
+				+ FPSize_t(*parameters().m_np)
+			));
+			//max/min safe
+			new_np = clamp<size_t>(new_np, *parameters().m_min_np, *parameters().m_np);
+			//reduce
+			if (new_np < current_np())
 			{
 				//sort population
 				dpopulation.parents().sort();
