@@ -288,7 +288,7 @@ namespace Denn
 					//b from archive (JADE)
 					if(m_archive)
 					{
-						size_t rand_b = random(id_target).irand(m_archive->size() + population.size() - 2);
+						size_t rand_b = random(id_target).index_rand(m_archive->size() + population.size() - 2);
 						bool get_from_archive = rand_b < m_archive->size();
 						nn_b = get_from_archive ? (*m_archive)[rand_b] : population[rand_deck.get_random_id(id_target)];
 					}

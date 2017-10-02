@@ -1,8 +1,8 @@
 #pragma once
 #include "Config.h"
 #include "ThreadPool.h"
-#include "DennCostFunction.h"
 #include "DennRandom.h"
+#include "DennCostFunction.h"
 #include "DennDatasetLoader.h"
 #include "DennParameters.h"
 #include "DennPopulation.h"

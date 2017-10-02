@@ -69,9 +69,7 @@
     <ClCompile Include="source\DennRuntimeOutputItems.cpp" />
     <ClCompile Include="source\DennSerializaOutputFactory.cpp" />
     <ClCompile Include="source\DennSerializeOutputItems.cpp" />
-    <ClCompile Include="source\main.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
+    <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\DennRandom.cpp" />
     <ClCompile Include="source\TicksTime.cpp" />
   </ItemGroup>
@@ -156,7 +154,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>$(DefineConstants);NOMINMAX;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>$(DefineConstants);NOMINMAX;USE_FAST_UNIFORM;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)/dips/include;$(ProjectDir)/include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -171,7 +169,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>$(DefineConstants);NOMINMAX;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>$(DefineConstants);NOMINMAX;USE_FAST_UNIFORM;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)/dips/include;$(ProjectDir)/include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -188,7 +186,7 @@
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>$(DefineConstants);NOMINMAX;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>$(DefineConstants);NOMINMAX;USE_FAST_UNIFORM;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)/dips/include;$(ProjectDir)/include;</AdditionalIncludeDirectories>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>
@@ -209,7 +207,7 @@
       </PrecompiledHeader>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PreprocessorDefinitions>$(DefineConstants);NOMINMAX;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>$(DefineConstants);NOMINMAX;USE_FAST_UNIFORM;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)/dips/include;$(ProjectDir)/include;</AdditionalIncludeDirectories>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>

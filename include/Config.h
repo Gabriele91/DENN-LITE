@@ -1,20 +1,22 @@
 #pragma once
-//default include
+//default C include
 #include <cstring>
 #include <cmath>
 #include <cassert>
-#include <string>
-#include <functional>
-#include <algorithm>
+//default CPP include
 #include <limits>
-#include <vector>
+#include <map>
 #include <queue>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <functional>
+#include <memory>
 //lib include
 #include <Eigen/Eigen>
 #include <zlib.h>
 //internal include
 #include "TicksTime.h"
-#include "DennRandom.h"
 //defines
 #define USE_CROSS_ENTROPY_SAFE
 #define RANDOM_SAFE_MUTATION

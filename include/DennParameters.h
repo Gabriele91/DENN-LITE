@@ -1,5 +1,6 @@
 #pragma once
 #include "Config.h"
+#include "DennRandom.h"
 #include "DennVariant.h"
 #include <string>
 #include <vector>
