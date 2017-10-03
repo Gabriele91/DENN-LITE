@@ -1,4 +1,3 @@
-#pragma once
 #include "DennMainUtils.h"
 
 namespace Denn
