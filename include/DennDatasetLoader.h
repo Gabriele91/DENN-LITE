@@ -1,8 +1,9 @@
 #pragma once
-#pragma once 
 #include "Config.h"
 #include "IOFileWrapper.h"
 #include "DennDataset.h"
+#include "DennFilesystem.h"
+
 namespace Denn
 {
 
@@ -50,6 +51,8 @@ namespace Denn
 	class DataSetLoader
 	{
 	public:
+		///////////////////////////////////////////////////////////////////
+		using SPtr = std::shared_ptr< DataSetLoader >;
 		///////////////////////////////////////////////////////////////////
 		virtual bool open(const std::string& path_file) = 0;
 
@@ -328,4 +331,16 @@ namespace Denn
 
 	using DataSetLoaderSTD = DataSetLoaderT< IOFileWrapper::std_file    >;
 	using DataSetLoaderGZ  = DataSetLoaderT< IOFileWrapper::zlib_file<> >;
+
+	inline static DataSetLoader::SPtr get_datase_loader(const std::string& path)
+	{
+		//ptr out
+		DataSetLoader::SPtr dbloader(nullptr);
+		//out put
+		std::string extension = Filesystem::get_extension(path);
+		     if (extension == ".gz")    dbloader = std::dynamic_pointer_cast<DataSetLoader>(std::make_shared<DataSetLoaderGZ>(path));
+		else if (extension == ".data")  dbloader = std::dynamic_pointer_cast<DataSetLoader>(std::make_shared<DataSetLoaderSTD>(path));
+		//return
+		return dbloader;
+	}
 }
