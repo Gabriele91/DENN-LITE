@@ -81,7 +81,7 @@ namespace Denn
 		if (m_params.m_use_backpropagation)
 		{
 			//init all
-			if (!init()) return false;
+			if (!init()) return nullptr;
 			//global info
 			const size_t n_global_pass  = ((size_t)m_params.m_generations / (size_t)m_params.m_sub_gens);
 			const size_t n_sub_pass     = m_params.m_sub_gens;
@@ -112,8 +112,8 @@ namespace Denn
 		else
 		{
 			//init all
-			if (!init()) return false;
-			if (!init_population()) return false;
+			if (!init()) 			return nullptr;
+			if (!init_population()) return nullptr;
 			//global info
 			const size_t n_global_pass = ((size_t)m_params.m_generations / (size_t)m_params.m_sub_gens);
 			const size_t n_sub_pass = m_params.m_sub_gens;
