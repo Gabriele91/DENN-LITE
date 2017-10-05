@@ -58,7 +58,14 @@ int main(int argc,const char** argv)
 		std::cerr << "input file: \"" << *arguments.m_dataset_filename << "\" not exists!" << std::endl;
 		return 1; //exit
 	}
-	DataSetLoaderGZ dataset((const std::string&)arguments.m_dataset_filename);
+	//get loader
+	DataSetLoader::SPtr dataset = get_datase_loader((const std::string&)arguments.m_dataset_filename);
+	//test loader
+	if(!dataset)
+	{
+		std::cerr << "input file: \"" << *arguments.m_dataset_filename << "\" not supported!" << std::endl;
+		return 1; //exit
+	}
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	std::ostream   runtime_output_stream(nullptr);
 	std::ofstream  runtime_output_file_stream;
@@ -110,7 +117,7 @@ int main(int argc,const char** argv)
 	SerializeOutput::SPtr serialize_output = SerializeOutputFactory::create(ext, ofile, arguments);
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	//execute test
- 	execute(arguments, dataset, uptr_thpool.get(), runtime_output_stream, serialize_output);
+ 	execute(arguments, *dataset, uptr_thpool.get(), runtime_output_stream, serialize_output);
 	////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	return 0;
