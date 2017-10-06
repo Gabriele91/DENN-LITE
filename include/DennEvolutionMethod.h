@@ -29,7 +29,9 @@ namespace Denn
 		virtual	void selection(DoubleBufferPopulation& population) = 0;
 		virtual void end_a_subgen_pass(DoubleBufferPopulation& population) {};
 		virtual void end_a_gen_pass(DoubleBufferPopulation& population) {};
-
+		virtual bool can_reset()	 	    { return true; }
+		virtual bool best_from_validation() { return true; }
+		
 		virtual const VariantRef get_context_data() const { return VariantRef(); }
 
 	protected:

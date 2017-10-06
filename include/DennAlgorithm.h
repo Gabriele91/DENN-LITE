@@ -75,10 +75,10 @@ public:
 	virtual Individual::SPtr execute();
 
 	//find best individual (validation test)
-	bool find_best(size_t& out_i, Scalar& out_eval);
+	bool find_best_on_validation(size_t& out_i, Scalar& out_eval);
 	
 	//find best individual (validation test)
-	Individual::SPtr find_best(Scalar& out_eval);
+	Individual::SPtr find_best_on_validation(Scalar& out_eval);
 
 	//fitness function on a population
 	void execute_fitness_on(Population& population) const;
@@ -148,6 +148,11 @@ public:
 		return m_main_random;
 	}
 
+	const DataSetScalar& current_batch() const
+	{
+		return m_dataset_batch;
+	}
+
 protected:
 	//init
 	bool init();
@@ -155,15 +160,17 @@ protected:
 	/////////////////////////////////////////////////////////////////
 	void execute_backpropagation(size_t pass, size_t n_sub_pass, Scalar learning_rate, Scalar regularize);
 	/////////////////////////////////////////////////////////////////
-	//tests
-	bool serial_find_best(size_t& out_i, Scalar& out_eval);
-	bool parallel_find_best(ThreadPool& thpool, size_t& out_i, Scalar& out_eval);
+	//tests (validation)
+	bool serial_find_best_on_validation(size_t& out_i, Scalar& out_eval);
+	bool parallel_find_best_on_validation(ThreadPool& thpool, size_t& out_i, Scalar& out_eval);
 	/////////////////////////////////////////////////////////////////
 	//Intermedie steps
 	void execute_a_pass(size_t pass, size_t n_sub_pass);
 	void execute_a_sub_pass(size_t pass, size_t sub_pass);
-	void  execute_update_best();
-	void  execute_update_restart(size_t pass);
+	void execute_update_best();
+	void execute_update_best_on_validation();
+	void execute_update_best_on_target_function();
+	void execute_update_restart(size_t pass);	
 	/////////////////////////////////////////////////////////////////
 	//execute a pass
 	void execute_pass();

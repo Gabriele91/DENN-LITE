@@ -78,78 +78,40 @@ namespace Denn
 	//big loop
 	Individual::SPtr DennAlgorithm::execute()
 	{
-		if (m_params.m_use_backpropagation)
+		//init all
+		if (!init()) 			return nullptr;
+		if (!init_population()) return nullptr;
+		//global info
+		const size_t n_global_pass = ((size_t)m_params.m_generations / (size_t)m_params.m_sub_gens);
+		const size_t n_sub_pass = m_params.m_sub_gens;
+		//restart init
+		m_restart_ctx = RestartContext();
+		//best
+		if(m_e_method->best_from_validation())
 		{
-			//init all
-			if (!init()) return nullptr;
-			//global info
-			const size_t n_global_pass  = ((size_t)m_params.m_generations / (size_t)m_params.m_sub_gens);
-			const size_t n_sub_pass     = m_params.m_sub_gens;
-			const Scalar learning_rate = m_params.m_learning_rate;
-			const Scalar regularize = m_params.m_regularize;
-			//best
-			m_best_ctx = BestContext(m_default->copy(), -std::numeric_limits<Scalar>::max());
-			//rand init
-			for (auto& layer :  m_best_ctx.m_best->m_network)
-			for (auto& matrix : *layer)
-			{
-				matrix = matrix.unaryExpr(m_random_function);
-			}
-			//start output
-			if (m_output) m_output->start();
-			//main loop
-			for (size_t pass = 0; pass != n_global_pass; ++pass)
-			{
-				execute_backpropagation(pass, n_sub_pass, learning_rate, regularize);
-				//next
-				next_batch();
-			}
-			//end output
-			if (m_output) m_output->end();
-			//result
-			return m_best_ctx.m_best;
-		}
-		else
-		{
-			//init all
-			if (!init()) 			return nullptr;
-			if (!init_population()) return nullptr;
-			//global info
-			const size_t n_global_pass = ((size_t)m_params.m_generations / (size_t)m_params.m_sub_gens);
-			const size_t n_sub_pass = m_params.m_sub_gens;
-			//restart init
-			m_restart_ctx = RestartContext();
-			//best
+			//maximize
 			m_best_ctx = BestContext(nullptr, -std::numeric_limits<Scalar>::max());
-			execute_update_best();
-			//start output
-			if (m_output) m_output->start();
-			//main loop
-			for (size_t pass = 0; pass != n_global_pass; ++pass)
-			{
-				execute_a_pass(pass, n_sub_pass);
-				//next
-				next_batch();
-			}
-			//end output
-			if (m_output) m_output->end();
-			//result
-			return m_best_ctx.m_best;
 		}
-
+		else 
+		{
+			//minimize
+			m_best_ctx = BestContext(nullptr, std::numeric_limits<Scalar>::max());				
+		}
+		execute_update_best();
+		//start output
+		if (m_output) m_output->start();
+		//main loop
+		for (size_t pass = 0; pass != n_global_pass; ++pass)
+		{
+			execute_a_pass(pass, n_sub_pass);
+			//next
+			next_batch();
+		}
+		//end output
+		if (m_output) m_output->end();
+		//result
+		return m_best_ctx.m_best;
 	}
-
-
-	//find best individual (validation test)
-	Individual::SPtr DennAlgorithm::find_best(Scalar& out_eval)
-	{
-		//best 
-		size_t best_i;
-		find_best(best_i, out_eval);
-		//return best
-		return m_population.parents()[best_i];
-	}
-
 
 	//using the test set on a individual
 	Scalar DennAlgorithm::execute_test() const 
@@ -211,12 +173,20 @@ namespace Denn
 	/////////////////////////////////////////////////////////////////
 	//test
 	//find best individual (validation test)
-	bool DennAlgorithm::find_best(size_t& out_i, Scalar& out_eval)
+	Individual::SPtr DennAlgorithm::find_best_on_validation(Scalar& out_eval)
 	{
-		if(m_thpool) return parallel_find_best(*m_thpool,out_i,out_eval);
-		else return serial_find_best(out_i, out_eval);
+		//best 
+		size_t best_i;
+		find_best_on_validation(best_i, out_eval);
+		//return best
+		return m_population.parents()[best_i];
 	}
-	bool DennAlgorithm::serial_find_best(size_t& out_i, Scalar& out_eval)
+	bool DennAlgorithm::find_best_on_validation(size_t& out_i, Scalar& out_eval)
+	{
+		if(m_thpool) return parallel_find_best_on_validation(*m_thpool,out_i,out_eval);
+		else 		 return serial_find_best_on_validation(out_i, out_eval);
+	}
+	bool DennAlgorithm::serial_find_best_on_validation(size_t& out_i, Scalar& out_eval)
 	{
 		//ref to pop
 		auto& population = m_population.parents();
@@ -245,7 +215,7 @@ namespace Denn
 		return true;
 
 	}
-	bool DennAlgorithm::parallel_find_best(ThreadPool& thpool, size_t& out_i, Scalar& out_eval)
+	bool DennAlgorithm::parallel_find_best_on_validation(ThreadPool& thpool, size_t& out_i, Scalar& out_eval)
 	{
 		//ref to pop
 		auto& population = m_population.parents();
@@ -304,7 +274,7 @@ namespace Denn
 		//update context
 		execute_update_best();
 		//restart
-		execute_update_restart(pass);
+		if(m_e_method->can_reset()) execute_update_restart(pass);
 		//output
 		if(m_output) m_output->end_a_pass();
 	}
@@ -319,9 +289,14 @@ namespace Denn
 	}
 	void DennAlgorithm::execute_update_best()
 	{
+		if(m_e_method->best_from_validation()) execute_update_best_on_validation();
+		else             					   execute_update_best_on_target_function();
+	}	
+	void DennAlgorithm::execute_update_best_on_validation()
+	{
 		//find best
-		Scalar curr_eval;
-		auto curr = find_best(curr_eval);
+		Scalar curr_eval = Scalar(0.0);
+		auto curr = find_best_on_validation(curr_eval);
 		//maximize (accuracy)
 		if (m_best_ctx.m_eval < curr_eval)
 		{
@@ -331,6 +306,21 @@ namespace Denn
 			m_best_ctx.m_best = curr->copy();
 			//save eval (on validation) of best
 			m_best_ctx.m_eval = curr_eval;
+		}
+	}
+	void DennAlgorithm::execute_update_best_on_target_function()
+	{
+		//find best
+		auto curr = m_population.parents().best();
+		//minimize (target function)
+		if (curr->m_eval < m_best_ctx.m_eval)
+		{
+			//must copy because "restart" 
+			//not copy element then 
+			//it can change the values of the best individual
+			m_best_ctx.m_best = curr->copy();
+			//save eval (on validation) of best
+			m_best_ctx.m_eval = curr->m_eval;
 		}
 	}
 	void DennAlgorithm::execute_update_restart(size_t pass)

@@ -145,7 +145,6 @@ namespace Denn
 		read_only<std::string>		    m_runtime_output_file     { "runtime_output_file",            "",    true /* false? */ };
 		read_only<bool>				    m_compute_test_per_pass   { "compute_test_per_pass",    bool(true),  true /* false? */ };
 		read_only<bool>				    m_serialize_neural_network{ "serialize_neural_network", bool(true),  false /* true? */ };
-		read_only<bool>	                m_use_backpropagation     { "use_backpropagation"     , bool(false), true /* false? */ };
 
 		read_only<unsigned int>	         m_seed				{ "seed", (unsigned int)(std::random_device{}())  };
 
@@ -177,9 +176,9 @@ namespace Denn
 		read_only<Scalar>	             m_clamp_min     { "clamp_min",  Scalar(-10.0) };
 		read_only<Scalar>	             m_range_max     { "random_max", Scalar( 1.0 ) };
 		read_only<Scalar>	             m_range_min     { "random_min", Scalar(-1.0)  };
-		read_only<bool>	                 m_restart_enable{ "restart_enable", bool(true), false };
-		read_only<long>	                 m_restart_count { "restart_count", size_t(2)    };
-		read_only<Scalar>	             m_restart_delta { "restart_delta", Scalar(0.02) };
+		read_only<bool>	                 m_restart_enable{ "restart_enable", bool(false), false };
+		read_only<long>	                 m_restart_count { "restart_count", size_t(-1)    };
+		read_only<Scalar>	             m_restart_delta { "restart_delta", Scalar(0.001) };
 		read_only<int>	                 m_threads_omp   { "threads_omp", size_t(2) };
 		read_only<size_t>	             m_threads_pop   { "threads_pop", size_t(2) };		
 		read_only<size_t>	             m_history_size  { "history_size", size_t(1) };

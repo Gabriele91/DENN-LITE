@@ -692,6 +692,61 @@ namespace Denn
 	};
 	REGISTERED_EVOLUTION_METHOD(L_SHADEMethod, "L-SHADE")
 
+	class BACKPROPAGATIONMethod : public EvolutionMethod
+	{
+	public:
+
+		BACKPROPAGATIONMethod(const DennAlgorithm& algorithm) : EvolutionMethod(algorithm)
+		{
+			m_learning_rate = parameters().m_learning_rate;
+			m_regularize    = parameters().m_regularize;
+		}
+
+		virtual void create_a_individual
+		(
+			  DoubleBufferPopulation& dpopulation
+			, size_t i_target
+			, Individual& i_output
+		)
+		override
+		{
+			//apply on parent
+			dpopulation.parents()[i_target]->m_network.backpropagation_with_sgd
+			(
+				[](const Matrix& predict, const Matrix& y)
+				{
+					return predict - y;
+				}
+				, m_algorithm.current_batch().m_features
+				, m_algorithm.current_batch().m_labels
+				, m_learning_rate
+				, m_regularize
+			);
+		}
+
+		virtual	void selection(DoubleBufferPopulation& dpopulation) override
+		{
+			//none
+		}
+
+		virtual bool can_reset() override 
+		{ 
+			return false;
+		}
+
+		virtual bool best_from_validation() override 
+		{ 
+			return false; 
+		}
+		
+	protected:
+
+		Scalar m_learning_rate;
+		Scalar m_regularize;
+		
+	};
+	REGISTERED_EVOLUTION_METHOD(BACKPROPAGATIONMethod, "BACKPROPAGATION")
+
 	#if 0
 	class SaDEMethod : public EvolutionMethod
 	{

@@ -50,19 +50,6 @@ namespace Denn
     Parameters::Parameters() 
     :m_params_info
     ({
-        ParameterInfo{
-			m_use_backpropagation, "Use backpropagation with SGD", { "--" + m_use_backpropagation.name(),    "-bp"  },
-            [this](Arguments& args) -> bool 
-            { 
-                std::string arg(args.get_string());
-				m_use_backpropagation =
-                    arg == std::string("true") 
-                ||  arg == std::string("yes") 
-                ||  arg == std::string("t")
-                ||  arg == std::string("y") ; 
-                return true; 
-            }
-        },
         ParameterInfo{ 
             m_generations, "Global number of generation [or backpropagation pass]", { "--" + m_generations.name(), "-t", "-g"  }, 
             [this](Arguments& args) -> bool { m_generations = args.get_int() ; return true; } 
