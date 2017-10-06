@@ -102,29 +102,35 @@ namespace Denn
 			std::string				   		  m_description;
 			std::vector< std::string  > 	  m_arg_key;
 			std::function< bool(Arguments&) > m_action;
+            std::string                       m_domain;
+            
 
 			ParameterInfo() { }
-
-			ParameterInfo(  const generic_read_only&			associated_variable
+            
+            template< class T >
+			ParameterInfo(  const read_only< T >&			    associated_variable
 						  , const std::string&				   	description
 						  , const std::vector< std::string  >& 	arg_key
 						  , std::function< bool(Arguments&) >   action
-						  )
+                          , const std::string&                  domain = cpp_type_to_arg_type<T>() )
 			: m_associated_variable(&associated_variable)
 			, m_description(description)
 			, m_arg_key(arg_key)
 			, m_action(action)
+            , m_domain(domain)
 			{				
 			}
 
 			ParameterInfo(  const std::string&				   	description
 						  , const std::vector< std::string  >& 	arg_key
 						  , std::function< bool(Arguments&) >   action
-						  )
+                          , const std::string&                  domain = std::string()
+                          )
 			: m_associated_variable(nullptr)
 			, m_description(description)
 			, m_arg_key(arg_key)
 			, m_action(action)
+            , m_domain(domain)
 			{				
 			}
 
@@ -137,6 +143,11 @@ namespace Denn
 			{
 				return has_an_associated_variable() && m_associated_variable->serializable();
 			}
+            
+        protected:
+            
+            template< class T > static const char* cpp_type_to_arg_type(){ return "void"; }
+            
 		};
 
 		read_only<std::string>			m_dataset_filename        { "dataset" };

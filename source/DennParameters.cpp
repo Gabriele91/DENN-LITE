@@ -46,7 +46,41 @@ namespace Denn
         return (*m_pointer)[0] == '-';
     }
 
-
+    //CPP type to str param
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<bool>(){ return "\"bool\""; }
+    
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<char>()                        { return "\"string\""; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< const char* >()               { return "\"string\""; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::string >()               { return "\"string\""; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector< std::string > >(){ return "\"list string\""; }
+    
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<short>()    { return "\"integer\""; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<int>()      { return "\"integer\""; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<long>()     { return "\"integer\""; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<long long>(){ return "\"integer\""; }
+    
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<unsigned short>()    { return "\"unsigned integer\""; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<unsigned int>()      { return "\"unsigned integer\""; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<unsigned long>()     { return "\"unsigned integer\""; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<unsigned long long>(){ return "\"unsigned integer\""; }
+    
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<float>()      { return "\"number\""; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<double>()     { return "\"number\""; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<long double>(){ return "\"number\""; }
+    
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<MatrixF>() { return "\"matrix\""; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<MatrixD>() { return "\"matrix\""; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<MatrixLD>(){ return "\"matrix\""; }
+    
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<int> >()        { return "\"list integer\""; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<float> >()      { return "\"list number\"";  }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<double> >()     { return "\"list number\"";  }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<long double> >(){ return "\"list number\"";  }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<MatrixF> >()    { return "\"list matrix\"";  }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<MatrixD> >()    { return "\"list matrix\"";  }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<MatrixLD> >()   { return "\"list matrix\"";  }
+    
+    
     Parameters::Parameters() 
     :m_params_info
     ({
