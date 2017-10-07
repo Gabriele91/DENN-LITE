@@ -527,7 +527,8 @@ namespace Denn
             s_out << arg_space << "{\n";
             s_out << arg_space << in_arg_inspace << "\"name\"" << " : "	<< Dump::json_string(param.m_associated_variable->name()) << ",\n";
             s_out << arg_space << in_arg_inspace << "\"args:\"" << " : " << Dump::json_array<std::string>(param.m_arg_key) << ",\n";
-            s_out << arg_space << in_arg_inspace << "\"description\"" << " : " << Dump::json_string(param.m_description) << ",\n";
+			s_out << arg_space << in_arg_inspace << "\"description\"" << " : " << Dump::json_string(param.m_description) << ",\n";
+			s_out << arg_space << in_arg_inspace << "\"serializable\"" << " : " << Dump::json_bool(param.serializable()) << ",\n";
             s_out << arg_space << in_arg_inspace << "\"domain\"" << " : ";
             switch (param.m_domain.m_type)
             {
@@ -538,7 +539,7 @@ namespace Denn
                     s_out << Dump::json_array<std::string>(param.m_domain.m_choises) << "\n";
                 break;
                 default:
-                    s_out << " null "<< "\n";
+                    s_out << Dump::json_null() << "\n";
                 break;
             }
             s_out << arg_space << "}";

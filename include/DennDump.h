@@ -6,11 +6,16 @@ namespace Denn
 {
 namespace Dump
 {
+	inline static std::string json_null()
+	{
+		return "null";
+	}
+
 	inline static std::string json_bool(bool b)
 	{
 		return b ? "true" : "false";
 	}
-	
+
 	inline static std::string json_string(const std::string& str)
 	{
 		//copy ptr
@@ -61,6 +66,11 @@ namespace Dump
 		return out + "\"";
 	}
 
+	template < typename T >  inline static std::string json_number(const T& value)
+	{
+		return std::to_string(value);
+	}
+	
 	template < typename T > static std::string json_matrix(const T& matrix)
 	{
 		Eigen::IOFormat matrix_to_json_array(Eigen::FullPrecision, Eigen::DontAlignCols, ", ", ", ", "[", "]", "[", "]");
@@ -150,21 +160,21 @@ namespace Dump
 		Eigen::IOFormat matrix_to_json_array(Eigen::FullPrecision, Eigen::DontAlignCols, ", ", ", ", "[", "]", "[", "]");
 		switch (value.get_type())
 		{
-		case VariantType::VR_NONE:     return "null"; break;
-		case VariantType::VR_BOOL:     return value.get<bool>() ? "true" : "false"; break;
-		case VariantType::VR_CHAR:     return std::to_string(value.get<char>());  break;
-		case VariantType::VR_SHORT:    return std::to_string(value.get<short>()); break;
-		case VariantType::VR_INT:      return std::to_string(value.get<int>());   break;
-		case VariantType::VR_LONG:     return std::to_string(value.get<long>());  break;
-		case VariantType::VR_LONGLONG: return std::to_string(value.get<long long>()); break;
-		case VariantType::VR_UCHAR:    return std::to_string(value.get<unsigned char>());  break;
-		case VariantType::VR_USHORT:   return std::to_string(value.get<unsigned short>()); break;
-		case VariantType::VR_UINT:     return std::to_string(value.get<unsigned int>()); break;
-		case VariantType::VR_ULONG:    return std::to_string(value.get<unsigned long>()); break;
-		case VariantType::VR_ULONGLONG:return std::to_string(value.get<unsigned long long>()); break;
-		case VariantType::VR_FLOAT:    return std::to_string(value.get<float>());  break;
-		case VariantType::VR_DOUBLE:   return std::to_string(value.get<double>());  break;
-		case VariantType::VR_LONG_DOUBLE:   return std::to_string(value.get<long double>());  break;
+		case VariantType::VR_NONE:     return json_null(); break;
+		case VariantType::VR_BOOL:     return json_bool(value.get<bool>()); break;
+		case VariantType::VR_CHAR:     return json_number(value.get<char>());  break;
+		case VariantType::VR_SHORT:    return json_number(value.get<short>()); break;
+		case VariantType::VR_INT:      return json_number(value.get<int>());   break;
+		case VariantType::VR_LONG:     return json_number(value.get<long>());  break;
+		case VariantType::VR_LONGLONG: return json_number(value.get<long long>()); break;
+		case VariantType::VR_UCHAR:    return json_number(value.get<unsigned char>());  break;
+		case VariantType::VR_USHORT:   return json_number(value.get<unsigned short>()); break;
+		case VariantType::VR_UINT:     return json_number(value.get<unsigned int>()); break;
+		case VariantType::VR_ULONG:    return json_number(value.get<unsigned long>()); break;
+		case VariantType::VR_ULONGLONG:return json_number(value.get<unsigned long long>()); break;
+		case VariantType::VR_FLOAT:    return json_number(value.get<float>());  break;
+		case VariantType::VR_DOUBLE:   return json_number(value.get<double>());  break;
+		case VariantType::VR_LONG_DOUBLE: return json_number(value.get<long double>());  break;
 
 		case VariantType::VR_FLOAT_MATRIX:        return json_matrix<MatrixF>(value.get<MatrixF>()); break;
 		case VariantType::VR_DOUBLE_MATRIX:       return json_matrix<MatrixD>(value.get<MatrixD>()); break;

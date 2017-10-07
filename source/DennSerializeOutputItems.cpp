@@ -43,10 +43,10 @@ namespace Denn
 
 		virtual void serialize_best(double time, Denn::Scalar accuracy, Denn::Scalar f, Denn::Scalar cr, const Denn::NeuralNetwork& network) override
 		{
-			output() << "\t\"time\" : " << time << "," << std::endl;
-			output() << "\t\"accuracy\" : " << accuracy << "," << std::endl;
-			output() << "\t\"f\" : " << f << "," << std::endl;
-			output() << "\t\"cr\" : " << cr << "," << std::endl;
+			output() << "\t\"time\" : " << Dump::json_number(time) << "," << std::endl;
+			output() << "\t\"accuracy\" : " << Dump::json_number(accuracy) << "," << std::endl;
+			output() << "\t\"f\" : " << Dump::json_number(f) << "," << std::endl;
+			output() << "\t\"cr\" : " << Dump::json_number(cr) << "," << std::endl;
 			//...
 			if (!*parameters().m_serialize_neural_network) return;
 			//serialize net
