@@ -136,11 +136,11 @@ namespace Denn
 	};
 
 	template < typename ScalarType >
-	inline DataType GetDataType(){ return DataType::DT_UNKNOWN; }
+	inline DataType get_data_type(){ return DataType::DT_UNKNOWN; }
 	template <>
-	inline DataType GetDataType<float>(){ return DataType::DT_FLOAT; }
+	inline DataType get_data_type<float>(){ return DataType::DT_FLOAT; }
 	template <>
-	inline DataType GetDataType<double>(){ return DataType::DT_DOUBLE; }
+	inline DataType get_data_type<double>(){ return DataType::DT_DOUBLE; }
 	template <>
-	inline DataType GetDataType<long double>(){ return DataType::DT_LONG_DOUBLE; }
+	inline DataType get_data_type<long double>(){ return DataType::DT_LONG_DOUBLE; }
 }

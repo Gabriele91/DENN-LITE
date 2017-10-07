@@ -83,7 +83,7 @@ namespace Denn
             return m_labels.cols();
         }
 
-		virtual DataType get_data_type() const { return Denn::GetDataType<ScalarType>();  }
+		virtual DataType get_data_type() const { return Denn::get_data_type<ScalarType>();  }
 	};
 
 	using DataSetScalar = DataSetX<Scalar>;
