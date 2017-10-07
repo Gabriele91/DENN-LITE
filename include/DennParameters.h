@@ -220,7 +220,7 @@ namespace Denn
 		read_only<bool>	                 m_restart_enable{ "restart_enable", bool(false), false };
 		read_only<long>	                 m_restart_count { "restart_count", size_t(-1)    };
 		read_only<Scalar>	             m_restart_delta { "restart_delta", Scalar(0.001) };
-		read_only<int>	                 m_threads_omp   { "threads_omp", size_t(2) };
+		read_only<size_t>	             m_threads_omp   { "threads_omp", size_t(2) };
 		read_only<size_t>	             m_threads_pop   { "threads_pop", size_t(2) };		
 		read_only<size_t>	             m_history_size  { "history_size", size_t(1) };
 		read_only<std::string>           m_mutation_type { "mutation","rand/1" };
@@ -229,7 +229,7 @@ namespace Denn
 		read_only<std::string>           m_sub_evolution_type{ "sub_evolution_method","JDE" };
 		read_only<Scalar>					   m_learning_rate		   { "learning_rate", Scalar(0.05) };
 		read_only<Scalar>					   m_regularize			   { "regularize", Scalar(0.0) };
-		read_only< std::vector<int> >          m_hidden_layers         { "hidden_layers"         /* , none */ };
+		read_only< std::vector<unsigned int> > m_hidden_layers         { "hidden_layers"         /* , none */ };
 		read_only< std::vector<std::string> >  m_active_functions      { "active_functions"      /* , none */ };
 		read_only< std::string >               m_output_active_function{ "output_active_function" ,  "softmax" };
 

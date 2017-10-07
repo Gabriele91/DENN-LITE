@@ -39,8 +39,8 @@ int main(int argc,const char** argv)
 	#ifdef EIGEN_HAS_OPENMP
 	if (*arguments.m_threads_omp)
 	{
-		omp_set_num_threads(*arguments.m_threads_omp);
-		Eigen::setNbThreads(*arguments.m_threads_omp);
+		omp_set_num_threads((int)*arguments.m_threads_omp);
+		Eigen::setNbThreads((int)*arguments.m_threads_omp);
 		Eigen::initParallel();
 	}
 	#endif

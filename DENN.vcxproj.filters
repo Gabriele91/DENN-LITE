@@ -108,6 +108,9 @@
     <ClInclude Include="include\DennMainUtils.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="include\DennDump.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\TicksTime.cpp">

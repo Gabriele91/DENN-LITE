@@ -5,6 +5,8 @@
 #include "DennEvolutionMethod.h"
 #include "DennRuntimeOutput.h"
 #include "DennSerializeOutput.h"
+#include "DennDump.h"
+
 namespace Denn
 {
     Arguments::Arguments(int nargs, const char** vargs)
@@ -52,33 +54,40 @@ namespace Denn
     template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<char>()                        { return "string"; }
     template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< const char* >()               { return "string"; }
     template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::string >()               { return "string"; }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector< std::string > >(){ return "list string"; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector< std::string > >(){ return "list(string)"; }
     
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<short>()    { return "integer"; }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<int>()      { return "integer"; }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<long>()     { return "integer"; }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<long long>(){ return "integer"; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<short>()    { return "int"; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<int>()      { return "int"; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<long>()     { return "int"; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<long long>(){ return "int"; }
     
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<unsigned short>()    { return "unsigned integer"; }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<unsigned int>()      { return "unsigned integer"; }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<unsigned long>()     { return "unsigned integer"; }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<unsigned long long>(){ return "unsigned integer"; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<unsigned short>()    { return "uint"; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<unsigned int>()      { return "uint"; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<unsigned long>()     { return "uint"; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<unsigned long long>(){ return "uint"; }
     
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<float>()      { return "number"; }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<double>()     { return "number"; }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<long double>(){ return "number"; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<float>()      { return "float"; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<double>()     { return "float"; }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<long double>(){ return "float"; }
     
     template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<MatrixF>() { return "matrix"; }
     template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<MatrixD>() { return "matrix"; }
     template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<MatrixLD>(){ return "matrix"; }
-    
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<int> >()        { return "list integer"; }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<float> >()      { return "list number";  }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<double> >()     { return "list number";  }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<long double> >(){ return "list number";  }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<MatrixF> >()    { return "list matrix";  }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<MatrixD> >()    { return "list matrix";  }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<MatrixLD> >()   { return "list matrix";  }
+
+	template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<short> >()		  { return "list(int)"; }
+	template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<int> >()		  { return "list(int)"; }
+	template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<long> >()		  { return "list(int)"; }
+	template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<long long> >()	  { return "list(int)"; }
+	template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<unsigned short> >()		  { return "list(uint)"; }
+	template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<unsigned int> >()		  { return "list(uint)"; }
+	template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<unsigned long> >()		  { return "list(uint)"; }
+	template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<unsigned long long> >()	  { return "list(uint)"; }
+	template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<float> >()        { return "list(float)";  }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<double> >()       { return "list(float)";  }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<long double> >()  { return "list(float)";  }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<MatrixF> >()      { return "list(matrix)";  }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<MatrixD> >()      { return "list(matrix)";  }
+    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<MatrixLD> >()     { return "list(matrix)";  }
     
     
     Parameters::Parameters() 
@@ -502,70 +511,7 @@ namespace Denn
         s_out << std::endl;
         return s_out.str();
     }
-
-    static std::string json_string(const std::string& str)
-    {
-        //copy ptr
-        const char *tmp = str.c_str();
-        //start '"'
-        std::string out = "\"";
-        //push all chars
-        while (*tmp)
-        {
-            switch (*tmp)
-            {
-                case '\n':
-                    out += "\\n";
-                    break;
-                case '\t':
-                    out += "\\t";
-                    break;
-                case '\b':
-                    out += "\\b";
-                    break;
-                case '\r':
-                    out += "\\r";
-                    break;
-                case '\f':
-                    out += "\\f";
-                    break;
-                case '\a':
-                    out += "\\a";
-                    break;
-                case '\\':
-                    out += "\\\\";
-                    break;
-                case '\?':
-                    out += "\\?";
-                    break;
-                case '\'':
-                    out += "\\\'";
-                    break;
-                case '\"':
-                    out += "\\\"";
-                    break;
-                default:
-                    out += *tmp;
-                    break;
-            }
-            ++tmp;
-        }
-        return out+"\"";
-    }
-    
-    static std::string json_array_of_strings(const std::vector< std::string >& str_list)
-    {
-        if(!str_list.size()) return "[]";
-        //concanate names
-        std::stringstream s_out;
-        s_out << "[";
-        for(size_t i = 0; i!=str_list.size()-1; ++i) s_out << json_string(str_list[i]) << ", ";
-        s_out << json_string(str_list.back());
-        s_out << "]";
-        //end
-        return s_out.str();
-    }
-    
+	    
     std::string Parameters::make_help_json() const
     {
         std::stringstream s_out;
@@ -579,17 +525,17 @@ namespace Denn
             
             if(i) s_out << ",\n";
             s_out << arg_space << "{\n";
-            s_out << arg_space << in_arg_inspace << "\"name\"" << " : " << json_string(param.m_associated_variable->name()) << ",\n";
-            s_out << arg_space << in_arg_inspace << "\"args:\"" << " : " << json_array_of_strings(param.m_arg_key) << ",\n";
-            s_out << arg_space << in_arg_inspace << "\"description\"" << " : " << json_string(param.m_description) << ",\n";
+            s_out << arg_space << in_arg_inspace << "\"name\"" << " : "	<< Dump::json_string(param.m_associated_variable->name()) << ",\n";
+            s_out << arg_space << in_arg_inspace << "\"args:\"" << " : " << Dump::json_array<std::string>(param.m_arg_key) << ",\n";
+            s_out << arg_space << in_arg_inspace << "\"description\"" << " : " << Dump::json_string(param.m_description) << ",\n";
             s_out << arg_space << in_arg_inspace << "\"domain\"" << " : ";
             switch (param.m_domain.m_type)
             {
                 case ParameterDomain::MONO:
-                    s_out << json_string(param.m_domain.m_domain) << "\n";
+                    s_out << Dump::json_string(param.m_domain.m_domain) << "\n";
                 break;
                 case ParameterDomain::CHOISE:
-                    s_out << json_array_of_strings(param.m_domain.m_choises) << "\n";
+                    s_out << Dump::json_array<std::string>(param.m_domain.m_choises) << "\n";
                 break;
                 default:
                     s_out << " null "<< "\n";

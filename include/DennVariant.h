@@ -45,7 +45,14 @@ namespace Denn
 		VR_INDIVIDUAL,
 		VR_POPULATION,
 
+		VR_STD_VECTOR_SHORT,
 		VR_STD_VECTOR_INT,
+		VR_STD_VECTOR_LONG,
+		VR_STD_VECTOR_LONGLONG,
+		VR_STD_VECTOR_USHORT,
+		VR_STD_VECTOR_UINT,
+		VR_STD_VECTOR_ULONG,
+		VR_STD_VECTOR_ULONGLONG,
 		VR_STD_VECTOR_FLOAT,
 		VR_STD_VECTOR_DOUBLE,
 		VR_STD_VECTOR_LONG_DOUBLE,
@@ -88,7 +95,16 @@ namespace Denn
 	template <> inline VariantType static_variant_type<Individual>() { return VR_INDIVIDUAL; };
 	template <> inline VariantType static_variant_type<Population>() { return VR_POPULATION; };
 
-	template <> inline VariantType static_variant_type< std::vector< int > >()      { return VR_STD_VECTOR_INT; };
+	template <> inline VariantType static_variant_type< std::vector< short > >() { return VR_STD_VECTOR_SHORT; };
+	template <> inline VariantType static_variant_type< std::vector< int > >() { return VR_STD_VECTOR_INT; };
+	template <> inline VariantType static_variant_type< std::vector< long > >() { return VR_STD_VECTOR_LONG; };
+	template <> inline VariantType static_variant_type< std::vector< long long > >() { return VR_STD_VECTOR_LONGLONG; };
+
+	template <> inline VariantType static_variant_type< std::vector< unsigned short > >() { return VR_STD_VECTOR_USHORT; };
+	template <> inline VariantType static_variant_type< std::vector< unsigned int > >() { return VR_STD_VECTOR_UINT; };
+	template <> inline VariantType static_variant_type< std::vector< unsigned long > >() { return VR_STD_VECTOR_ULONG; };
+	template <> inline VariantType static_variant_type< std::vector< unsigned long long > >() { return VR_STD_VECTOR_ULONGLONG; };
+
 	template <> inline VariantType static_variant_type< std::vector< float > >() { return VR_STD_VECTOR_FLOAT; };
 	template <> inline VariantType static_variant_type< std::vector< double > >() { return VR_STD_VECTOR_DOUBLE; };
 	template <> inline VariantType static_variant_type< std::vector< long double > >() { return VR_STD_VECTOR_LONG_DOUBLE; };
@@ -240,10 +256,52 @@ namespace Denn
 			*((Population *)(m_ptr)) = pop;
 		}
 
+		Variant(const std::vector< short > & v_s)
+		{
+			set_type(VR_STD_VECTOR_SHORT);
+			*((std::vector< short >*)(m_ptr)) = v_s;
+		}
+
 		Variant(const std::vector< int > & v_i)
 		{
 			set_type(VR_STD_VECTOR_INT);
 			*((std::vector< int >*)(m_ptr)) = v_i;
+		}
+
+		Variant(const std::vector< long > & v_l)
+		{
+			set_type(VR_STD_VECTOR_LONG);
+			*((std::vector< long >*)(m_ptr)) = v_l;
+		}
+
+		Variant(const std::vector< long long > & v_ll)
+		{
+			set_type(VR_STD_VECTOR_LONGLONG);
+			*((std::vector< long long >*)(m_ptr)) = v_ll;
+		}
+
+		Variant(const std::vector< unsigned short > & v_us)
+		{
+			set_type(VR_STD_VECTOR_USHORT);
+			*((std::vector< unsigned short >*)(m_ptr)) = v_us;
+		}
+
+		Variant(const std::vector< unsigned int > & v_ui)
+		{
+			set_type(VR_STD_VECTOR_UINT);
+			*((std::vector< unsigned int >*)(m_ptr)) = v_ui;
+		}
+
+		Variant(const std::vector< unsigned long > & v_ul)
+		{
+			set_type(VR_STD_VECTOR_ULONG);
+			*((std::vector< unsigned long >*)(m_ptr)) = v_ul;
+		}
+
+		Variant(const std::vector< unsigned long long > & v_ull)
+		{
+			set_type(VR_STD_VECTOR_ULONGLONG);
+			*((std::vector< unsigned long long >*)(m_ptr)) = v_ull;
 		}
 
 		Variant(const std::vector< float > & v_f)
@@ -373,7 +431,14 @@ namespace Denn
 			case VR_POPULATION:
 			case VR_C_STRING:
 			case VR_STD_STRING:
+			case VR_STD_VECTOR_SHORT:
 			case VR_STD_VECTOR_INT:
+			case VR_STD_VECTOR_LONG:
+			case VR_STD_VECTOR_LONGLONG:
+			case VR_STD_VECTOR_USHORT:
+			case VR_STD_VECTOR_UINT:
+			case VR_STD_VECTOR_ULONG:
+			case VR_STD_VECTOR_ULONGLONG:
 			case VR_STD_VECTOR_FLOAT:
 			case VR_STD_VECTOR_DOUBLE:
 			case VR_STD_VECTOR_LONG_DOUBLE:
@@ -408,8 +473,29 @@ namespace Denn
 			case VR_INDIVIDUAL:		   get<Individual>() = (const Individual&)in; break;
 			case VR_POPULATION:		   get<Population>() = (const Population&)in; break;
 
+			case VR_STD_VECTOR_SHORT:
+				get< std::vector<short> >() = (const std::vector<short>&)in;
+				break;
 			case VR_STD_VECTOR_INT:
 				get< std::vector<int> >() = (const std::vector<int>&)in;
+				break;
+			case VR_STD_VECTOR_LONG:
+				get< std::vector<long> >() = (const std::vector<long>&)in;
+				break;
+			case VR_STD_VECTOR_LONGLONG:
+				get< std::vector<long long> >() = (const std::vector<long long>&)in;
+				break;
+			case VR_STD_VECTOR_USHORT:
+				get< std::vector<unsigned short> >() = (const std::vector<unsigned short>&)in;
+				break;
+			case VR_STD_VECTOR_UINT:
+				get< std::vector<unsigned int> >() = (const std::vector<unsigned int>&)in;
+				break;
+			case VR_STD_VECTOR_ULONG:
+				get< std::vector<unsigned long> >() = (const std::vector<unsigned long>&)in;
+				break;
+			case VR_STD_VECTOR_ULONGLONG:
+				get< std::vector<unsigned long long> >() = (const std::vector<unsigned long long>&)in;
 				break;
 			case VR_STD_VECTOR_FLOAT:
 				get< std::vector<float> >() = (const std::vector<float>&)in;
@@ -483,7 +569,14 @@ namespace Denn
 			case VR_INDIVIDUAL:		   delete (Individual*)(m_ptr); break;
 			case VR_POPULATION:		   delete (Population*)(m_ptr); break;
 
+			case VR_STD_VECTOR_SHORT:    delete (std::vector<short>*)m_ptr;    break;
 			case VR_STD_VECTOR_INT:    delete (std::vector<int>*)m_ptr;    break;
+			case VR_STD_VECTOR_LONG:    delete (std::vector<long>*)m_ptr;    break;
+			case VR_STD_VECTOR_LONGLONG:    delete (std::vector<long long>*)m_ptr;    break;
+			case VR_STD_VECTOR_USHORT:    delete (std::vector<unsigned short>*)m_ptr;    break;
+			case VR_STD_VECTOR_UINT:    delete (std::vector<unsigned int>*)m_ptr;    break;
+			case VR_STD_VECTOR_ULONG:    delete (std::vector<unsigned long>*)m_ptr;    break;
+			case VR_STD_VECTOR_ULONGLONG:    delete (std::vector<unsigned long long>*)m_ptr;    break;
 			case VR_STD_VECTOR_FLOAT:  delete (std::vector<float>*)m_ptr;  break;
 			case VR_STD_VECTOR_DOUBLE:  delete (std::vector<double>*)m_ptr;  break;
 			case VR_STD_VECTOR_LONG_DOUBLE:  delete (std::vector<long double>*)m_ptr;  break;
@@ -508,7 +601,14 @@ namespace Denn
 			case VR_INDIVIDUAL:			        m_ptr = new Individual; break;
 			case VR_POPULATION:		            m_ptr = new Population; break;
 
+			case VR_STD_VECTOR_SHORT:           m_ptr = new std::vector<short>;      break;
 			case VR_STD_VECTOR_INT:             m_ptr = new std::vector<int>;	     break;
+			case VR_STD_VECTOR_LONG:            m_ptr = new std::vector<long>;       break;
+			case VR_STD_VECTOR_LONGLONG:        m_ptr = new std::vector<long long>;	 break;
+			case VR_STD_VECTOR_USHORT:          m_ptr = new std::vector<unsigned short>;     break;
+			case VR_STD_VECTOR_UINT:            m_ptr = new std::vector<unsigned int>;	     break;
+			case VR_STD_VECTOR_ULONG:           m_ptr = new std::vector<unsigned long>;      break;
+			case VR_STD_VECTOR_ULONGLONG:       m_ptr = new std::vector<unsigned long long>; break;
 			case VR_STD_VECTOR_FLOAT:           m_ptr = new std::vector<float>;	     break;
 			case VR_STD_VECTOR_DOUBLE:          m_ptr = new std::vector<double>;     break;
 			case VR_STD_VECTOR_LONG_DOUBLE:     m_ptr = new std::vector<long double>;break;
@@ -648,10 +748,52 @@ namespace Denn
 			m_type = VR_POPULATION;
 		}
 
+		VariantRef(const std::vector< short > & v_s)
+		{
+			m_ptr = (void*)&v_s;
+			m_type = VR_STD_VECTOR_SHORT;
+		}
+
 		VariantRef(const std::vector< int > & v_i)
 		{
 			m_ptr = (void*)&v_i;
 			m_type = VR_STD_VECTOR_INT;
+		}
+
+		VariantRef(const std::vector< long > & v_l)
+		{
+			m_ptr = (void*)&v_l;
+			m_type = VR_STD_VECTOR_LONG;
+		}
+
+		VariantRef(const std::vector< long long > & v_ll)
+		{
+			m_ptr = (void*)&v_ll;
+			m_type = VR_STD_VECTOR_LONGLONG;
+		}		
+		
+		VariantRef(const std::vector< unsigned short > & v_us)
+		{
+			m_ptr = (void*)&v_us;
+			m_type = VR_STD_VECTOR_USHORT;
+		}
+
+		VariantRef(const std::vector< unsigned int > & v_ui)
+		{
+			m_ptr = (void*)&v_ui;
+			m_type = VR_STD_VECTOR_UINT;
+		}
+
+		VariantRef(const std::vector< unsigned long > & v_ul)
+		{
+			m_ptr = (void*)&v_ul;
+			m_type = VR_STD_VECTOR_ULONG;
+		}
+
+		VariantRef(const std::vector< unsigned long long > & v_ull)
+		{
+			m_ptr = (void*)&v_ull;
+			m_type = VR_STD_VECTOR_ULONGLONG;
 		}
 
 		VariantRef(const std::vector< float > & v_f)
@@ -791,7 +933,14 @@ namespace Denn
 		case VariantType::VR_INDIVIDUAL:         (*this) = ref.get<Individual>(); break;
 		case VariantType::VR_POPULATION:         (*this) = ref.get<Population>(); break;
 
+		case VariantType::VR_STD_VECTOR_SHORT:             (*this) = ref.get< std::vector<short> >(); break;
 		case VariantType::VR_STD_VECTOR_INT:               (*this) = ref.get< std::vector<int> >(); break;
+		case VariantType::VR_STD_VECTOR_LONG:              (*this) = ref.get< std::vector<long> >(); break;
+		case VariantType::VR_STD_VECTOR_LONGLONG:          (*this) = ref.get< std::vector<long long> >(); break;
+		case VariantType::VR_STD_VECTOR_USHORT:            (*this) = ref.get< std::vector<unsigned short> >(); break;
+		case VariantType::VR_STD_VECTOR_UINT:              (*this) = ref.get< std::vector<unsigned int> >(); break;
+		case VariantType::VR_STD_VECTOR_ULONG:             (*this) = ref.get< std::vector<unsigned long> >(); break;
+		case VariantType::VR_STD_VECTOR_ULONGLONG:         (*this) = ref.get< std::vector<unsigned long long> >(); break;
 		case VariantType::VR_STD_VECTOR_FLOAT:             (*this) = ref.get< std::vector<float> >(); break;
 		case VariantType::VR_STD_VECTOR_DOUBLE:            (*this) = ref.get< std::vector<double> >(); break;
 		case VariantType::VR_STD_VECTOR_LONG_DOUBLE:       (*this) = ref.get< std::vector<long double> >(); break;

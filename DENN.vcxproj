@@ -28,6 +28,7 @@
     <ClInclude Include="include\DennAlgorithm.h" />
     <ClInclude Include="include\DennCrossover.h" />
     <ClInclude Include="include\DennDataSet.h" />
+    <ClInclude Include="include\DennDump.h" />
     <ClInclude Include="include\DennEvolutionMethod.h" />
     <ClInclude Include="include\DennFilesystem.h" />
     <ClInclude Include="include\DennIndividual.h" />
