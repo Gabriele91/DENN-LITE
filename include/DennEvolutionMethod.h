@@ -67,7 +67,7 @@ namespace Denn
 		static void append(const std::string& name, CreateObject fun, size_t size);
 
 		//list of methods
-		static std::vector< std::string > list_of_of_evolution_methods();
+		static std::vector< std::string > list_of_evolution_methods();
 		static std::string names_of_evolution_methods(const std::string& sep = ", ");
 
 		//info

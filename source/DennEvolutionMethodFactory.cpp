@@ -46,7 +46,7 @@ namespace Denn
 		m_cmap->operator[](name) = fun;
 	}
 	//list of methods
-	std::vector< std::string > EvolutionMethodFactory::list_of_of_evolution_methods()
+	std::vector< std::string > EvolutionMethodFactory::list_of_evolution_methods()
 	{
 		std::vector< std::string > list;
 		for (const auto & pair : *m_cmap) list.push_back(pair.first);
@@ -55,7 +55,7 @@ namespace Denn
 	std::string  EvolutionMethodFactory::names_of_evolution_methods(const std::string& sep)
 	{
 		std::stringstream sout;
-		auto list = list_of_of_evolution_methods();
+		auto list = list_of_evolution_methods();
 		std::copy(list.begin(), list.end() - 1, std::ostream_iterator<std::string>(sout, sep.c_str()));
 		sout << *(list.end() - 1);
 		return sout.str();

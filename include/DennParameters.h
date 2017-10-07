@@ -96,13 +96,42 @@ namespace Denn
 
 		};
 
+        struct ParameterDomain
+        {
+            enum TypeDomain
+            {
+                NONE,
+                MONO,
+                CHOISE,
+            };
+            TypeDomain  m_type   {  NONE  };
+            std::string m_domain { "void" };
+            std::vector< std::string > m_choises;
+            
+            ParameterDomain(){}
+            
+            ParameterDomain(const std::string& domain)
+            : m_type(MONO)
+            , m_domain(domain)
+            {
+            }
+            
+            ParameterDomain(const std::string& domain, const std::vector< std::string > choises)
+            : m_type(CHOISE)
+            , m_domain(domain)
+            , m_choises(choises)
+            {
+            }
+        };
+        
 		struct ParameterInfo
 		{
+            
 			const generic_read_only*		  m_associated_variable;
 			std::string				   		  m_description;
 			std::vector< std::string  > 	  m_arg_key;
 			std::function< bool(Arguments&) > m_action;
-            std::string                       m_domain;
+            ParameterDomain                   m_domain;
             
 
 			ParameterInfo() { }
@@ -112,7 +141,8 @@ namespace Denn
 						  , const std::string&				   	description
 						  , const std::vector< std::string  >& 	arg_key
 						  , std::function< bool(Arguments&) >   action
-                          , const std::string&                  domain = cpp_type_to_arg_type<T>() )
+                          , const ParameterDomain&              domain = ParameterDomain(cpp_type_to_arg_type<T>())
+                          )
 			: m_associated_variable(&associated_variable)
 			, m_description(description)
 			, m_arg_key(arg_key)
@@ -124,7 +154,7 @@ namespace Denn
 			ParameterInfo(  const std::string&				   	description
 						  , const std::vector< std::string  >& 	arg_key
 						  , std::function< bool(Arguments&) >   action
-                          , const std::string&                  domain = std::string()
+                          , const ParameterDomain&              domain = ParameterDomain(std::string())
                           )
 			: m_associated_variable(nullptr)
 			, m_description(description)
@@ -216,7 +246,7 @@ namespace Denn
 		static bool compare_n_args(const std::vector< std::string >& keys, const char* arg);
 		static std::string return_n_space(size_t n);
 		std::string make_help() const;
-
+        std::string make_help_json() const;
 
 	};
 
