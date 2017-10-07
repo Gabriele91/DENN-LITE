@@ -43,10 +43,12 @@
     <ClInclude Include="include\DennRuntimeOutput.h" />
     <ClInclude Include="include\DennSerializeOutput.h" />
     <ClInclude Include="include\DennVariant.h" />
+    <ClInclude Include="include\DennVersion.h" />
     <ClInclude Include="include\IOFileWrapper.h" />
     <ClInclude Include="include\DennRandom.h" />
     <ClInclude Include="include\ThreadPool.h" />
     <ClInclude Include="include\TicksTime.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\DennActiveFunctionFactory.cpp" />
@@ -88,6 +90,9 @@
     <None Include="README.md" />
     <None Include="tests\run_bench.sh" />
     <None Include="tests\windows_space_to_unix.py" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="DENN.rc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>15.0</VCProjectVersion>

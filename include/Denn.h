@@ -4,6 +4,7 @@
 #include  "Config.h"
 #include  "TicksTime.h"
 #include  "IOFileWrapper.h"
+#include  "DennVersion.h"
 #include  "DennConstants.h"
 #include  "DennRandom.h"
 

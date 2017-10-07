@@ -111,6 +111,12 @@
     <ClInclude Include="include\DennDump.h">
       <Filter>File di intestazione</Filter>
     </ClInclude>
+    <ClInclude Include="include\DennVersion.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>File di intestazione</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\TicksTime.cpp">
@@ -226,5 +232,10 @@
     <None Include="tests\job_manager\manager.py">
       <Filter>File di risorse\python\job_manager</Filter>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="DENN.rc">
+      <Filter>File di risorse</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

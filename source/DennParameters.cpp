@@ -6,6 +6,7 @@
 #include "DennRuntimeOutput.h"
 #include "DennSerializeOutput.h"
 #include "DennDump.h"
+#include "DennVersion.h"
 
 namespace Denn
 {
@@ -413,6 +414,10 @@ namespace Denn
         ParameterInfo{
             "Print the json help", { "--jhelp",    "-jh"  },
             [this](Arguments& args) -> bool { std::cout << make_help_json();  return true; }
+        },
+        ParameterInfo{
+            "Displays the program's version", { "--version",    "-v"  },
+            [this](Arguments& args) -> bool { std::cout << "version: " << DENN_VER_STR;  return true; }
         }
     })
     {
