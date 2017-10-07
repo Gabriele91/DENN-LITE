@@ -48,7 +48,6 @@
     <ClInclude Include="include\DennRandom.h" />
     <ClInclude Include="include\ThreadPool.h" />
     <ClInclude Include="include\TicksTime.h" />
-    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\DennActiveFunctionFactory.cpp" />
