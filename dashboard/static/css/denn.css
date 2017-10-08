@@ -1,0 +1,8 @@
+@font-face {
+    font-family: DENNProject;
+    src: url(../fonts/LinBiolinum_R.woff);
+}
+  
+body {
+    font-family: DENNProject;
+}
