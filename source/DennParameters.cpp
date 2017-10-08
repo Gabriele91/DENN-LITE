@@ -111,6 +111,18 @@ namespace Denn
             [this](Arguments& args) -> bool { m_seed = args.get_int() ; return true; }
         },
         ParameterInfo{
+            m_batch_size, "Batch size", { "--" + m_batch_size.name(), "-b" },
+            [this](Arguments& args) -> bool 
+			{
+				m_batch_size = args.get_int();
+				return true; 
+			}
+        },
+        ParameterInfo{
+            m_batch_offset, "Batch offset, how many records will be replaced in the next batch [<= batch size]", { "--" + m_batch_offset.name(), "-bo" },
+            [this](Arguments& args) -> bool {  m_batch_offset = args.get_int();  return true; }
+        },
+        ParameterInfo{
             m_evolution_type, "Type of evolution method [" + EvolutionMethodFactory::names_of_evolution_methods() + "]", { "--" + m_evolution_type.name(), "--evolution",    "-em"  },
             [this](Arguments& args) -> bool  
             { 

@@ -10,6 +10,7 @@
 #include "DennCrossover.h"
 #include "DennEvolutionMethod.h"
 #include "DennRuntimeOutput.h"
+#include "DennTestSetStream.h"
 
 namespace Denn
 {
@@ -150,15 +151,13 @@ public:
 
 	const DataSetScalar& current_batch() const
 	{
-		return m_dataset_batch;
+		return m_dataset_batch.last_batch();
 	}
 
 protected:
 	//init
 	bool init();
 	bool init_population();
-	/////////////////////////////////////////////////////////////////
-	void execute_backpropagation(size_t pass, size_t n_sub_pass, Scalar learning_rate, Scalar regularize);
 	/////////////////////////////////////////////////////////////////
 	//tests (validation)
 	bool serial_find_best_on_validation(size_t& out_i, Scalar& out_eval);
@@ -203,7 +202,7 @@ protected:
 	//dataset
 	Individual::SPtr      m_default;
 	DataSetLoader*		  m_dataset_loader;
-	DataSetScalar	      m_dataset_batch;
+	TestSetStream         m_dataset_batch;
 	//Execution Context
 	BestContext		      m_best_ctx;
 	RestartContext		  m_restart_ctx;

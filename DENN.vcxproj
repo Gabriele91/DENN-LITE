@@ -28,6 +28,7 @@
     <ClInclude Include="include\DennAlgorithm.h" />
     <ClInclude Include="include\DennCrossover.h" />
     <ClInclude Include="include\DennDataSet.h" />
+    <ClInclude Include="include\DennTestSetStream.h" />
     <ClInclude Include="include\DennDump.h" />
     <ClInclude Include="include\DennEvolutionMethod.h" />
     <ClInclude Include="include\DennFilesystem.h" />
@@ -50,6 +51,7 @@
     <ClInclude Include="include\TicksTime.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="include\DennTestSetStream.cpp" />
     <ClCompile Include="source\DennActiveFunctionFactory.cpp" />
     <ClCompile Include="source\DennActiveFunctionItems.cpp" />
     <ClCompile Include="source\DennAlgorithm.cpp" />

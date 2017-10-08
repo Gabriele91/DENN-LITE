@@ -110,6 +110,36 @@ namespace Denn
 		}
 		return str;
 	}
+
+	template < typename Matrix >
+	Matrix shift_by_rows(const Matrix& in, typename Matrix::Index down)
+	{
+		//no swift
+		if (!down) return in;
+		//result
+		Matrix out(in.rows(), in.cols());
+		//mod
+		if (down > 0) down = down % in.rows();
+		else down = in.rows() - (-down % in.rows());
+		int rest = in.rows() - down;
+		//shif
+		out.topRows(down)	 = in.bottomRows(down);
+		out.bottomRows(rest) = in.topRows(rest);
+		//return
+		return out;
+	}
+
+	template < typename Matrix >
+	bool append_rows(Matrix& matrix, const Matrix& rows_to_append)
+	{
+		if (matrix.cols() != rows_to_append.cols()) return false;
+		//alloc
+		mat.conservativeResize(mat.rows() + rows_to_append.rows(), mat.cols());
+		//copy
+		out.bottomRows(rows_to_append.rows()) = rows_to_append;
+		//return
+		return true;
+	}
 }
 
 //Debug

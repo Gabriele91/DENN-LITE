@@ -181,6 +181,8 @@ namespace Denn
 		};
 
 		read_only<std::string>			m_dataset_filename        { "dataset" };
+		read_only<size_t>			    m_batch_size			  { "batch_size", size_t(100) };
+		read_only<size_t>			    m_batch_offset			  { "batch_offset", size_t(0) };
 		read_only<std::string> 			m_output_filename         { "output"  };
 		read_only<std::string>		    m_runtime_output_type     { "runtime_output",            "bench",    true /* false? */ };
 		read_only<std::string>		    m_runtime_output_file     { "runtime_output_file",            "",    true /* false? */ };

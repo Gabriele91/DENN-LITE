@@ -21,6 +21,7 @@ namespace Denn
 		, nn_default
 		))
 	, m_dataset_loader(dataset_loader)
+	, m_dataset_batch(dataset_loader)
 	, m_thpool(thpool)
 	, m_params(params)
 	{
@@ -31,10 +32,11 @@ namespace Denn
 	{
 		//success flag
 		bool success = m_dataset_loader != nullptr;
-		//init db
-		success &= m_dataset_loader->start_read_batch();
-		//batch
-		success &= m_dataset_loader->read_batch(m_dataset_batch);
+		//init test set
+		if(*m_params.m_batch_offset <= 0)
+			m_dataset_batch.start_read_batch(*m_params.m_batch_size, *m_params.m_batch_size);
+		else
+			m_dataset_batch.start_read_batch(*m_params.m_batch_size, *m_params.m_batch_offset);
 		//init random engine
 		m_main_random.reinit(*m_params.m_seed);
 		//gen random function
@@ -63,7 +65,7 @@ namespace Denn
 		(
 			np,
 			m_default,
-			m_dataset_batch,
+			current_batch(),
 			m_random_function,
 			m_target_function
 		);
@@ -135,40 +137,6 @@ namespace Denn
 		Scalar eval = Denn::CostFunction::accuracy(test.m_labels, y);
 		//return
 		return eval;
-	}
-	/////////////////////////////////////////////////////////////////
-	void DennAlgorithm::execute_backpropagation(size_t pass, size_t n_sub_pass, Scalar learning_rate, Scalar regularize)
-	{
-		///////////////////////////////////////////////////////////////////
-		//output
-		if (m_output) m_output->start_a_pass();
-		//sub pass
-		for (size_t sub_pass = 0; sub_pass != n_sub_pass; ++sub_pass)
-		{
-			//output
-			if (m_output) m_output->start_a_sub_pass();
-			//pass
-			m_best_ctx.m_best->m_network.backpropagation_with_sgd
-			(
-				[](const Matrix& predict, const Matrix& y)
-				{
-					return predict - y;
-				}
-				, m_dataset_batch.m_features
-				, m_dataset_batch.m_labels
-				, learning_rate
-				, regularize
-			);
-			//update eval
-			auto y = m_best_ctx.m_best->m_network.apply(m_dataset_batch.m_features);
-			m_best_ctx.m_eval		  =
-			m_best_ctx.m_best->m_eval = m_target_function(m_dataset_batch.m_labels, y);
-			//TODO, COMPUTE ERROR BACKPROPAGATION
-			//output
-			if (m_output) m_output->end_a_sub_pass();
-		}
-		//output
-		if (m_output) m_output->end_a_pass();
 	}
 	/////////////////////////////////////////////////////////////////
 	//test
@@ -347,7 +315,7 @@ namespace Denn
 				  m_best_ctx.m_best					     //best
 				, main_random().index_rand(current_np()) //where put
 				, m_default							     //default individual
-				, m_dataset_batch						 //current batch
+				, current_batch()						 //current batch
 				, m_random_function				         //random generator
 				, m_target_function				         //fitness function	  
 			);
@@ -410,8 +378,8 @@ namespace Denn
 		//Compute new individual
 		m_e_method->create_a_individual(m_population, i, *new_son);
 		//eval
-		auto y = new_son->m_network.apply(m_dataset_batch.m_features);
-		new_son->m_eval = m_target_function(m_dataset_batch.m_labels, y);
+		auto y = new_son->m_network.apply(current_batch().m_features);
+		new_son->m_eval = m_target_function(current_batch().m_labels, y);
 	}
 	
 	/////////////////////////////////////////////////////////////////
@@ -436,8 +404,8 @@ namespace Denn
 			//ref to target
 			auto& i_target = *population[i];
 			//eval
-			auto y = i_target.m_network.apply(m_dataset_batch.m_features);
-			i_target.m_eval = m_target_function(m_dataset_batch.m_labels, y);
+			auto y = i_target.m_network.apply(current_batch().m_features);
+			i_target.m_eval = m_target_function(current_batch().m_labels, y);
 			//safe
 			if (std::isnan(i_target.m_eval))
 				i_target.m_eval = std::numeric_limits<Scalar>::max();
@@ -458,8 +426,8 @@ namespace Denn
 			m_promises[i] = thpool.push_task([this,&i_target]()
 			{
 				//test
-				auto y = i_target.m_network.apply(m_dataset_batch.m_features);
-				i_target.m_eval = m_target_function(m_dataset_batch.m_labels, y);
+				auto y = i_target.m_network.apply(current_batch().m_features);
+				i_target.m_eval = m_target_function(current_batch().m_labels, y);
 				//safe
 				if (std::isnan(i_target.m_eval))
 					i_target.m_eval = std::numeric_limits<Scalar>::max();
@@ -493,7 +461,8 @@ namespace Denn
 	//load next batch
 	bool DennAlgorithm::next_batch()
 	{
-		return m_dataset_loader->read_batch(m_dataset_batch);
+		m_dataset_batch.read_batch();
+		return true;
 	}
 	/////////////////////////////////////////////////////////////////
 
