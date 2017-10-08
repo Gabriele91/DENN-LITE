@@ -51,7 +51,6 @@
     <ClInclude Include="include\TicksTime.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="include\DennTestSetStream.cpp" />
     <ClCompile Include="source\DennActiveFunctionFactory.cpp" />
     <ClCompile Include="source\DennActiveFunctionItems.cpp" />
     <ClCompile Include="source\DennAlgorithm.cpp" />
@@ -73,6 +72,7 @@
     <ClCompile Include="source\DennRuntimeOutputItems.cpp" />
     <ClCompile Include="source\DennSerializaOutputFactory.cpp" />
     <ClCompile Include="source\DennSerializeOutputItems.cpp" />
+    <ClCompile Include="source\DennTestSetStream.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\DennRandom.cpp" />
     <ClCompile Include="source\TicksTime.cpp" />
