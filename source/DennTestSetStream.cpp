@@ -48,6 +48,7 @@ namespace Denn
 		const size_t c_labels = m_dataset->get_main_header_info().m_n_classes;
 		size_t offset = 0;
 		size_t n_read = 0;
+		#if 0
 		//swift
 		if (n_rows < m_batch.m_features.rows())
 		{
@@ -57,6 +58,16 @@ namespace Denn
 			//start to n_rows
 			offset = n_rows;
 		}
+		#else 
+		if (n_rows < m_batch.m_features.rows())
+		{
+			//put the last N values on the top
+			m_batch.m_features = Denn::shift_top(m_batch.m_features, n_rows);
+			m_batch.m_labels = Denn::shift_top(m_batch.m_labels, n_rows);
+			//start to n_rows
+			offset = m_batch.m_features.rows() - n_rows;
+		}
+		#endif
 		//copy last
 		if (m_cache_rows_read < m_cache_batch.m_features.rows())
 		{

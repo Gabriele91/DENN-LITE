@@ -111,8 +111,12 @@ namespace Denn
 		return str;
 	}
 
+	/// Shifts a matrix/vector row-wise.
+	/// A negative \a down value is taken to mean shifting up.
+	/// When passed zero for \a down, the input matrix is returned unchanged.
+	/// The type \a Matrix can be either a fixed- or dynamically-sized matrix.
 	template < typename Matrix >
-	Matrix shift_by_rows(const Matrix& in, typename Matrix::Index down)
+	inline Matrix shift_by_rows(const Matrix& in, typename Matrix::Index down)
 	{
 		//no swift
 		if (!down) return in;
@@ -130,7 +134,19 @@ namespace Denn
 	}
 
 	template < typename Matrix >
-	bool append_rows(Matrix& matrix, const Matrix& rows_to_append)
+	inline Matrix shift_bottom(const Matrix& in, unsigned int down)
+	{
+		return shift_by_rows(in, int(down));
+	}
+
+	template < typename Matrix >
+	inline Matrix shift_top(const Matrix& in, unsigned int top)
+	{
+		return shift_by_rows(in, -1*int(top));
+	}
+	
+	template < typename Matrix >
+	inline bool append_rows(Matrix& matrix, const Matrix& rows_to_append)
 	{
 		if (matrix.cols() != rows_to_append.cols()) return false;
 		//alloc
