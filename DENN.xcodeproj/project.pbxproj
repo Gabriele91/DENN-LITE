@@ -546,6 +546,8 @@
 		E0BD60361F89951F00E2406A /* DennVersion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DennVersion.h; sourceTree = "<group>"; };
 		E0C2239C1F87E47D00ECE11D /* DennMainUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennMainUtils.cpp; sourceTree = "<group>"; };
 		E0C2239D1F87E48500ECE11D /* DennMainUtils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DennMainUtils.h; sourceTree = "<group>"; };
+		E0C4D3061F8A585200797530 /* DennTestSetStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DennTestSetStream.h; sourceTree = "<group>"; };
+		E0C4D3071F8A587100797530 /* DennTestSetStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennTestSetStream.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -1638,6 +1640,7 @@
 		CDE1975C1F7E420300A6160B /* include */ = {
 			isa = PBXGroup;
 			children = (
+				E0C4D3061F8A585200797530 /* DennTestSetStream.h */,
 				E0BD60361F89951F00E2406A /* DennVersion.h */,
 				E0BD60351F8994AB00E2406A /* DennDump.h */,
 				E0C2239D1F87E48500ECE11D /* DennMainUtils.h */,
@@ -1674,6 +1677,7 @@
 		CDE197781F7E420300A6160B /* source */ = {
 			isa = PBXGroup;
 			children = (
+				E0C4D3071F8A587100797530 /* DennTestSetStream.cpp */,
 				E0C2239C1F87E47D00ECE11D /* DennMainUtils.cpp */,
 				CDE197791F7E420300A6160B /* DennActiveFunctionFactory.cpp */,
 				CDE1977A1F7E420300A6160B /* DennActiveFunctionItems.cpp */,

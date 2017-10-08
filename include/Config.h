@@ -134,9 +134,9 @@ namespace Denn
 	{
 		if (matrix.cols() != rows_to_append.cols()) return false;
 		//alloc
-		mat.conservativeResize(mat.rows() + rows_to_append.rows(), mat.cols());
+		matrix.conservativeResize(matrix.rows() + rows_to_append.rows(), matrix.cols());
 		//copy
-		out.bottomRows(rows_to_append.rows()) = rows_to_append;
+		matrix.bottomRows(rows_to_append.rows()) = rows_to_append;
 		//return
 		return true;
 	}
