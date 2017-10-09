@@ -9,7 +9,12 @@ from flask_login import UserMixin
 from flask_login import login_required
 from flask_login import login_user
 from flask_login import logout_user
-from compass.db import Session, User, gen_passwd, gen_user_id
+from compass.db import Session
+from compass.db import User
+from compass.db import gen_passwd_hash
+from compass.db import gen_user_id_hash
+from compass.db import get_user_from_api_key
+from compass import SECRET_KEY
 import sqlalchemy
 import os
 
@@ -22,13 +27,13 @@ app = Flask(__name__)
 # config
 app.config.update(
     DEBUG=True,
-    SECRET_KEY='secret_xxx'
+    SECRET_KEY=SECRET_KEY
 )
 
 # flask-login
 login_manager = LoginManager()
-login_manager.init_app(app)
 login_manager.login_view = "login"
+login_manager.init_app(app)
 
 # silly user model
 
@@ -37,7 +42,7 @@ class FlaskUser(UserMixin):
 
     def __init__(self, username):
         self.username = username
-        self.__username_id = gen_user_id(username)
+        self.__username_id = gen_user_id_hash(username)
 
     @property
     def id(self):
@@ -51,13 +56,15 @@ class FlaskUser(UserMixin):
             try:
                 session.query(User).filter(
                     User.username == self.username,
-                    User.password == gen_passwd(passwd)
+                    User.password == gen_passwd_hash(passwd)
                 ).one()
             except sqlalchemy.orm.exc.NoResultFound:
                 return False
             return True
 
 # root
+
+
 @app.route("/", methods=["GET"])
 def web_root():
     return redirect('/static/login.html')
@@ -103,3 +110,16 @@ def page_not_found(e):
 @login_manager.user_loader
 def load_user(username):
     return FlaskUser(username)
+
+@login_manager.request_loader
+def load_user_from_request(request):
+    print(request)
+    print(request.args)
+    # first, try to login using the api_key url arg
+    api_key = request.args.get('api_key')
+    if api_key:
+        user = get_user_from_api_key(api_key)
+        if user:
+            return user
+
+    return None
