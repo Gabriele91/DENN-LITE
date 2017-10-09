@@ -57,6 +57,11 @@ class FlaskUser(UserMixin):
                 return False
             return True
 
+# root
+@app.route("/", methods=["GET"])
+def web_root():
+    return redirect('/static/login.html')
+
 
 # somewhere to login
 @app.route("/login", methods=["GET", "POST"])
