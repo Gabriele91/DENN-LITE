@@ -542,6 +542,7 @@
 		CDE1978E1F7E420300A6160B /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		CDE197901F7E420300A6160B /* TicksTime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TicksTime.cpp; sourceTree = "<group>"; };
 		CDE197B21F7E432D00A6160B /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
+		E08E3DA11F8B90190016A723 /* DennDump.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DennDump.cpp; sourceTree = "<group>"; };
 		E0BD60351F8994AB00E2406A /* DennDump.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DennDump.h; sourceTree = "<group>"; };
 		E0BD60361F89951F00E2406A /* DennVersion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DennVersion.h; sourceTree = "<group>"; };
 		E0C2239C1F87E47D00ECE11D /* DennMainUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennMainUtils.cpp; sourceTree = "<group>"; };
@@ -1702,6 +1703,7 @@
 				CDE1978D1F7E420300A6160B /* DennSerializeOutputItems.cpp */,
 				CDE1978E1F7E420300A6160B /* main.cpp */,
 				CDE197901F7E420300A6160B /* TicksTime.cpp */,
+				E08E3DA11F8B90190016A723 /* DennDump.cpp */,
 			);
 			path = source;
 			sourceTree = "<group>";
