@@ -194,6 +194,9 @@
     <ClCompile Include="source\DennTestSetStream.cpp">
       <Filter>File di origine</Filter>
     </ClCompile>
+    <ClCompile Include="source\DennDump.cpp">
+      <Filter>File di origine</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="tests\run_bench.sh">
