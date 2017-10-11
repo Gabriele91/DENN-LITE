@@ -11,6 +11,17 @@ namespace Denn
 	: m_algorithm(algorithm)
 	{
 	}
+    
+    //virtual
+    void EvolutionMethod::start() {};
+    void EvolutionMethod::start_a_gen_pass(DoubleBufferPopulation& population) {};
+    void EvolutionMethod::start_a_subgen_pass(DoubleBufferPopulation& population) {};
+    void EvolutionMethod::end_a_subgen_pass(DoubleBufferPopulation& population) {};
+    void EvolutionMethod::end_a_gen_pass(DoubleBufferPopulation& population) {};
+    bool EvolutionMethod::can_reset()            { return true; }
+    bool EvolutionMethod::best_from_validation() { return *parameters().m_use_validation; }
+    const VariantRef EvolutionMethod::get_context_data() const { return VariantRef(); }
+    
 	//easy access
 	const Parameters& EvolutionMethod::parameters()            const { return m_algorithm.parameters();        }
 	const EvolutionMethod& EvolutionMethod::evolution_method() const { return m_algorithm.evolution_method();  }

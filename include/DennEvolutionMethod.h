@@ -22,17 +22,16 @@ namespace Denn
 		//EvolutionMethod
 		EvolutionMethod(const DennAlgorithm& algorithm);
 		//..		
-		virtual void start() {};
-		virtual void start_a_gen_pass(DoubleBufferPopulation& population) {};
-		virtual void start_a_subgen_pass(DoubleBufferPopulation& population) {};
+		virtual void start();
+		virtual void start_a_gen_pass(DoubleBufferPopulation& population);
+		virtual void start_a_subgen_pass(DoubleBufferPopulation& population);
 		virtual void create_a_individual(DoubleBufferPopulation& population, size_t target, Individual& i_output) = 0;
 		virtual	void selection(DoubleBufferPopulation& population) = 0;
-		virtual void end_a_subgen_pass(DoubleBufferPopulation& population) {};
-		virtual void end_a_gen_pass(DoubleBufferPopulation& population) {};
-		virtual bool can_reset()	 	    { return true; }
-		virtual bool best_from_validation() { return true; }
-		
-		virtual const VariantRef get_context_data() const { return VariantRef(); }
+		virtual void end_a_subgen_pass(DoubleBufferPopulation& population);
+		virtual void end_a_gen_pass(DoubleBufferPopulation& population);
+        virtual bool can_reset();
+        virtual bool best_from_validation();
+        virtual const VariantRef get_context_data() const;
 
 	protected:
 		//attributes

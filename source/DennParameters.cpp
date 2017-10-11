@@ -123,6 +123,19 @@ namespace Denn
             [this](Arguments& args) -> bool {  m_batch_offset = args.get_int();  return true; }
         },
         ParameterInfo{
+            m_use_validation, "Use the validation test", { "--" + m_use_validation.name(), "-uv" },
+            [this](Arguments& args) -> bool
+            {
+                std::string arg(args.get_string());
+                m_use_validation =
+                    arg == std::string("true")
+                ||  arg == std::string("yes")
+                ||  arg == std::string("t")
+                ||  arg == std::string("y") ;
+                return true;
+            }
+        },
+        ParameterInfo{
             m_evolution_type, "Type of evolution method [" + EvolutionMethodFactory::names_of_evolution_methods() + "]", { "--" + m_evolution_type.name(), "--evolution",    "-em"  },
             [this](Arguments& args) -> bool  
             { 

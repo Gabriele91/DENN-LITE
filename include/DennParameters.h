@@ -188,6 +188,7 @@ namespace Denn
 		read_only<std::string>		    m_runtime_output_file     { "runtime_output_file",            "",    true /* false? */ };
 		read_only<bool>				    m_compute_test_per_pass   { "compute_test_per_pass",    bool(true),  true /* false? */ };
 		read_only<bool>				    m_serialize_neural_network{ "serialize_neural_network", bool(true),  false /* true? */ };
+        read_only<bool>                 m_use_validation          { "use_validation",           bool(true),  true /* false? */ };
 
 		read_only<unsigned int>	         m_seed				{ "seed", (unsigned int)(std::random_device{}())  };
 
