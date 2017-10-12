@@ -522,14 +522,11 @@
 		CDE1977A1F7E420300A6160B /* DennActiveFunctionItems.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennActiveFunctionItems.cpp; sourceTree = "<group>"; };
 		CDE1977B1F7E420300A6160B /* DennAlgorithm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennAlgorithm.cpp; sourceTree = "<group>"; };
 		CDE1977C1F7E420300A6160B /* DennCrossoverFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennCrossoverFactory.cpp; sourceTree = "<group>"; };
-		CDE1977D1F7E420300A6160B /* DennCrossoverItems.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennCrossoverItems.cpp; sourceTree = "<group>"; };
 		CDE1977E1F7E420300A6160B /* DennEvolutionMethodFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennEvolutionMethodFactory.cpp; sourceTree = "<group>"; };
-		CDE1977F1F7E420300A6160B /* DennEvolutionMethodItems.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennEvolutionMethodItems.cpp; sourceTree = "<group>"; };
 		CDE197801F7E420300A6160B /* DennFilesystem.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennFilesystem.cpp; sourceTree = "<group>"; };
 		CDE197811F7E420300A6160B /* DennIndividual.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennIndividual.cpp; sourceTree = "<group>"; };
 		CDE197821F7E420300A6160B /* DennLayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennLayer.cpp; sourceTree = "<group>"; };
 		CDE197831F7E420300A6160B /* DennMutationFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennMutationFactory.cpp; sourceTree = "<group>"; };
-		CDE197841F7E420300A6160B /* DennMutationItems.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennMutationItems.cpp; sourceTree = "<group>"; };
 		CDE197851F7E420300A6160B /* DennNeuralNetwork.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennNeuralNetwork.cpp; sourceTree = "<group>"; };
 		CDE197861F7E420300A6160B /* DennParameters.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennParameters.cpp; sourceTree = "<group>"; };
 		CDE197871F7E420300A6160B /* DennPerceptronLayer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennPerceptronLayer.cpp; sourceTree = "<group>"; };
@@ -543,6 +540,22 @@
 		CDE197901F7E420300A6160B /* TicksTime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TicksTime.cpp; sourceTree = "<group>"; };
 		CDE197B21F7E432D00A6160B /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
 		E08E3DA11F8B90190016A723 /* DennDump.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DennDump.cpp; sourceTree = "<group>"; };
+		E0A523351F8F788D007E91D0 /* DennCrossoverBin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennCrossoverBin.cpp; sourceTree = "<group>"; };
+		E0A523361F8F788D007E91D0 /* DennCrossoverExp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennCrossoverExp.cpp; sourceTree = "<group>"; };
+		E0A523371F8F788D007E91D0 /* DennCrossoverInterm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennCrossoverInterm.cpp; sourceTree = "<group>"; };
+		E0A523381F8F788D007E91D0 /* DennCrossoverNone.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennCrossoverNone.cpp; sourceTree = "<group>"; };
+		E0A5233A1F8F788D007E91D0 /* DennEvolutionMethodBackPropagation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennEvolutionMethodBackPropagation.cpp; sourceTree = "<group>"; };
+		E0A5233B1F8F788D007E91D0 /* DennEvolutionMethodDE.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennEvolutionMethodDE.cpp; sourceTree = "<group>"; };
+		E0A5233C1F8F788D007E91D0 /* DennEvolutionMethodHistory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennEvolutionMethodHistory.cpp; sourceTree = "<group>"; };
+		E0A5233D1F8F788D007E91D0 /* DennEvolutionMethodJADE.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennEvolutionMethodJADE.cpp; sourceTree = "<group>"; };
+		E0A5233E1F8F788D007E91D0 /* DennEvolutionMethodJDE.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennEvolutionMethodJDE.cpp; sourceTree = "<group>"; };
+		E0A5233F1F8F788D007E91D0 /* DennEvolutionMethodNone.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennEvolutionMethodNone.cpp; sourceTree = "<group>"; };
+		E0A523401F8F788D007E91D0 /* DennEvolutionMethodShaDE.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennEvolutionMethodShaDE.cpp; sourceTree = "<group>"; };
+		E0A523421F8F788D007E91D0 /* DennMutationBest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennMutationBest.cpp; sourceTree = "<group>"; };
+		E0A523431F8F788D007E91D0 /* DennMutationCurrentToBest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennMutationCurrentToBest.cpp; sourceTree = "<group>"; };
+		E0A523441F8F788D007E91D0 /* DennMutationDegl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennMutationDegl.cpp; sourceTree = "<group>"; };
+		E0A523451F8F788D007E91D0 /* DennMutationNone.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennMutationNone.cpp; sourceTree = "<group>"; };
+		E0A523461F8F788D007E91D0 /* DennMutationRand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennMutationRand.cpp; sourceTree = "<group>"; };
 		E0BD60351F8994AB00E2406A /* DennDump.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DennDump.h; sourceTree = "<group>"; };
 		E0BD60361F89951F00E2406A /* DennVersion.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DennVersion.h; sourceTree = "<group>"; };
 		E0C2239C1F87E47D00ECE11D /* DennMainUtils.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennMainUtils.cpp; sourceTree = "<group>"; };
@@ -1678,20 +1691,20 @@
 		CDE197781F7E420300A6160B /* source */ = {
 			isa = PBXGroup;
 			children = (
+				E0A523341F8F788D007E91D0 /* DennCrossover */,
+				E0A523391F8F788D007E91D0 /* DennEvolutionMethod */,
+				E0A523411F8F788D007E91D0 /* DennMutation */,
 				E0C4D3071F8A587100797530 /* DennTestSetStream.cpp */,
 				E0C2239C1F87E47D00ECE11D /* DennMainUtils.cpp */,
 				CDE197791F7E420300A6160B /* DennActiveFunctionFactory.cpp */,
 				CDE1977A1F7E420300A6160B /* DennActiveFunctionItems.cpp */,
 				CDE1977B1F7E420300A6160B /* DennAlgorithm.cpp */,
 				CDE1977C1F7E420300A6160B /* DennCrossoverFactory.cpp */,
-				CDE1977D1F7E420300A6160B /* DennCrossoverItems.cpp */,
 				CDE1977E1F7E420300A6160B /* DennEvolutionMethodFactory.cpp */,
-				CDE1977F1F7E420300A6160B /* DennEvolutionMethodItems.cpp */,
 				CDE197801F7E420300A6160B /* DennFilesystem.cpp */,
 				CDE197811F7E420300A6160B /* DennIndividual.cpp */,
 				CDE197821F7E420300A6160B /* DennLayer.cpp */,
 				CDE197831F7E420300A6160B /* DennMutationFactory.cpp */,
-				CDE197841F7E420300A6160B /* DennMutationItems.cpp */,
 				CDE197851F7E420300A6160B /* DennNeuralNetwork.cpp */,
 				CDE197861F7E420300A6160B /* DennParameters.cpp */,
 				CDE197871F7E420300A6160B /* DennPerceptronLayer.cpp */,
@@ -1714,6 +1727,43 @@
 				CDE197B21F7E432D00A6160B /* libz.tbd */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		E0A523341F8F788D007E91D0 /* DennCrossover */ = {
+			isa = PBXGroup;
+			children = (
+				E0A523351F8F788D007E91D0 /* DennCrossoverBin.cpp */,
+				E0A523361F8F788D007E91D0 /* DennCrossoverExp.cpp */,
+				E0A523371F8F788D007E91D0 /* DennCrossoverInterm.cpp */,
+				E0A523381F8F788D007E91D0 /* DennCrossoverNone.cpp */,
+			);
+			path = DennCrossover;
+			sourceTree = "<group>";
+		};
+		E0A523391F8F788D007E91D0 /* DennEvolutionMethod */ = {
+			isa = PBXGroup;
+			children = (
+				E0A5233A1F8F788D007E91D0 /* DennEvolutionMethodBackPropagation.cpp */,
+				E0A5233B1F8F788D007E91D0 /* DennEvolutionMethodDE.cpp */,
+				E0A5233C1F8F788D007E91D0 /* DennEvolutionMethodHistory.cpp */,
+				E0A5233D1F8F788D007E91D0 /* DennEvolutionMethodJADE.cpp */,
+				E0A5233E1F8F788D007E91D0 /* DennEvolutionMethodJDE.cpp */,
+				E0A5233F1F8F788D007E91D0 /* DennEvolutionMethodNone.cpp */,
+				E0A523401F8F788D007E91D0 /* DennEvolutionMethodShaDE.cpp */,
+			);
+			path = DennEvolutionMethod;
+			sourceTree = "<group>";
+		};
+		E0A523411F8F788D007E91D0 /* DennMutation */ = {
+			isa = PBXGroup;
+			children = (
+				E0A523421F8F788D007E91D0 /* DennMutationBest.cpp */,
+				E0A523431F8F788D007E91D0 /* DennMutationCurrentToBest.cpp */,
+				E0A523441F8F788D007E91D0 /* DennMutationDegl.cpp */,
+				E0A523451F8F788D007E91D0 /* DennMutationNone.cpp */,
+				E0A523461F8F788D007E91D0 /* DennMutationRand.cpp */,
+			);
+			path = DennMutation;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
