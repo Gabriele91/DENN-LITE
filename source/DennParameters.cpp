@@ -442,7 +442,7 @@ namespace Denn
         },
         ParameterInfo{
             "Displays the program's version", { "--version",    "-v"  },
-            [this](Arguments& args) -> bool { std::cout << "version: " << DENN_VER_STR;  return true; }
+            [this](Arguments& args) -> bool { std::cout << "version: " << DENN_VER_STR << std::endl;  return true; }
         }
     })
     {
