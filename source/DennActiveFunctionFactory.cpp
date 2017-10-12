@@ -19,7 +19,7 @@ namespace Denn
 	void ActiveFunctionFactory::append(const std::string& name,const ActiveFunction& fun)
 	{
 		//alloc
-		if (!m_cmap) m_cmap = std::move(std::make_unique< std::map< std::string, ActiveFunction > >());
+		if (!m_cmap) m_cmap = std::make_unique< std::map< std::string, ActiveFunction > >();
 		//find
 		auto it = m_cmap->find(name);
 		//add

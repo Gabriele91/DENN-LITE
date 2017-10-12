@@ -21,7 +21,7 @@ namespace Denn
 	void SerializeOutputFactory::append(const std::string& name, SerializeOutputFactory::CreateObject fun, size_t size)
 	{
 		//alloc
-		if (!m_cmap) m_cmap = std::move(std::make_unique< std::map< std::string, SerializeOutputFactory::CreateObject > >());
+		if (!m_cmap) m_cmap = std::make_unique< std::map< std::string, SerializeOutputFactory::CreateObject > >();
 		//add
 		m_cmap->operator[](name) = fun;
 	}

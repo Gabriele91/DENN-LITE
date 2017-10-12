@@ -41,7 +41,7 @@ namespace Denn
 	void MutationFactory::append(const std::string& name, MutationFactory::CreateObject fun, size_t size)
 	{
 		//alloc
-		if (!m_cmap) m_cmap = std::move(std::make_unique< std::map< std::string, MutationFactory::CreateObject > >());
+		if (!m_cmap) m_cmap = std::make_unique< std::map< std::string, MutationFactory::CreateObject > >();
 		//add
 		m_cmap->operator[](name) = fun;
 	}

@@ -26,7 +26,7 @@ namespace Denn
 	void RuntimeOutputFactory::append(const std::string& name, RuntimeOutputFactory::CreateObject fun, size_t size)
 	{
 		//alloc
-		if (!m_cmap) m_cmap = std::move(std::make_unique< std::map< std::string, RuntimeOutputFactory::CreateObject > >());
+		if (!m_cmap) m_cmap = std::make_unique< std::map< std::string, RuntimeOutputFactory::CreateObject > >();
 		//add
 		m_cmap->operator[](name) = fun;
 	}

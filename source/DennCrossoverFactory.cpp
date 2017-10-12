@@ -40,7 +40,7 @@ namespace Denn
 	void CrossoverFactory::append(const std::string& name, CrossoverFactory::CreateObject fun, size_t size)
 	{
 		//alloc
-		if (!m_cmap) m_cmap = std::move(std::make_unique< std::map< std::string, CrossoverFactory::CreateObject > >());
+		if (!m_cmap) m_cmap = std::make_unique< std::map< std::string, CrossoverFactory::CreateObject > >();
 		//add
 		m_cmap->operator[](name) = fun;
 	}

@@ -52,7 +52,7 @@ namespace Denn
 	void EvolutionMethodFactory::append(const std::string& name, EvolutionMethodFactory::CreateObject fun, size_t size)
 	{
 		//alloc
-		if (!m_cmap) m_cmap = std::move(std::make_unique< std::map< std::string, EvolutionMethodFactory::CreateObject > >());
+		if (!m_cmap) m_cmap = std::make_unique< std::map< std::string, EvolutionMethodFactory::CreateObject > >();
 		//add
 		m_cmap->operator[](name) = fun;
 	}

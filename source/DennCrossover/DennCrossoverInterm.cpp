@@ -13,8 +13,8 @@ namespace Denn
 		{
 			//baias
 			const auto& i_target = *population[id_target];
-			const auto& cr = i_mutant.m_cr;
-			//for each layers
+			// const auto& cr = i_mutant.m_cr;
+			// for each layers
 			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
 			{
 				//weights and baias

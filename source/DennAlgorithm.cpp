@@ -12,6 +12,7 @@ namespace Denn
 		, ThreadPool*		  thpool
 	)
 	: m_main_random(*params.m_seed)
+    , m_thpool(thpool)
 	, m_target_function(target_function)
 	, m_output(RuntimeOutputFactory::create(*params.m_runtime_output_type, output, *this))
 	, m_default(std::make_shared<Individual>
@@ -22,7 +23,6 @@ namespace Denn
 		))
 	, m_dataset_loader(dataset_loader)
 	, m_dataset_batch(dataset_loader)
-	, m_thpool(thpool)
 	, m_params(params)
 	{
 	}
