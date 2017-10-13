@@ -1,0 +1,49 @@
+#include "DennMutation.h"
+#include "DennAlgorithm.h"
+#include <algorithm>
+#include <sstream>
+#include <iterator>
+#include <assert.h>
+namespace Denn
+{
+	class Trigonometric : public Mutation
+	{
+	public:
+
+		Trigonometric(const DennAlgorithm& algorithm) :Mutation(algorithm) {}
+
+		virtual void operator()(const Population& population, size_t id_target, Individual& i_final) override
+		{
+			//target
+			const Individual& i_target = *population[id_target];
+			//init generator
+			auto& rand_deck = random(id_target).deck();
+			//set population size in deck
+			rand_deck.reinit(population.size());
+			//random selection
+			const Individual& nn_a = *population[rand_deck.get_random_id(id_target)];
+			const Individual& nn_b = *population[rand_deck.get_random_id(id_target)];
+			const Individual& nn_c = *population[rand_deck.get_random_id(id_target)];
+			//parameters
+			Scalar p = abs(nn_a.m_eval) + abs(nn_b.m_eval + nn_c.m_eval);
+			Scalar p_a = nn_a.m_eval / p;
+			Scalar p_b = nn_b.m_eval / p;
+			Scalar p_c = nn_c.m_eval / p;
+			//for each layer
+			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
+			{
+				//weights and biases
+				for ( size_t m = 0; m != i_target[i_layer].size(); ++m)
+				{
+					//mutation
+					Matrix& w_final = i_final[i_layer][m];
+					const Matrix& x_a = nn_a[i_layer][m];
+					const Matrix& x_b = nn_b[i_layer][m];
+					const Matrix& x_c = nn_c[i_layer][m];
+					w_final = (x_a + x_b + x_c) / 3 + (p_b -p_a) * (x_a - x_b) + (p_c - p_b) * (x_b - x_c) + (p_a - p_c) * (x_c - x_a);
+				}
+			}
+        }
+	};
+	REGISTERED_MUTATION(Trigonometric, "trig")
+}
