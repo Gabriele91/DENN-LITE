@@ -4,11 +4,8 @@ from flask import request
 from flask import abort
 from flask import redirect
 from flask import Response
-from flask_login import LoginManager
-from flask_login import UserMixin
-from flask_login import login_required
-from flask_login import login_user
-from flask_login import logout_user
+from flask import render_template
+import flask_login
 from compass.db import Session
 from compass.db import User
 from compass.db import gen_passwd_hash
@@ -16,7 +13,6 @@ from compass.db import gen_user_id_hash
 from compass.db import get_user_from_api_key
 from compass import SECRET_KEY
 import sqlalchemy
-import os
 
 # global vars
 PROTECTED_FOLDER = "./compass"
@@ -31,27 +27,29 @@ app.config.update(
 )
 
 # flask-login
-login_manager = LoginManager()
-login_manager.login_view = "login"
+login_manager = flask_login.LoginManager()
+login_manager.session_protection = 'strong'
 login_manager.init_app(app)
 
-# silly user model
 
+class DashboardUser(flask_login.UserMixin):
 
-class FlaskUser(UserMixin):
+    """A typical Dashboard user."""
 
     def __init__(self, username):
         self.username = username
-        self.__username_id = gen_user_id_hash(username)
+        self.role = self.__get_role()
+        self.__user_id_hash = gen_user_id_hash(username)
 
-    @property
-    def id(self):
-        self.__username_id
+    def get_id(self):
+        """Return the current user id hash."""
+        return self.__user_id_hash
 
     def __repr__(self):
-        return self.username
+        return "[{}|{}|{}]".format(self.username, self.role, self.__user_id_hash)
 
     def check_passwd(self, passwd):
+        """Checks if the password given matches the user password."""
         with Session() as session:
             try:
                 session.query(User).filter(
@@ -62,64 +60,106 @@ class FlaskUser(UserMixin):
                 return False
             return True
 
-# root
+    def __get_role(self):
+        with Session() as session:
+            try:
+                res = session.query(User).filter(
+                    User.username == self.username
+                ).one()
+            except sqlalchemy.orm.exc.NoResultFound:
+                return False
+            return res.role
+
+
+USER_CACHE = {}  # Logged user cache
 
 
 @app.route("/", methods=["GET"])
 def web_root():
+    """Main route of the website is redirected to login."""
     return redirect('/static/login.html')
 
 
 # somewhere to login
 @app.route("/login", methods=["GET", "POST"])
 def login():
+    """Entry point to do the login.
+
+    If user is authenticated is added to the USER_CACHE.
+    """
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['passwd']
-        user = FlaskUser(username)
+        user = DashboardUser(username)
         if user.check_passwd(password):
-            login_user(user)
-            return redirect('/dashboard/index.html')
+            flask_login.login_user(user)
+            USER_CACHE[user.get_id()] = user
+            return redirect('/dashboard')
         else:
             return abort(401)
     else:
         return redirect('/static/login.html')
 
 
+@app.route("/dashboard", methods=["GET"])
+@flask_login.login_required
+def web_dashboard():
+    """Redirects the base dashboard url to the index."""
+    return redirect('/dashboard/index.html')
+
+
 @app.route('/dashboard/<path:filename>')
-@login_required
-def protected(filename):
-    return send_from_directory(
-        PROTECTED_FOLDER,
-        filename
-    )
+@flask_login.login_required
+def web_dashboard_files(filename):
+    """Dashboard section.
+
+    Check if user requests the index and
+    serves the template or the file from the 
+    protected directory.
+    """
+    if filename == 'index.html':
+        return render_template("dashboard.html",
+                               role=flask_login.current_user.role
+                               )
+    else:
+        return send_from_directory(
+            PROTECTED_FOLDER,
+            filename
+        )
+
+
+@login_manager.unauthorized_handler
+def unauthorized():
+    """Shows if user is not authorized"""
+    return Response('<p>Unauthorized</p>')
 
 
 @app.route("/logout")
-@login_required
+@flask_login.login_required
 def logout():
-    logout_user()
+    """Logout entry point.
+
+    This function remove the user from the USER_CACHE too.
+    """
+    user = flask_login.current_user
+    if user.get_id() in USER_CACHE:
+        del USER_CACHE[user.get_id()]
+    flask_login.logout_user()
     return Response('<p>Logged out</p>')
 
 
 @app.errorhandler(401)
-def page_not_found(e):
+def page_not_found(error):
+    """401 error handler."""
     return Response('<p>Login failed</p>')
 
 
 @login_manager.user_loader
-def load_user(username):
-    return FlaskUser(username)
+def load_user(user_id):
+    """User loader.
 
-@login_manager.request_loader
-def load_user_from_request(request):
-    print(request)
-    print(request.args)
-    # first, try to login using the api_key url arg
-    api_key = request.args.get('api_key')
-    if api_key:
-        user = get_user_from_api_key(api_key)
-        if user:
-            return user
-
-    return None
+    Check the user instance from the USER_CACHE
+    using the passed user_id.
+    """
+    if user_id in USER_CACHE:
+        return USER_CACHE[user_id]
