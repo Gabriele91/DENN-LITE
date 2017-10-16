@@ -4,7 +4,8 @@ def main():
     import hashlib
 
     parser = argparse.ArgumentParser(description='Process some integers.')
-    parser.add_argument('script', metavar='script', type=str,
+    parser.add_argument('script', type=str,
+                        choices=['init-db'],
                         help='Script to execute')
 
     args = parser.parse_args()
