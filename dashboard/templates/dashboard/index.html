@@ -9,52 +9,11 @@
 </head>
 
 <body id="dashboard-app">
-    <nav class="navbar navbar-expand-md navbar-dark fixed-top bg-dark">
-      <a class="navbar-brand" href="#">Dashboard</a>
-      <button class="navbar-toggler d-lg-none" type="button" data-toggle="collapse" data-target="#navbarsExampleDefault" aria-controls="navbarsExampleDefault" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse" id="navbarsExampleDefault">
-        <ul class="navbar-nav mr-auto">
-          <li class="nav-item active">
-            <a class="nav-link" href="#"><i class="fa fa-home" aria-hidden="true"> Home</i> <span class="sr-only">(current)</span></a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#"><i class="fa fa-bars" aria-hidden="true"> DENN</i></a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#"><i class="fa fa-database" aria-hidden="true"> Databases</i></a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#"><i class="fa fa-question-circle" aria-hidden="true"> Help</i></a>
-          </li>
-        </ul>
-        {% if role == 'admin' %}
-        <button class="btn btn-outline-info my-2 my-sm-0"><i class="fa fa-cog" aria-hidden="true"></i></button>
-        {% endif %}
-        <a href="/logout" class="btn btn-outline-danger my-2 my-sm-0 ml-3"><i class="fa fa-sign-out" aria-hidden="true"></i></a>
-      </div>
-    </nav>
+    {% include 'dashboard/navbar.html' %}
           
     <div class="container-fluid">
       <div class="row">
-        <nav class="col-sm-3 col-md-2 d-none d-sm-block bg-light sidebar">
-          <ul class="nav nav-pills flex-column">
-            <li class="nav-item">
-              <a class="nav-link active" href="#">Overview <span class="sr-only">(current)</span></a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Reports</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Analytics</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="#">Export</a>
-            </li>
-          </ul>
-        </nav>
+        {% include "dashboard/menu/" + section + ".html" ignore missing %}
           
         <main class="col-sm-9 ml-sm-auto col-md-10 pt-3" role="main">
           <h1>Dashboard</h1>

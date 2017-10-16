@@ -13,6 +13,8 @@ from compass.db import gen_user_id_hash
 from compass.db import get_user_from_api_key
 from compass import SECRET_KEY
 import sqlalchemy
+import json
+from os import path
 
 # global vars
 PROTECTED_FOLDER = "./compass"
@@ -73,6 +75,9 @@ class DashboardUser(flask_login.UserMixin):
 
 USER_CACHE = {}  # Logged user cache
 
+with open(path.join(path.dirname(__file__), "config.json")) as config_file:
+    DASHBOARD_CONFIG = json.load(config_file)
+
 
 @app.route("/", methods=["GET"])
 def web_root():
@@ -105,7 +110,7 @@ def login():
 @flask_login.login_required
 def web_dashboard():
     """Redirects the base dashboard url to the index."""
-    return redirect('/dashboard/index.html')
+    return redirect('/dashboard/home')
 
 
 @app.route('/dashboard/<path:filename>')
@@ -117,9 +122,10 @@ def web_dashboard_files(filename):
     serves the template or the file from the 
     protected directory.
     """
-    if filename == 'index.html':
-        return render_template("dashboard.html",
-                               role=flask_login.current_user.role
+    if filename in DASHBOARD_CONFIG['sections']:
+        return render_template("dashboard/index.html",
+                               role=flask_login.current_user.role,
+                               section=filename
                                )
     else:
         return send_from_directory(
