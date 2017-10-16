@@ -261,7 +261,11 @@ namespace Denn
 			m_degl_neighborhood, "Neighborhood of target where is searched the best (DEGL)",{ "--" + m_degl_neighborhood.name(), "-glnn" },
 			[this](Arguments& args) -> bool { m_degl_neighborhood = args.get_int();  return true; }
 		},	
-
+		ParameterInfo{
+			m_trig_m, "Probability of the mutation to be trigonometric (TDE)",{ "--" + m_trig_m.name(), "-tm" },
+			[this](Arguments& args) -> bool { m_trig_m = args.get_double();  return true; }
+        },
+        
         ParameterInfo{ 
             m_clamp_min, "Minimum size of weight", { "--" + m_clamp_min.name(),    "-cmin"  }, 
             [this](Arguments& args) -> bool { m_clamp_min = args.get_double() ; return true;  } 

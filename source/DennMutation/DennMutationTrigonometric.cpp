@@ -20,21 +20,23 @@ namespace Denn
 			auto& rand_deck = random(id_target).deck();
 			//set population size in deck
 			rand_deck.reinit(population.size());
-			//random selection
-			const Individual& nn_a = *population[rand_deck.get_random_id(id_target)];
-			const Individual& nn_b = *population[rand_deck.get_random_id(id_target)];
-			const Individual& nn_c = *population[rand_deck.get_random_id(id_target)];
-			//parameters
-			Scalar p = abs(nn_a.m_eval) + abs(nn_b.m_eval + nn_c.m_eval);
-			Scalar p_a = nn_a.m_eval / p;
-			Scalar p_b = nn_b.m_eval / p;
-			Scalar p_c = nn_c.m_eval / p;
 			//for each layer
 			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
 			{
 				//weights and biases
 				for ( size_t m = 0; m != i_target[i_layer].size(); ++m)
 				{
+					//do rand
+					rand_deck.reset();
+					//do cross + mutation
+					const Individual& nn_a = *population[rand_deck.get_random_id(id_target)];
+					const Individual& nn_b = *population[rand_deck.get_random_id(id_target)];
+					const Individual& nn_c = *population[rand_deck.get_random_id(id_target)];
+					//parameters
+					Scalar p = abs(nn_a.m_eval) + abs(nn_b.m_eval + nn_c.m_eval);
+					Scalar p_a = nn_a.m_eval / p;
+					Scalar p_b = nn_b.m_eval / p;
+					Scalar p_c = nn_c.m_eval / p;
 					//mutation
 					Matrix& w_final = i_final[i_layer][m];
 					const Matrix& x_a = nn_a[i_layer][m];

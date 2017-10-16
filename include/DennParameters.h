@@ -215,6 +215,8 @@ namespace Denn
 		//DEGL
 		read_only<Scalar>                m_degl_scalar_weight{ "degl_scalar_weight",Scalar(0.5) };
 		read_only<size_t>                m_degl_neighborhood { "degl_neighborhood", Scalar(1)   };
+		//TDE
+		read_only<Scalar>				 m_trig_m        { "trig_m", Scalar(0.05) };
 
 		read_only<Scalar>	             m_clamp_max     { "clamp_max",  Scalar( 10.0) };
 		read_only<Scalar>	             m_clamp_min     { "clamp_min",  Scalar(-10.0) };
