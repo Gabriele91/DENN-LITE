@@ -16,6 +16,7 @@ __all__ = ['User', 'Session', 'gen_passwd_hash',
 
 # TYPE OF DATABASE
 BASE = declarative_base()
+ENGINE = None
 
 
 class User(BASE):
@@ -31,13 +32,16 @@ class User(BASE):
     role = Column(String(256), nullable=False)
 
 
-# DATABASE ENGINE
-ENGINE = create_engine('sqlite:///{}'.format(
-    path.join(path.dirname(path.abspath(__file__)), 'dashboard.db')
-))
+def create_db():
+    """Generates the database."""
+    global ENGINE, BASE
+    # DATABASE ENGINE
+    ENGINE = create_engine('sqlite:///{}'.format(
+        path.join(path.dirname(path.abspath(__file__)), 'dashboard.db')
+    ))
 
-# BASE METADATA
-BASE.metadata.create_all(ENGINE)
+    # BASE METADATA
+    BASE.metadata.create_all(ENGINE)
 
 
 def gen_passwd_hash(passwd):
@@ -128,6 +132,8 @@ class Session(object):
     """Controller for database session."""
 
     def __init__(self):
+        if ENGINE is None:
+            create_db()
         BASE.metadata.bind = ENGINE
         self.DBSession = sessionmaker(bind=ENGINE)
         self.session = None
