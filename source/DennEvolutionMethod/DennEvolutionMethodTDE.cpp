@@ -36,9 +36,9 @@ namespace Denn
 			i_output.m_cr = target.m_cr;
             //call mutation
             if(random(i_target).uniform() < Scalar(m_algorithm.parameters().m_trig_m))
-                (*m_mutation) (parents, i_target, i_output);
-            else
                 (*m_trig_mutation) (parents, i_target, i_output);
+            else
+                (*m_mutation) (parents, i_target, i_output);
 			//call crossover
 			(*m_crossover)(parents, i_target, i_output);
 		}
