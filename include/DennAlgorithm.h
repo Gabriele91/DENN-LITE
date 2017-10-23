@@ -154,6 +154,11 @@ public:
 		return m_dataset_batch.last_batch();
 	}
 
+	const DataSetLoader* get_datase_loader() const 
+	{
+		return m_dataset_loader;
+	}
+
 protected:
 	//init
 	bool init();

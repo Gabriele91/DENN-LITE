@@ -15,14 +15,6 @@ namespace Denn
 	
 		virtual void start() override
 		{
-			for(auto& p : m_algorithm.population().parents())
-			{
-				p.m_eval_class.resize(m_algorithm.get_dataset_loader().get_main_header_info().m_n_classes)
-			}
-			for(auto& p : m_algorithm.population().sons())
-			{
-				p.m_eval_class.resize(m_algorithm.get_dataset_loader().get_main_header_info().m_n_classes)
-			}
 			//create mutation/crossover
 			m_mutation = MutationFactory::create(parameters().m_mutation_type, m_algorithm);
 			m_crossover = CrossoverFactory::create(parameters().m_crossover_type, m_algorithm);
