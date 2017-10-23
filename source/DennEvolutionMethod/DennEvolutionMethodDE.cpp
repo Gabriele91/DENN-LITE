@@ -19,6 +19,12 @@ namespace Denn
 			m_mutation = MutationFactory::create(m_algorithm.parameters().m_mutation_type, m_algorithm);
 			m_crossover = CrossoverFactory::create(m_algorithm.parameters().m_crossover_type, m_algorithm);
 		}
+		
+		virtual void start_a_subgen_pass(DoubleBufferPopulation& dpopulation) override
+		{
+			//sort parents
+			if (m_mutation->required_sort()) dpopulation.parents().sort();
+		}
 
 		virtual void create_a_individual
 		(

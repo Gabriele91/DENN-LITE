@@ -287,7 +287,7 @@ namespace Denn
 			//not copy element then 
 			//it can change the values of the best individual
 			m_best_ctx.m_best = curr->copy();
-			//save eval (on validation) of best
+			//save eval (on test set) of best
 			m_best_ctx.m_eval = curr->m_eval;
 		}
 	}
