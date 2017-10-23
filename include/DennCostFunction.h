@@ -51,7 +51,22 @@ namespace CostFunction
             Scalar log_one_m_y = safe_log<typename Matrix::Scalar>(Scalar(1.0)-predict(y,x));
             evalout(y,x)       = (labels(y,x) * log_y + (Scalar(1.0)-labels(y,x)) * (log_one_m_y));
         }
-        return evalout;
+        return -(evalout.rowwise().mean());
+	}
+	
+    template < typename Matrix >
+    Matrix cross_entropy_logistic_by_cols (const Matrix& labels, const Matrix& predict)
+    {
+        using Scalar = typename Matrix::Scalar ;
+        Matrix evalout(labels.rows(),labels.cols());
+        for(typename Matrix::Index x = 0; x!=labels.cols(); ++x)
+        for(typename Matrix::Index y = 0; y!=labels.rows(); ++y)
+        {
+            Scalar log_y       = safe_log<typename Matrix::Scalar>(predict(y,x));
+            Scalar log_one_m_y = safe_log<typename Matrix::Scalar>(Scalar(1.0)-predict(y,x));
+            evalout(y,x)       = (labels(y,x) * log_y + (Scalar(1.0)-labels(y,x)) * (log_one_m_y));
+        }
+        return -(evalout.colwise().mean());
     }
     
 	template < typename Matrix >
@@ -68,6 +83,7 @@ namespace CostFunction
 		}
 		return (-(evalout.rowwise().mean())).mean();
 	}
+	
 
 	template < typename Matrix >
 	inline Matrix& softmax(Matrix& inout_matrix)
