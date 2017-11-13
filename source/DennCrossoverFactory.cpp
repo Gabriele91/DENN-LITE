@@ -26,29 +26,29 @@ namespace Denn
 	Random& Crossover::random()					         const { return m_algorithm.random(); }
 	#endif
 	//map
-	std::unique_ptr< std::map< std::string, CrossoverFactory::CreateObject > > CrossoverFactory::m_cmap;
+	static std::map< std::string, CrossoverFactory::CreateObject >& c_map()
+	{
+		static std::map< std::string, CrossoverFactory::CreateObject > c_map;
+		return c_map;
+	}
 	//public
 	Crossover::SPtr CrossoverFactory::create(const std::string& name, const DennAlgorithm& algorithm)
 	{
-		//map is alloc?
-		if (!m_cmap) return nullptr;
 		//find
-		auto it = m_cmap->find(name);
+		auto it = c_map().find(name);
 		//return
 		return it->second(algorithm);
 	}
 	void CrossoverFactory::append(const std::string& name, CrossoverFactory::CreateObject fun, size_t size)
 	{
-		//alloc
-		if (!m_cmap) m_cmap = std::make_unique< std::map< std::string, CrossoverFactory::CreateObject > >();
 		//add
-		m_cmap->operator[](name) = fun;
+		c_map()[name] = fun;
 	}
 	//list of methods
 	std::vector< std::string > CrossoverFactory::list_of_crossovers()
 	{
 		std::vector< std::string > list;
-		for (const auto & pair : *m_cmap) list.push_back(pair.first);
+		for (const auto & pair : c_map()) list.push_back(pair.first);
 		return list;
 	}
 	std::string                CrossoverFactory::names_of_crossovers(const std::string& sep)
@@ -62,8 +62,8 @@ namespace Denn
 	bool CrossoverFactory::exists(const std::string& name)
 	{
 		//find
-		auto it = m_cmap->find(name);
+		auto it = c_map().find(name);
 		//return 
-		return it != m_cmap->end();
+		return it != c_map().end();
 	}
 }

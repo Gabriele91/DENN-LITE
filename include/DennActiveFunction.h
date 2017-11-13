@@ -59,11 +59,6 @@ namespace Denn
 		//info
 		static bool exists(const std::string& name);
 
-	protected:
-
-		//ActiveFunction map
-		static std::unique_ptr< std::map< std::string, ActiveFunction > > m_cmap;
-
 	};
 
 	//class used for static registration of a object class

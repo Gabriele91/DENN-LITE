@@ -7,29 +7,29 @@
 namespace Denn
 {
 	//map
-	std::unique_ptr< std::map< std::string, SerializeOutputFactory::CreateObject > > SerializeOutputFactory::m_cmap;
+	static std::map< std::string, SerializeOutputFactory::CreateObject >& s_map()
+	{
+		static std::map< std::string, SerializeOutputFactory::CreateObject > s_map;
+		return s_map;
+	}
 	//public
 	SerializeOutput::SPtr SerializeOutputFactory::create(const std::string& name, std::ostream& stream, const Parameters& params)
 	{
-		//map is alloc?
-		if (!m_cmap) return nullptr;
 		//find
-		auto it = m_cmap->find(name);
+		auto it = s_map().find(name);
 		//return
 		return it->second(stream, params);
 	}
 	void SerializeOutputFactory::append(const std::string& name, SerializeOutputFactory::CreateObject fun, size_t size)
 	{
-		//alloc
-		if (!m_cmap) m_cmap = std::make_unique< std::map< std::string, SerializeOutputFactory::CreateObject > >();
 		//add
-		m_cmap->operator[](name) = fun;
+		s_map()[name] = fun;
 	}
 	//list of methods
 	std::vector< std::string > SerializeOutputFactory::list_of_serialize_outputs()
 	{
 		std::vector< std::string > list;
-		for (const auto & pair : *m_cmap) list.push_back(pair.first);
+		for (const auto & pair : s_map()) list.push_back(pair.first);
 		return list;
 	}
 	std::string  SerializeOutputFactory::names_of_serialize_outputs(const std::string& sep)
@@ -44,8 +44,8 @@ namespace Denn
 	bool SerializeOutputFactory::exists(const std::string& name)
 	{
 		//find
-		auto it = m_cmap->find(name);
+		auto it = s_map().find(name);
 		//return 
-		return it != m_cmap->end();
+		return it != s_map().end();
 	}
 }
