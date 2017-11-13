@@ -5,33 +5,31 @@
 namespace Denn
 {
     //map
-	std::unique_ptr< std::map< std::string, ActiveFunction > > ActiveFunctionFactory::m_cmap;
+	static std::map< std::string, ActiveFunction >& a_map()
+	{
+		static std::map< std::string, ActiveFunction > a_map;
+		return a_map;
+	}
 	//public
 	ActiveFunction ActiveFunctionFactory::get(const std::string& name)
 	{
-		//map is alloc?
-		if (!m_cmap) return nullptr;
 		//find
-		auto it = m_cmap->find(name);
+		auto it =  a_map().find(name);
 		//return
-		return it != m_cmap->end() ? it->second : nullptr;
+		return it != a_map().end() ? it->second : nullptr;
 	}
 	void ActiveFunctionFactory::append(const std::string& name,const ActiveFunction& fun)
 	{
-		//alloc
-		if (!m_cmap) m_cmap = std::make_unique< std::map< std::string, ActiveFunction > >();
 		//find
-		auto it = m_cmap->find(name);
+		auto it = a_map().find(name);
 		//add
-		if (it == m_cmap->end()) m_cmap->insert({ name,fun });
-		else					 m_cmap->operator[](name) = fun;
+		if (it == a_map().end()) a_map().insert({ name,fun });
+		else					 a_map()[name] = fun;
 	}
 	std::string ActiveFunctionFactory::name_of(const ActiveFunction& fun)
 	{
-		//none
-		if (!m_cmap) return std::string();
 		//for all elements
-		for (auto it : *m_cmap) if(it.second == fun) return it.first;
+		for (auto it : a_map()) if(it.second == fun) return it.first;
 		//none
 		return std::string();
 	}
@@ -39,7 +37,7 @@ namespace Denn
 	std::vector< std::string > ActiveFunctionFactory::list_of_active_functions()
 	{
 		std::vector< std::string > list;
-		for (const auto & pair : *m_cmap) list.push_back(pair.first);
+		for (const auto & pair : a_map()) list.push_back(pair.first);
 		return list;
 	}
 	std::string ActiveFunctionFactory::names_of_active_functions(const std::string& sep)
@@ -53,8 +51,8 @@ namespace Denn
 	bool ActiveFunctionFactory::exists(const std::string& name)
 	{
 		//find
-		auto it = m_cmap->find(name);
+		auto it = a_map().find(name);
 		//return 
-		return it != m_cmap->end();
+		return it != a_map().end();
 	}
 }

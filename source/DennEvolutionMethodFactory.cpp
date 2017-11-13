@@ -38,29 +38,29 @@ namespace Denn
 	Random& EvolutionMethod::random()					       const { return m_algorithm.random(); }
 	#endif
 	//map
-	std::unique_ptr< std::map< std::string, EvolutionMethodFactory::CreateObject > > EvolutionMethodFactory::m_cmap;
+	static std::map< std::string, EvolutionMethodFactory::CreateObject >& em_map()
+	{
+		static std::map< std::string, EvolutionMethodFactory::CreateObject > em_map;
+		return em_map;
+	}
 	//public
 	EvolutionMethod::SPtr EvolutionMethodFactory::create(const std::string& name, const DennAlgorithm& algorithm)
 	{
-		//map is alloc?
-		if (!m_cmap) return nullptr;
 		//find
-		auto it = m_cmap->find(name);
+		auto it = em_map().find(name);
 		//return
 		return it->second(algorithm);
 	}
 	void EvolutionMethodFactory::append(const std::string& name, EvolutionMethodFactory::CreateObject fun, size_t size)
 	{
-		//alloc
-		if (!m_cmap) m_cmap = std::make_unique< std::map< std::string, EvolutionMethodFactory::CreateObject > >();
 		//add
-		m_cmap->operator[](name) = fun;
+		em_map()[name] = fun;
 	}
 	//list of methods
 	std::vector< std::string > EvolutionMethodFactory::list_of_evolution_methods()
 	{
 		std::vector< std::string > list;
-		for (const auto & pair : *m_cmap) list.push_back(pair.first);
+		for (const auto & pair : em_map()) list.push_back(pair.first);
 		return list;
 	}
 	std::string  EvolutionMethodFactory::names_of_evolution_methods(const std::string& sep)
@@ -75,8 +75,8 @@ namespace Denn
 	bool EvolutionMethodFactory::exists(const std::string& name)
 	{
 		//find
-		auto it = m_cmap->find(name);
+		auto it = em_map().find(name);
 		//return 
-		return it != m_cmap->end();
+		return it != em_map().end();
 	}
 }
