@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <functional>
 #include <memory>
+#include <iostream>
 //lib include
 #include <Eigen/Eigen>
 #include <zlib.h>
@@ -92,7 +93,7 @@ namespace Denn
 	{
 		#if 0
 		T value_mod = value % base;
-		while  (value_mod < T(0)) value_mod += value;
+		while  (value_mod < T(0)) value_mod += base;
 		return value_mod;
 		#else 
 		//from JS

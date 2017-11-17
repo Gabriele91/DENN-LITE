@@ -88,20 +88,38 @@ namespace CostFunction
 	template < typename Matrix >
 	inline Matrix& softmax(Matrix& inout_matrix)
 	{
-		const auto	                  N   = inout_matrix.rows();
-		const typename Matrix::Scalar max = inout_matrix.maxCoeff();
+		const auto N   = inout_matrix.rows();
+		const auto max = inout_matrix.maxCoeff();
 		//compute e^(M-max)
 		inout_matrix = (inout_matrix.array() - max).exp();
 		// M(r,n)/ SUM_r(M(n))
 		for (int n = 0; n < N; n++)
 		{
 			//reduce
-			typename Matrix::Scalar sum = inout_matrix.row(n).sum();
+			auto sum = inout_matrix.row(n).sum();
 			//no nan
 			if (sum) inout_matrix.row(n) /= sum;
 		}
 		return inout_matrix;
 	}
+
+    template < typename Matrix >
+    inline Matrix& softmax_col(Matrix& inout_matrix)
+    {
+        const auto N   = inout_matrix.cols();
+        const auto max = inout_matrix.maxCoeff();
+        //compute e^(M-max)
+        inout_matrix = (inout_matrix.array() - max).exp();
+        // M(r,n)/ SUM_r(M(n))
+        for (int n = 0; n < N; n++)
+        {
+            //reduce
+            auto sum = inout_matrix.col(n).sum();
+            //no nan
+            if (sum) inout_matrix.col(n) /= sum;
+        }
+        return inout_matrix;
+    }
 
 	template < typename Matrix >
 	typename Matrix::Scalar softmax_cross_entropy(const Matrix& x, const Matrix& y)

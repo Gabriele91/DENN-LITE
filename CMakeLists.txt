@@ -6,8 +6,8 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "-DFLOAT -fPIC -D_FORCE_INLINES")
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 
-include_directories(include)
-include_directories(dips/include)
+include_directories(include/)
+include_directories(dips/include/)
 
 set(SOURCE_FILES
         dips/include/Eigen/src/Cholesky/LDLT.h
@@ -447,6 +447,7 @@ set(SOURCE_FILES
         include/DennDump.h
         include/DennEvolutionMethod.h
         include/DennFilesystem.h
+        include/DennGate.h
         include/DennIndividual.h
         include/DennLayer.h
         include/DennMainUtils.h
@@ -483,6 +484,21 @@ set(SOURCE_FILES
         source/DennMutation/DennMutationNone.cpp
         source/DennMutation/DennMutationRand.cpp
         source/DennMutation/DennMutationTrigonometric.cpp
+        source/DennGates/DennGate.cpp
+        source/DennGates/DennGateRead.cpp
+        source/DennGates/DennGateZero.cpp
+        source/DennGates/DennGateOne.cpp
+        source/DennGates/DennGateTwo.cpp
+        source/DennGates/DennGateAdd.cpp
+        source/DennGates/DennGateInc.cpp
+        source/DennGates/DennGateDec.cpp
+        source/DennGates/DennGateSub.cpp
+        source/DennGates/DennGateLessThan.cpp
+        source/DennGates/DennGateLessEqualThan.cpp
+        source/DennGates/DennGateEquality.cpp
+        source/DennGates/DennGateMin.cpp
+        source/DennGates/DennGateMax.cpp
+        source/DennGates/DennGateWrite.cpp
         source/DennActiveFunctionFactory.cpp
         source/DennActiveFunctionItems.cpp
         source/DennAlgorithm.cpp
@@ -504,10 +520,10 @@ set(SOURCE_FILES
         source/DennSerializaOutputFactory.cpp
         source/DennSerializeOutputItems.cpp
         source/DennTestSetStream.cpp
-        source/main.cpp
-        source/TicksTime.cpp)
+        source/TicksTime.cpp
+        source/main.cpp)
 
-find_package("ZLIB")
+find_package(ZLIB)
 find_library(M_LIB m)
 find_library(UTIL_LIB util)
 

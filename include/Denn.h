@@ -14,6 +14,7 @@
 #include  "DennPerceptronLayer.h"
 #include  "DennNeuralNetwork.h"
 #include  "DennCostFunction.h"
+#include  "DennGate.h"
 
 //Dataset includes
 #include  "DennDatasetLoader.h"
