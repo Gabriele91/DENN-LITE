@@ -67,7 +67,9 @@
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodJADE.cpp" />
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodJDE.cpp" />
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodNone.cpp" />
+    <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodSDE.cpp" />
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodShaDE.cpp" />
+    <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodTDE.cpp" />
     <ClCompile Include="source\DennFilesystem.cpp" />
     <ClCompile Include="source\DennIndividual.cpp" />
     <ClCompile Include="source\DennLayer.cpp" />
@@ -78,6 +80,7 @@
     <ClCompile Include="source\DennMutation\DennMutationDegl.cpp" />
     <ClCompile Include="source\DennMutation\DennMutationNone.cpp" />
     <ClCompile Include="source\DennMutation\DennMutationRand.cpp" />
+    <ClCompile Include="source\DennMutation\DennMutationTrigonometric.cpp" />
     <ClCompile Include="source\DennNeuralNetwork.cpp" />
     <ClCompile Include="source\DennParameters.cpp" />
     <ClCompile Include="source\DennPerceptronLayer.cpp" />

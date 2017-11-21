@@ -245,6 +245,15 @@
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodShaDE.cpp">
       <Filter>Source\DennEvolutionMethod</Filter>
     </ClCompile>
+    <ClCompile Include="source\DennMutation\DennMutationTrigonometric.cpp">
+      <Filter>Source\DennMutation</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodTDE.cpp">
+      <Filter>Source\DennEvolutionMethod</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodSDE.cpp">
+      <Filter>Source\DennEvolutionMethod</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="tests\run_bench.sh">
