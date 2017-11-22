@@ -1,7 +1,12 @@
+"""Command line interface for compass module."""
+from __future__ import print_function
+import argparse
+import os
+import sys
+
+
 def main():
-    import argparse
-    import os
-    import hashlib
+    """Main function."""
 
     parser = argparse.ArgumentParser(description='Process some integers.')
     parser.add_argument('script', type=str,
@@ -12,18 +17,21 @@ def main():
 
     if args.script == 'init-db':
         print("==> Initialize database! (all previous data will be deleted...)")
-        os.remove(os.path.join(os.path.dirname(__file__), "dashboard.db"))
+        try:
+            os.remove(os.path.join(os.path.dirname(
+                __file__), "db", "dashboard.db"))
+        except FileNotFoundError:
+            pass
         print("==> Deleted current database!")
 
-        from sqlalchemy import create_engine
-        from . db import User, Session, gen_passwd_hash, gen_api_key
+        from compass.db import User, Session
 
         with Session() as session:
             # Insert a Person in the person table
             new_user = User(
                 username='admin',
-                password=gen_passwd_hash('admin'),
-                api_key=gen_api_key('admin', 'admin'),
+                password=User.gen_passwd_hash('admin'),
+                api_key=User.gen_api_key('admin', 'admin'),
                 role='admin'
             )
             session.add(new_user)
@@ -32,4 +40,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    sys.exit(main())
