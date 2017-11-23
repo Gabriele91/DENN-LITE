@@ -53,7 +53,7 @@ namespace NRam {
             for (size_t r = 0; r < out_mem.rows(); ++r)
                 out_mem(r, 0) = out_mem(r, Matrix::Index(out_mem(r, 0)));
 
-            return {in_mem, out_mem, Task::init_regs()};
+            return std::make_tuple(in_mem, out_mem, Task::init_regs());
         };
     };
 
@@ -75,7 +75,7 @@ namespace NRam {
             Matrix out_mem = in_mem;
             out_mem.block(0, m_max_int / 2, in_mem.rows(), in_mem.cols() - m_max_int / 2)
                     = in_mem.block(0, 1, in_mem.rows(), m_max_int / 2);
-            return {in_mem, out_mem, Task::init_regs()};
+            return std::make_tuple(in_mem, out_mem, Task::init_regs());
         }
     };
 
@@ -98,7 +98,7 @@ namespace NRam {
             for (size_t c = 0; c < m_max_int / 2; c++)
                 out_mem.col(c) += ColVector::Ones(out_mem.rows());
 
-            return {in_mem, out_mem, Task::init_regs()};
+            return std::make_tuple(in_mem, out_mem, Task::init_regs());
         }
     };
 }
