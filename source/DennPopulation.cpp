@@ -1,3 +1,4 @@
+#include "Config.h"
 #include "DennPopulation.h"
 namespace Denn
 {
@@ -82,7 +83,7 @@ namespace Denn
 		, const Individual::SPtr& i_default
 		, const DataSet& dataset
 		, const RandomFunction random_func
-		, CostFunction target_function
+		, LossFunction loss_function
 	)
 	{
 		//init pop
@@ -108,8 +109,7 @@ namespace Denn
 		//eval
 		for (size_t i = 0; i != population.size(); ++i)
 		{
-			auto y = population[i]->m_network.apply(dataset.features());
-			population[i]->m_eval = target_function(dataset.labels(), y);
+			population[i]->m_eval = loss_function(*population[i], dataset);
 		}
 	}
 	//size
@@ -188,7 +188,7 @@ namespace Denn
 		, const Individual::SPtr& i_default
 		, const DataSet&          dataset
 		, const RandomFunction    random_func
-		, CostFunction            target_function
+		, LossFunction            loss_function
 	)
 	{
 		//ref to current
@@ -210,8 +210,7 @@ namespace Denn
 		//eval
 		for (size_t i = 0; i != population.size(); ++i)
 		{
-			auto y = population[i]->m_network.apply(dataset.features());
-			population[i]->m_eval = target_function(dataset.labels(), y);
+			population[i]->m_eval = loss_function(*population[i], dataset);
 		}
 	}
 }

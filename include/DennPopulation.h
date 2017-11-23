@@ -59,7 +59,7 @@ namespace Denn
 	public:
         //Pointer
         using RandomFunction = std::function<Scalar(Scalar)>;
-		using CostFunction   = std::function<Scalar(const Matrix&, const Matrix&) >;
+		using LossFunction   = std::function< Scalar(const Individual&, const DataSet&) >;
         //attributes
 		Population m_pop_buffer[ size_t(PopulationType::PT_SIZE) ];
 		//init population
@@ -68,7 +68,7 @@ namespace Denn
 			, const Individual::SPtr& i_default
 			, const DataSet& dataset
 			, const RandomFunction random_func
-			, CostFunction target_function
+			, LossFunction loss_function
 		);
 		//size
 		size_t size() const;
@@ -99,7 +99,7 @@ namespace Denn
 			, const Individual::SPtr& i_default
 			, const DataSet&          dataset
 			, const RandomFunction    random_func
-			, CostFunction            target_function
+			, LossFunction            target_function
 		);
 	};
 }

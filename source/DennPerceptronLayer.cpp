@@ -37,10 +37,10 @@ namespace Denn
 		return std::static_pointer_cast<Layer>(std::make_shared<PerceptronLayer>(*this));
 	}
 	//////////////////////////////////////////////////
-	Matrix PerceptronLayer::apply(const Matrix& input) 
+	Matrix PerceptronLayer::apply(const Matrix& input) const
 	{
 		//get output
-		Matrix layer_output = (input * m_weights).rowwise() + Eigen::Map<RowVector>(m_baias.data(), m_baias.cols()*m_baias.rows());
+		Matrix layer_output = (input * m_weights).rowwise() + Eigen::Map<RowVector>((Scalar*)m_baias.data(), m_baias.cols()*m_baias.rows());
 		//activation function?
 		if (m_active_function) return m_active_function(layer_output);
 		else                   return layer_output;

@@ -26,9 +26,9 @@ namespace Denn
 		{
 		}
 		//actions
-		const Matrix& operator() (Matrix& input) { return m_function(input); }
-		const Matrix& apply(Matrix& input)  { return m_function(input); }
-		const Matrix& derive(Matrix& input) { return m_function_derivate(input); }
+		const Matrix& operator() (Matrix& input) const { return m_function(input); }
+		const Matrix& apply(Matrix& input)       const { return m_function(input); }
+		const Matrix& derive(Matrix& input)      const { return m_function_derivate(input); }
 		//operation
 		bool operator == (const ActiveFunction& right) const
 		{

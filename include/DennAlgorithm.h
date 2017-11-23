@@ -24,7 +24,7 @@ public:
 	//Search space
 	using DBPopulation   = DoubleBufferPopulation;
 	using RandomFunction = typename DoubleBufferPopulation::RandomFunction;
-	using CostFunction   = typename DoubleBufferPopulation::CostFunction;
+	using LossFunction   = typename DoubleBufferPopulation::LossFunction;
 	//DE parallel
 	using PromiseList    = std::vector< std::future<void> >;
 	//Ref mutation crossover
@@ -68,7 +68,7 @@ public:
 		  DataSetLoader*      dataset_loader
 		, const Parameters&   params
 		, const NeuralNetwork nn_default
-		, CostFunction		  target_function
+		, LossFunction		  loss_function
 		, std::ostream&       output
 		, ThreadPool*		  thpool = nullptr
 	);	
@@ -202,7 +202,7 @@ protected:
 	mutable PromiseList	  m_promises;
 	//serach space
 	DBPopulation          m_population;
-	CostFunction          m_target_function;	
+	LossFunction          m_loss_function;
 	RuntimeOutput::SPtr   m_output;
 	//dataset
 	Individual::SPtr      m_default;

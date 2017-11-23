@@ -62,7 +62,15 @@ namespace Denn
 	)
 	{
 		//Loss function
-		auto loss_function = CostFunction::cross_entropy_logistic_regression< Matrix >;
+		auto loss_function =
+		[](const Individual& individual, const DataSet& dataset) -> Scalar
+		{
+			return CostFunction::cross_entropy_logistic_regression(
+					  dataset.labels()
+					, individual.m_network.apply(dataset.features())
+			);
+		};
+
 		//DENN
 		DennAlgorithm denn
 		(

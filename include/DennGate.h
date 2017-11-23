@@ -9,7 +9,7 @@ namespace Denn
     class Gate : public std::enable_shared_from_this< Gate >
     {
     public:
-        enum Type
+        enum Arity
         {
             CONST = 0,
             UNARY = 1,
@@ -45,18 +45,18 @@ namespace Denn
             return m_name;
         }
 
-        Type type() const
+        Arity arity() const
         {
-            return m_type;
+            return m_arity;
         }
 
     protected:
 
-        Gate(const std::string& name, Type type) : m_name(name), m_type(type) {}
+        Gate(const std::string& name, Arity arity) : m_name(name), m_arity(arity) {}
 
         std::string m_name;
 
-        Type m_type;
+        Arity m_arity;
 
     };
 

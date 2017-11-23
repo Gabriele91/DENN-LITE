@@ -7,13 +7,13 @@ namespace Denn
 		  DataSetLoader*      dataset_loader
 		, const Parameters&   params
 		, const NeuralNetwork nn_default
-		, CostFunction		  target_function
+		, LossFunction		  loss_function
 		, std::ostream&       output
 		, ThreadPool*		  thpool
 	)
 	: m_main_random(*params.m_seed)
     , m_thpool(thpool)
-	, m_target_function(target_function)
+	, m_loss_function(loss_function)
 	, m_output(RuntimeOutputFactory::create(*params.m_runtime_output_type, output, *this))
 	, m_default(std::make_shared<Individual>
 	    ( *params.m_default_f
@@ -67,7 +67,7 @@ namespace Denn
 			m_default,
 			current_batch(),
 			m_random_function,
-			m_target_function
+			m_loss_function
 		);
 		//method of evoluction
 		m_e_method = EvolutionMethodFactory::create(m_params.m_evolution_type, *this);
@@ -317,7 +317,7 @@ namespace Denn
 				, m_default							     //default individual
 				, current_batch()						 //current batch
 				, m_random_function				         //random generator
-				, m_target_function				         //fitness function	  
+				, m_loss_function				         //fitness function
 			);
 			m_restart_ctx.m_test_count = 0;
 			m_restart_ctx.m_last_eval = m_best_ctx.m_eval;
@@ -378,8 +378,7 @@ namespace Denn
 		//Compute new individual
 		m_e_method->create_a_individual(m_population, i, *new_son);
 		//eval
-		auto y = new_son->m_network.apply(current_batch().m_features);
-		new_son->m_eval = m_target_function(current_batch().m_labels, y);
+		new_son->m_eval = m_loss_function(*new_son, current_batch());
 	}
 	
 	/////////////////////////////////////////////////////////////////
@@ -404,8 +403,7 @@ namespace Denn
 			//ref to target
 			auto& i_target = *population[i];
 			//eval
-			auto y = i_target.m_network.apply(current_batch().m_features);
-			i_target.m_eval = m_target_function(current_batch().m_labels, y);
+			i_target.m_eval = m_loss_function(i_target, current_batch());
 			//safe
 			if (std::isnan(i_target.m_eval))
 				i_target.m_eval = std::numeric_limits<Scalar>::max();
@@ -426,8 +424,7 @@ namespace Denn
 			m_promises[i] = thpool.push_task([this,&i_target]()
 			{
 				//test
-				auto y = i_target.m_network.apply(current_batch().m_features);
-				i_target.m_eval = m_target_function(current_batch().m_labels, y);
+				i_target.m_eval = m_loss_function(i_target, current_batch());
 				//safe
 				if (std::isnan(i_target.m_eval))
 					i_target.m_eval = std::numeric_limits<Scalar>::max();

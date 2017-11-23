@@ -6,6 +6,10 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "-DFLOAT -fPIC -D_FORCE_INLINES")
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 
+set(CMAKE_CXX_FLAGS_DEBUG "-g -D_DEBUG")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+
 include_directories(include/)
 include_directories(dips/include/)
 
@@ -466,6 +470,8 @@ set(SOURCE_FILES
         include/IOFileWrapper.h
         include/ThreadPool.h
         include/TicksTime.h
+        include/DennNRam.h
+        include/DennNRamTask.h
         source/DennCrossover/DennCrossoverBin.cpp
         source/DennCrossover/DennCrossoverExp.cpp
         source/DennCrossover/DennCrossoverInterm.cpp
@@ -520,8 +526,10 @@ set(SOURCE_FILES
         source/DennSerializaOutputFactory.cpp
         source/DennSerializeOutputItems.cpp
         source/DennTestSetStream.cpp
+        source/DennNRam.cpp
         source/TicksTime.cpp
-        source/main.cpp)
+        source/main.cpp
+        )
 
 find_package(ZLIB)
 find_library(M_LIB m)

@@ -36,7 +36,7 @@ public:
 		add_layer(layers...);
 	}
 	/////////////////////////////////////////////////////////////////////////
-	Matrix apply(const Matrix& input);
+	Matrix apply(const Matrix& input) const;
 	//backpropagation context
     struct BackpropagationContext
     {

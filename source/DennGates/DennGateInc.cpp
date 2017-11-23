@@ -1,4 +1,5 @@
 #include "DennGate.h"
+#include "DennDump.h"
 
 namespace Denn
 {

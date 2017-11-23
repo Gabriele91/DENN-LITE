@@ -14,7 +14,7 @@ namespace Denn
 		//EIGEN_MAKE_ALIGNED_OPERATOR_NEW	
 		///////////////////////////////////////////////////////////////////////////
 		virtual Layer::SPtr copy() const  				                                                 = 0;
-		virtual Matrix apply(const Matrix& input)									                     = 0;
+		virtual Matrix apply(const Matrix& input) const								                     = 0;
 		virtual Matrix              feedforward(const Matrix& input, Matrix& ff_out)													      = 0;
 		virtual Matrix              backpropagate_delta   (const Matrix& bp_delta, const Matrix& ff_out)								      = 0;
 		virtual std::vector<Matrix> backpropagate_gradient(const Matrix& bp_delta, const Matrix& ff_out, size_t input_samples, Scalar lambda) = 0;

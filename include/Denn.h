@@ -15,6 +15,7 @@
 #include  "DennNeuralNetwork.h"
 #include  "DennCostFunction.h"
 #include  "DennGate.h"
+#include  "DennNRamTask.h"
 
 //Dataset includes
 #include  "DennDatasetLoader.h"

@@ -15,8 +15,6 @@ namespace Denn
         {
             long max_int = M.cols();
             Matrix C = Matrix::Zero(1, A.cols());
-            MESSAGE(Dump::json_matrix(A))
-            MESSAGE(Dump::json_matrix(B))
             for (long j = 0, value = 0; j < A.size(); ++j, ++value)
                 for (long i = 0; i < A.size(); ++i)
                 {

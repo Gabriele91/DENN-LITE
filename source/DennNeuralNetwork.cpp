@@ -31,7 +31,7 @@ namespace Denn
 		return *this;
 	}
 	/////////////////////////////////////////////////////////////////////////
-	Matrix NeuralNetwork::apply(const Matrix& input)
+	Matrix NeuralNetwork::apply(const Matrix& input) const
 	{
 		//no layer?
 		assert(m_layers.size());
