@@ -1,7 +1,7 @@
 //
 // Created by Valerio Belli on 15/11/17.
 //
-
+#include <iterator>
 #include "DennGate.h"
 
 
