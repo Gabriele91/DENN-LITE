@@ -7,13 +7,17 @@ namespace Denn
 		  DataSetLoader*      dataset_loader
 		, const Parameters&   params
 		, const NeuralNetwork nn_default
-		, LossFunction		  loss_function
+		, Evaluation::SPtr    loss_function
+		, Evaluation::SPtr    validation_function
+		, Evaluation::SPtr    test_function
 		, std::ostream&       output
 		, ThreadPool*		  thpool
 	)
 	: m_main_random(*params.m_seed)
     , m_thpool(thpool)
 	, m_loss_function(loss_function)
+	, m_validation_function(validation_function)
+	, m_test_function(test_function)
 	, m_output(RuntimeOutputFactory::create(*params.m_runtime_output_type, output, *this))
 	, m_default(std::make_shared<Individual>
 	    ( *params.m_default_f
@@ -89,16 +93,15 @@ namespace Denn
 		//restart init
 		m_restart_ctx = RestartContext();
 		//best
-		if(m_e_method->best_from_validation())
-		{
-			//maximize
-			m_best_ctx = BestContext(nullptr, -std::numeric_limits<Scalar>::max());
-		}
-		else 
-		{
-			//minimize
-			m_best_ctx = BestContext(nullptr, std::numeric_limits<Scalar>::max());				
-		}
+		bool minimize = m_e_method->best_from_validation() ?  
+						m_validation_function->minimize() : 
+						m_loss_function->minimize();
+
+		//default best
+		m_best_ctx = BestContext(nullptr, 
+			  minimize 
+			? -std::numeric_limits<Scalar>::max() 
+			:  std::numeric_limits<Scalar>::max());
 		execute_update_best();
 		//start output
 		if (m_output) m_output->start();
@@ -121,9 +124,8 @@ namespace Denn
 		//validation
 		DataSetScalar test;
 		m_dataset_loader->read_test(test);
-		//compute
-		auto y = m_best_ctx.m_best->m_network.apply(test.m_features);
-		Scalar eval = Denn::CostFunction::accuracy(test.m_labels, y);
+		//compute test
+		Scalar eval = (*m_test_function)(*m_best_ctx.m_best, test);
 		//return
 		return eval;
 	}
@@ -132,9 +134,8 @@ namespace Denn
 		//validation
 		DataSetScalar test;
 		m_dataset_loader->read_test(test);
-		//compute
-		auto y = individual.m_network.apply(test.m_features);
-		Scalar eval = Denn::CostFunction::accuracy(test.m_labels, y);
+		//compute		
+		Scalar eval = (*m_test_function)(individual, test);
 		//return
 		return eval;
 	}
@@ -162,23 +163,31 @@ namespace Denn
 		DataSetScalar validation;
 		m_dataset_loader->read_validation(validation);
 		//best
-		Scalar best_eval = std::numeric_limits<Scalar>::min();
+		Scalar best_eval =  m_validation_function->minimize() 
+						 ?  std::numeric_limits<Scalar>::max() 
+						 : -std::numeric_limits<Scalar>::max();
 		size_t	   best_i= 0;
 		//find best
 		for (size_t i = 0; i != current_np(); ++i)
 		{
-			auto y = population[i]->m_network.apply(validation.m_features);
-			Scalar eval = Denn::CostFunction::accuracy(validation.m_labels, y);
-			//safe
-			if (std::isnan(eval)) eval = std::numeric_limits<Scalar>::min();
-			//maximize (accuracy)
-			if (!i || best_eval < eval)
+			//test
+			eval = (*m_validation_function)(i_target, validation);
+			//safe, nan = worst
+			if (std::isnan(eval)) eval =   m_validation_function->minimize() 
+										?  std::numeric_limits<Scalar>::max() 
+										: -std::numeric_limits<Scalar>::max();
+			//find best
+			if(!i //first
+			|| (m_validation_function->minimize()  && best_eval > eval)
+			|| (!m_validation_function->minimize() && best_eval < eval)
+			)
 			{
 				best_i = i;
 				best_eval = eval;
 			}
 		}
-		out_i = best_i;
+		//find best
+		out_i    = best_i
 		out_eval = best_eval;
 		return true;
 
@@ -193,7 +202,9 @@ namespace Denn
 		DataSetScalar validation;
 		m_dataset_loader->read_validation(validation);
 		//list eval
-		std::vector<Scalar> validation_evals(population.size(), std::numeric_limits<Scalar>::min());
+		std::vector<Scalar> validation_evals(population.size(),    m_validation_function->minimize() 
+																?  std::numeric_limits<Scalar>::max() 
+																: -std::numeric_limits<Scalar>::max());
 		//alloc promises
 		m_promises.resize(np);
 		//for all
@@ -206,17 +217,24 @@ namespace Denn
 			m_promises[i] = thpool.push_task([&]()
 			{
 				//test
-				auto y = i_target.m_network.apply(validation.m_features);
-				eval = Denn::CostFunction::accuracy(validation.m_labels, y);
-				//safe
-				if (std::isnan(eval)) eval = std::numeric_limits<Scalar>::min();
+				eval = (*m_validation_function)(i_target, validation);
+				//safe, nan = worst
+				if (std::isnan(eval)) eval =   m_validation_function->minimize() 
+											?  std::numeric_limits<Scalar>::max() 
+											: -std::numeric_limits<Scalar>::max();
 			});
 		}
 		//wait
 		for (auto& promise : m_promises) promise.wait();
 		//find best
-		//maximize (accuracy)
-		out_i    = std::distance(validation_evals.begin(), std::max_element(validation_evals.begin(), validation_evals.end()));
+		if(m_validation_function->minimize())
+		{
+			out_i = std::distance(validation_evals.begin(), std::min_element(validation_evals.begin(), validation_evals.end()));
+		}
+		else 
+		{
+			out_i = std::distance(validation_evals.begin(), std::max_element(validation_evals.begin(), validation_evals.end()));			
+		}
 		out_eval = validation_evals[out_i];
 		return true;
 
@@ -378,7 +396,7 @@ namespace Denn
 		//Compute new individual
 		m_e_method->create_a_individual(m_population, i, *new_son);
 		//eval
-		new_son->m_eval = m_loss_function(*new_son, current_batch());
+		new_son->m_eval = (*m_loss_function)(*new_son, current_batch());
 	}
 	
 	/////////////////////////////////////////////////////////////////
@@ -403,10 +421,12 @@ namespace Denn
 			//ref to target
 			auto& i_target = *population[i];
 			//eval
-			i_target.m_eval = m_loss_function(i_target, current_batch());
-			//safe
+			i_target.m_eval = (*m_loss_function)(i_target, current_batch());
+			//safe, nan = worst
 			if (std::isnan(i_target.m_eval))
-				i_target.m_eval = std::numeric_limits<Scalar>::max();
+				i_target.m_eval = m_loss_function->minimize()
+								? std::numeric_limits<Scalar>::max() 
+								: -std::numeric_limits<Scalar>::max() ; 
 		}
 	}
 	void DennAlgorithm::parallel_execute_target_function_on_all_population(Population& population, ThreadPool& thpool) const
@@ -424,10 +444,12 @@ namespace Denn
 			m_promises[i] = thpool.push_task([this,&i_target]()
 			{
 				//test
-				i_target.m_eval = m_loss_function(i_target, current_batch());
-				//safe
+				i_target.m_eval = (*m_loss_function)(i_target, current_batch());
+				//safe, nan = worst
 				if (std::isnan(i_target.m_eval))
-					i_target.m_eval = std::numeric_limits<Scalar>::max();
+					i_target.m_eval = m_loss_function->minimize()
+									? std::numeric_limits<Scalar>::max() 
+									:-std::numeric_limits<Scalar>::max(); 
 			});
 		}
 		//wait

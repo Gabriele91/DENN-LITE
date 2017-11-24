@@ -179,6 +179,8 @@ void execute
         , parameters
         , nn0
         , loss_function
+        , EvaluationFactory::create("accuracy",denn) //validation
+        , EvaluationFactory::create("accuracy",denn) //test
         //output
         , output
         //thread pool
@@ -195,13 +197,13 @@ void execute
     //output
     serialize_output->serialize_parameters(parameters);
     serialize_output->serialize_best
-            (
-                    execute_time
-                    , test //denn.execute_test(*result)
-                    , result->m_f
-                    , result->m_cr
-                    , result->m_network
-            );
+    (
+        execute_time
+        , test //denn.execute_test(*result)
+        , result->m_f
+        , result->m_cr
+        , result->m_network
+    );
     //output
     nn0 = result->m_network;
     ////////////////////////////////////////////////////////////////////////////////////////////////

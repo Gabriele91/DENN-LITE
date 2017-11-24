@@ -66,6 +66,7 @@
         "locale": "cpp",
         "valarray": "cpp",
         "set": "cpp",
-        "__nullptr": "cpp"
+        "__nullptr": "cpp",
+        "cinttypes": "cpp"
     }
 }

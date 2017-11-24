@@ -3,6 +3,7 @@
 #include "ThreadPool.h"
 #include "DennRandom.h"
 #include "DennCostFunction.h"
+#include "DennEvaluation.h"
 #include "DennDatasetLoader.h"
 #include "DennParameters.h"
 #include "DennPopulation.h"
@@ -23,8 +24,7 @@ public:
 	using LayerList      = typename NeuralNetwork::LayerList;
 	//Search space
 	using DBPopulation   = DoubleBufferPopulation;
-	using RandomFunction = typename DoubleBufferPopulation::RandomFunction;
-	using LossFunction   = typename DoubleBufferPopulation::LossFunction;
+	using RandomFunction = std::function<Scalar(Scalar)>;
 	//DE parallel
 	using PromiseList    = std::vector< std::future<void> >;
 	//Ref mutation crossover
@@ -68,7 +68,9 @@ public:
 		  DataSetLoader*      dataset_loader
 		, const Parameters&   params
 		, const NeuralNetwork nn_default
-		, LossFunction		  loss_function
+		, Evaluation::SPtr    loss_function
+		, Evaluation::SPtr    validation_function
+		, Evaluation::SPtr    test_function
 		, std::ostream&       output
 		, ThreadPool*		  thpool = nullptr
 	);	
@@ -202,7 +204,9 @@ protected:
 	mutable PromiseList	  m_promises;
 	//serach space
 	DBPopulation          m_population;
-	LossFunction          m_loss_function;
+	Evaluation::SPtr      m_loss_function;
+	Evaluation::SPtr      m_validation_function;
+	Evaluation::SPtr      m_test_function;
 	RuntimeOutput::SPtr   m_output;
 	//dataset
 	Individual::SPtr      m_default;

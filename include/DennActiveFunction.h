@@ -71,14 +71,14 @@ namespace Denn
 		}
 	};
 	
-	#define __HELPER_BASE__REGISTERED_ACTIVE_FUNCTION(item_name_, name_, ...)\
+	#define __HELPER_BASE_REGISTERED_ACTIVE_FUNCTION(item_name_, name_, ...)\
 	namespace\
 	{\
 		static const ActiveFunctionItem& _Denn_ ## item_name_ ## _ActiveFunctionItem = ActiveFunctionItem(name_, ActiveFunction(__VA_ARGS__));\
 	}
-	#define __HELPER_CALL__REGISTERED_ACTIVE_FUNCTION(item_name_, name_, ... )\
-		__HELPER_BASE__REGISTERED_ACTIVE_FUNCTION( item_name_, name_, __VA_ARGS__)
+	#define __HELPER_CALL_REGISTERED_ACTIVE_FUNCTION(item_name_, name_, ... )\
+		__HELPER_BASE_REGISTERED_ACTIVE_FUNCTION( item_name_, name_, __VA_ARGS__)
 
 	#define REGISTERED_ACTIVE_FUNCTION(name_, ...)\
-		__HELPER_CALL__REGISTERED_ACTIVE_FUNCTION( __COUNTER__, name_, __VA_ARGS__)
+		__HELPER_CALL_REGISTERED_ACTIVE_FUNCTION( __COUNTER__, name_, __VA_ARGS__)
 }

@@ -3,9 +3,14 @@
 #include "DennDataset.h"
 #include "DennNeuralNetwork.h"
 #include "DennIndividual.h"
+#include "DennIndividual.h"
+#include "DennEvaluation.h"
 
 namespace Denn
 {
+	////////////////////////////////////////////////////////////////////////
+	class Population;
+	class DoubleBufferPopulation;
     ////////////////////////////////////////////////////////////////////////
 	//Population
 	class Population
@@ -43,9 +48,10 @@ namespace Denn
 	protected:
 
 		std::vector < Individual::SPtr > m_individuals;
+		bool m_minimize_loss_function { true };
+		friend class DoubleBufferPopulation;
 
 	};
-
     ////////////////////////////////////////////////////////////////////////
 	enum class PopulationType : size_t
 	{
@@ -59,16 +65,16 @@ namespace Denn
 	public:
         //Pointer
         using RandomFunction = std::function<Scalar(Scalar)>;
-		using LossFunction   = std::function< Scalar(const Individual&, const DataSet&) >;
         //attributes
 		Population m_pop_buffer[ size_t(PopulationType::PT_SIZE) ];
+		bool m_minimize_loss_function { true };
 		//init population
 		void init(
 			size_t np
 			, const Individual::SPtr& i_default
-			, const DataSet& dataset
-			, const RandomFunction random_func
-			, LossFunction loss_function
+			, const DataSet&          dataset
+			, const RandomFunction    random_func
+			, Evaluation&		      loss_function
 		);
 		//size
 		size_t size() const;
@@ -99,7 +105,7 @@ namespace Denn
 			, const Individual::SPtr& i_default
 			, const DataSet&          dataset
 			, const RandomFunction    random_func
-			, LossFunction            target_function
+			, Evaluation&		      loss_function
 		);
 	};
 }

@@ -14,6 +14,8 @@
 #include  "DennPerceptronLayer.h"
 #include  "DennNeuralNetwork.h"
 #include  "DennCostFunction.h"
+#include  "DennEvaluation.h"
+
 #include  "DennGate.h"
 #include  "DennNRamTask.h"
 

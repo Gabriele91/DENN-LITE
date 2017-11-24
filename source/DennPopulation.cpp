@@ -32,8 +32,12 @@ namespace Denn
 		//find best
 		for (size_t i = 0; i != m_individuals.size(); ++i)
 		{
-			//minimize (cross_entropy)
-			if (!i || m_individuals[i]->m_eval < best_eval)
+			//
+			if 
+			(!i 
+			 || ( m_minimize_loss_function && m_individuals[i]->m_eval < best_eval)
+			 || (!m_minimize_loss_function && m_individuals[i]->m_eval > best_eval)
+			)
 			{
 				best_i = i;
 				best_eval = m_individuals[i]->m_eval;
@@ -83,7 +87,7 @@ namespace Denn
 		, const Individual::SPtr& i_default
 		, const DataSet& dataset
 		, const RandomFunction random_func
-		, LossFunction loss_function
+		, Evaluation& loss_function
 	)
 	{
 		//init pop
@@ -111,6 +115,10 @@ namespace Denn
 		{
 			population[i]->m_eval = loss_function(*population[i], dataset);
 		}
+		//minimize?
+		m_minimize_loss_function = loss_function.minimize();
+		parents().m_minimize_loss_function = m_minimize_loss_function;
+		sons().m_minimize_loss_function = m_minimize_loss_function;
 	}
 	//size
 	size_t DoubleBufferPopulation::size() const
@@ -163,14 +171,29 @@ namespace Denn
 	//swap
 	void DoubleBufferPopulation::the_best_sons_become_parents()
 	{
-		//minimize (cross_entropy)
-		for (size_t i = 0; i != parents().size(); ++i)
+		//minimize
+		if(m_minimize_loss_function)
 		{
-			if (sons()[i]->m_eval < parents()[i]->m_eval)
+			for (size_t i = 0; i != parents().size(); ++i)
 			{
-				auto individual_tmp = parents()[i];
-				parents()[i] = sons()[i];
-				sons()[i] = individual_tmp;
+				if (sons()[i]->m_eval < parents()[i]->m_eval)
+				{
+					auto individual_tmp = parents()[i];
+					parents()[i] = sons()[i];
+					sons()[i] = individual_tmp;
+				}
+			}
+		}
+		else 
+		{
+			for (size_t i = 0; i != parents().size(); ++i)
+			{
+				if (sons()[i]->m_eval > parents()[i]->m_eval)
+				{
+					auto individual_tmp = parents()[i];
+					parents()[i] = sons()[i];
+					sons()[i] = individual_tmp;
+				}
 			}
 		}
 	}
@@ -188,7 +211,7 @@ namespace Denn
 		, const Individual::SPtr& i_default
 		, const DataSet&          dataset
 		, const RandomFunction    random_func
-		, LossFunction            loss_function
+		, Evaluation& 			  loss_function
 	)
 	{
 		//ref to current
@@ -212,5 +235,9 @@ namespace Denn
 		{
 			population[i]->m_eval = loss_function(*population[i], dataset);
 		}
+		//minimize?
+		m_minimize_loss_function = loss_function.minimize();
+		parents().m_minimize_loss_function = m_minimize_loss_function;
+		sons().m_minimize_loss_function = m_minimize_loss_function;
 	}
 }
