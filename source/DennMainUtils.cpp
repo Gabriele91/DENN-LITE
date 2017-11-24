@@ -61,23 +61,15 @@ namespace Denn
 		, NeuralNetwork&			  neural_netowrk
 	)
 	{
-		//Loss function
-		auto loss_function =
-		[](const Individual& individual, const DataSet& dataset) -> Scalar
-		{
-			return CostFunction::cross_entropy_logistic_regression(
-					  dataset.labels()
-					, individual.m_network.apply(dataset.features())
-			);
-		};
-
 		//DENN
 		DennAlgorithm denn
 		(
 			&dataset
 			, parameters
 			, neural_netowrk
-			, loss_function
+			, EvaluationFactory::create("cross_entropy_logistic",denn) //train (loss function)
+			, EvaluationFactory::create("accuracy",denn) //validation
+			, EvaluationFactory::create("accuracy",denn) //test
 			//output
 			, output
 			//thread pool

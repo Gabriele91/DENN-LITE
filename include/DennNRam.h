@@ -17,6 +17,8 @@ namespace NRam
 
     struct NRamLayout
     {
+        NRamLayout();
+        
         NRamLayout(
             const size_t batch_size,
             const size_t max_int,

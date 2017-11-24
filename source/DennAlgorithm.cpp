@@ -71,7 +71,7 @@ namespace Denn
 			m_default,
 			current_batch(),
 			m_random_function,
-			m_loss_function
+			*m_loss_function
 		);
 		//method of evoluction
 		m_e_method = EvolutionMethodFactory::create(m_params.m_evolution_type, *this);
@@ -170,8 +170,9 @@ namespace Denn
 		//find best
 		for (size_t i = 0; i != current_np(); ++i)
 		{
+			auto& i_target = *population[i];
 			//test
-			eval = (*m_validation_function)(i_target, validation);
+			Scalar eval = (*m_validation_function)(i_target, validation);
 			//safe, nan = worst
 			if (std::isnan(eval)) eval =   m_validation_function->minimize() 
 										?  std::numeric_limits<Scalar>::max() 
@@ -187,7 +188,7 @@ namespace Denn
 			}
 		}
 		//find best
-		out_i    = best_i
+		out_i    = best_i;
 		out_eval = best_eval;
 		return true;
 
@@ -335,7 +336,7 @@ namespace Denn
 				, m_default							     //default individual
 				, current_batch()						 //current batch
 				, m_random_function				         //random generator
-				, m_loss_function				         //fitness function
+				, *m_loss_function				         //fitness function
 			);
 			m_restart_ctx.m_test_count = 0;
 			m_restart_ctx.m_last_eval = m_best_ctx.m_eval;

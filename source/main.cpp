@@ -131,6 +131,44 @@ namespace Denn
         DataSetHeader       m_fake_header;
         DataSetTrainHeader  m_fake_train_header;
     };
+
+
+    //NRam
+    class NRamEval : public Evaluation
+	{
+	public:
+        //eval
+		NRamEval(const DennAlgorithm& algorithm) 
+        : Evaluation(algorithm) 
+        {
+        }
+        //methods
+        virtual bool minimize() const { return true; }
+        virtual Scalar operator () (const Individual& individual, const DataSet& ds)
+        {
+            //network
+            auto& nn      = individual.m_network;
+            //Dataset
+            auto& in_mem  = ds.features();
+            auto& out_mem = ds.labels();
+            //regs
+            auto regs = NRam::fuzzy_regs(m_context.m_batch_size, m_context.m_n_regs, m_context.m_max_int);
+            //to list
+            auto list_in_mem = NRam::fuzzy_encode(in_mem);
+            //execute
+            return NRam::train(m_context, nn, regs, list_in_mem, out_mem);
+        }
+        //layout
+        NRam::NRamLayout m_context;
+        //set context
+        Evaluation::SPtr set_context(const NRam::NRamLayout& context)
+        {
+            m_context = context;
+            return this->get_ptr();
+        }
+    };
+    REGISTERED_EVALUATION(NRamEval,"nram")
+
 }
 
 void execute
@@ -152,35 +190,16 @@ void execute
     // NETWORK
     NeuralNetwork nn0 = build_mlp_network(context.m_n_regs, context.m_nn_output, parameters);
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    //Loss function
-    auto loss_function =
-    [&](const Individual& individual, const DataSet& ds) -> Scalar
-    {
-        //network
-        auto& nn      = individual.m_network;
-
-        auto task     = context.m_task;
-
-        //Dataset
-        auto& in_mem  = ds.features();
-        auto& out_mem = ds.labels();
-
-        auto regs    = NRam::fuzzy_regs(context.m_batch_size, context.m_n_regs, context.m_max_int);
-
-        //to list
-        auto list_in_mem = NRam::fuzzy_encode(in_mem);
-        //execute
-        return NRam::train(context, nn, regs, list_in_mem, out_mem);
-    };
     //DENN
     DennAlgorithm denn
     (
           &db_copy
         , parameters
         , nn0
-        , loss_function
-        , EvaluationFactory::create("accuracy",denn) //validation
-        , EvaluationFactory::create("accuracy",denn) //test
+        //..
+        , ((NRamEval*)EvaluationFactory::create("nram", denn).get())->set_context(context)  //test
+        , ((NRamEval*)EvaluationFactory::create("nram", denn).get())->set_context(context)  //validation
+        , ((NRamEval*)EvaluationFactory::create("nram", denn).get())->set_context(context)  //test
         //output
         , output
         //thread pool
@@ -193,12 +212,12 @@ void execute
     //test
     DataSetScalar test_set;
     db_copy.read_test(test_set);
-    auto test = loss_function(*result, test_set);
+    auto test = (*((NRamEval*)EvaluationFactory::create("nram", denn).get())->set_context(context))(*result, test_set);
     //output
     serialize_output->serialize_parameters(parameters);
     serialize_output->serialize_best
     (
-        execute_time
+          execute_time
         , test //denn.execute_test(*result)
         , result->m_f
         , result->m_cr

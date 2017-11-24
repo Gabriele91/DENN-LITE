@@ -15,11 +15,13 @@ namespace Denn
 	class DoubleBufferPopulation;
 
     //Evaluate function
-	class Evaluation
+	class Evaluation : public std::enable_shared_from_this<Evaluation>
 	{		
     public:
         //ref to Evaluation
         using SPtr = std::shared_ptr<Evaluation>;
+		//return ptr
+		SPtr get_ptr() { return this->shared_from_this(); }
 		//Evaluation info
         Evaluation(const DennAlgorithm& algorithm);
         //methods
@@ -89,7 +91,7 @@ namespace Denn
 	};
 
 
-	#define REGISTERED_EVALUATION_FUNCTION(class_,name_)\
+	#define REGISTERED_EVALUATION(class_,name_)\
 	namespace\
 	{\
 		static const EvaluationItem<class_>& _Denn_ ## class_ ## _EvaluationItem= EvaluationItem<class_>::instance( name_, sizeof(class_) );\

@@ -8,32 +8,32 @@ namespace Denn
 	class Accuary : public Evaluation
 	{
 	public:
-		Bin(const DennAlgorithm& algorithm) : Evaluation(algorithm) {}
+		Accuary(const DennAlgorithm& algorithm) : Evaluation(algorithm) {}
 
         //methods
         virtual bool minimize() const { return false; }
-        virtual Scalar operator () (const Individual& individual, const DataSet& set)
+        virtual Scalar operator () (const Individual& individual, const DataSet& dataset)
         {
-            auto x = individual->m_network.apply(ds.features());
-            return CostFunction::accuracy(x,set.labels());
+            auto x = individual.m_network.apply(dataset.features());
+            return CostFunction::accuracy(x,dataset.labels());
         }
 		
     };
     REGISTERED_EVALUATION(Accuary,"accuary")
     
-	class InvAccuary : public Evaluation
+	class InverseAccuracy : public Evaluation
 	{
 	public:
-		Bin(const DennAlgorithm& algorithm) : Evaluation(algorithm) {}
+		InverseAccuracy(const DennAlgorithm& algorithm) : Evaluation(algorithm) {}
 
         //methods
         virtual bool minimize() const { return true; }
-        virtual Scalar operator () (const Individual& individual, const DataSet& set)
+        virtual Scalar operator () (const Individual& individual, const DataSet& dataset)
         {
-            auto x = individual->m_network.apply(ds.features());
-            return CostFunction::inv_accuary(x,set.labels());
+            auto x = individual.m_network.apply(dataset.features());
+            return CostFunction::inverse_accuracy(x,dataset.labels());
         }
 		
     };
-	REGISTERED_EVALUATION(InvAccuary,"inv_accuary")
+	REGISTERED_EVALUATION(InverseAccuracy,"inverse_accuracy")
 }
