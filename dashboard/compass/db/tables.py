@@ -24,6 +24,17 @@ class User(BASE):
     role = sqlalchemy.Column(sqlalchemy.String(256), nullable=False)
 
     @staticmethod
+    def add_user():
+        new_user = User(
+                username='admin',
+                password=User.gen_passwd_hash('admin'),
+                api_key=User.gen_api_key('admin', 'admin'),
+                role='admin'
+            )
+            session.add(new_user)
+            session.commit()
+
+    @staticmethod
     def gen_passwd_hash(passwd):
         """Generates the hash of a user password.
 
@@ -48,14 +59,11 @@ class User(BASE):
             str: hash (md5) of the username
         """
         with Session() as session:
-            try:
-                res = session.query(User).filter(
-                    User.username == username
-                ).one()
-                id_hash = hashlib.md5()
-                id_hash.update("{}".format(res.id).encode('ascii'))
-            except sqlalchemy.orm.exc.NoResultFound:
-                return None
+            res = session.query(User).filter(
+                User.username == username
+            ).one()
+            id_hash = hashlib.md5()
+            id_hash.update("{}".format(res.id).encode('ascii'))
         return id_hash.hexdigest()
 
     @staticmethod
@@ -115,7 +123,7 @@ class User(BASE):
                     User.username == username
                 ).one()
             except sqlalchemy.orm.exc.NoResultFound:
-                return False
+                return 'nobody'
             return res.role
 
     @staticmethod
