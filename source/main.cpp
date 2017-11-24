@@ -53,21 +53,17 @@ namespace Denn
             m_fake_train_header.m_n_row= task->get_batch_size();
             //init
             auto train       = (*task)();
-            auto test        = (*task)();
             auto validation  = (*task)();
+            auto test        = (*task)();
 
             m_train.m_features      = std::get<0>(train);
             m_train.m_labels        = std::get<1>(train);
-//            m_train.m_in_mem        = std::get<0>(train);
-
-            m_test.m_features       = std::get<0>(test);
-            m_test.m_labels         = std::get<1>(test);
-//            m_test.m_in_mem         = std::get<0>(test);
 
             m_validation.m_features = std::get<0>(validation);
             m_validation.m_labels   = std::get<1>(validation);
-//            m_validation.m_in_mem   = std::get<0>(validation);
 
+            m_test.m_features      = std::get<0>(test);
+            m_test.m_labels        = std::get<1>(test);
         }
         ///////////////////////////////////////////////////////////////////
         bool open(const std::string& path_file) override
@@ -124,9 +120,9 @@ namespace Denn
 
     protected:
 
-        DataSetScalar    m_test;
-        DataSetScalar    m_validation;
         DataSetScalar    m_train;
+        DataSetScalar    m_validation;
+        DataSetScalar    m_test;
 
         DataSetHeader       m_fake_header;
         DataSetTrainHeader  m_fake_train_header;
@@ -206,16 +202,12 @@ void execute
     double execute_time = Time::get_time();
     auto result = denn.execute();
     execute_time = Time::get_time() - execute_time;
-    //test
-    DataSetScalar test_set;
-    db_copy.read_test(test_set);
-    auto test = (*EvaluationFactory::get("nram"))(*result, test_set);
     //output
     serialize_output->serialize_parameters(parameters);
     serialize_output->serialize_best
     (
           execute_time
-        , test //denn.execute_test(*result)
+        , denn.execute_test(*result)
         , result->m_f
         , result->m_cr
         , result->m_network

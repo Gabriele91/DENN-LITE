@@ -270,7 +270,7 @@ namespace Denn
 		Scalar curr_eval = Scalar(0.0);
 		auto curr = find_best_on_validation(curr_eval);
 		//validation best
-		if (validation_function_compare(m_best_ctx.m_eval,curr_eval))
+		if (validation_function_compare(curr_eval, m_best_ctx.m_eval))
 		{
 			//must copy because "restart" 
 			//not copy element then 
@@ -285,7 +285,7 @@ namespace Denn
 		//find best
 		auto curr = m_population.parents().best();
 		//loss best
-		if (loss_function_compare(m_best_ctx.m_eval,curr->m_eval))
+		if (loss_function_compare(curr->m_eval, m_best_ctx.m_eval))
 		{
 			//must copy because "restart" 
 			//not copy element then 
