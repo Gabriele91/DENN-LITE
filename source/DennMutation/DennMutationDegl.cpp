@@ -35,7 +35,8 @@ namespace Denn
 			for(long k=-nn; k!=(nn+1); ++k)
 			{
 				long i = Denn::positive_mod(k + (long)id_target, np);
-				if( population[i]->m_eval <  population[id_l_best]->m_eval) id_l_best = i;
+				if(loss_function_compare(population[i]->m_eval, population[id_l_best]->m_eval)) 
+					id_l_best = i;
 			}
 			//local best ref
 			const Individual& l_best = *population[id_l_best];	

@@ -84,7 +84,7 @@ namespace Denn
 			{
 				Individual::SPtr father = dpopulation.parents()[i];
 				Individual::SPtr son = dpopulation.sons()[i];
-				if (son->m_eval < father->m_eval)
+				if (loss_function_compare(son->m_eval,father->m_eval))
 				{
 					if (m_archive_max_size) m_archive.push_back(father->copy());
 					//else if (main_random().uniform() < Scalar(m_archive_max_size) / Scalar(m_archive_max_size + n_discarded))

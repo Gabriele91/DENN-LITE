@@ -163,9 +163,7 @@ namespace Denn
 		DataSetScalar validation;
 		m_dataset_loader->read_validation(validation);
 		//best
-		Scalar best_eval =  m_validation_function->minimize() 
-						 ?  std::numeric_limits<Scalar>::max() 
-						 : -std::numeric_limits<Scalar>::max();
+		Scalar best_eval =  validation_function_worst();
 		size_t	   best_i= 0;
 		//find best
 		for (size_t i = 0; i != current_np(); ++i)
@@ -174,14 +172,9 @@ namespace Denn
 			//test
 			Scalar eval = (*m_validation_function)(i_target, validation);
 			//safe, nan = worst
-			if (std::isnan(eval)) eval =   m_validation_function->minimize() 
-										?  std::numeric_limits<Scalar>::max() 
-										: -std::numeric_limits<Scalar>::max();
+			if (std::isnan(eval)) eval = validation_function_worst();
 			//find best
-			if(!i //first
-			|| (m_validation_function->minimize()  && best_eval > eval)
-			|| (!m_validation_function->minimize() && best_eval < eval)
-			)
+			if(!i && validation_function_compare(eval,best_eval))
 			{
 				best_i = i;
 				best_eval = eval;
@@ -203,9 +196,7 @@ namespace Denn
 		DataSetScalar validation;
 		m_dataset_loader->read_validation(validation);
 		//list eval
-		std::vector<Scalar> validation_evals(population.size(),    m_validation_function->minimize() 
-																?  std::numeric_limits<Scalar>::max() 
-																: -std::numeric_limits<Scalar>::max());
+		std::vector<Scalar> validation_evals(population.size(), validation_function_worst());
 		//alloc promises
 		m_promises.resize(np);
 		//for all
@@ -220,9 +211,7 @@ namespace Denn
 				//test
 				eval = (*m_validation_function)(i_target, validation);
 				//safe, nan = worst
-				if (std::isnan(eval)) eval =   m_validation_function->minimize() 
-											?  std::numeric_limits<Scalar>::max() 
-											: -std::numeric_limits<Scalar>::max();
+				if (std::isnan(eval)) eval = validation_function_worst();;
 			});
 		}
 		//wait
@@ -245,7 +234,7 @@ namespace Denn
 	//Intermedie steps
 	void DennAlgorithm::execute_a_pass(size_t pass, size_t n_sub_pass)
 	{
-		execute_target_function_on_all_population(m_population.parents());
+		execute_loss_function_on_all_population(m_population.parents());
 		///////////////////////////////////////////////////////////////////
 		//output
 		if(m_output) m_output->start_a_pass();
@@ -277,15 +266,15 @@ namespace Denn
 	void DennAlgorithm::execute_update_best()
 	{
 		if(m_e_method->best_from_validation()) execute_update_best_on_validation();
-		else             					   execute_update_best_on_target_function();
+		else             					   execute_update_best_on_loss_function();
 	}	
 	void DennAlgorithm::execute_update_best_on_validation()
 	{
 		//find best
 		Scalar curr_eval = Scalar(0.0);
 		auto curr = find_best_on_validation(curr_eval);
-		//maximize (accuracy)
-		if (m_best_ctx.m_eval < curr_eval)
+		//validation best
+		if (validation_function_compare(m_best_ctx.m_eval,curr_eval))
 		{
 			//must copy because "restart" 
 			//not copy element then 
@@ -295,12 +284,12 @@ namespace Denn
 			m_best_ctx.m_eval = curr_eval;
 		}
 	}
-	void DennAlgorithm::execute_update_best_on_target_function()
+	void DennAlgorithm::execute_update_best_on_loss_function()
 	{
 		//find best
 		auto curr = m_population.parents().best();
-		//minimize (target function)
-		if (curr->m_eval < m_best_ctx.m_eval)
+		//loss best
+		if (loss_function_compare(m_best_ctx.m_eval,curr->m_eval))
 		{
 			//must copy because "restart" 
 			//not copy element then 
@@ -404,33 +393,30 @@ namespace Denn
 	//fitness function on a population
 	void DennAlgorithm::execute_fitness_on(Population& population) const
 	{
-		execute_target_function_on_all_population(population);
+		execute_loss_function_on_all_population(population);
 	}
-	void DennAlgorithm::execute_target_function_on_all_population(Population& population) const
+	void DennAlgorithm::execute_loss_function_on_all_population(Population& population) const
 	{
 		//eval on batch
-		if (m_thpool) parallel_execute_target_function_on_all_population(population, *m_thpool);
-		else 		  serial_execute_target_function_on_all_population(population);
+		if (m_thpool) parallel_execute_loss_function_on_all_population(population, *m_thpool);
+		else 		  serial_execute_loss_function_on_all_population(population);
 	}
-	void DennAlgorithm::serial_execute_target_function_on_all_population(Population& population) const
+	void DennAlgorithm::serial_execute_loss_function_on_all_population(Population& population) const
 	{
 		//np
 		size_t np = current_np();
 		//for all
 		for (size_t i = 0; i != np; ++i)
 		{
-			//ref to target
+			//ref to loss
 			auto& i_target = *population[i];
 			//eval
 			i_target.m_eval = (*m_loss_function)(i_target, current_batch());
 			//safe, nan = worst
-			if (std::isnan(i_target.m_eval))
-				i_target.m_eval = m_loss_function->minimize()
-								? std::numeric_limits<Scalar>::max() 
-								: -std::numeric_limits<Scalar>::max() ; 
+			if (std::isnan(i_target.m_eval)) i_target.m_eval = loss_function_worst(); 
 		}
 	}
-	void DennAlgorithm::parallel_execute_target_function_on_all_population(Population& population, ThreadPool& thpool) const
+	void DennAlgorithm::parallel_execute_loss_function_on_all_population(Population& population, ThreadPool& thpool) const
 	{
 		//get np
 		size_t np = current_np();
@@ -447,10 +433,7 @@ namespace Denn
 				//test
 				i_target.m_eval = (*m_loss_function)(i_target, current_batch());
 				//safe, nan = worst
-				if (std::isnan(i_target.m_eval))
-					i_target.m_eval = m_loss_function->minimize()
-									? std::numeric_limits<Scalar>::max() 
-									:-std::numeric_limits<Scalar>::max(); 
+				if (std::isnan(i_target.m_eval)) i_target.m_eval = loss_function_worst(); 
 			});
 		}
 		//wait

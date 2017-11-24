@@ -161,6 +161,70 @@ public:
 		return m_dataset_loader;
 	}
 
+	Evaluation::SPtr loss_function() const 
+	{
+		return m_loss_function;
+	}
+	
+	Evaluation::SPtr validation_function() const 
+	{
+		return m_validation_function;
+	}
+
+	Evaluation::SPtr test_function() const 
+	{
+		return m_test_function;
+	}
+
+
+	bool loss_function_compare(Scalar left, Scalar right) const
+	{
+		return  m_loss_function->minimize() 
+		    ?   left < right
+			:  right < left
+			;
+	}
+
+	bool validation_function_compare(Scalar left, Scalar right) const
+	{
+		return  m_validation_function->minimize() 
+		    ?   left < right
+			:  right < left
+			;
+	}
+
+	bool test_function_compare(Scalar left, Scalar right) const
+	{
+		return  m_test_function->minimize() 
+		    ?  left < right
+			:  right < left
+			;
+	}
+
+	Scalar loss_function_worst() const
+	{
+		return  m_loss_function->minimize() 
+		    ?   std::numeric_limits<Scalar>::max() 
+			:  -std::numeric_limits<Scalar>::max()
+			;
+	}
+
+	Scalar validation_function_worst() const
+	{
+		return  m_validation_function->minimize() 
+		    ?   std::numeric_limits<Scalar>::max() 
+			:  -std::numeric_limits<Scalar>::max()
+			;
+	}
+
+	Scalar test_function_worst() const
+	{
+		return  m_test_function->minimize() 
+		    ?   std::numeric_limits<Scalar>::max() 
+			:  -std::numeric_limits<Scalar>::max()
+			;
+	}
+
 protected:
 	//init
 	bool init();
@@ -175,7 +239,7 @@ protected:
 	void execute_a_sub_pass(size_t pass, size_t sub_pass);
 	void execute_update_best();
 	void execute_update_best_on_validation();
-	void execute_update_best_on_target_function();
+	void execute_update_best_on_loss_function();
 	void execute_update_restart(size_t pass);	
 	/////////////////////////////////////////////////////////////////
 	//execute a pass
@@ -185,9 +249,9 @@ protected:
 	void  execute_generation_task(size_t i);
 	/////////////////////////////////////////////////////////////////
 	//eval all
-	void execute_target_function_on_all_population(Population& population) const;
-	void serial_execute_target_function_on_all_population(Population& population) const;
-	void parallel_execute_target_function_on_all_population(Population& population,ThreadPool& thpool) const;
+	void execute_loss_function_on_all_population(Population& population) const;
+	void serial_execute_loss_function_on_all_population(Population& population) const;
+	void parallel_execute_loss_function_on_all_population(Population& population,ThreadPool& thpool) const;
 	/////////////////////////////////////////////////////////////////
 	//gen random function
 	RandomFunction gen_random_func() const;

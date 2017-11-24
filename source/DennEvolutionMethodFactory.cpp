@@ -34,6 +34,11 @@ namespace Denn
 
 	Random& EvolutionMethod::main_random()					   const { return m_algorithm.main_random(); }
 
+	//help, how is the best
+	bool EvolutionMethod::loss_function_compare(Scalar left, Scalar right) const       { return  m_algorithm.loss_function_compare(left,right);  }
+	bool EvolutionMethod::validation_function_compare(Scalar left, Scalar right) const { return  m_algorithm.validation_function_compare(left,right);  }
+	bool EvolutionMethod::test_function_compare(Scalar left, Scalar right) const       { return  m_algorithm.test_function_compare(left,right);  }
+
 	#ifndef RANDOM_SAFE_EVOLUTION_METHOD
 	Random& EvolutionMethod::random()					       const { return m_algorithm.random(); }
 	#endif
