@@ -93,15 +93,11 @@ namespace Denn
 		//restart init
 		m_restart_ctx = RestartContext();
 		//best
-		bool minimize = m_e_method->best_from_validation() ?  
-						m_validation_function->minimize() : 
-						m_loss_function->minimize();
-
+		Scalar worst_eval = m_e_method->best_from_validation() 
+						  ? validation_function_worst() 
+						  : loss_function_worst();
 		//default best
-		m_best_ctx = BestContext(nullptr, 
-			  minimize 
-			? -std::numeric_limits<Scalar>::max() 
-			:  std::numeric_limits<Scalar>::max());
+		m_best_ctx = BestContext(nullptr, worst_eval);
 		execute_update_best();
 		//start output
 		if (m_output) m_output->start();
