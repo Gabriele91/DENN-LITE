@@ -30,9 +30,9 @@ namespace NRam
 
         m_gates = {
                 GateFactory::create("read"),
+                GateFactory::create("zero"),
                 GateFactory::create("inc"),
-                GateFactory::create("add"),
-                GateFactory::create("dec"),
+                GateFactory::create("lt"),
                 GateFactory::create("min"),
                 GateFactory::create("write")
         };
@@ -240,7 +240,7 @@ namespace NRam
                 cum_prob_complete[s] += p_t[s];
                 prob_incomplete[s] *= 1 - fi;
                 //
-                cost(0, s) -= p_t[s] * calculate_sample_cost(in_mem[s], out_mem.row(0));
+                cost(0, s) -= p_t[s] * calculate_sample_cost(in_mem[s], out_mem.row(s));
             }
         }
 

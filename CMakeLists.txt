@@ -484,6 +484,8 @@ set(SOURCE_FILES
         source/DennEvolutionMethod/DennEvolutionMethodNone.cpp
         source/DennEvolutionMethod/DennEvolutionMethodShaDE.cpp
         source/DennEvolutionMethod/DennEvolutionMethodTDE.cpp
+        source/DennEvaluation/DennAccuracy.cpp
+        source/DennEvaluation/DennCrossentropy.cpp
         source/DennMutation/DennMutationBest.cpp
         source/DennMutation/DennMutationCurrentToBest.cpp
         source/DennMutation/DennMutationDegl.cpp
@@ -510,6 +512,7 @@ set(SOURCE_FILES
         source/DennAlgorithm.cpp
         source/DennCrossoverFactory.cpp
         source/DennDump.cpp
+        source/DennEvaluationFactory.cpp
         source/DennEvolutionMethodFactory.cpp
         source/DennFilesystem.cpp
         source/DennIndividual.cpp

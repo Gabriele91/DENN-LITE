@@ -20,24 +20,6 @@ namespace Denn
     using GateList    = std::vector< Gate::SPtr>;
     using MemoryTuple = std::tuple<Matrix, Matrix, Matrix>;
 
-    class DataSetNRAM : public DataSetScalar
-    {
-    public:
-        Eigen::Matrix< Scalar, Eigen::Dynamic, Eigen::Dynamic > m_in_mem;
-
-        virtual void* ptr_in_mem() const { return (void*)&m_in_mem; }
-
-        const Matrix& in_mem() const
-        {
-            return *((const Matrix*)(ptr_in_mem()));
-        }
-
-        Matrix& in_mem()
-        {
-            return *((Matrix*)(ptr_in_mem()));
-        }
-    };
-
     class DataSetTask : public DataSetLoader
     {
     public:
@@ -174,7 +156,7 @@ void execute
     using namespace Denn;
     ////////////////////////////////////////////////////////////////////////////////////////////////
     //Create context
-    NRam::NRamLayout context(1000, 10, 4, 9, parameters);
+    NRam::NRamLayout context(1000, 16, 2, 3, parameters);
     //Set context
     EvaluationFactory::get<NRamEval>("nram")->set_context(context);
     //Dataset
