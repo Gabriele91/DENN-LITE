@@ -8,8 +8,6 @@ namespace Denn
 	class CrossEntropy : public Evaluation
 	{
 	public:
-		CrossEntropy(const DennAlgorithm& algorithm) : Evaluation(algorithm) {}
-
         //methods
         virtual bool minimize() const { return true; }
         virtual Scalar operator () (const Individual& individual, const DataSet& dataset)
@@ -25,8 +23,6 @@ namespace Denn
 	class CrossEntropyLogistic : public Evaluation
 	{
 	public:
-		CrossEntropyLogistic(const DennAlgorithm& algorithm) : Evaluation(algorithm) {}
-
         //methods
         virtual bool minimize() const { return true; }
         virtual Scalar operator () (const Individual& individual, const DataSet& dataset)

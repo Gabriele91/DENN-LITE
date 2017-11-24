@@ -54,7 +54,7 @@ namespace Denn
 		//find
 		auto it = em_map().find(name);
 		//return
-		return it->second(algorithm);
+		return it == em_map().end() ? nullptr : it->second(algorithm);
 	}
 	void EvolutionMethodFactory::append(const std::string& name, EvolutionMethodFactory::CreateObject fun, size_t size)
 	{

@@ -137,11 +137,6 @@ namespace Denn
     class NRamEval : public Evaluation
 	{
 	public:
-        //eval
-		NRamEval(const DennAlgorithm& algorithm) 
-        : Evaluation(algorithm) 
-        {
-        }
         //methods
         virtual bool minimize() const { return true; }
         virtual Scalar operator () (const Individual& individual, const DataSet& ds)
@@ -184,6 +179,8 @@ void execute
     ////////////////////////////////////////////////////////////////////////////////////////////////
     //Create context
     NRam::NRamLayout context(1000, 10, 4, 9, parameters);
+    //Set context
+    EvaluationFactory::get<NRamEval>("nram")->set_context(context);
     //Dataset
     DataSetTask db_copy(context.m_task);
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -197,9 +194,9 @@ void execute
         , parameters
         , nn0
         //..
-        , ((NRamEval*)EvaluationFactory::create("nram", denn).get())->set_context(context)  //test
-        , ((NRamEval*)EvaluationFactory::create("nram", denn).get())->set_context(context)  //validation
-        , ((NRamEval*)EvaluationFactory::create("nram", denn).get())->set_context(context)  //test
+        , EvaluationFactory::get("nram")  //test
+        , EvaluationFactory::get("nram")  //validation
+        , EvaluationFactory::get("nram")  //test
         //output
         , output
         //thread pool
@@ -212,7 +209,7 @@ void execute
     //test
     DataSetScalar test_set;
     db_copy.read_test(test_set);
-    auto test = (*((NRamEval*)EvaluationFactory::create("nram", denn).get())->set_context(context))(*result, test_set);
+    auto test = (*EvaluationFactory::get("nram"))(*result, test_set);
     //output
     serialize_output->serialize_parameters(parameters);
     serialize_output->serialize_best

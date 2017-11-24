@@ -8,8 +8,6 @@ namespace Denn
 	class Accuary : public Evaluation
 	{
 	public:
-		Accuary(const DennAlgorithm& algorithm) : Evaluation(algorithm) {}
-
         //methods
         virtual bool minimize() const { return false; }
         virtual Scalar operator () (const Individual& individual, const DataSet& dataset)
@@ -24,8 +22,6 @@ namespace Denn
 	class InverseAccuracy : public Evaluation
 	{
 	public:
-		InverseAccuracy(const DennAlgorithm& algorithm) : Evaluation(algorithm) {}
-
         //methods
         virtual bool minimize() const { return true; }
         virtual Scalar operator () (const Individual& individual, const DataSet& dataset)

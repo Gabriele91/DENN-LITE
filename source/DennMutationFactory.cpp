@@ -43,7 +43,7 @@ namespace Denn
 		//find
 		auto it = m_map().find(name);
 		//return
-		return it->second(algorithm);
+		return it == m_map().end() ? nullptr : it->second(algorithm);
 	}
 	void MutationFactory::append(const std::string& name, MutationFactory::CreateObject fun, size_t size)
 	{

@@ -67,9 +67,9 @@ namespace Denn
 			&dataset
 			, parameters
 			, neural_netowrk
-			, EvaluationFactory::create("cross_entropy_logistic",denn) //train (loss function)
-			, EvaluationFactory::create("accuracy",denn) //validation
-			, EvaluationFactory::create("accuracy",denn) //test
+			, EvaluationFactory::get("cross_entropy_logistic") //train (loss function)
+			, EvaluationFactory::get("accuracy") //validation
+			, EvaluationFactory::get("accuracy") //test
 			//output
 			, output
 			//thread pool

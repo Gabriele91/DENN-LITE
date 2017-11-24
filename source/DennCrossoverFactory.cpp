@@ -42,7 +42,7 @@ namespace Denn
 		//find
 		auto it = c_map().find(name);
 		//return
-		return it->second(algorithm);
+		return it == c_map().end() ? nullptr : it->second(algorithm);
 	}
 	void CrossoverFactory::append(const std::string& name, CrossoverFactory::CreateObject fun, size_t size)
 	{
