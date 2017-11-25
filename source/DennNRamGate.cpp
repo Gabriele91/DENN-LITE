@@ -2,10 +2,11 @@
 // Created by Valerio Belli on 15/11/17.
 //
 #include <iterator>
-#include "DennGate.h"
-
+#include "DennNRamGate.h"
 
 namespace Denn
+{
+namespace NRam
 {
     //map
     static std::map< std::string, GateFactory::CreateObject >& g_map()
@@ -48,4 +49,5 @@ namespace Denn
         //return
         return it != g_map().end();
     }
+}
 }

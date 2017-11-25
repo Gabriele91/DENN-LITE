@@ -190,8 +190,9 @@ namespace Denn
 		read_only<bool>				    m_serialize_neural_network{ "serialize_neural_network", bool(true),  false /* true? */ };
         read_only<bool>                 m_use_validation          { "use_validation",           bool(true),  true /* false? */ };
 
-		read_only<unsigned int>	         m_seed				{ "seed", (unsigned int)(std::random_device{}())  };
+		read_only<unsigned int>	         m_seed			 { "seed", (unsigned int)(std::random_device{}())  };
 
+		read_only<std::string>	         m_instance      { "instance", "default" };
 		read_only<size_t>	             m_generations   { "generation", size_t(1000)  };
 		read_only<size_t>	             m_sub_gens      { "sub_gens"  , size_t(100)   };
 		read_only<size_t>	             m_np            { "number_parents",size_t(16) };

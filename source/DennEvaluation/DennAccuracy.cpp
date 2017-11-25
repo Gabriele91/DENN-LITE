@@ -5,7 +5,7 @@
 
 namespace Denn
 {
-	class Accuary : public Evaluation
+	class Accuracy : public Evaluation
 	{
 	public:
         //methods
@@ -17,7 +17,7 @@ namespace Denn
         }
 		
     };
-    REGISTERED_EVALUATION(Accuary,"accuary")
+    REGISTERED_EVALUATION(Accuracy,"accuracy")
     
 	class InverseAccuracy : public Evaluation
 	{

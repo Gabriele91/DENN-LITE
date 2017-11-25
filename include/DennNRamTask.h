@@ -3,19 +3,31 @@
 //
 #pragma once
 #include "Config.h"
+#include "DennRandom.h"
 
 namespace Denn
 {
-    using MemoryTuple = std::tuple<Matrix, Matrix, Matrix>;
-
-namespace NRam {
-    class Task : std::enable_shared_from_this< Task > {
+namespace NRam 
+{
+	//memory struct
+	using MemoryTuple = std::tuple<Matrix, Matrix, Matrix>;
+	
+	//Task
+    class Task : public std::enable_shared_from_this< Task >
+	{
     public:
-        Task(size_t batch_size, size_t max_int, size_t n_regs) : m_batch_size(batch_size),
-                                                                       m_max_int(max_int),
-                                                                       m_n_regs(n_regs) {}
 
-        virtual MemoryTuple operator()() { return {}; }
+		//ref to Crossover
+		using SPtr = std::shared_ptr<Task>;
+
+		//return ptr
+		SPtr get_ptr() { return this->shared_from_this(); }
+
+		//init
+		Task(size_t batch_size, size_t max_int, size_t n_regs, Random& random);
+
+		//build dataset
+		virtual MemoryTuple operator()();
 
         /**
          * Initialize R registers to zero (i.e. set P(x = 0) = 1.0).
@@ -23,83 +35,86 @@ namespace NRam {
          * @param R Registers number
          * @return MatrixList
          */
-        Matrix init_regs() const { return Matrix::Zero(m_batch_size, m_n_regs); }
+		Matrix init_regs() const;
 
-        size_t get_batch_size() const { return m_batch_size; }
-        size_t get_max_int()    const { return m_max_int; }
-        size_t get_num_regs()   const { return m_n_regs; }
+		//info
+		size_t  get_batch_size()    const;
+		size_t  get_max_int()       const;
+		size_t  get_num_regs()      const;
+		Random& get_random_engine() const;
+
     protected:
 
-        size_t m_batch_size;
-        size_t m_max_int;
-        size_t m_n_regs;
+        size_t  m_batch_size;
+        size_t  m_max_int;
+        size_t  m_n_regs;
+		Random& m_random;
     };
 
-    class TaskAccess : public Task {
-    public:
-        TaskAccess(size_t batch_size, size_t max_int, size_t n_regs) : Task(batch_size, max_int, n_regs) {}
+	//class factory of tasks
+	class TaskFactory
+	{
 
-        MemoryTuple operator()() override
-        {
-            std::srand((unsigned int) time(0));
+	public:
+		//Gate classes map
+		typedef Task::SPtr(*CreateObject)(size_t batch_size, size_t max_int, size_t n_regs, Random& random);
 
-            Matrix in_mem = ((Matrix::Random(m_batch_size, m_max_int) +
-                              Matrix::Ones(m_batch_size, m_max_int)) * (m_max_int / 2))
-                    .unaryExpr((Scalar(*)(Scalar)) std::floor);
-            in_mem.col(m_max_int - 1) = RowVector::Zero(in_mem.rows());
-            in_mem.col(0) = RowVector::Ones(in_mem.rows()) * 2;
+		//public
+		static Task::SPtr create
+		(
+			  const std::string& name
+			, size_t batch_size
+			, size_t max_int
+			, size_t n_regs
+			, Random& random
+		);
+		static void append(const std::string& name, CreateObject fun, size_t size);
 
-            Matrix out_mem = in_mem;
-            for (size_t r = 0; r < out_mem.rows(); ++r)
-                out_mem(r, 0) = out_mem(r, Matrix::Index(out_mem(r, 0)));
+		//list of methods
+		static std::vector< std::string > list_of_tasks();
+		static std::string names_of_tasks(const std::string& sep = ", ");
 
-            return std::make_tuple(in_mem, out_mem, Task::init_regs());
-        };
-    };
+		//info
+		static bool exists(const std::string& name);
+
+	};
+	
+	//class used for static registration of a object class
+	template<class T>
+	class TaskItem
+	{
+
+		static Task::SPtr create
+		(
+		  size_t batch_size
+		, size_t max_int
+		, size_t n_regs
+		, Random& random
+		)
+		{
+			return (std::make_shared< T >(batch_size, max_int, n_regs, random))->get_ptr();
+		}
+
+		TaskItem(const std::string& name, size_t size)
+		{
+			TaskFactory::append(name, TaskItem<T>::create, size);
+		}
+
+	public:
 
 
-    class TaskCopy : public Task {
-    public:
-        TaskCopy(size_t batch_size, size_t max_int, size_t n_regs) : Task(batch_size, max_int, n_regs) {}
+		static TaskItem<T>& instance(const std::string& name, size_t size)
+		{
+			static TaskItem<T> objectItem(name, size);
+			return objectItem;
+		}
 
-        MemoryTuple operator()() override
-        {
-            std::srand((unsigned int) time(0));
-            Matrix in_mem = ((Matrix::Random(m_batch_size, m_max_int) +
-                              Matrix::Ones(m_batch_size, m_max_int)) * (m_max_int / 2))
-                    .unaryExpr((Scalar(*)(Scalar)) std::floor);
-            in_mem.block(0, m_max_int / 2, in_mem.rows(), in_mem.cols() - m_max_int / 2) =
-                    Matrix::Zero(m_batch_size, m_max_int / 2);
-            in_mem.col(0) = RowVector::Ones(in_mem.rows()) * Matrix::Index(m_max_int / 2);
+	};
 
-            Matrix out_mem = in_mem;
-            out_mem.block(0, m_max_int / 2, in_mem.rows(), in_mem.cols() - m_max_int / 2)
-                    = in_mem.block(0, 1, in_mem.rows(), m_max_int / 2);
-            return std::make_tuple(in_mem, out_mem, Task::init_regs());
-        }
-    };
-
-
-    class TaskIncrement : Task {
-    public:
-        TaskIncrement(size_t batch_size, size_t max_int, size_t n_regs) : Task(batch_size, max_int, n_regs) {}
-
-        MemoryTuple operator()() override
-        {
-            std::srand((unsigned int) time(0));
-
-            Matrix in_mem = ((Matrix::Random(m_batch_size, m_max_int) +
-                              Matrix::Ones(m_batch_size, m_max_int)) * (m_max_int / 2))
-                    .unaryExpr((Scalar(*)(Scalar)) std::floor);
-            in_mem.block(0, Matrix::Index(m_max_int - m_max_int / 2), in_mem.rows(), Matrix::Index(m_max_int / 2)) =
-                    Matrix::Zero(m_batch_size, m_max_int - m_max_int / 2);
-
-            Matrix out_mem = in_mem;
-            for (size_t c = 0; c < m_max_int / 2; c++)
-                out_mem.col(c) += ColVector::Ones(out_mem.rows());
-
-            return std::make_tuple(in_mem, out_mem, Task::init_regs());
-        }
-    };
+	#define REGISTERED_TASK(class_,name_)\
+    namespace\
+    {\
+        static const auto& _Denn_ ## class_ ## _GateItem= Denn::NRam::TaskItem<class_>::instance( name_, sizeof(class_) );\
+    }
 }
 }

@@ -21,7 +21,7 @@ namespace Denn
 	REGISTERED_ACTIVE_FUNCTION("linear", linear<Matrix>, dx_linear<Matrix>)
 
 	//ActiveFunction (local)
-	REGISTERED_ACTIVE_FUNCTION("softmax", CostFunction::softmax<Matrix>)
+	REGISTERED_ACTIVE_FUNCTION("softmax", CostFunction::softmax_row_samples<Matrix>)
 
 	//ActiveFunction (point)
 	#define POINTF_AS_ACTIVEF(ufunc)\

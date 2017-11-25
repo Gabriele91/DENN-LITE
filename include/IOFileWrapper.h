@@ -3,6 +3,11 @@
 #include <string>
 #include <zlib.h>
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4996) 
+#endif 
+
 namespace Denn
 {
 namespace IOFileWrapper
@@ -200,7 +205,7 @@ protected:
 		//test
 		if (!m_file_raw) return;
         //return pos
-        size_t pos = std::ftell(m_file_raw);
+        auto pos = std::ftell(m_file_raw);
 		//move
 		std::fseek(m_file_raw, -4, SEEK_END);
 		//read
@@ -336,3 +341,7 @@ public:
 
 }
 }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif

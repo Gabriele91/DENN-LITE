@@ -12,10 +12,11 @@
 #include "DennEvolutionMethod.h"
 #include "DennRuntimeOutput.h"
 #include "DennTestSetStream.h"
+#include "DennInstance.h"
 
 namespace Denn
 {
-
+//Def DennAlgorithm
 class DennAlgorithm
 {
 public:
@@ -63,17 +64,8 @@ public:
 		}
 	};
 	////////////////////////////////////////////////////////////////////////
-	DennAlgorithm
-	(
-		  DataSetLoader*      dataset_loader
-		, const Parameters&   params
-		, const NeuralNetwork nn_default
-		, Evaluation::SPtr    loss_function
-		, Evaluation::SPtr    validation_function
-		, Evaluation::SPtr    test_function
-		, std::ostream&       output
-		, ThreadPool*		  thpool = nullptr
-	);	
+	DennAlgorithm(Instance&	instance, const Parameters&   params);	
+
 	//big loop
 	virtual Individual::SPtr execute();
 
@@ -261,8 +253,8 @@ protected:
 	bool next_batch();
 	/////////////////////////////////////////////////////////////////
 	//Random engine
-	mutable Random 		  m_main_random;
-	mutable RandomList    m_population_random;
+	Random&	m_main_random;
+	mutable RandomList m_population_random;
 	//multi threads
 	ThreadPool*			  m_thpool;
 	mutable PromiseList	  m_promises;

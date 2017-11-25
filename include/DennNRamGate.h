@@ -6,6 +6,9 @@
 
 namespace Denn
 {
+namespace NRam
+{
+	//A Gate
     class Gate : public std::enable_shared_from_this< Gate >
     {
     public:
@@ -60,6 +63,9 @@ namespace Denn
 
     };
 
+	//List of gate
+	using GateList = std::vector < Gate::SPtr >;
+
     //class factory of gate methods
     class GateFactory
     {
@@ -106,11 +112,11 @@ namespace Denn
         }
 
     };
-
-
+	
     #define REGISTERED_GATE(class_,name_)\
     namespace\
     {\
-        static const auto& _Denn_ ## class_ ## _GateItem= GateItem<class_>::instance( name_, sizeof(class_) );\
+        static const auto& _Denn_ ## class_ ## _GateItem= Denn::NRam::GateItem<class_>::instance( name_, sizeof(class_) );\
     }
+}
 }

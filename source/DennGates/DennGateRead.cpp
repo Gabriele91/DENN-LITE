@@ -1,7 +1,10 @@
-#include "DennGate.h"
+#include "DennNRamGate.h"
 #include "DennDump.h"
 
+
 namespace Denn
+{
+namespace NRam
 {
     class ReadGate : public Gate
     {
@@ -16,4 +19,5 @@ namespace Denn
     };
 
     REGISTERED_GATE(ReadGate, "read");
+}
 }

@@ -1,6 +1,9 @@
-#include "DennGate.h"
+#include "DennNRamGate.h"
+
 
 namespace Denn
+{
+namespace NRam
 {
     class MinGate : public Gate
     {
@@ -15,4 +18,5 @@ namespace Denn
         }
     };
     REGISTERED_GATE(MinGate, "min");
+}
 }

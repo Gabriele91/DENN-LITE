@@ -5,13 +5,11 @@
 #include "Config.h"
 #include "Denn.h"
 #include "DennDump.h"
-
+#include "DennNRamGate.h"
+#include "DennNRamTask.h"
 
 namespace Denn
 {
-    using MatrixList  = std::vector < Matrix >;
-    using GateList    = std::vector < Gate::SPtr >;
-
 namespace NRam
 {
 
@@ -19,21 +17,21 @@ namespace NRam
     {
         NRamLayout();
         
-        NRamLayout(
-            const size_t batch_size,
-            const size_t max_int,
-            const size_t n_regs,
-            const size_t timesteps,
-            const Denn::Parameters &parameters
+		NRamLayout
+		(
+			const size_t batch_size,
+			const size_t max_int,
+			const size_t n_regs,
+			const size_t timesteps,
+			const GateList& gates
         );
 
-        size_t   m_batch_size;
-        size_t   m_max_int;
-        size_t   m_n_regs;
-        size_t   m_timesteps;
-        size_t   m_nn_output;
-        GateList m_gates;
-        Task*    m_task;
+        size_t      m_batch_size;
+        size_t      m_max_int;
+        size_t      m_n_regs;
+        size_t      m_timesteps;
+        size_t      m_nn_output;
+        GateList    m_gates;
     };
 
     MatrixList fuzzy_encode(const Matrix& M);

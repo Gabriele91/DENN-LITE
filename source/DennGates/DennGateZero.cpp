@@ -1,10 +1,11 @@
 //
 // Created by Valerio Belli on 15/11/17.
 //
-
-#include "DennGate.h"
+#include "DennNRamGate.h"
 
 namespace Denn
+{
+namespace NRam
 {
     class ZeroGate : public Gate
     {
@@ -21,4 +22,5 @@ namespace Denn
     };
 
     REGISTERED_GATE(ZeroGate, "zero");
+}
 }

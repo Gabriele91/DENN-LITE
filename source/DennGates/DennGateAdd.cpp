@@ -1,9 +1,12 @@
 #include "Config.h"
-#include "DennGate.h"
+#include "DennNRamGate.h"
 #include "DennDump.h"
 #include <iostream>
 
+
 namespace Denn
+{
+namespace NRam
 {
     class AddGate : public Gate
     {
@@ -24,4 +27,5 @@ namespace Denn
         }
     };
     REGISTERED_GATE(AddGate, "add");
+}
 }

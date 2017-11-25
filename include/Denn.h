@@ -15,15 +15,15 @@
 #include  "DennNeuralNetwork.h"
 #include  "DennCostFunction.h"
 #include  "DennEvaluation.h"
-
-#include  "DennGate.h"
 #include  "DennNRamTask.h"
 
 //Dataset includes
 #include  "DennDatasetLoader.h"
 #include  "DennDataset.h"
+#include  "DennNRamDatasetTask.h"
 
 //Denn
+#include  "DennInstance.h"
 #include  "DennAlgorithm.h"
 
 //Denn output

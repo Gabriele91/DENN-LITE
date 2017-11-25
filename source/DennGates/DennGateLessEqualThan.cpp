@@ -1,6 +1,8 @@
-#include "DennGate.h"
+#include "DennNRamGate.h"
 
 namespace Denn
+{
+namespace NRam
 {
     class LessEqualThanGate : public Gate
     {
@@ -20,4 +22,5 @@ namespace Denn
         }
     };
     REGISTERED_GATE(LessEqualThanGate, "let");
+}
 }

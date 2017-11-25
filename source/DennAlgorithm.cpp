@@ -2,31 +2,22 @@
 
 namespace Denn
 {
-	DennAlgorithm::DennAlgorithm
-	(
-		  DataSetLoader*      dataset_loader
-		, const Parameters&   params
-		, const NeuralNetwork nn_default
-		, Evaluation::SPtr    loss_function
-		, Evaluation::SPtr    validation_function
-		, Evaluation::SPtr    test_function
-		, std::ostream&       output
-		, ThreadPool*		  thpool
-	)
-	: m_main_random(*params.m_seed)
-    , m_thpool(thpool)
-	, m_loss_function(loss_function)
-	, m_validation_function(validation_function)
-	, m_test_function(test_function)
-	, m_output(RuntimeOutputFactory::create(*params.m_runtime_output_type, output, *this))
-	, m_default(std::make_shared<Individual>
-	    ( *params.m_default_f
+	DennAlgorithm::DennAlgorithm(Instance&	instance, const Parameters&   params)
+	: m_main_random(instance.random_engine())
+    , m_thpool(instance.thread_pool())
+	, m_loss_function(instance.loss_function())
+	, m_validation_function(instance.validation_function())
+	, m_test_function(instance.test_function())
+	, m_output(RuntimeOutputFactory::create(*params.m_runtime_output_type, 
+											 instance.output_stream(), *this))
+	, m_default(std::make_shared<Individual>( 
+		  *params.m_default_f
 		, *params.m_default_cr
 	    , *params.m_perc_of_best
-		, nn_default
+		, instance.neural_network()
 		))
-	, m_dataset_loader(dataset_loader)
-	, m_dataset_batch(dataset_loader)
+	, m_dataset_loader(&instance.dataset_loader())
+	, m_dataset_batch(&instance.dataset_loader())
 	, m_params(params)
 	{
 	}

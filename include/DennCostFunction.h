@@ -103,24 +103,72 @@ namespace CostFunction
 		return inout_matrix;
 	}
 
-    template < typename Matrix >
-    inline Matrix& softmax_col(Matrix& inout_matrix)
-    {
-        const auto N   = inout_matrix.cols();
-        const auto max = inout_matrix.maxCoeff();
-        //compute e^(M-max)
-        inout_matrix = (inout_matrix.array() - max).exp();
-        // M(r,n)/ SUM_r(M(n))
-        for (int n = 0; n < N; n++)
-        {
-            //reduce
-            auto sum = inout_matrix.col(n).sum();
-            //no nan
-            if (sum) inout_matrix.col(n) /= sum;
-        }
-        return inout_matrix;
-    }
+	template < typename Scalar >
+	inline ColVectorT< Scalar >& softmax_col(ColVectorT< Scalar >& inout_col)
+	{
+		const auto max = inout_col.maxCoeff();
+		//compute e^(M-max)
+		inout_col = (inout_col.array() - max).exp();
+		//reduce
+		auto sum = inout_col.sum();
+		//no nan
+		if (sum) inout_col /= sum;
+		//return
+		return inout_col;
+	}
 
+	template < typename Scalar >
+	inline RowVectorT< Scalar >& softmax_row(RowVectorT< Scalar >& inout_row)
+	{
+		const auto max = inout_row.maxCoeff();
+		//compute e^(M-max)
+		inout_row = (inout_row.array() - max).exp();
+		//reduce
+		auto sum = inout_row.sum();
+		//no nan
+		if (sum) inout_row /= sum;
+		//return
+		return inout_row;
+	}
+	
+	template < typename Matrix >
+	inline Matrix& softmax_col_samples(Matrix& inout_matrix)
+	{
+		const auto N = inout_matrix.cols();
+		// for each examples
+		for (int n = 0; n < N; n++)
+		{
+			const auto max = inout_matrix.col(n).maxCoeff();
+			//compute e^(M-max)
+			inout_matrix.col(n) = (inout_matrix.col(n).array() - max).exp();
+			//reduce
+			auto sum = inout_matrix.col(n).sum();
+			//no nan
+			if (sum) inout_matrix.col(n) /= sum;
+		}
+		//return
+		return inout_matrix;
+	}
+
+	template < typename Matrix >
+	inline Matrix& softmax_row_samples(Matrix& inout_matrix)
+	{
+		const auto N = inout_matrix.rows();
+		// for each examples
+		for (int n = 0; n < N; n++)
+		{
+			const auto max = inout_matrix.row(n).maxCoeff();
+			//compute e^(M-max)
+			inout_matrix.row(n) = (inout_matrix.row(n).array() - max).exp();
+			//reduce
+			auto sum = inout_matrix.row(n).sum();
+			//no nan
+			if (sum) inout_matrix.row(n) /= sum;
+		}
+		//return
+		return inout_matrix;
+	}
+	
 	template < typename Matrix >
 	typename Matrix::Scalar softmax_cross_entropy(const Matrix& x, const Matrix& y)
 	{

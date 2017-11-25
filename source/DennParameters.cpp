@@ -5,6 +5,7 @@
 #include "DennEvolutionMethod.h"
 #include "DennRuntimeOutput.h"
 #include "DennSerializeOutput.h"
+#include "DennInstance.h"
 #include "DennDump.h"
 #include "DennVersion.h"
 
@@ -94,6 +95,20 @@ namespace Denn
     Parameters::Parameters() 
     :m_params_info
     ({
+        ParameterInfo{
+            m_instance, "Type of instance [" + InstanceFactory::names_of_instances() + "]", { "--" + m_instance.name(), "--test_type", "-ins", "-tt" },
+            [this](Arguments& args) -> bool  
+            { 
+                std::string str_m_type = args.get_string() ;
+                //all lower case
+                std::transform(str_m_type.begin(),str_m_type.end(), str_m_type.begin(), ::toupper);
+                //save
+				m_instance = str_m_type;
+                //ok 
+                return InstanceFactory::exists(*m_instance);
+            }
+            , { "string", InstanceFactory::list_of_instances() }
+        },
         ParameterInfo{ 
             m_generations, "Global number of generation [or backpropagation pass]", { "--" + m_generations.name(), "-t", "-g"  }, 
             [this](Arguments& args) -> bool { m_generations = args.get_int() ; return true; } 
@@ -411,6 +426,10 @@ namespace Denn
         ParameterInfo{ 
             m_threads_pop, "Number of threads using for  generate a new population", { "--" + m_threads_pop.name(),    "-tp"  }, 
             [this](Arguments& args) -> bool { m_threads_pop = args.get_int() ;  return true; } 
+        },
+        ParameterInfo{
+            "Print list of instances", { "--instances-list", "-ilist"  }, 
+            [this](Arguments& args) -> bool { std::cout << InstanceFactory::names_of_instances() << std::endl; return true; } 
         },
         ParameterInfo{
             "Print list of evolution methods", { "--evolution_method-list", "--evolution-list",    "-elist"  }, 

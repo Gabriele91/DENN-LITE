@@ -1,6 +1,8 @@
-#include "DennGate.h"
+#include "DennNRamGate.h"
 
 namespace Denn
+{
+namespace NRam
 {
     class MaxGate : public Gate
     {
@@ -15,4 +17,5 @@ namespace Denn
         }
     };
     REGISTERED_GATE(MaxGate, "max");
+}
 }

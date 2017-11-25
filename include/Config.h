@@ -64,6 +64,13 @@ namespace Denn
 	using MatrixD	 = typename Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>;
 	using MatrixF	 = typename Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>;
 	using Matrix 	 = typename Eigen::Matrix< Scalar, Eigen::Dynamic, Eigen::Dynamic > ;
+
+	template < typename T >
+	using MatrixListT  = std::vector < MatrixT< T > >;
+	using MatrixListF  = std::vector < MatrixF >;
+	using MatrixListD  = std::vector < MatrixD >;
+	using MatrixListLD = std::vector < MatrixLD >;
+	using MatrixList   = std::vector < Matrix >;
 }
 //utilities
 namespace Denn
