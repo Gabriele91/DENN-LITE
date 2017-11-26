@@ -11,7 +11,7 @@ namespace NRam
 
         IncGate() : Gate("inc",UNARY) {}
 
-        Matrix operator() (const Matrix& A, Matrix& M) override
+        Matrix operator() (const Matrix& A, Matrix& M)  const override
         {
             return Denn::shift_bottom<Matrix>(A.transpose(), 1).transpose();
         }

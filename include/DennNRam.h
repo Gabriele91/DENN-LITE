@@ -59,9 +59,9 @@ namespace NRam
 
     MatrixT<size_t> defuzzy_mem(const Matrix &M);
 
-    Scalar run_circuit(NRamLayout &context, Matrix &nn_out_decision, MatrixList &fuzzy_regs, MatrixList &in_mem,
+    Scalar run_circuit(const NRamLayout &context, Matrix &nn_out_decision, MatrixList &fuzzy_regs, MatrixList &in_mem,
                        size_t s);
 
-    Scalar train(NRamLayout &context, const NeuralNetwork &nn, MatrixList &fuzzy_regs, MatrixList &in_mem, const Matrix &out_mem);
+    Scalar train(const NRamLayout &context, const NeuralNetwork &nn, MatrixList &fuzzy_regs, MatrixList &in_mem, const Matrix &out_mem);
 }
 }

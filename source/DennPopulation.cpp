@@ -101,15 +101,16 @@ namespace Denn
 				i_individual = i_default->copy();
 			}
 		}
-		//ref to current
-		Population& population = parents();
 		//random init
+		for (Population& population : m_pop_buffer)
 		for (auto& individual : population)
 		for (auto& layer : individual->m_network)
 		for (auto& matrix : *layer)
 		{
 			matrix = matrix.unaryExpr(random_func);
 		}
+		//ref to current
+		Population& population = parents();
 		//eval
 		for (size_t i = 0; i != population.size(); ++i)
 		{
@@ -214,9 +215,8 @@ namespace Denn
 		, Evaluation& 			  loss_function
 	)
 	{
-		//ref to current
-		Population& population = parents();
 		//random init
+		for (Population& population : m_pop_buffer)
 		for (auto& individual : population)
 		{
 			//Copy default params
@@ -228,6 +228,8 @@ namespace Denn
 				matrix = matrix.unaryExpr(random_func);
 			}
 		}
+		//ref to current
+		Population& population = parents();
 		//must copy, The Best Individual can't to be changed during the DE process
 		population[where_put_best] = best->copy();
 		//eval

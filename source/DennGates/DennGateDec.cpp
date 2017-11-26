@@ -10,7 +10,7 @@ namespace NRam
 
         DecGate() : Gate("dec", UNARY) {}
 
-        Matrix operator() (const Matrix& A, Matrix& M) override
+        Matrix operator() (const Matrix& A, Matrix& M)  const override
         {
             return Denn::shift_top<Matrix>(A.transpose(), 1).transpose();
         }

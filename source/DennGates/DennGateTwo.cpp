@@ -12,7 +12,7 @@ namespace NRam
 
         TwoGate() : Gate("two", CONST) {}
 
-        Matrix operator() (Matrix& M) override
+        Matrix operator() (Matrix& M)  const override
         {
 
             Matrix C = Matrix::Zero(1, M.cols());

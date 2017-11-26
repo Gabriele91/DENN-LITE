@@ -13,7 +13,7 @@ namespace NRam
 
         ZeroGate() : Gate("zero", CONST) {}
 
-        Matrix operator() (Matrix& M) override
+        Matrix operator() (Matrix& M)  const override
         {
             Matrix C = Matrix::Zero(1, M.cols());
             C.row(0).col(0).fill(1);

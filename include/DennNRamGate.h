@@ -28,17 +28,17 @@ namespace NRam
         //contructor
         Gate() { /* void */ }
 
-        virtual Matrix operator () (Matrix& M)
+        virtual Matrix operator () (Matrix& M)  const
         {
             return Matrix();
         }
 
-        virtual Matrix operator () (const Matrix& A, Matrix& M)
+        virtual Matrix operator () (const Matrix& A, Matrix& M)  const
         {
             return Matrix();
         }
 
-        virtual Matrix operator () (const Matrix& A, const Matrix& B, Matrix& M)
+        virtual Matrix operator () (const Matrix& A, const Matrix& B, Matrix& M)  const
         {
             return Matrix();
         }

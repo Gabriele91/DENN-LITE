@@ -21,6 +21,7 @@ namespace NRam
 		virtual bool minimize() const { return true; }
 		virtual Scalar operator () (const Individual& individual, const DataSet& ds)
 		{
+			assert(m_context);
 			//network
 			auto& nn = individual.m_network;
 			//Dataset
@@ -34,9 +35,9 @@ namespace NRam
 			return NRam::train(*m_context, nn, regs, list_in_mem, out_mem);
 		}
 		//layout
-		NRam::NRamLayout* m_context = nullptr;
+		const NRam::NRamLayout* m_context { nullptr };
 		//set context
-		Evaluation::SPtr set_context(NRamLayout& context)
+		Evaluation::SPtr set_context(const NRamLayout& context)
 		{
 			m_context = &context;
 			return this->get_ptr();

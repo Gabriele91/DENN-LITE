@@ -11,7 +11,7 @@ namespace NRam
 
         SubGate() : Gate("sub", BINARY) {}
 
-        Matrix operator() (const Matrix& A, const Matrix& B, Matrix& M) override
+        Matrix operator() (const Matrix& A, const Matrix& B, Matrix& M)  const override
         {
             long max_int = M.cols();
             Matrix C = Matrix::Zero(1, A.cols());

@@ -10,7 +10,7 @@ namespace NRam
 
         MaxGate() : Gate("max", BINARY) {}
 
-        Matrix operator() (const Matrix& A, const Matrix& B, Matrix& M) override
+        Matrix operator() (const Matrix& A, const Matrix& B, Matrix& M)  const override
         {
             Matrix C = (*GateFactory::create("lt"))(A, B, M);
             return C(0, 0) < C(0, 1) ? B : A;

@@ -12,7 +12,7 @@ namespace NRam
 
         ReadGate() : Gate("read",UNARY) {}
 
-        Matrix operator() (const Matrix& Ptr, Matrix& M) override
+        Matrix operator() (const Matrix& Ptr, Matrix& M)  const override
         {
             return Ptr * M;
         }

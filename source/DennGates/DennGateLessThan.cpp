@@ -10,7 +10,7 @@ namespace NRam
 
         LessThanGate() : Gate("lt", BINARY) {}
 
-        Matrix operator() (const Matrix& A, const Matrix& B, Matrix& M) override
+        Matrix operator() (const Matrix& A, const Matrix& B, Matrix& M)  const override
         {
             auto m_max_int = M.cols();
             Matrix C = Matrix::Zero(1, m_max_int);

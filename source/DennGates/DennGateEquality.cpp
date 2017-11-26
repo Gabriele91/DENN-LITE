@@ -10,7 +10,7 @@ namespace NRam
 
         EqualityGate() : Gate("eq", BINARY) {}
 
-        Matrix operator() (const Matrix& A, const Matrix& B, Matrix& M) override
+        Matrix operator() (const Matrix& A, const Matrix& B, Matrix& M)  const override
         {
 
             long m_max_int = M.cols();

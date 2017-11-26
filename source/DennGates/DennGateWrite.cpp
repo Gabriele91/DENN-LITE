@@ -11,7 +11,7 @@ namespace NRam
 
         WriteGate() : Gate("write", BINARY) {}
 
-        Matrix operator() (const Matrix& Ptr, const Matrix& Val, Matrix& M) override
+        Matrix operator() (const Matrix& Ptr, const Matrix& Val, Matrix& M)  const override
         {
             // Calculate the erase matrix with which the memory is erased
             Matrix erase = (Matrix::Ones(1, M.cols()) - Ptr).transpose() * Matrix::Ones(1, M.cols());

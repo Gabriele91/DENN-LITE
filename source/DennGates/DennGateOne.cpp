@@ -16,7 +16,7 @@ namespace NRam
 
         OneGate() : Gate("one", CONST) {}
 
-        Matrix operator() (Matrix& M) override
+        Matrix operator() (Matrix& M)  const override
         {
             Matrix C = Matrix::Zero(1, M.cols());
             C.row(0).col(1).fill(1);
