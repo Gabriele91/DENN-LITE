@@ -30,7 +30,7 @@
     <ClInclude Include="include\DennCrossover.h" />
     <ClInclude Include="include\DennDataSet.h" />
     <ClInclude Include="include\DennEvaluation.h" />
-    <ClInclude Include="include\DennNRamDataSetTask.h" />
+    <ClInclude Include="include\DennNRamDatasetTask.h" />
     <ClInclude Include="include\DennNRamGate.h" />
     <ClInclude Include="include\DennNRam.h" />
     <ClInclude Include="include\DennNRamTask.h" />
@@ -106,7 +106,7 @@
     <ClCompile Include="source\DennMutation\DennMutationRand.cpp" />
     <ClCompile Include="source\DennNeuralNetwork.cpp" />
     <ClCompile Include="source\DennNRam.cpp" />
-    <ClCompile Include="source\DennNRamDataSetTask.cpp" />
+    <ClCompile Include="source\DennNRamDatasetTask.cpp" />
     <ClCompile Include="source\DennNRamGate.cpp" />
     <ClCompile Include="source\DennNRamTask.cpp" />
     <ClCompile Include="source\DennNRamTaskItems.cpp" />

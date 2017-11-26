@@ -147,7 +147,7 @@
     <ClInclude Include="include\DennInstance.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\DennNRamDataSetTask.h">
+    <ClInclude Include="include\DennNRamDatasetTask.h">
       <Filter>Include</Filter>
     </ClInclude>
     <ClInclude Include="include\DennInstanceUtils.h">
@@ -338,7 +338,7 @@
     <ClCompile Include="source\DennInstance\DennDefaultInstance.cpp">
       <Filter>Source\DennInstance</Filter>
     </ClCompile>
-    <ClCompile Include="source\DennNRamDataSetTask.cpp">
+    <ClCompile Include="source\DennNRamDatasetTask.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="source\DennEvaluation\DennAccuracy.cpp">
