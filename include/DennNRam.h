@@ -13,13 +13,15 @@ namespace Denn
 namespace NRam
 {
 
-    struct NRamLayout
+    class NRamLayout
     {
+    public:
+
         NRamLayout();
-        
-		NRamLayout
-		(
-			const size_t batch_size,
+
+        void init
+        (
+            const size_t batch_size,
 			const size_t max_int,
 			const size_t n_regs,
 			const size_t timesteps,

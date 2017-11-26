@@ -59,10 +59,10 @@ namespace NRam
 			//init in mem
 			in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform() * m_max_int); });
 			in_mem.block(0, offset, in_mem.rows(), in_mem.cols() - offset) = Matrix::Zero(m_batch_size, in_mem.cols() - offset);
-			in_mem.col(0) = RowVector::Ones(in_mem.rows()) * offset;
+			in_mem.col(0) = ColVector::Ones(in_mem.rows()) * offset;
 			//out mem
 			Matrix out_mem = in_mem;
-			out_mem.block(0, offset, in_mem.rows(), in_mem.cols() - offset) = in_mem.block(0, 1, in_mem.rows(), in_mem.cols() + offset);
+			out_mem.block(0, offset, in_mem.rows(), in_mem.cols() - offset) = in_mem.block(0, 1, in_mem.rows(), offset);
 			//return
 			return std::make_tuple(in_mem, out_mem, Task::init_regs());
 		}

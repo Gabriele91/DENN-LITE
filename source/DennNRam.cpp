@@ -15,20 +15,21 @@ namespace NRam
     {
     }
 
-    NRamLayout::NRamLayout
-	(
-        const size_t            batch_size,
-        const size_t            max_int,
-        const size_t            n_regs,
-        const size_t            timesteps,
-		const GateList& gates
-    ) 
-	: m_batch_size(batch_size)
-    , m_max_int(max_int)
-    , m_n_regs(n_regs)
-    , m_timesteps(timesteps)
-	, m_gates(gates)
+    void NRamLayout::init
+    (
+        const size_t batch_size,
+        const size_t max_int,
+        const size_t n_regs,
+        const size_t timesteps,
+        const GateList& gates
+    )
     {
+        // values init
+	    m_batch_size = batch_size;
+        m_max_int = max_int;
+        m_n_regs = n_regs;
+        m_timesteps = timesteps;
+	    m_gates = gates;
         // Past cardinality
         size_t i = 0;
         m_nn_output = 0;
@@ -45,7 +46,6 @@ namespace NRam
 
         // Size for f_t
         m_nn_output += 1;
-
     }
 
     MatrixList fuzzy_encode(const Matrix &M) {

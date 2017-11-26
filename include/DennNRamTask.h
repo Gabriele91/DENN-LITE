@@ -114,7 +114,7 @@ namespace NRam
 	#define REGISTERED_TASK(class_,name_)\
     namespace\
     {\
-        static const auto& _Denn_ ## class_ ## _GateItem= Denn::NRam::TaskItem<class_>::instance( name_, sizeof(class_) );\
+        static const auto& _Denn_ ## class_ ## _TaskItem= Denn::NRam::TaskItem<class_>::instance( name_, sizeof(class_) );\
     }
 }
 }

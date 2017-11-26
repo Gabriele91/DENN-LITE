@@ -498,7 +498,7 @@ namespace Denn
             }
             if(!is_a_valid_arg) 
             {
-                std::cerr << "parameter" << p << " not found" << std::endl;
+                std::cerr << "parameter " << p << " not found" << std::endl;
                 exit(1);
             }
             else if(!parameters_arguments_are_correct) 

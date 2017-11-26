@@ -87,7 +87,7 @@ namespace Denn
 	}
 
 	//build output stream
-	bool build_serialize(SerializeOutput::SPtr& serialize, std::ofstream& file, const Denn::Parameters& arguments)
+	bool build_serialize(SerializeOutput::SPtr& serialize, std::ofstream& ofile, const Denn::Parameters& arguments)
 	{
 		////////////////////////////////////////////////////////////////////////////////////////////////
 		if (Denn::Filesystem::exists((const std::string&)arguments.m_output_filename) &&
@@ -96,7 +96,8 @@ namespace Denn
 			std::cerr << "can't write into the file: \"" << *arguments.m_output_filename << "\"" << std::endl;
 			return false;
 		}
-		std::ofstream	ofile((const std::string&)arguments.m_output_filename);
+		//open output file
+		ofile.open((const std::string&)arguments.m_output_filename);
 		//extension
 		std::string ext = Denn::Filesystem::get_extension(*arguments.m_output_filename);
 		std::transform(ext.begin(), ext.end(), ext.begin(), ::tolower);
@@ -105,10 +106,10 @@ namespace Denn
 			std::cerr << "can't serialize a file with extension \"" << ext << "\"" << std::endl;
 			return false;
 		}
-
 		////////////////////////////////////////////////////////////////////////////////////////////////
-		SerializeOutput::SPtr serialize_output = SerializeOutputFactory::create(ext, ofile, arguments);
-		return true;
+		serialize = SerializeOutputFactory::create(ext, ofile, arguments);
+		////////////////////////////////////////////////////////////////////////////////////////////////
+		return serialize != nullptr;
 	}
 
 	//build thread pool

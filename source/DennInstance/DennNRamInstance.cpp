@@ -74,10 +74,10 @@ namespace NRam
 			//stream
 			if (!build_outputstream(m_runtime_output_stream, m_runtime_output_file_stream, parameters)) return;
 			//serialize
-			if (!build_serialize(m_serialize, m_serialize_output_file_stream, parameters))  		
+			if (!build_serialize(m_serialize, m_serialize_output_file_stream, parameters))  return;		
 			////////////////////////////////////////////////////////////////////////////////////////////////
 			//Create context
-			m_nram = NRamLayout(1000, 16, 2, 3,
+			m_nram.init(1000, 16, 2, 3,
 			{
 				GateFactory::create("read"),
 				GateFactory::create("zero"),
@@ -93,7 +93,7 @@ namespace NRam
 			//Dataset
 			m_dataset = *m_task;
 			//network
-			m_network = build_mlp_network(m_nram.m_max_int, m_nram.m_nn_output, parameters);
+			m_network = build_mlp_network(m_nram.m_n_regs, m_nram.m_nn_output, parameters);
 			////////////////////////////////////////////////////////////////////////////////////////////////
 			m_success_init = true;
 		}
@@ -157,7 +157,7 @@ namespace NRam
 			m_serialize->serialize_parameters(m_parameters);
 			m_serialize->serialize_best
 			(
-				execute_time
+				  execute_time
 				, denn.execute_test(*result)
 				, result->m_f
 				, result->m_cr
