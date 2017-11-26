@@ -5,7 +5,7 @@
 #include "DennSerializeOutput.h"
 #include "DennNRam.h"
 #include "DennNRamTask.h"
-#include "DennNRamDatasetTask.h"
+#include "DennNRamDataSetTask.h"
 #include "DennInstanceUtils.h"
 #include <fstream>
 
