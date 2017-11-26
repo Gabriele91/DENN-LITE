@@ -77,6 +77,7 @@ namespace NRam
 			if (!build_serialize(m_serialize, m_serialize_output_file_stream, parameters))  return;		
 			////////////////////////////////////////////////////////////////////////////////////////////////
 			//Create context
+			#if 0
 			m_nram.init(1000, 16, 2, 3,
 			{
 				GateFactory::create("read"),
@@ -86,6 +87,22 @@ namespace NRam
 				GateFactory::create("min"),
 				GateFactory::create("write")
 			});
+			#else 
+			m_nram.init
+			(
+			  1000 // Samples
+			, 10   // Max int
+			, 4    // Registers
+			, 1    // Timesteps
+			,{
+				GateFactory::create("read"),
+				GateFactory::create("inc"),
+				GateFactory::create("add"),
+				GateFactory::create("dec"),
+				GateFactory::create("min"),
+				GateFactory::create("write")
+			 });
+			#endif
 			//get eval & set context
 			m_eval = EvaluationFactory::get<NRamEval>("nram")->set_context(m_nram);
 			//task
