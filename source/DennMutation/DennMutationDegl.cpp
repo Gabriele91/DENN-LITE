@@ -89,7 +89,7 @@ namespace Denn
 						w_final_array[i] = Denn::lerp(w_l_m_array[i], w_g_m_array[i], scalar_weight);
 
 					//clamp
-					w_final.unaryExpr(m_algorithm.clamp_function());
+					w_final = w_final.unaryExpr(m_algorithm.clamp_function());
 				}
 			}
 		}
@@ -206,7 +206,7 @@ namespace Denn
 				for(Matrix::Index i=0; i != w_final.size(); ++i)
 					w_final_array[i] = Denn::lerp(w_l_m_array[i], w_g_m_array[i], scalar_weight);
 				//clamp
-				w_final.unaryExpr(m_algorithm.clamp_function());
+				w_final = w_final.unaryExpr(m_algorithm.clamp_function());
 			}
 		}
 	};
