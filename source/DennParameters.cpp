@@ -7,6 +7,8 @@
 #include "DennSerializeOutput.h"
 #include "DennInstance.h"
 #include "DennDump.h"
+#include "DennNRamGate.h"
+#include "DennNRamTask.h"
 #include "DennVersion.h"
 
 namespace Denn
@@ -360,6 +362,7 @@ namespace Denn
                 //ok
                 return m_active_functions.get().size() != 0; 
             }
+			,{ "list(string)",  ActiveFunctionFactory::list_of_active_functions() }
         },
         ParameterInfo{
 			m_output_active_function, "Activation function of output layer [" + ActiveFunctionFactory::names_of_active_functions() + "]", { "--" + m_output_active_function.name(), "--output_activation_functions" ,  "-oaf"  },
@@ -375,7 +378,55 @@ namespace Denn
                 //ok
                 return true;
             }
+			,{ "string",  ActiveFunctionFactory::list_of_active_functions() }
+        },
+		ParameterInfo{
+			m_max_int, "Max int of nram's registers",{ "--" + m_max_int.name(), "-nrmi" },
+			[this](Arguments& args) -> bool { m_max_int = args.get_int();  return true; }
+		},
+		ParameterInfo{
+			m_n_registers, "Number of nram's registers",{ "--" + m_n_registers.name(), "-nrr" },
+			[this](Arguments& args) -> bool { m_n_registers = args.get_int();  return true; }
+		},
+		ParameterInfo{
+			m_time_steps, "Time steps of nram machine",{ "--" + m_time_steps.name(), "-nrts" },
+			[this](Arguments& args) -> bool { m_time_steps = args.get_int();  return true; }
+		},
+        ParameterInfo{
+			m_task, "Task of nram machine [" + NRam::TaskFactory::names_of_tasks() + "]", { "--" + m_task.name(), "-nrtk"  },
+            [this](Arguments& args) -> bool 
+            { 
+                std::string str_c_type = args.get_string();
+                //all lower case
+                std::transform(str_c_type.begin(),str_c_type.end(), str_c_type.begin(), ::tolower);
+                //test
+                if(!NRam::TaskFactory::exists(str_c_type)) return false;
+                //save
+				m_task = str_c_type;
+                //ok
+                return true;
+            }
+			,{ "string",  NRam::TaskFactory::list_of_tasks() }
         }, 
+        ParameterInfo{
+			m_gates, "List of gates of nram machine [" + NRam::GateFactory::names_of_gates() + "]", { "--" + m_gates.name(), "-nrg"  },
+            [this](Arguments& args) -> bool 
+            { 
+                while(args.remaining() && !args.start_with_minus())
+                {
+                    std::string str_c_type = args.get_string();
+                    //all lower case
+                    std::transform(str_c_type.begin(),str_c_type.end(), str_c_type.begin(), ::tolower);
+                    //test
+                    if(!NRam::GateFactory::exists(str_c_type)) return false;
+                    //push
+					m_gates.get().push_back(str_c_type);
+                }
+                //ok
+                return m_gates.get().size() != 0;
+            }
+			,{ "list(string)",  NRam::GateFactory::list_of_gates() }
+        },
         ParameterInfo{
             m_dataset_filename, "Path of dataset file (gz)", { "--" + m_dataset_filename.name(), "-d", "-i" }, 
             [this](Arguments& args) -> bool {  m_dataset_filename = args.get_string();  return true; } 
@@ -446,6 +497,14 @@ namespace Denn
         ParameterInfo{
             "Print list of activation functions", { "--active_functions-list", "--activation_functions-list",    "-aflist"  }, 
             [this](Arguments& args) -> bool { std::cout << ActiveFunctionFactory::names_of_active_functions() << std::endl; return true; } 
+        },
+        ParameterInfo{
+            "Print list of nram's taks", { "--nram-task-list", "--task-list", "-nrtlist"  },
+            [this](Arguments& args) -> bool { std::cout << NRam::TaskFactory::names_of_tasks() << std::endl; return true; }
+        },
+        ParameterInfo{
+            "Print list of nram's gates", { "--nram-gates-list", "--gates-list", "-nrglist"  },
+            [this](Arguments& args) -> bool { std::cout << NRam::GateFactory::names_of_gates() << std::endl; return true; }
         },
         ParameterInfo{
             "Print list of runtime output", { "--runtime_output-list",    "-rolist"  }, 
