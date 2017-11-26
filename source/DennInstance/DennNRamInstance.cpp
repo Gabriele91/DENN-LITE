@@ -77,37 +77,33 @@ namespace NRam
 			//serialize
 			if (!build_serialize(m_serialize, m_serialize_output_file_stream, parameters))  return;		
 			////////////////////////////////////////////////////////////////////////////////////////////////
-			//Create context
-			#if 0
-			m_nram.init(1000, 16, 2, 3,
+			// Test
+			if (!(*parameters.m_gates).size())
 			{
-				GateFactory::create("read"),
-				GateFactory::create("zero"),
-				GateFactory::create("inc"),
-				GateFactory::create("lt"),
-				GateFactory::create("min"),
-				GateFactory::create("write")
-			});
-			#else 
+				std::cerr << "nram required a list of gates" << std::endl;
+				return;
+			}
+			if (!(*parameters.m_task).size())
+			{
+				std::cerr << "nram's learning process requires a task" << std::endl;
+				return;
+			}
+			// gete list of gates
+			std::vector< Gate::SPtr > gates;
+			for (auto& gate_name : *(parameters.m_gates)) gates.push_back(GateFactory::create(gate_name));
+			//init nram context
 			m_nram.init
 			(
-			  1000 // Samples
-			, 10   // Max int
-			, 4    // Registers
-			, 1    // Timesteps
-			,{
-				GateFactory::create("read"),
-				GateFactory::create("inc"),
-				GateFactory::create("add"),
-				GateFactory::create("dec"),
-				GateFactory::create("min"),
-				GateFactory::create("write")
-			 });
-			#endif
+				  *parameters.m_batch_size
+				, *parameters.m_max_int
+				, *parameters.m_n_registers
+				, *parameters.m_time_steps
+				, gates
+			);
 			//get eval & set context
 			m_eval = EvaluationFactory::get<NRamEval>("nram")->set_context(m_nram);
 			//task
-			m_task = TaskFactory::create("copy", m_nram.m_batch_size, m_nram.m_max_int, m_nram.m_n_regs, m_random_engine);
+			m_task = TaskFactory::create(*parameters.m_task, m_nram.m_batch_size, m_nram.m_max_int, m_nram.m_n_regs, m_random_engine);
 			//Dataset
 			m_dataset = *m_task;
 			//network
