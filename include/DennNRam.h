@@ -39,29 +39,11 @@ namespace NRam
     MatrixList fuzzy_encode(const Matrix& M);
 
     MatrixList fuzzy_regs(const size_t batch_size, const size_t n_regs, const size_t max_int);
+	
+	Scalar calculate_sample_cost(Matrix &M, const RowVector &desired_mem);
 
-    Matrix fuzzy_reg_at(const NRamLayout& context, const MatrixList& fuzzy_regs, size_t c);
+    Scalar run_circuit(const NRamLayout &context, Matrix& nn_out_decision, Matrix& regs, Matrix& in_mem);
 
-    /**
-     * Set the new value of a register for a sample.
-     *
-     * @param fuzzy_regs
-     * @param new_reg Register new distribution
-     * @param idx_reg
-     * @param sample
-     * @return
-     */
-    MatrixList& set_fuzzy_reg_at(MatrixList& fuzzy_regs, const Matrix& new_reg, size_t idx_reg, size_t sample);
-
-    Scalar calculate_sample_cost(Matrix &M, const RowVector &desired_mem);
-
-    Matrix avg(const Matrix &regs, const Matrix &in);
-
-    MatrixT<size_t> defuzzy_mem(const Matrix &M);
-
-    Scalar run_circuit(const NRamLayout &context, Matrix &nn_out_decision, MatrixList &fuzzy_regs, MatrixList &in_mem,
-                       size_t s);
-
-    Scalar train(const NRamLayout &context, const NeuralNetwork &nn, MatrixList &fuzzy_regs, MatrixList &in_mem, const Matrix &out_mem);
+    Scalar train(const NRamLayout &context, const NeuralNetwork &nn,  const Matrix& in_mem, const Matrix &out_mem);
 }
 }

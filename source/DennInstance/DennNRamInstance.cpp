@@ -25,14 +25,10 @@ namespace NRam
 			//network
 			auto& nn = individual.m_network;
 			//Dataset
-			auto& in_mem = ds.features();
+			auto& in_mem  = ds.features();
 			auto& out_mem = ds.labels();
-			//regs
-			auto regs = NRam::fuzzy_regs(m_context->m_batch_size, m_context->m_n_regs, m_context->m_max_int);
-			//to list
-			auto list_in_mem = NRam::fuzzy_encode(in_mem);
 			//execute
-			return NRam::train(*m_context, nn, regs, list_in_mem, out_mem);
+			return NRam::train(*m_context, nn, in_mem, out_mem);
 		}
 		//layout
 		const NRam::NRamLayout* m_context { nullptr };

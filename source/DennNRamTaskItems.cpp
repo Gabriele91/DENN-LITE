@@ -26,8 +26,8 @@ namespace NRam
 			Matrix in_mem(m_batch_size, m_max_int);
 			//init
 			in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform() * m_max_int); });
-			in_mem.col(m_max_int - 1) = RowVector::Zero(in_mem.rows());
-			in_mem.col(0) = ColVector::Ones(in_mem.rows()) * 2;
+			in_mem.col(m_max_int - 1) = ColVector::Zero(in_mem.rows());
+			in_mem.col(0)             = ColVector::Ones(in_mem.rows()) * 2;
 			//out mem
 			Matrix out_mem = in_mem;
 			for (size_t r = 0; r < out_mem.rows(); ++r)  out_mem(r, 0) = out_mem(r, Matrix::Index(out_mem(r, 0)));
