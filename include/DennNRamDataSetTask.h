@@ -4,7 +4,7 @@
 #pragma once
 #include "Config.h"
 #include "DennNRamTask.h"
-#include "DennDataSetLoader.h"
+#include "DennDatasetLoader.h"
 
 namespace Denn
 {

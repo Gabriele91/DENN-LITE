@@ -101,7 +101,7 @@ namespace Denn
             { 
                 std::string str_m_type = args.get_string() ;
                 //all lower case
-                std::transform(str_m_type.begin(),str_m_type.end(), str_m_type.begin(), ::toupper);
+                std::transform(str_m_type.begin(),str_m_type.end(), str_m_type.begin(), ::tolower);
                 //save
 				m_instance = str_m_type;
                 //ok 
@@ -498,12 +498,12 @@ namespace Denn
             }
             if(!is_a_valid_arg) 
             {
-                std::cerr << "parameter" << p << " not found\n";
+                std::cerr << "parameter" << p << " not found" << std::endl;
                 exit(1);
             }
             else if(!parameters_arguments_are_correct) 
             {
-                std::cerr << "arguments of parameter " << p << " not are correct\n";
+                std::cerr << "arguments of parameter " << p << " are not correct" << std::endl;
                 exit(1);
             }
         }
