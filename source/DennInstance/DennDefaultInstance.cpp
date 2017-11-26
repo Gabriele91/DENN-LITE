@@ -13,6 +13,10 @@ namespace Denn
 	class DefaultInstance : public Instance
 	{
 	public:
+		//local info
+		std::ofstream  m_runtime_output_file_stream;  //n.b. before of context dec
+		std::ofstream  m_serialize_output_file_stream;//n.b. before of context dec
+		bool		   m_success_init{ false };
 		//context
 		const Denn::Parameters&	      m_parameters;    //< parameters
 		mutable DataSetLoader::SPtr   m_dataset;	   //< dataset
@@ -21,10 +25,6 @@ namespace Denn
 		mutable SerializeOutput::SPtr m_serialize;     //< serialize output
 		mutable std::unique_ptr<ThreadPool> m_pool{ nullptr };     //< thread pool
 		mutable std::ostream   m_runtime_output_stream{ nullptr }; //< stream
-		//local info
-		std::ofstream  m_runtime_output_file_stream;
-		std::ofstream  m_serialize_output_file_stream;
-		bool		   m_success_init{ false };
 		//init
 		DefaultInstance(const Denn::Parameters& parameters) : m_parameters(parameters)
 		{

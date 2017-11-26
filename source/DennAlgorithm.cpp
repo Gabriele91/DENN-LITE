@@ -291,7 +291,7 @@ namespace Denn
 		//if not enabled then not reset
 		if(!*m_params.m_restart_enable) return ;
 		//inc count
-		if ((m_best_ctx.m_eval - m_restart_ctx.m_last_eval) <= (Scalar)m_params.m_restart_delta)
+		if (std::abs(m_best_ctx.m_eval - m_restart_ctx.m_last_eval) <= (Scalar)m_params.m_restart_delta)
 		{
 			++m_restart_ctx.m_test_count;
 		}
