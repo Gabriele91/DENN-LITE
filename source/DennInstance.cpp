@@ -3,6 +3,10 @@
 
 namespace Denn
 {
+	//ok
+	Instance::Instance() {}
+	Instance::Instance(const Denn::Parameters& parameters) {}
+	Instance::~Instance(){ }
 	//map
 	static std::map< std::string, InstanceFactory::CreateObject >& i_map()
 	{

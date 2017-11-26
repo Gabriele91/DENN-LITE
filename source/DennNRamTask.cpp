@@ -16,6 +16,11 @@ namespace NRam
 	{
 	}
 	
+	//delete
+	Task::~Task()
+	{
+	}
+
 	//build dataset
 	MemoryTuple Task::operator()() 
 	{ 

@@ -15,8 +15,9 @@ namespace Denn
 	public:
 		using SPtr = std::shared_ptr<Instance>;
 
-		Instance() {}
-		Instance(const Denn::Parameters& parameters) {}
+		Instance();
+		Instance(const Denn::Parameters& parameters);
+		virtual ~Instance();
 
 		SPtr get_ptr() { return shared_from_this(); }
 

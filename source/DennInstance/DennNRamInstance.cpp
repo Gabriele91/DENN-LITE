@@ -114,6 +114,10 @@ namespace NRam
 			////////////////////////////////////////////////////////////////////////////////////////////////
 			m_success_init = true;
 		}
+		virtual ~NRamInstance()
+		{
+			//none	
+		}
 
 		Random&  random_engine()  const override
 		{

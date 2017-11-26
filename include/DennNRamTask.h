@@ -26,6 +26,9 @@ namespace NRam
 		//init
 		Task(size_t batch_size, size_t max_int, size_t n_regs, Random& random);
 
+		//delete
+		virtual ~Task();
+
 		//build dataset
 		virtual MemoryTuple operator()();
 

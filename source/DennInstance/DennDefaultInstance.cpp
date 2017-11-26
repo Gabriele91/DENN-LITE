@@ -63,6 +63,11 @@ namespace Denn
 			m_success_init = true;
 		}
 
+		virtual ~DefaultInstance()
+		{
+			//none	
+		}
+
 		Random&  random_engine()  const override
 		{
 			return m_random_engine;
@@ -123,7 +128,7 @@ namespace Denn
 			m_serialize->serialize_parameters(m_parameters);
 			m_serialize->serialize_best
 			(
-				execute_time
+				  execute_time
 				, denn.execute_test(*result)
 				, result->m_f
 				, result->m_cr

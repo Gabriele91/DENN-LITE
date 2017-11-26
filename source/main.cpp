@@ -21,7 +21,11 @@ int main(int argc,const char** argv)
 	Instance::SPtr instance = InstanceFactory::create(parameters.m_instance, parameters);
     ////////////////////////////////////////////////////////////////////////////////////////////////
     //execute test
-	if (instance) return (instance->execute() ? 0 : -1);
+	if (instance)
+    {
+        if(instance->execute()) return 0;
+        else                    return 128;
+    }
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    return -255;
+    return 255;
 }
