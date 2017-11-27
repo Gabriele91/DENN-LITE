@@ -62,6 +62,8 @@ endif
 ifeq ($(shell uname -s),Linux)
 # too slow -fopenmp 
 C_FLAGS += -lpthread -pthread 
+# remove gcc warning (eigen)
+C_FLAGS += -Wno-int-in-bool-context
 endif
 
 # MacOS flags
