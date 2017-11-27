@@ -20,7 +20,7 @@
 //Dataset includes
 #include  "DennDatasetLoader.h"
 #include  "DennDataset.h"
-#include  "DennNRamDataSetTask.h"
+#include  "DennNRamDatasetTask.h"
 
 //Denn
 #include  "DennInstance.h"
