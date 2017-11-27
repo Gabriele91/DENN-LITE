@@ -451,10 +451,8 @@ set(SOURCE_FILES
         include/DennDump.h
         include/DennEvolutionMethod.h
         include/DennFilesystem.h
-        include/DennGate.h
         include/DennIndividual.h
         include/DennLayer.h
-        include/DennMainUtils.h
         include/DennMutation.h
         include/DennNeuralNetwork.h
         include/DennParameters.h
@@ -492,7 +490,6 @@ set(SOURCE_FILES
         source/DennMutation/DennMutationNone.cpp
         source/DennMutation/DennMutationRand.cpp
         source/DennMutation/DennMutationTrigonometric.cpp
-        source/DennGates/DennGate.cpp
         source/DennGates/DennGateRead.cpp
         source/DennGates/DennGateZero.cpp
         source/DennGates/DennGateOne.cpp
@@ -517,7 +514,6 @@ set(SOURCE_FILES
         source/DennFilesystem.cpp
         source/DennIndividual.cpp
         source/DennLayer.cpp
-        source/DennMainUtils.cpp
         source/DennMutationFactory.cpp
         source/DennNeuralNetwork.cpp
         source/DennParameters.cpp

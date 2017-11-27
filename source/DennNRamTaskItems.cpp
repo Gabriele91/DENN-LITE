@@ -62,7 +62,7 @@ namespace NRam
 			in_mem.col(0) = ColVector::Ones(in_mem.rows()) * offset;
 			//out mem
 			Matrix out_mem = in_mem;
-			out_mem.block(0, offset, in_mem.rows(), in_mem.cols() - offset) = in_mem.block(0, 1, in_mem.rows(), offset);
+			out_mem.block(0, offset, in_mem.rows(), in_mem.cols() - offset - 1) = in_mem.block(0, 1, in_mem.rows(), offset - 1);
 			//return
 			return std::make_tuple(in_mem, out_mem, Task::init_regs());
 		}
