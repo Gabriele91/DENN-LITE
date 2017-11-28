@@ -334,7 +334,6 @@ namespace NRam
 				auto& in_mem  = std::get<0>(test);
 				auto& out_mem = std::get<1>(test);
 				//print
-				output_stream()  << "-----------------" << std::endl; 
 				output_stream()  << "Test[" << t << "]" << std::endl; 
 				output_stream() << "in: "  << Dump::json_matrix(in_mem) << std::endl;
 				//execute
