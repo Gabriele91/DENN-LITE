@@ -48,28 +48,14 @@ namespace NRam
         m_nn_output += 1;
     }
 
-    MatrixList fuzzy_encode(const Matrix &M) {
-        MatrixList encoded_mem;
-        for (size_t s = 0; s < M.rows(); s++) 
-		{
-            Matrix sample = Matrix::Zero(M.cols(), M.cols());
-            for (size_t n = 0; n < M.cols(); n++) 
-			{
-                sample(n, MatrixT<int>::Index(M(s, n))) = Scalar(1.0);
-            }
-            encoded_mem.push_back(sample);
-        }
-        return encoded_mem;
-    }
-
-    MatrixList fuzzy_regs(const size_t m_batch_size, const size_t m_n_regs, const size_t m_max_int)
+    Matrix fuzzy_encode(const Matrix& M)
     {
-        // Generate list of fuzzy registers
-        MatrixList fuzzy_regs(m_batch_size, Matrix::Zero(m_n_regs, m_max_int));
-		// Set the P(x = 0) = 1.0
-		for (auto& mem : fuzzy_regs) mem.col(0).fill(1);
-		// return
-		return fuzzy_regs;
+        Matrix sample = Matrix::Zero(M.cols(), M.cols());
+        for (Matrix::Index n = 0; n < M.cols(); n++) 
+        {
+            sample(n, Matrix::Index(M(0,n))) = Scalar(1.0);
+        }
+        return sample;
     }
 
     Scalar calculate_sample_cost(Matrix &M, const RowVector &desired_mem)
@@ -82,12 +68,12 @@ namespace NRam
         return s_cost;
     }
 
-    static Matrix avg(const Matrix &regs, const Matrix &in)
+    static Matrix avg(const Matrix& regs, const Matrix& in)
     {
-        return in * regs;
+        return regs.transpose() * in;
     }
 
-    Scalar run_circuit(const NRamLayout &context, Matrix& nn_out_decision, Matrix& regs, Matrix& in_mem)
+    Scalar run_circuit(const NRamLayout& context, const Matrix& nn_out_decision, Matrix& regs, Matrix& in_mem)
     {
         //start col
         size_t ptr_col = 0, coefficient_size = context.m_n_regs;
@@ -100,30 +86,30 @@ namespace NRam
             {
                 case Gate::CONST:
                 {
-                    auto C = gate(in_mem);
+                    Matrix C = gate(in_mem);
                     regs.conservativeResize(regs.rows() + 1, regs.cols());
                     regs.row(regs.rows() - 1) = C;
                 }
                 break;
                 case Gate::UNARY:
                 {
-                    Matrix a = nn_out_decision.block(0, ptr_col, 1, coefficient_size);
-                    Matrix A = CostFunction::softmax(a);
+                    ColVector a = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
+                    Matrix A = CostFunction::softmax_col(a);
                     ptr_col += coefficient_size;
 
-                    auto C = gate(avg(regs, A), in_mem);
+                    Matrix C = gate(avg(regs, A), in_mem);
                     regs.conservativeResize(regs.rows() + 1, regs.cols());
                     regs.row(regs.rows() - 1) = C;
                 }
                 break;
                 case Gate::BINARY:
                 {
-                    Matrix a = nn_out_decision.block(0, ptr_col, 1, coefficient_size);
-                    Matrix A = CostFunction::softmax(a);
+                    ColVector a = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
+                    Matrix A = CostFunction::softmax_col(a);
                     ptr_col += coefficient_size;
 
-                    Matrix b = nn_out_decision.block(0, ptr_col, 1, coefficient_size);
-                    Matrix B = CostFunction::softmax(b);
+                    ColVector b = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
+                    Matrix B = CostFunction::softmax_col(b);
                     ptr_col += coefficient_size;
 
                     Matrix C = gate(avg(regs, A), avg(regs, B), in_mem);
@@ -138,14 +124,14 @@ namespace NRam
         }
 
         // Update regs after circuit execution
-        for (; i < context.m_gates.size() + context.m_n_regs; ++i)
+        for (size_t r = 0; i < context.m_gates.size() + context.m_n_regs; ++i, ++r)
         {
 			// get row
-            auto   c   = nn_out_decision.block(0, ptr_col, 1, coefficient_size);
+            ColVector c = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
 			// softmax
-            Matrix C   = CostFunction::softmax(c);
+            Matrix C = CostFunction::softmax_col(c);
 			// update
-			regs.row(i - context.m_gates.size()) = avg(regs, C);
+			regs.row(r) = avg(regs, C).transpose();
 			// next
 			ptr_col += coefficient_size;
         }
@@ -163,57 +149,45 @@ namespace NRam
     , const Matrix& linear_out_mem
     )
     {		
-		//regs													
-		MatrixList regs = fuzzy_regs(context.m_batch_size, context.m_n_regs, context.m_max_int);
-		//to list
-		MatrixList in_mem = NRam::fuzzy_encode(linear_in_mem);
-        //execute network
-        std::vector<Scalar> p_t(in_mem.size(),Scalar(1.0));                // Probability that execution is finished at timestep t
-        std::vector<Scalar> prob_incomplete(in_mem.size(), Scalar(1.0));   // Probability that the execution is not finished before timestep t
-        std::vector<Scalar> cum_prob_complete(in_mem.size(), Scalar(0.0)); // Cumulative probability of p_i
-		//tanspose
-		#define MEMORY_IS_TRANSPOSE
         //time step
-        Matrix cost = Matrix::Zero(1, in_mem.size());
-        for (size_t timestep = 0; timestep < context.m_timesteps; timestep++)
+        Scalar full_cost = Scalar(0.0);
+        // Run the circuit
+        for (Matrix::Index s = 0; s < linear_in_mem.rows(); ++s)
         {
-            // Run the circuit
-            for (size_t s = 0; s != in_mem.size(); ++s)
+            //Alloc regs
+            Matrix regs = Matrix::Zero(context.m_n_regs,context.m_max_int); 
+            //P(X=0)
+            regs.col(0).fill(1);
+            //In mem fazzy
+            Matrix in_mem = fuzzy_encode(linear_in_mem.row(s));
+            //Cost helper
+            Scalar p_t = Scalar(1.0);
+            Scalar prob_incomplete = Scalar(1.0);
+            Scalar cum_prob_complete = Scalar(0.0);
+            Scalar sample_cost = Scalar(0.0);
+            //for all timestep, run on s
+            for (size_t timestep = 0; timestep < context.m_timesteps; timestep++)
             {
-				//execute nn
-				Matrix out = network.apply(regs[s].col(0).transpose());
-//fix?
-#ifdef MEMORY_IS_TRANSPOSE
-				//transpose
-				Matrix t_in_mem = in_mem[s].transpose();
-				//execute circuit
-				Scalar fi = run_circuit(context, out, regs[s], t_in_mem);
-#else
-				//execute circuit
-				Scalar fi = run_circuit(context, out, regs[s], in_mem[s]);
-#endif
-				//compute exit state
+                //execute nn
+                Matrix out = network.apply(regs.col(0).transpose()).transpose();
+                //execute circuit
+                Scalar fi = run_circuit(context, out, regs, in_mem);
+                //compute exit state
                 if (timestep == context.m_timesteps - 1)
-                    p_t[s] = 1 - cum_prob_complete[s];
+                    p_t = 1 - cum_prob_complete;
                 else
-                    p_t[s] = fi * prob_incomplete[s];
-				//
-                cum_prob_complete[s] += p_t[s];
-                prob_incomplete[s] *= 1 - fi;
-//fix?
-#ifdef MEMORY_IS_TRANSPOSE
-				//transpose
-				in_mem[s] = t_in_mem.transpose();
-				//compute cost
-				cost(0, s) -= p_t[s] * calculate_sample_cost(in_mem[s], linear_out_mem.row(s));
-#else
-				//compute cost
-				cost(0, s) -= p_t[s] * calculate_sample_cost(in_mem[s], linear_out_mem.row(s));
-#endif
+                    p_t = fi * prob_incomplete;
+                //
+                cum_prob_complete += p_t;
+                prob_incomplete *= 1 - fi;
+                //compute cost
+                sample_cost -= p_t * calculate_sample_cost(in_mem, linear_out_mem.row(s));
             }
+            //add to full "cost"
+            full_cost += sample_cost;
         }
 
-        return cost.sum();
+        return full_cost;
     }
 }
 }

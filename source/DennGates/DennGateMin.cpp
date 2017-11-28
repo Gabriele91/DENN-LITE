@@ -14,7 +14,7 @@ namespace NRam
         Matrix operator() (const Matrix& A, const Matrix& B, Matrix& M)  const override
         {
             Matrix C = (*GateFactory::create("lt"))(A, B, M);
-            return C(0, 0) < C(0, 1) ? A : B;
+            return (C(0, 0) < C(0, 1) ? A : B).transpose();
         }
     };
     REGISTERED_GATE(MinGate, "min");

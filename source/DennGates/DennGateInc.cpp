@@ -13,7 +13,7 @@ namespace NRam
 
         Matrix operator() (const Matrix& A, Matrix& M)  const override
         {
-            return Denn::shift_bottom<Matrix>(A.transpose(), 1).transpose();
+            return Denn::shift_bottom<Matrix>(A, 1).transpose();
         }
     };
 

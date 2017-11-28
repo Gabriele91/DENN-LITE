@@ -1,7 +1,6 @@
 #include "DennNRamGate.h"
 #include "DennDump.h"
 
-
 namespace Denn
 {
 namespace NRam
@@ -14,7 +13,7 @@ namespace NRam
 
         Matrix operator() (const Matrix& Ptr, Matrix& M)  const override
         {
-            return Ptr * M;
+            return (M.transpose() * Ptr).transpose();
         }
     };
 

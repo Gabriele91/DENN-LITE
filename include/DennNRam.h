@@ -36,13 +36,11 @@ namespace NRam
         GateList    m_gates;
     };
 
-    MatrixList fuzzy_encode(const Matrix& M);
+    Matrix fuzzy_encode(const Matrix& M);
 
-    MatrixList fuzzy_regs(const size_t batch_size, const size_t n_regs, const size_t max_int);
-	
 	Scalar calculate_sample_cost(Matrix &M, const RowVector &desired_mem);
 
-    Scalar run_circuit(const NRamLayout &context, Matrix& nn_out_decision, Matrix& regs, Matrix& in_mem);
+    Scalar run_circuit(const NRamLayout &context, const Matrix& nn_out_decision, Matrix& regs, Matrix& in_mem);
 
     Scalar train(const NRamLayout &context, const NeuralNetwork &nn,  const Matrix& in_mem, const Matrix &out_mem);
 }

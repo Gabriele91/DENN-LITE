@@ -14,10 +14,10 @@ namespace NRam
         Matrix operator() (const Matrix& Ptr, const Matrix& Val, Matrix& M)  const override
         {
             // Calculate the erase matrix with which the memory is erased
-            Matrix erase = (Matrix::Ones(1, M.cols()) - Ptr).transpose() * Matrix::Ones(1, M.cols());
+            Matrix erase = (RowVector::Ones(M.cols()) - Ptr.transpose()).transpose() * RowVector::Ones(M.cols());
 
             // Calculate where the new information will be added to the memory
-            Matrix contrib = Ptr.transpose() * Val;
+            Matrix contrib = Ptr * Val.transpose();
 
             // Update M
             M = (erase.cwiseProduct(M) + contrib);

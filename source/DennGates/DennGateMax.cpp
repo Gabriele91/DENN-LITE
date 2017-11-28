@@ -13,7 +13,7 @@ namespace NRam
         Matrix operator() (const Matrix& A, const Matrix& B, Matrix& M)  const override
         {
             Matrix C = (*GateFactory::create("lt"))(A, B, M);
-            return C(0, 0) < C(0, 1) ? B : A;
+            return (C(0, 0) < C(0, 1) ? B : A).transpose();
         }
     };
     REGISTERED_GATE(MaxGate, "max");
