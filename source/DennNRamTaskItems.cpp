@@ -89,7 +89,7 @@ namespace NRam
 			Matrix::Index offset(m_max_int / 2);
 			Matrix in_mem(m_batch_size, m_max_int);
 			//init in mem
-			in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform() * m_max_int); });
+			in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.index_rand(m_max_int - 1)); });
 			in_mem.block(0, offset, in_mem.rows(), in_mem.cols() - offset) = Matrix::Zero(m_batch_size, in_mem.cols() - offset);
 			//init out mem
 			Matrix out_mem = in_mem;
