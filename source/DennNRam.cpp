@@ -58,6 +58,26 @@ namespace NRam
         return sample;
     }
 
+    Matrix defuzzy_mem(const Matrix &M)
+    {
+        Matrix m(1, M.rows());
+        for (Matrix::Index r = 0; r < M.rows(); r++)
+        {
+            Scalar        max_value = M(r, 0);
+            Matrix::Index max_index = 0;
+            for (Matrix::Index c = 1; c < M.cols(); ++c)
+            {
+                if (max_value < M(r, c))
+                {
+                    max_value = M(r, c);
+                    max_index = c;
+                }
+            }
+            m(0, r) = max_index;
+        }
+        return m;
+    }
+
     Scalar calculate_sample_cost(Matrix &M, const RowVector &desired_mem)
     {
         Scalar s_cost = 0;

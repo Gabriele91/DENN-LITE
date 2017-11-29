@@ -38,6 +38,8 @@ namespace NRam
 
     Matrix fuzzy_encode(const Matrix& M);
 
+    Matrix defuzzy_mem(const Matrix &M)
+
 	Scalar calculate_sample_cost(Matrix &M, const RowVector &desired_mem);
 
     Scalar run_circuit(const NRamLayout &context, const Matrix& nn_out_decision, Matrix& regs, Matrix& in_mem);
