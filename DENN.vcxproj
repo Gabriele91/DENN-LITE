@@ -96,6 +96,7 @@
     <ClCompile Include="source\DennInstance.cpp" />
     <ClCompile Include="source\DennInstance\DennDefaultInstance.cpp" />
     <ClCompile Include="source\DennInstance\DennNRamInstance.cpp" />
+    <ClCompile Include="source\DennJson.cpp" />
     <ClCompile Include="source\DennLayer.cpp" />
     <ClCompile Include="source\DennInstanceUtils.cpp" />
     <ClCompile Include="source\DennMutationFactory.cpp" />
