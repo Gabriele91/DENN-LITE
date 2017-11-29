@@ -337,9 +337,14 @@ namespace NRam
 				output_stream()  << "Test[" << t << "]" << std::endl; 
 				output_stream() << "in: "  << Dump::json_matrix(in_mem) << std::endl;
 				//execute
-				Matrix result = NRam::execute(m_nram, m_network, in_mem);
+				auto result = NRam::execute(m_nram, m_network, in_mem);
+                auto output = std::get<0>(result);
+                auto sample_timesteps_connections = std::get<1>(result);
+
+                print_sample_execution(m_nram, sample_timesteps_connections[0], output_stream());
+
 				//output
-				output_stream() << "result: " << Dump::json_matrix(result) << std::endl;
+				output_stream() << "result: " << Dump::json_matrix(output) << std::endl;
 				output_stream() << "expected out: " << Dump::json_matrix(out_mem) << std::endl;
 				output_stream() << std::endl;;
 			}

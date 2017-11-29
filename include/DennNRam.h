@@ -36,17 +36,31 @@ namespace NRam
         GateList    m_gates;
     };
 
+    using ConnectionValue             = std::map< std::string, int >;
+    using ConnectionsHistory          = std::map< std::string, ConnectionValue >;
+    using ListConnectionsHistory      = std::vector< ConnectionsHistory >;
+    using ListListConnectionsHistory  = std::vector< ListConnectionsHistory >;
+    using ResultAndConnectionsHistory = std::tuple<Matrix, ListListConnectionsHistory>;
+
     Matrix fuzzy_encode(const Matrix& M);
 
     Matrix defuzzy_mem(const Matrix &M);
 
-	Scalar calculate_sample_cost(Matrix &M, const RowVector &desired_mem);
+    Matrix defuzzy_mem_cols(const Matrix &M);
+
+    std::string register_or_gate(const NRamLayout& context, Scalar idx);
+
+    void print_sample_execution(const NRamLayout& context, const ListConnectionsHistory& connections, std::ostream& output);
+
+    Scalar calculate_sample_cost(Matrix &M, const RowVector &desired_mem);
 
     Scalar run_circuit(const NRamLayout &context, const Matrix& nn_out_decision, Matrix& regs, Matrix& in_mem);
 
+    Scalar run_circuit(const NRamLayout &context, const Matrix& nn_out_decision, Matrix& regs, Matrix& in_mem, ConnectionsHistory& history);
+
     Scalar train(const NRamLayout &context, const NeuralNetwork &nn,  const Matrix& in_mem, const Matrix &out_mem);
 
-    Matrix execute(const NRamLayout &context, const NeuralNetwork& network, const Matrix& linear_in_mem);
+    ResultAndConnectionsHistory execute(const NRamLayout &context, const NeuralNetwork& network, const Matrix& linear_in_mem);
 
 }
 }
