@@ -60,7 +60,7 @@ namespace NRam
 
     Matrix defuzzy_mem(const Matrix &M)
     {
-        Matrix m(1, M.rows());
+        Matrix m(1, M.cols());
         for (Matrix::Index r = 0; r < M.rows(); r++)
         {
             Scalar        max_value = M(r, 0);
@@ -208,6 +208,43 @@ namespace NRam
         }
 
         return full_cost;
+    }
+
+    Matrix execute
+    (
+      const NRamLayout &context
+    , const NeuralNetwork& network
+    , const Matrix& linear_in_mem
+    )
+    {		
+        //time step
+        Scalar full_cost = Scalar(0.0);
+        // Ouput
+        Matrix output;
+        // Run the circuit
+        for (Matrix::Index s = 0; s < linear_in_mem.rows(); ++s)
+        {
+            //Alloc regs
+            Matrix regs = Matrix::Zero(context.m_n_regs,context.m_max_int); 
+            //P(X=0)
+            regs.col(0).fill(1);
+            //In mem fazzy
+            Matrix in_mem = fuzzy_encode(linear_in_mem.row(s));
+            //Cost helper
+            Scalar p_t = Scalar(1.0);
+            //for all timestep, run on s
+            for (size_t timestep = 0; timestep < context.m_timesteps; timestep++)
+            {
+                //execute nn
+                Matrix out = network.apply(regs.col(0).transpose()).transpose();
+                //execute circuit
+                Scalar fi = run_circuit(context, out, regs, in_mem);
+            }
+            //save ouput
+            output.conservativeResize(output.rows()+1, in_mem.cols());
+            output.row(output.rows()-1) = defuzzy_mem(in_mem).row(0);
+        }
+        return output;
     }
 }
 }

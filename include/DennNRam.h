@@ -38,12 +38,15 @@ namespace NRam
 
     Matrix fuzzy_encode(const Matrix& M);
 
-    Matrix defuzzy_mem(const Matrix &M)
+    Matrix defuzzy_mem(const Matrix &M);
 
 	Scalar calculate_sample_cost(Matrix &M, const RowVector &desired_mem);
 
     Scalar run_circuit(const NRamLayout &context, const Matrix& nn_out_decision, Matrix& regs, Matrix& in_mem);
 
     Scalar train(const NRamLayout &context, const NeuralNetwork &nn,  const Matrix& in_mem, const Matrix &out_mem);
+
+    Matrix execute(const NRamLayout &context, const NeuralNetwork& network, const Matrix& linear_in_mem);
+
 }
 }

@@ -337,9 +337,10 @@ namespace NRam
 				output_stream()  << "Test[" << t << "]" << std::endl; 
 				output_stream() << "in: "  << Dump::json_matrix(in_mem) << std::endl;
 				//execute
-				NRam::train(m_nram, m_network, in_mem, out_mem);
+				Matrix result = NRam::execute(m_nram, m_network, in_mem);
 				//output
-				output_stream() << "out: " << Dump::json_matrix(out_mem) << std::endl;
+				output_stream() << "result: " << Dump::json_matrix(result) << std::endl;
+				output_stream() << "expected out: " << Dump::json_matrix(out_mem) << std::endl;
 				output_stream() << std::endl;;
 			}
 			////////////////////////////////////////////////////////////////////////////////////////////////
