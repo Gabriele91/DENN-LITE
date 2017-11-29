@@ -6,6 +6,7 @@
 #include "DennNRam.h"
 #include "DennNRamTask.h"
 #include  <cctype>
+#include  <sstream>
 
 namespace Denn
 {
@@ -99,6 +100,7 @@ namespace NRam
         return m;
     }
 
+    #if 0
     std::string register_or_gate(const NRamLayout& context, ConnectionValue cv)
     {
         int idx = cv["connection"], value = cv["value"];
@@ -124,9 +126,11 @@ namespace NRam
         }
     }
 
-    void print_sample_execution(const NRamLayout& context,
-                                const ListConnectionsHistory& connections,
-                                std::ostream& output
+    void print_sample_execution
+    (
+        const NRamLayout& context,
+        const ListConnectionsHistory& connections,
+        std::ostream& output
     )
     {
         for(size_t t = 0; t < context.m_timesteps; ++t)
@@ -169,6 +173,7 @@ namespace NRam
                        << std::endl;
         }
     }
+    #endif 
 
     Scalar calculate_sample_cost(Matrix &M, const RowVector &desired_mem)
     {
@@ -183,122 +188,6 @@ namespace NRam
     static Matrix avg(const Matrix& regs, const Matrix& in)
     {
         return regs.transpose() * in;
-    }
-
-    Scalar run_circuit(const NRamLayout &context
-            , const Matrix& nn_out_decision
-            , Matrix& regs
-            , Matrix& in_mem)
-    {
-        ConnectionsHistory timestep_connection;
-        return run_circuit(context, nn_out_decision, regs, in_mem, timestep_connection);
-    }
-
-    Scalar run_circuit(const NRamLayout &context, const Matrix& nn_out_decision, Matrix& regs, Matrix& in_mem,
-                       ConnectionsHistory& timestep_connection)
-    {
-        //start col
-        size_t ptr_col = 0, coefficient_size = context.m_n_regs;
-        // Execute circuit
-        size_t i = 0;
-        for (; i != context.m_gates.size(); ++i, ++coefficient_size)
-        {
-            auto &gate = *context.m_gates[i];
-            switch (gate.arity())
-            {
-                case Gate::CONST:
-                {
-                    Matrix C = gate(in_mem);
-                    regs.conservativeResize(regs.rows() + 1, regs.cols());
-                    regs.row(regs.rows() - 1) = C;
-
-                    // Add to history execution
-                    ConnectionValue cv;
-                    cv["connection"] = -1;
-                    cv["value"]      = -1;
-                    cv["result"]     = static_cast<int>(defuzzy_mem(C)(0, 0));
-                    timestep_connection[gate.name()] = cv;
-                }
-                break;
-                case Gate::UNARY:
-                {
-                    ColVector a    = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
-                    Matrix coeff_a = CostFunction::softmax_col(a);
-                    ptr_col += coefficient_size;
-
-                    ColVector selected_value_a = avg(regs, coeff_a);
-                    Matrix C = gate(selected_value_a, in_mem);
-                    regs.conservativeResize(regs.rows() + 1, regs.cols());
-                    regs.row(regs.rows() - 1) = C;
-
-                    // Add to history execution
-                    ConnectionValue cv;
-                    cv["connection"] = static_cast<int>(defuzzy_mem_cols(coeff_a)(0, 0));
-                    cv["value"]      = static_cast<int>(defuzzy_mem_cols(selected_value_a)(0, 0));
-                    cv["result"]     = static_cast<int>(defuzzy_mem(C)(0, 0));
-                    timestep_connection[gate.name() + "(0)"] = cv;
-                }
-                break;
-                case Gate::BINARY:
-                {
-                    ColVector a    = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
-                    Matrix coeff_a = CostFunction::softmax_col(a);
-                    ptr_col += coefficient_size;
-
-                    ColVector b    = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
-                    Matrix coeff_b = CostFunction::softmax_col(b);
-                    ptr_col += coefficient_size;
-
-                    Matrix selected_value_a = avg(regs, coeff_a);
-                    Matrix selected_value_b = avg(regs, coeff_b);
-                    Matrix C = gate(selected_value_a, selected_value_b, in_mem);
-                    //append output
-                    regs.conservativeResize(regs.rows() + 1, regs.cols());
-                    regs.row(regs.rows() - 1) = C;
-
-
-                    // Add to history execution
-                    ConnectionValue cv_a;
-                    cv_a["connection"] = static_cast<int>(defuzzy_mem_cols(coeff_a)(0, 0));
-                    cv_a["value"]      = static_cast<int>(defuzzy_mem_cols(selected_value_a)(0, 0));
-                    cv_a["result"]     = static_cast<int>(defuzzy_mem(C)(0, 0));
-                    timestep_connection[gate.name() + "(0)"] = cv_a;
-
-
-                    ConnectionValue cv_b;
-                    cv_b["connection"] = static_cast<int>(defuzzy_mem_cols(coeff_b)(0, 0));
-                    cv_b["value"]      = static_cast<int>(defuzzy_mem_cols(selected_value_b)(0, 0));
-                    cv_b["result"]     = static_cast<int>(defuzzy_mem(C)(0, 0));
-                    timestep_connection[gate.name() + "(1)"] = cv_b;
-                }
-                break;
-                default:
-                break;
-            }
-        }
-
-        // Update regs after circuit execution
-        for (size_t r = 0; i < context.m_gates.size() + context.m_n_regs; ++i, ++r)
-        {
-			// get row
-            ColVector c = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
-			// softmax
-            Matrix coeff_c = CostFunction::softmax_col(c);
-			// update
-			regs.row(r) = avg(regs, coeff_c).transpose();
-			// next
-			ptr_col += coefficient_size;
-
-
-            ConnectionValue cv;
-            cv["connection"] = static_cast<int>(defuzzy_mem_cols(coeff_c)(0, 0));
-            cv["value"]      = static_cast<int>(defuzzy_mem_cols(regs.row(r).transpose())(0, 0));
-            timestep_connection["reg(" + std::to_string(r) + ")"] = cv;
-        }
-		//resize regs
-		regs.conservativeResize(context.m_n_regs, regs.cols());
-        //return fi
-        return PointFunction::sigmoid(nn_out_decision.col(nn_out_decision.cols() - 1)(0));
     }
 
     Scalar train
@@ -353,7 +242,81 @@ namespace NRam
         return full_cost;
     }
 
-    ResultAndConnectionsHistory execute
+    Scalar run_circuit
+    (   
+      const NRamLayout &context
+    , const Matrix& nn_out_decision
+    , Matrix& regs
+    , Matrix& in_mem
+    )
+    {
+        //start col
+        size_t ptr_col = 0, coefficient_size = context.m_n_regs;
+        // Execute circuit
+        size_t i = 0;
+        for (; i != context.m_gates.size(); ++i, ++coefficient_size)
+        {
+            auto &gate = *context.m_gates[i];
+            switch (gate.arity())
+            {
+                case Gate::CONST:
+                {
+                    Matrix C = gate(in_mem);
+                    regs.conservativeResize(regs.rows() + 1, regs.cols());
+                    regs.row(regs.rows() - 1) = C;
+                }
+                break;
+                case Gate::UNARY:
+                {
+                    ColVector a    = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
+                    Matrix coeff_a = CostFunction::softmax_col(a);
+                    ptr_col += coefficient_size;
+
+                    Matrix C = gate(avg(regs, coeff_a), in_mem);
+                    regs.conservativeResize(regs.rows() + 1, regs.cols());
+                    regs.row(regs.rows() - 1) = C;
+                }
+                break;
+                case Gate::BINARY:
+                {
+                    ColVector a    = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
+                    Matrix coeff_a = CostFunction::softmax_col(a);
+                    ptr_col += coefficient_size;
+
+                    ColVector b    = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
+                    Matrix coeff_b = CostFunction::softmax_col(b);
+                    ptr_col += coefficient_size;
+
+                    Matrix C = gate(avg(regs, coeff_a), avg(regs, coeff_b), in_mem);
+                    //append output
+                    regs.conservativeResize(regs.rows() + 1, regs.cols());
+                    regs.row(regs.rows() - 1) = C;
+                }
+                break;
+                default:
+                break;
+            }
+        }
+
+        // Update regs after circuit execution
+        for (size_t r = 0; i < context.m_gates.size() + context.m_n_regs; ++i, ++r)
+        {
+			// get row
+            ColVector c = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
+			// softmax
+            Matrix coeff_c = CostFunction::softmax_col(c);
+			// update
+			regs.row(r) = avg(regs, coeff_c).transpose();
+			// next
+			ptr_col += coefficient_size;
+        }
+		//resize regs
+		regs.conservativeResize(context.m_n_regs, regs.cols());
+        //return fi
+        return PointFunction::sigmoid(nn_out_decision.col(nn_out_decision.cols() - 1)(0));
+    }
+
+    ResultAndExecutionDebug execute
     (
       const NRamLayout &context
     , const NeuralNetwork& network
@@ -364,8 +327,9 @@ namespace NRam
         Scalar full_cost = Scalar(0.0);
         // Ouput
         Matrix output;
+        //list of execution debugger
+        ListExecutionDebug samples_debug;
         // Run the circuit
-        ListListConnectionsHistory samples_timesteps_connection(1);
         for (Matrix::Index s = 0; s < linear_in_mem.rows(); ++s)
         {
             //Alloc regs
@@ -376,27 +340,237 @@ namespace NRam
             Matrix in_mem = fuzzy_encode(linear_in_mem.row(s));
             //Cost helper
             Scalar p_t = Scalar(1.0);
+            //debugger
+            ExecutionDebug execution_debug;
             //for all timestep, run on s
-
-            ListConnectionsHistory sample_timesteps_connection(context.m_timesteps);
             for (size_t timestep = 0; timestep < context.m_timesteps; timestep++)
             {
-                ConnectionsHistory timestep_connection;
+                //new step
+                execution_debug.push_step();
                 //execute nn
                 Matrix out = network.apply(regs.col(0).transpose()).transpose();
                 //execute circuit
-                Scalar fi = run_circuit(context, out, regs, in_mem, timestep_connection);
-                sample_timesteps_connection[timestep] = timestep_connection;
+                Scalar fi = run_circuit(context, out, regs, in_mem, execution_debug);
             }
-
             // Add to connections sample history
-            samples_timesteps_connection[s] = sample_timesteps_connection;
+            samples_debug.push_back(execution_debug);
             //save ouput
             output.conservativeResize(output.rows()+1, in_mem.cols());
             output.row(output.rows()-1) = defuzzy_mem(in_mem).row(0);
         }
-
-        return std::tuple< Matrix, ListListConnectionsHistory >( output, samples_timesteps_connection );
+        return ResultAndExecutionDebug( output, samples_debug );
     }
+
+    Scalar run_circuit
+    (
+      const NRamLayout &context
+    , const Matrix& nn_out_decision
+    , Matrix& regs
+    , Matrix& in_mem
+    , ExecutionDebug& debug
+    )
+    {
+        //start col
+        size_t ptr_col = 0, coefficient_size = context.m_n_regs;
+        // Execute circuit
+        size_t i = 0;
+        for (; i != context.m_gates.size(); ++i, ++coefficient_size)
+        {
+            auto &gate = *context.m_gates[i];
+            switch (gate.arity())
+            {
+                case Gate::CONST:
+                {
+                    Matrix C = gate(in_mem);
+                    regs.conservativeResize(regs.rows() + 1, regs.cols());
+                    regs.row(regs.rows() - 1) = C;
+                    // Add to history execution
+                    debug.push_op(gate, defuzzy_mem(in_mem), defuzzy_mem(C));
+                }
+                break;
+                case Gate::UNARY:
+                {
+                    ColVector a    = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
+                    Matrix coeff_a = CostFunction::softmax_col(a);
+                    ptr_col += coefficient_size;
+
+                    ColVector selected_value_a = avg(regs, coeff_a);
+                    Matrix C = gate(selected_value_a, in_mem);
+                    regs.conservativeResize(regs.rows() + 1, regs.cols());
+                    regs.row(regs.rows() - 1) = C;
+                    // Add to history execution
+                    debug.push_op(
+                          gate
+                        , defuzzy_mem(coeff_a)
+                        , defuzzy_mem(selected_value_a)
+                        , defuzzy_mem(in_mem)
+                        , defuzzy_mem(C)
+                    );
+                }
+                break;
+                case Gate::BINARY:
+                {
+                    ColVector a    = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
+                    Matrix coeff_a = CostFunction::softmax_col(a);
+                    ptr_col += coefficient_size;
+
+                    ColVector b    = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
+                    Matrix coeff_b = CostFunction::softmax_col(b);
+                    ptr_col += coefficient_size;
+
+                    Matrix selected_value_a = avg(regs, coeff_a);
+                    Matrix selected_value_b = avg(regs, coeff_b);
+                    Matrix C = gate(selected_value_a, selected_value_b, in_mem);
+                    //append output
+                    regs.conservativeResize(regs.rows() + 1, regs.cols());
+                    regs.row(regs.rows() - 1) = C;
+                    // Add to history execution
+                    debug.push_op(
+                          gate
+                        , defuzzy_mem(coeff_a)
+                        , defuzzy_mem(selected_value_a)
+                        , defuzzy_mem(coeff_b)
+                        , defuzzy_mem(selected_value_b)
+                        , defuzzy_mem(in_mem)
+                        , defuzzy_mem(C)
+                    );
+                }
+                break;
+                default:
+                break;
+            }
+        }
+
+        // Update regs after circuit execution
+        for (size_t r = 0; i < context.m_gates.size() + context.m_n_regs; ++i, ++r)
+        {
+			// get row
+            ColVector c = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
+			// softmax
+            Matrix coeff_c = CostFunction::softmax_col(c);
+			// update
+			regs.row(r) = avg(regs, coeff_c).transpose();
+			// next
+			ptr_col += coefficient_size;
+            // Add to history execution
+            debug.push_update(r, defuzzy_mem_cols(coeff_c), defuzzy_mem_cols(regs.row(r).transpose()));
+        }
+		//resize regs
+		regs.conservativeResize(context.m_n_regs, regs.cols());
+        //return fi
+        return PointFunction::sigmoid(nn_out_decision.col(nn_out_decision.cols() - 1)(0));
+    }
+
+    ExecutionDebug::ExecutionDebug(){}
+    ExecutionDebug::ExecutionDebug(const ExecutionDebug& debug){ m_steps = debug.m_steps; }
+
+    void ExecutionDebug::push_step()
+    {
+        m_steps.resize(m_steps.size()+1);
+    }
+    void ExecutionDebug::push_op(const Gate& gate, const Matrix& m, const Matrix& out)
+    {
+        m_steps[m_steps.size()-1].push_op(OpNode( gate.name() , Values{ m, out }));
+    }
+    void ExecutionDebug::push_op(const Gate& gate, const Matrix& a, const Matrix& in_a, const Matrix& m, const Matrix& out)
+    {
+        m_steps[m_steps.size()-1].push_op(OpNode( gate.name() , Values{ a, in_a, m, out }));
+    }
+    void ExecutionDebug::push_op(const Gate& gate, const Matrix& a, const Matrix& in_a, const Matrix& b, const Matrix& in_b, const Matrix& m, const Matrix& out)
+    {           
+        m_steps[m_steps.size()-1].push_op(OpNode( gate.name() , Values{ a, in_a, b, in_b, m, out }));
+    }
+    void ExecutionDebug::push_update(size_t r, const Matrix& c, const Matrix& in_c)
+    {          
+        m_steps[m_steps.size()-1].push_up(UpNode( r , Values{ c, in_c }));
+    }
+
+    //help
+    Gate::Arity ExecutionDebug::get_arity(size_t value_size)
+    {
+        switch(value_size)
+        {
+            default:
+            case 2: return Gate::Arity::CONST;  
+            case 4: return Gate::Arity::UNARY;   
+            case 6: return Gate::Arity::BINARY; 
+        }
+    }
+
+    std::string ExecutionDebug::shell() const
+    {
+        std::stringstream output;            
+        for(size_t s = 0; s != m_steps.size(); ++s)
+        {
+            //get step
+            auto& step = m_steps[s];
+            //print step
+            output << "Timestep [" << s << "]:" << std::endl;
+            //get op
+            for(size_t p = 0; p != step.m_ops.size(); ++p)
+            {
+                //operation
+                auto& operation = step.m_ops[p];
+                //name, value
+                auto& name     = std::get<0>(operation);
+                auto& values   = std::get<1>(operation);
+                auto  arity    = get_arity(values.size());
+                //gate name
+                std::string  gate_name= name; 
+                gate_name[0] = std::toupper(gate_name[0]);
+
+                switch(arity)
+                {
+                    case Gate::Arity::CONST:
+                        output << "\t• " 
+                               << gate_name << " => "
+                               << values.back()(0,0)
+                               << std::endl;
+                    break;
+                    case Gate::Arity::UNARY:
+                        output << "\t• " 
+                               << gate_name 
+                               << "(" 
+                               << values[0](0,0)
+                               << ") => "
+                               << values.back()(0,0)
+                               << std::endl;
+                    break;
+                    case Gate::Arity::BINARY:
+                        output << "\t• " 
+                               << gate_name 
+                               << "(" 
+                               << values[0](0,0)
+                               << ","
+                               << values[2](0,0)
+                               << ") => "
+                               << values.back()(0,0)
+                               << std::endl;
+                    break;
+                    //none
+                    default: break;
+                }
+            }
+            //get update
+            for(size_t p = 0; p != step.m_ups.size(); ++p)
+            {
+                //operation
+                auto& update =  step.m_ups[p];
+                //name, value
+                auto& r      = std::get<0>(update);
+                auto& values = std::get<1>(update);
+                //update
+                output << "\t• R" << r << " => " << values.back()(0,0) << std::endl;
+            }
+       
+        }
+        return output.str();
+    }
+
+    Json ExecutionDebug::json() const
+    {
+        return Json();
+    }
+
 }
 }

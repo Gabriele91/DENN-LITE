@@ -7,6 +7,7 @@
 #include "DennDump.h"
 #include "DennNRamGate.h"
 #include "DennNRamTask.h"
+#include "DennJson.h"
 
 namespace Denn
 {
@@ -36,11 +37,49 @@ namespace NRam
         GateList    m_gates;
     };
 
-    using ConnectionValue             = std::map< std::string, int >;
-    using ConnectionsHistory          = std::map< std::string, ConnectionValue >;
-    using ListConnectionsHistory      = std::vector< ConnectionsHistory >;
-    using ListListConnectionsHistory  = std::vector< ListConnectionsHistory >;
-    using ResultAndConnectionsHistory = std::tuple<Matrix, ListListConnectionsHistory>;
+
+    class ExecutionDebug
+    {
+    public:
+        //values
+        using Values     = std::vector< Matrix >;
+        using OpNode     = std::tuple < std::string, Values >;
+        using Operations = std::vector< OpNode >;
+        using UpNode     = std::tuple < size_t, Values >;
+        using Updates    = std::vector < UpNode >;
+        //structs
+        struct Step  
+        {
+            Operations  m_ops;
+            Updates     m_ups;
+            void push_op(const OpNode& op){ m_ops.push_back(std::move(op)); }
+            void push_up(const UpNode& up){ m_ups.push_back(std::move(up)); }
+        };
+        using Steps  = std::vector< Step >;
+        
+        ExecutionDebug();
+        ExecutionDebug(const ExecutionDebug& debug);
+
+        void push_step();
+        void push_op(const Gate& gate, const Matrix& m, const Matrix& out);
+        void push_op(const Gate& gate, const Matrix& a, const Matrix& in_a, const Matrix& m, const Matrix& out);
+        void push_op(const Gate& gate, const Matrix& a, const Matrix& in_a, const Matrix& b, const Matrix& in_b, const Matrix& m, const Matrix& out);
+        void push_update(size_t r, const Matrix& c, const Matrix& in_c);
+        
+        std::string shell() const;
+        Json json() const;
+
+
+    protected:
+        //save all step
+        Steps m_steps;
+        //help
+        static Gate::Arity get_arity(size_t value_size);
+
+    };
+    using ListExecutionDebug      = std::vector< ExecutionDebug >;
+    using ResultAndExecutionDebug = std::tuple<Matrix, ListExecutionDebug >;
+
 
     Matrix fuzzy_encode(const Matrix& M);
 
@@ -50,17 +89,15 @@ namespace NRam
 
     std::string register_or_gate(const NRamLayout& context, Scalar idx);
 
-    void print_sample_execution(const NRamLayout& context, const ListConnectionsHistory& connections, std::ostream& output);
-
     Scalar calculate_sample_cost(Matrix &M, const RowVector &desired_mem);
 
     Scalar run_circuit(const NRamLayout &context, const Matrix& nn_out_decision, Matrix& regs, Matrix& in_mem);
 
-    Scalar run_circuit(const NRamLayout &context, const Matrix& nn_out_decision, Matrix& regs, Matrix& in_mem, ConnectionsHistory& history);
+    Scalar run_circuit(const NRamLayout &context, const Matrix& nn_out_decision, Matrix& regs, Matrix& in_mem, ExecutionDebug& debug);
 
     Scalar train(const NRamLayout &context, const NeuralNetwork &nn,  const Matrix& in_mem, const Matrix &out_mem);
 
-    ResultAndConnectionsHistory execute(const NRamLayout &context, const NeuralNetwork& network, const Matrix& linear_in_mem);
+    ResultAndExecutionDebug execute(const NRamLayout &context, const NeuralNetwork& network, const Matrix& linear_in_mem);
 
 }
 }
