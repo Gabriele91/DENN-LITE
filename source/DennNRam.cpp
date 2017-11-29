@@ -5,6 +5,7 @@
 #include "Denn.h"
 #include "DennNRam.h"
 #include "DennNRamTask.h"
+#include  <cctype>
 
 namespace Denn
 {
