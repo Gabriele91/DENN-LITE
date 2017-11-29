@@ -5,6 +5,7 @@
 #include "DennIndividual.h"
 #include "DennIndividual.h"
 #include "DennEvaluation.h"
+#include "ThreadPool.h"
 
 namespace Denn
 {
@@ -70,11 +71,12 @@ namespace Denn
 		bool m_minimize_loss_function { true };
 		//init population
 		void init(
-			size_t np
+			  size_t np
 			, const Individual::SPtr& i_default
 			, const DataSet&          dataset
 			, const RandomFunction    random_func
 			, Evaluation&		      loss_function
+			, ThreadPool*			  thread_pool = nullptr
 		);
 		//size
 		size_t size() const;
@@ -106,6 +108,7 @@ namespace Denn
 			, const DataSet&          dataset
 			, const RandomFunction    random_func
 			, Evaluation&		      loss_function
+			, ThreadPool*			  thread_pool = nullptr
 		);
 	};
 }

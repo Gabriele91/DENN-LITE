@@ -26,8 +26,6 @@ public:
 	//Search space
 	using DBPopulation   = DoubleBufferPopulation;
 	using RandomFunction = std::function<Scalar(Scalar)>;
-	//DE parallel
-	using PromiseList    = std::vector< std::future<void> >;
 	//Ref mutation crossover
 	using ClampFunction  = std::function<Scalar(Scalar)>;
 	//Vector of random

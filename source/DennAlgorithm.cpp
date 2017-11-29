@@ -62,7 +62,8 @@ namespace Denn
 			m_default,
 			current_batch(),
 			m_random_function,
-			*m_loss_function
+			*m_loss_function,
+			m_thpool
 		);
 		//method of evoluction
 		m_e_method = EvolutionMethodFactory::create(m_params.m_evolution_type, *this);
@@ -313,6 +314,7 @@ namespace Denn
 				, current_batch()						 //current batch
 				, m_random_function				         //random generator
 				, *m_loss_function				         //fitness function
+				, m_thpool								 //threads
 			);
 			m_restart_ctx.m_test_count = 0;
 			m_restart_ctx.m_last_eval = m_best_ctx.m_eval;

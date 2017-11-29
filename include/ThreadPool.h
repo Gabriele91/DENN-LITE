@@ -7,6 +7,10 @@
 
 namespace Denn
 {
+	//Promise
+	using Promise     = std::future<void>;
+	using PromiseList = std::vector< Promise >;
+	//
 	class ThreadPool
 	{
 	public:
