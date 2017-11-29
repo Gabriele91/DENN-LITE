@@ -15,10 +15,10 @@ namespace NRam
         {
 			Matrix::Index max_int = M.cols();
             Matrix C = Matrix::Zero(1, max_int);
-            for (long j = 0, value = 0; j < max_int; ++j, ++value)
-            for (long i = 0; i < max_int; ++i)
+            for (Matrix::Index j = 0, value = 0; j < max_int; ++j, ++value)
+            for (Matrix::Index i = 0; i < max_int; ++i)
             {
-                C(0, value) += A(i, 0) * B(((2 * j) + i) % max_int, 0);
+                C(0, value) += A(i, 0) * B(positive_mod((i - j), max_int), 0);
             }
             return C;
         }
