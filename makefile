@@ -4,6 +4,7 @@ COMPILER      ?=g++
 TOP           ?=$(shell pwd)
 SCALAR		  ?= FLOAT
 HAVE_TERM     := $(shell echo $$TERM)
+VERION_COMPILER := `$$COMPILER --version`
 #undef to none (linux)
 ifndef HAVE_TERM
 	HAVE_TERM = none
@@ -62,6 +63,12 @@ endif
 ifeq ($(shell uname -s),Linux)
 # too slow -fopenmp 
 C_FLAGS += -lpthread -pthread 
+endif
+
+#clang
+ifeq ($(findstring clang,$(VERION_COMPILER)), clang)
+# none
+else 
 # remove gcc warning (eigen)
 C_FLAGS += -Wno-int-in-bool-context
 endif
