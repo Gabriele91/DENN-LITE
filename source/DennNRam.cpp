@@ -194,23 +194,8 @@ namespace NRam
 				JsonArray jvalues;
 				for (auto& value : values)
 				{
-					//json array of matrix
-					JsonArray jmatrix;
-					//matrix to json array
-					for (Matrix::Index r = 0; r != value.rows(); ++r)
-					{
-						//row of matrix
-						JsonArray jrow_matrix;
-						//cols
-						for (Matrix::Index c = 0; c != value.cols(); ++c)
-						{
-							jrow_matrix.emplace_back(value(r, c));
-						}
-						//save row
-						jmatrix.emplace_back(jrow_matrix);
-					}
 					//save matrix
-					jvalues.emplace_back(jmatrix);
+					jvalues.push_back(json_array_from_matrix(value));
 				}
 				//save values
 				jop["values"] = std::move(jvalues);
@@ -234,23 +219,8 @@ namespace NRam
 				JsonArray jvalues;
 				for (auto& value : values)
 				{
-					//json array of matrix
-					JsonArray jmatrix;
-					//matrix to json array
-					for (Matrix::Index r = 0; r != value.rows(); ++r)
-					{
-						//row of matrix
-						JsonArray jrow_matrix;
-						//cols
-						for (Matrix::Index c = 0; c != value.cols(); ++c)
-						{
-							jrow_matrix.emplace_back(value(r, c));
-						}
-						//save row
-						jmatrix.emplace_back(jrow_matrix);
-					}
 					//save matrix
-					jvalues.push_back(jmatrix);
+					jvalues.push_back(json_array_from_matrix(value));
 				}
 				//save values
 				jup["values"] = std::move(jvalues);

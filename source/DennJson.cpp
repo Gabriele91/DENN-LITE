@@ -514,6 +514,7 @@ namespace Denn
 	}
 	#pragma endregion
 	
+	//parser of a json
 	bool Json::parser(const std::string& cppsource)
     {
         //get ptr
@@ -780,4 +781,51 @@ namespace Denn
     JsonValue& Json::operator[] (const std::string& key)            { return document()[key]; }
     const JsonValue& Json::operator[] (const size_t& key) const     { return document()[key]; }
     const JsonValue& Json::operator[] (const std::string& key) const{ return document()[key]; }
+
+	//help function
+	Matrix matrix_from_json_array(const JsonValue& value)
+	{
+		//fail
+		if (!value.is_array()) return Matrix();
+		//matrix
+		Matrix matrix;
+		//array
+		const JsonArray& jmatrix = value.array();
+		//for all row
+		for (size_t r = 0; r < jmatrix.size(); ++r)
+		{
+			//fail
+			if (!jmatrix[r].is_array()) return matrix;
+			//array
+			const JsonArray& jrow = jmatrix[r].array();
+			//cols
+			for (size_t c = 0; c < jrow.size(); ++c)
+			{
+				matrix.conservativeResize(r + 1, c + 1);
+				matrix(r, c) = jrow[c].number();
+			}
+		}
+		//end
+		return matrix;
+	}	
+	JsonValue json_array_from_matrix(const Matrix& value)
+	{
+		//json array of matrix
+		JsonArray jmatrix;
+		//matrix to json array
+		for (Matrix::Index r = 0; r != value.rows(); ++r)
+		{
+			//row of matrix
+			JsonArray jrow_matrix;
+			//cols
+			for (Matrix::Index c = 0; c != value.cols(); ++c)
+			{
+				jrow_matrix.emplace_back(value(r, c));
+			}
+			//save row
+			jmatrix.emplace_back(jrow_matrix);
+		}
+		//return
+		return jmatrix;
+	}
 }

@@ -19,6 +19,8 @@ namespace Denn
 	//stream
 	std::ostream& operator<< (std::ostream& stream, const Json& value);
 	std::ostream& operator<< (std::ostream& stream, const JsonValue& value);
+	Matrix matrix_from_json_array(const JsonValue& value);
+	JsonValue json_array_from_matrix(const Matrix& value);
 	//value
 	class  JsonValue
 	{

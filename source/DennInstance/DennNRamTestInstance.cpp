@@ -117,12 +117,40 @@ namespace NRam
 			////////////////////////////////////////////////////////////////////////////////////////////////
 			//test
 		    auto& network = jdata["network"];
-			for(size_t l = 0; l < m_network.size(); ++l)
-			for(size_t m = 0; m < m_network[l].size(); ++m)
-			for(size_t r = 0; r < m_network[l][m].rows(); ++r)
-			for(size_t c = 0; c < m_network[l][m].cols(); ++c)
+			bool  parser_network_success = network.is_array();
+			//parsing
+			for (size_t l = 0; l < m_network.size() && parser_network_success; ++l)
 			{
-				m_network[l][m](r,c) = network[l][m][r][c].number();
+				//test
+				parser_network_success = network[l].is_array();
+				//for all layers
+				for (size_t m = 0; m < m_network[l].size() && parser_network_success; ++m)
+				{
+					//test
+					if (!(parser_network_success = network[l].is_array())) break;
+					//get
+					Matrix  matrix = matrix_from_json_array(network[l][m]);
+					Matrix& nn_mat = m_network[l][m];
+					//test
+					if (nn_mat.rows() == matrix.rows() && nn_mat.cols() == matrix.cols())
+					{
+						//ok
+						nn_mat = matrix;
+					}
+					else
+					{
+						//fail
+						parser_network_success = false;
+						break;
+					}
+				}
+			}
+			if (!parser_network_success)
+			{
+				//error to parsing
+				std::cerr << "network configuration is wrong" << std::endl;
+				//end
+				return; //exit
 			}
 			////////////////////////////////////////////////////////////////////////////////////////////////
 			m_success_init = true;
@@ -211,9 +239,9 @@ namespace NRam
 				if (serialize)
 				{
 					JsonObject jtest;
-					jtest["memory"]    = Dump::json_matrix(in_mem);
-					jtest["result"]    = Dump::json_matrix(output);
-					jtest["expected"]  = Dump::json_matrix(out_mem);
+					jtest["memory"]    = json_array_from_matrix(in_mem);
+					jtest["result"]    = json_array_from_matrix(output);
+					jtest["expected"]  = json_array_from_matrix(out_mem);
 					jtest["execution"] = debug[0].json().document();
 					jtests.push_back(jtest);
 				}
