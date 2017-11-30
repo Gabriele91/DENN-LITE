@@ -692,7 +692,7 @@ namespace Denn
                     ++source;
                 continue;
                 case '}':
-                    if( /* separator || */  !in_object())
+                    if(!in_object())
                     {
                         m_list_errors.push_back({line,"JSON_MISMATCH_{}_BRACKET"});
                         return false;
@@ -708,7 +708,7 @@ namespace Denn
                     ++source;
                 continue;
                 case ']':
-                    if( /* separator || */ !in_array())
+                    if(!in_array())
                     {
                         m_list_errors.push_back({line,"JSON_MISMATCH_[]_BRACKET"});
                         return false;
