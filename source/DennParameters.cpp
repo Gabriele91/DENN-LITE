@@ -427,8 +427,12 @@ namespace Denn
             }
 			,{ "list(string)",  NRam::GateFactory::list_of_gates() }
         },
+		ParameterInfo{
+			m_n_test, "Number of test of nram",{ "--" + m_n_test.name(), "-nrnt" },
+			[this](Arguments& args) -> bool { m_time_steps = args.get_int();  return true; }
+		},				
         ParameterInfo{
-            m_dataset_filename, "Path of dataset file (gz)", { "--" + m_dataset_filename.name(), "-d", "-i" }, 
+            m_dataset_filename, "Path of dataset file (gz) or network file input (json)", { "--" + m_dataset_filename.name(), "-d", "-i" }, 
             [this](Arguments& args) -> bool {  m_dataset_filename = args.get_string();  return true; } 
         },
         ParameterInfo{ 

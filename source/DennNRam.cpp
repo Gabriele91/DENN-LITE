@@ -12,7 +12,7 @@ namespace Denn
 {
 namespace NRam
 {
-
+	////////////////////////////////////////////////////////////////////////////////////////
     NRamLayout::NRamLayout()
     {
     }
@@ -49,8 +49,245 @@ namespace NRam
         // Size for f_t
         m_nn_output += 1;
     }
+	////////////////////////////////////////////////////////////////////////////////////////
+	// debugger
+	ExecutionDebug::ExecutionDebug(){}
+    ExecutionDebug::ExecutionDebug(const ExecutionDebug& debug){ m_steps = debug.m_steps; }
+    void ExecutionDebug::push_step()
+    {
+        m_steps.resize(m_steps.size()+1);
+    }
+    void ExecutionDebug::push_op(const Gate& gate, const Matrix& m, const Matrix& out)
+    {
+        m_steps[m_steps.size()-1].push_op(OpNode( gate.name() , Values{ m, out }));
+    }
+    void ExecutionDebug::push_op(const Gate& gate, const Matrix& a, const Matrix& in_a, const Matrix& m, const Matrix& out)
+    {
+        m_steps[m_steps.size()-1].push_op(OpNode( gate.name() , Values{ a, in_a, m, out }));
+    }
+    void ExecutionDebug::push_op(const Gate& gate, const Matrix& a, const Matrix& in_a, const Matrix& b, const Matrix& in_b, const Matrix& m, const Matrix& out)
+    {           
+        m_steps[m_steps.size()-1].push_op(OpNode( gate.name() , Values{ a, in_a, b, in_b, m, out }));
+    }
+    void ExecutionDebug::push_update(size_t r, const Matrix& c, const Matrix& in_c)
+    {          
+        m_steps[m_steps.size()-1].push_up(UpNode( r , Values{ c, in_c }));
+    }
+	//serialize help
+    Gate::Arity ExecutionDebug::get_arity(size_t value_size)
+    {
+        switch(value_size)
+        {
+            default:
+            case 2: return Gate::Arity::CONST;  
+            case 4: return Gate::Arity::UNARY;   
+            case 6: return Gate::Arity::BINARY; 
+        }
+    }
+	//shell
+    std::string ExecutionDebug::shell() const
+    {
+        std::stringstream output;            
+        for(size_t s = 0; s != m_steps.size(); ++s)
+        {
+            //get step
+            auto& step = m_steps[s];
+            //print step
+            output << "Timestep [" << s << "]:" << std::endl;
+            //get op
+            for(size_t p = 0; p != step.m_ops.size(); ++p)
+            {
+                //operation
+                auto& operation = step.m_ops[p];
+                //name, value
+                auto& name     = std::get<0>(operation);
+                auto& values   = std::get<1>(operation);
+                auto  arity    = get_arity(values.size());
+                //gate name
+                std::string  gate_name= name; 
+                gate_name[0] = std::toupper(gate_name[0]);
 
-    Matrix fuzzy_encode(const Matrix& M)
+                switch(arity)
+                {
+                    case Gate::Arity::CONST:
+                        output << "\t• " 
+                               << gate_name << " => "
+                               << values.back()(0,0)
+                               << std::endl;
+                    break;
+                    case Gate::Arity::UNARY:
+                        output << "\t• " 
+                               << gate_name 
+                               << "(" 
+                               << values[0](0,0)
+                               << ") => "
+                               << values.back()(0,0)
+                               << std::endl;
+                    break;
+                    case Gate::Arity::BINARY:
+                        output << "\t• " 
+                               << gate_name 
+                               << "(" 
+                               << values[0](0,0)
+                               << ","
+                               << values[2](0,0)
+                               << ") => "
+                               << values.back()(0,0)
+                               << std::endl;
+                    break;
+                    //none
+                    default: break;
+                }
+            }
+            //get update
+            for(size_t p = 0; p != step.m_ups.size(); ++p)
+            {
+                //operation
+                auto& update =  step.m_ups[p];
+                //name, value
+                auto& r      = std::get<0>(update);
+                auto& values = std::get<1>(update);
+                //update
+                output << "\t• R" << r << " => " << values.back()(0,0) << std::endl;
+            }
+
+            // Print mem at last timestep
+            auto& last_gate_op = step.m_ops.back();
+            auto& values       = std::get<1>(last_gate_op);
+            output << "\t• Mem " << Dump::json_matrix(values[values.size() - 2]) << std::endl;
+       
+        }
+        return output.str();
+    }
+	//json
+    Json ExecutionDebug::json() const
+	{
+		//Array of steps
+		JsonArray jsteps;
+		//for each step
+		for (size_t s = 0; s != m_steps.size(); ++s)
+		{
+			//get step
+			auto& step = m_steps[s];
+			//Json array of ops
+			JsonArray jops;
+			//get op
+			for (size_t p = 0; p != step.m_ops.size(); ++p)
+			{
+				//Json op
+				JsonObject jop;
+				//operation
+				auto& operation = step.m_ops[p];
+				//name, value
+				auto& name = std::get<0>(operation);
+				auto& values = std::get<1>(operation);
+				auto  arity = get_arity(values.size());
+				//info json
+				jop["type"]  = "gate";
+				jop["name"]  = name;
+				jop["arity"] = arity == Gate::Arity::CONST
+							? "CONST" 
+							: arity == Gate::Arity::UNARY
+							? "UNARY"
+							: "BINARY";
+				//values
+				JsonArray jvalues;
+				for (auto& value : values)
+				{
+					//json array of matrix
+					JsonArray jmatrix;
+					//matrix to json array
+					for (Matrix::Index r = 0; r != value.rows(); ++r)
+					{
+						//row of matrix
+						JsonArray jrow_matrix;
+						//cols
+						for (Matrix::Index c = 0; c != value.cols(); ++c)
+						{
+							jrow_matrix.push_back(value(r, c));
+						}
+						//save row
+						jmatrix.push_back(jrow_matrix);
+					}
+					//save matrix
+					jvalues.push_back(jmatrix);
+				}
+				//save values
+				jop["values"] = jvalues;
+				//save jop
+				jops.push_back(jops);
+			}
+			//get update
+			for (size_t p = 0; p != step.m_ups.size(); ++p)
+			{
+				//Json op
+				JsonObject jup;
+				//operation
+				auto& update = step.m_ups[p];
+				//name, value
+				auto& r = std::get<0>(update);
+				auto& values = std::get<1>(update);
+				//info update
+				jup["type"] = "update";
+				jup["register"] = int(r);
+				//values
+				JsonArray jvalues;
+				for (auto& value : values)
+				{
+					//json array of matrix
+					JsonArray jmatrix;
+					//matrix to json array
+					for (Matrix::Index r = 0; r != value.rows(); ++r)
+					{
+						//row of matrix
+						JsonArray jrow_matrix;
+						//cols
+						for (Matrix::Index c = 0; c != value.cols(); ++c)
+						{
+							jrow_matrix.push_back(value(r, c));
+						}
+						//save row
+						jmatrix.push_back(jrow_matrix);
+					}
+					//save matrix
+					jvalues.push_back(jmatrix);
+				}
+				//save values
+				jup["values"] = jvalues;
+				//save jop
+				jops.push_back(jops);
+			}
+			//save jops in steps
+			jsteps.push_back(jops);
+		}
+		//return 
+        return Json(jsteps);
+    }
+	////////////////////////////////////////////////////////////////////////////////////////
+	//Evaluetor of nram
+	REGISTERED_EVALUATION(NRamEval, "nram")
+	//methods
+	bool NRamEval::minimize() const { return true; }
+	Scalar NRamEval::operator () (const Individual& individual, const DataSet& ds)
+	{
+		assert(m_context);
+		//network
+		auto& nn = individual.m_network;
+		//Dataset
+		auto& in_mem = ds.features();
+		auto& out_mem = ds.labels();
+		//execute
+		return NRam::train(*m_context, nn, in_mem, out_mem);
+	}
+	//set context
+	Evaluation::SPtr NRamEval::set_context(const NRamLayout& context)
+	{
+		m_context = &context;
+		return this->get_ptr();
+	}
+	////////////////////////////////////////////////////////////////////////////////////////
+	// NRam
+	Matrix fuzzy_encode(const Matrix& M)
     {
         Matrix sample = Matrix::Zero(M.cols(), M.cols());
         for (Matrix::Index n = 0; n < M.cols(); n++) 
@@ -100,81 +337,6 @@ namespace NRam
         return m;
     }
 
-    #if 0
-    std::string register_or_gate(const NRamLayout& context, ConnectionValue cv)
-    {
-        int idx = cv["connection"], value = cv["value"];
-
-        // From 0 to R - 1 is a Register
-        if (idx < context.m_n_regs)
-        {
-            return "R" + std::to_string((int)idx)
-                   + "(" +std::to_string(value) + ")"; // idx + 1 for coerence with the paper
-        }
-        // From R to O - 1 is a Gate
-        else if (idx >= context.m_n_regs && idx < context.m_n_regs + context.m_gates.size())
-        {
-            auto& gate = *context.m_gates[(int)idx - context.m_n_regs];
-            std::string gate_name = gate.name();
-            gate_name[0] = std::toupper(gate_name[0]);
-
-            return gate_name + "(" +std::to_string(value) + ")";;
-        }
-        else
-        {
-            return "Unknown input!";
-        }
-    }
-
-    void print_sample_execution
-    (
-        const NRamLayout& context,
-        const ListConnectionsHistory& connections,
-        std::ostream& output
-    )
-    {
-        for(size_t t = 0; t < context.m_timesteps; ++t)
-        {
-            output << "Timestep [" << t << "]:" <<std::endl;
-            ConnectionsHistory connections_history = connections[t];
-            for(size_t g = 0; g < context.m_gates.size(); ++g)
-            {
-                auto& gate = *context.m_gates[g];
-
-                // Print for constant gate
-                if (gate.arity() == 0)
-                {
-                    std::string gate_name = gate.name();
-                    gate_name[0] = std::toupper(gate_name[0]);
-                    output << "\t• " << gate_name << " => "
-                           << connections_history[gate.name()]["result"]
-                           << std::endl;
-                }
-
-                // Print for the other gates and them values
-                for(size_t a = 0; a < gate.arity(); ++a)
-                {
-                    std::string gate_name = gate.name();
-                    gate_name[0] = std::toupper(gate_name[0]);
-                    output << "\t• " << gate_name
-                           << "." << a + 1 << " = "
-                           << register_or_gate(context, connections_history[gate.name() + "(" + std::to_string(a) + ")"])
-                           << " => "
-                           << connections_history[gate.name() + "(" + std::to_string(a) + ")"]["result"]
-                           << std::endl;
-                }
-            }
-
-            // Print the updated register and from what
-            for(size_t r = 1; r < context.m_n_regs + 1; ++r)
-                output << "\t• R" << r << "' = "
-                       << register_or_gate(context, connections_history["reg(" + std::to_string(r - 1) + ")"])
-                       << " => " << connections_history["reg(" + std::to_string(r - 1) + ")"]["value"]
-                       << std::endl;
-        }
-    }
-    #endif 
-
     Scalar calculate_sample_cost(Matrix &M, const RowVector &desired_mem)
     {
         Scalar s_cost = 0;
@@ -189,7 +351,8 @@ namespace NRam
     {
         return regs.transpose() * in;
     }
-
+	////////////////////////////////////////////////////////////////////////////////////////
+	//Train
     Scalar train
     (
       const NRamLayout &context
@@ -315,7 +478,8 @@ namespace NRam
         //return fi
         return PointFunction::sigmoid(nn_out_decision.col(nn_out_decision.cols() - 1)(0));
     }
-
+	////////////////////////////////////////////////////////////////////////////////////////
+	//Execute
     ResultAndExecutionDebug execute
     (
       const NRamLayout &context
@@ -460,122 +624,6 @@ namespace NRam
         //return fi
         return PointFunction::sigmoid(nn_out_decision.col(nn_out_decision.cols() - 1)(0));
     }
-
-    ExecutionDebug::ExecutionDebug(){}
-    ExecutionDebug::ExecutionDebug(const ExecutionDebug& debug){ m_steps = debug.m_steps; }
-
-    void ExecutionDebug::push_step()
-    {
-        m_steps.resize(m_steps.size()+1);
-    }
-    void ExecutionDebug::push_op(const Gate& gate, const Matrix& m, const Matrix& out)
-    {
-        m_steps[m_steps.size()-1].push_op(OpNode( gate.name() , Values{ m, out }));
-    }
-    void ExecutionDebug::push_op(const Gate& gate, const Matrix& a, const Matrix& in_a, const Matrix& m, const Matrix& out)
-    {
-        m_steps[m_steps.size()-1].push_op(OpNode( gate.name() , Values{ a, in_a, m, out }));
-    }
-    void ExecutionDebug::push_op(const Gate& gate, const Matrix& a, const Matrix& in_a, const Matrix& b, const Matrix& in_b, const Matrix& m, const Matrix& out)
-    {           
-        m_steps[m_steps.size()-1].push_op(OpNode( gate.name() , Values{ a, in_a, b, in_b, m, out }));
-    }
-    void ExecutionDebug::push_update(size_t r, const Matrix& c, const Matrix& in_c)
-    {          
-        m_steps[m_steps.size()-1].push_up(UpNode( r , Values{ c, in_c }));
-    }
-
-    //help
-    Gate::Arity ExecutionDebug::get_arity(size_t value_size)
-    {
-        switch(value_size)
-        {
-            default:
-            case 2: return Gate::Arity::CONST;  
-            case 4: return Gate::Arity::UNARY;   
-            case 6: return Gate::Arity::BINARY; 
-        }
-    }
-
-    std::string ExecutionDebug::shell() const
-    {
-        std::stringstream output;            
-        for(size_t s = 0; s != m_steps.size(); ++s)
-        {
-            //get step
-            auto& step = m_steps[s];
-            //print step
-            output << "Timestep [" << s << "]:" << std::endl;
-            //get op
-            for(size_t p = 0; p != step.m_ops.size(); ++p)
-            {
-                //operation
-                auto& operation = step.m_ops[p];
-                //name, value
-                auto& name     = std::get<0>(operation);
-                auto& values   = std::get<1>(operation);
-                auto  arity    = get_arity(values.size());
-                //gate name
-                std::string  gate_name= name; 
-                gate_name[0] = std::toupper(gate_name[0]);
-
-                switch(arity)
-                {
-                    case Gate::Arity::CONST:
-                        output << "\t• " 
-                               << gate_name << " => "
-                               << values.back()(0,0)
-                               << std::endl;
-                    break;
-                    case Gate::Arity::UNARY:
-                        output << "\t• " 
-                               << gate_name 
-                               << "(" 
-                               << values[0](0,0)
-                               << ") => "
-                               << values.back()(0,0)
-                               << std::endl;
-                    break;
-                    case Gate::Arity::BINARY:
-                        output << "\t• " 
-                               << gate_name 
-                               << "(" 
-                               << values[0](0,0)
-                               << ","
-                               << values[2](0,0)
-                               << ") => "
-                               << values.back()(0,0)
-                               << std::endl;
-                    break;
-                    //none
-                    default: break;
-                }
-            }
-            //get update
-            for(size_t p = 0; p != step.m_ups.size(); ++p)
-            {
-                //operation
-                auto& update =  step.m_ups[p];
-                //name, value
-                auto& r      = std::get<0>(update);
-                auto& values = std::get<1>(update);
-                //update
-                output << "\t• R" << r << " => " << values.back()(0,0) << std::endl;
-            }
-
-            // Print mem at last timestep
-            auto& last_gate_op = step.m_ops[step.m_ops.size() - 1];
-            auto& values       = std::get<1>(last_gate_op);
-            output << "\t• Mem " << Dump::json_matrix(values[values.size() - 2]) << std::endl;
-       
-        }
-        return output.str();
-    }
-
-    Json ExecutionDebug::json() const
-    {
-        return Json();
-    }
-
+	////////////////////////////////////////////////////////////////////////////////////////
 }
 }

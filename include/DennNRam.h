@@ -36,8 +36,7 @@ namespace NRam
         size_t      m_nn_output;
         GateList    m_gates;
     };
-
-
+	
     class ExecutionDebug
     {
     public:
@@ -77,17 +76,28 @@ namespace NRam
         static Gate::Arity get_arity(size_t value_size);
 
     };
+
     using ListExecutionDebug      = std::vector< ExecutionDebug >;
     using ResultAndExecutionDebug = std::tuple<Matrix, ListExecutionDebug >;
 
+	//Evalutation of nram
+	class NRamEval : public Evaluation
+	{
+	public:
+		//methods
+		virtual bool minimize() const;
+		virtual Scalar operator () (const Individual& individual, const DataSet& ds);
+		//layout
+		const NRam::NRamLayout* m_context{ nullptr };
+		//set context
+		Evaluation::SPtr set_context(const NRamLayout& context);
+	};
 
     Matrix fuzzy_encode(const Matrix& M);
 
     Matrix defuzzy_mem(const Matrix &M);
 
     Matrix defuzzy_mem_cols(const Matrix &M);
-
-    std::string register_or_gate(const NRamLayout& context, Scalar idx);
 
     Scalar calculate_sample_cost(Matrix &M, const RowVector &desired_mem);
 

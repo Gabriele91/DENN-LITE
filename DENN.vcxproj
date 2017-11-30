@@ -30,6 +30,7 @@
     <ClInclude Include="include\DennCrossover.h" />
     <ClInclude Include="include\DennDataSet.h" />
     <ClInclude Include="include\DennEvaluation.h" />
+    <ClInclude Include="include\DennJson.h" />
     <ClInclude Include="include\DennNRamDatasetTask.h" />
     <ClInclude Include="include\DennNRamGate.h" />
     <ClInclude Include="include\DennNRam.h" />
@@ -96,6 +97,7 @@
     <ClCompile Include="source\DennInstance.cpp" />
     <ClCompile Include="source\DennInstance\DennDefaultInstance.cpp" />
     <ClCompile Include="source\DennInstance\DennNRamInstance.cpp" />
+    <ClCompile Include="source\DennInstance\DennNRamTestInstance.cpp" />
     <ClCompile Include="source\DennJson.cpp" />
     <ClCompile Include="source\DennLayer.cpp" />
     <ClCompile Include="source\DennInstanceUtils.cpp" />
