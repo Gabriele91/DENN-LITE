@@ -215,7 +215,7 @@ namespace NRam
 				//save values
 				jop["values"] = jvalues;
 				//save jop
-				jops.push_back(jops);
+				jops.push_back(jop);
 			}
 			//get update
 			for (size_t p = 0; p != step.m_ups.size(); ++p)
@@ -255,7 +255,7 @@ namespace NRam
 				//save values
 				jup["values"] = jvalues;
 				//save jop
-				jops.push_back(jops);
+				jops.push_back(jup);
 			}
 			//save jops in steps
 			jsteps.push_back(jops);
