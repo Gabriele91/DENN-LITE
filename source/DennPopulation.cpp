@@ -91,30 +91,37 @@ namespace Denn
 		, ThreadPool* thread_pool
 	)
 	{
+		//minimize?
+		m_minimize_loss_function = loss_function.minimize();
+		parents().m_minimize_loss_function = m_minimize_loss_function;
+		sons().m_minimize_loss_function = m_minimize_loss_function;
 		//init
 		if(thread_pool)
 		{
 			//alloc promises
 			PromiseList promises;
 			//eval
-			Population& population = parents();
+			Population& p_ref = parents();
+			Population& s_ref = sons();
 			//size
-			population.resize(np);
+			p_ref.resize(np);
+			s_ref.resize(np);
 			//parallel
-			for (size_t i = 0; i != population.size(); ++i)
+			for (size_t i = 0; i != np; ++i)
 			{
 				promises.push_back(thread_pool->push_task([&,i]()
 				{
 					//copy layout
-					population[i] = i_default->copy();
+					p_ref[i] = i_default->copy();
+					s_ref[i] = i_default->copy();
 					//init
-					for (auto& layer : population[i]->m_network)
+					for (auto& layer : p_ref[i]->m_network)
 					for (auto& matrix : *layer)
 					{
 						matrix = matrix.unaryExpr(random_func);
 					}
 					//eval
-					population[i]->m_eval = loss_function(*population[i], dataset);
+					p_ref[i]->m_eval = loss_function(*p_ref[i], dataset);
 				}));
 			}
 			//wait
@@ -122,35 +129,28 @@ namespace Denn
 		}
 		else 
 		{
-			for (Population& population : m_pop_buffer)
-			{
-				//size pop
-				population.resize(np);
-				//init
-				for (Individual::SPtr& individual : population)
-				{
-					//copy layout
-					individual = i_default->copy();
-					//init layers
-					for (auto& layer : individual->m_network)
-					for (auto& matrix : *layer)
-					{
-						matrix = matrix.unaryExpr(random_func);
-					}
-				}
-			}
-			//ref to current
-			Population& population = parents();
 			//eval
-			for (size_t i = 0; i != population.size(); ++i)
+			Population& p_ref = parents();
+			Population& s_ref = sons();
+			//size
+			p_ref.resize(np);
+			s_ref.resize(np);
+			//parallel
+			for (size_t i = 0; i != np; ++i)
 			{
-				population[i]->m_eval = loss_function(*population[i], dataset);
+				//copy layout
+				p_ref[i] = i_default->copy();
+				s_ref[i] = i_default->copy();
+				//init
+				for (auto& layer : p_ref[i]->m_network)
+				for (auto& matrix : *layer)
+				{
+					matrix = matrix.unaryExpr(random_func);
+				}
+				//eval
+				p_ref[i]->m_eval = loss_function(*p_ref[i], dataset);
 			}
 		}
-		//minimize?
-		m_minimize_loss_function = loss_function.minimize();
-		parents().m_minimize_loss_function = m_minimize_loss_function;
-		sons().m_minimize_loss_function = m_minimize_loss_function;
 	}
 	//size
 	size_t DoubleBufferPopulation::size() const
@@ -247,63 +247,62 @@ namespace Denn
 		, ThreadPool*			  thread_pool
 	)
 	{
+		//minimize?
+		m_minimize_loss_function = loss_function.minimize();
+		parents().m_minimize_loss_function = m_minimize_loss_function;
+		sons().m_minimize_loss_function = m_minimize_loss_function;
 		//init
 		if(thread_pool)
-		{			
+		{	
 			//alloc promises
 			PromiseList promises;
 			//eval
-			Population& population = parents();
-			//random init
-			for (size_t i = 0; i != population.size(); ++i)
+			Population& p_ref = parents();
+			Population& s_ref = sons();
+			//parallel
+			for (size_t i = 0; i != p_ref.size(); ++i)
 			{
 				promises.push_back(thread_pool->push_task([&,i]()
 				{
 					//Copy default params
-					population[i]->copy_attributes(*i_default);
-					//Reinit layers
-					for (auto& layer  : population[i]->m_network)
+					p_ref[i]->copy_attributes(*i_default);
+					s_ref[i]->copy_attributes(*i_default);
+					//init
+					for (auto& layer : p_ref[i]->m_network)
 					for (auto& matrix : *layer)
 					{
 						matrix = matrix.unaryExpr(random_func);
 					}
 					//eval
-					population[i]->m_eval = loss_function(*population[i], dataset);
+					p_ref[i]->m_eval = loss_function(*p_ref[i], dataset);
 				}));
 			}
 			//wait
-			for (auto& p : promises) p.wait(); promises.clear();
-			//must copy, The Best Individual can't to be changed during the DE process
-			population[where_put_best] = best->copy();
-			population[where_put_best]->m_eval = loss_function(*population[where_put_best], dataset);
+			for (auto& p : promises) p.wait();	
 		}
 		else 
-		{
+		{			
 			//eval
-			Population& population = parents();
-			//random init
-			for (auto& individual : population)
+			Population& p_ref = parents();
+			Population& s_ref = sons();
+			//parallel
+			for (size_t i = 0; i != p_ref.size(); ++i)
 			{
 				//Copy default params
-				individual->copy_attributes(*i_default);
-				//Reinit layers
-				for (auto& layer : individual->m_network)
+				p_ref[i]->copy_attributes(*i_default);
+				s_ref[i]->copy_attributes(*i_default);
+				//init
+				for (auto& layer : p_ref[i]->m_network)
 				for (auto& matrix : *layer)
 				{
 					matrix = matrix.unaryExpr(random_func);
 				}
-			}
-			//must copy, The Best Individual can't to be changed during the DE process
-			population[where_put_best] = best->copy();
-			//eval
-			for (size_t i = 0; i != population.size(); ++i)
-			{
-				population[i]->m_eval = loss_function(*population[i], dataset);
+				//eval
+				p_ref[i]->m_eval = loss_function(*p_ref[i], dataset);
 			}
 		}
-		//minimize?
-		m_minimize_loss_function = loss_function.minimize();
-		parents().m_minimize_loss_function = m_minimize_loss_function;
-		sons().m_minimize_loss_function = m_minimize_loss_function;
+		//must copy, The Best Individual can't to be changed during the DE process
+		parents()[where_put_best] = best->copy();
+		parents()[where_put_best]->m_eval = loss_function(*parents()[where_put_best], dataset);
 	}
 }
