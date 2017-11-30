@@ -204,18 +204,18 @@ namespace NRam
 						//cols
 						for (Matrix::Index c = 0; c != value.cols(); ++c)
 						{
-							jrow_matrix.push_back(value(r, c));
+							jrow_matrix.emplace_back(value(r, c));
 						}
 						//save row
-						jmatrix.push_back(jrow_matrix);
+						jmatrix.emplace_back(jrow_matrix);
 					}
 					//save matrix
-					jvalues.push_back(jmatrix);
+					jvalues.emplace_back(jmatrix);
 				}
 				//save values
-				jop["values"] = jvalues;
+				jop["values"] = std::move(jvalues);
 				//save jop
-				jops.push_back(jop);
+				jops.emplace_back(jop);
 			}
 			//get update
 			for (size_t p = 0; p != step.m_ups.size(); ++p)
@@ -244,21 +244,21 @@ namespace NRam
 						//cols
 						for (Matrix::Index c = 0; c != value.cols(); ++c)
 						{
-							jrow_matrix.push_back(value(r, c));
+							jrow_matrix.emplace_back(value(r, c));
 						}
 						//save row
-						jmatrix.push_back(jrow_matrix);
+						jmatrix.emplace_back(jrow_matrix);
 					}
 					//save matrix
 					jvalues.push_back(jmatrix);
 				}
 				//save values
-				jup["values"] = jvalues;
+				jup["values"] = std::move(jvalues);
 				//save jop
-				jops.push_back(jup);
+				jops.emplace_back(jup);
 			}
 			//save jops in steps
-			jsteps.push_back(jops);
+			jsteps.emplace_back(jops);
 		}
 		//return 
         return Json(jsteps);

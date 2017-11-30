@@ -72,7 +72,10 @@ namespace Denn
 		const JsonValue& operator[] (const size_t& key) const;
 		const JsonValue& operator[] (const std::string& key) const;
 		// move assignment
-        JsonValue& operator= (JsonValue&&);
+		#if 1
+		JsonValue& operator= (JsonValue&&);
+		#endif
+		// copy assignment
         JsonValue& operator= (const JsonValue&);
 
 	private:

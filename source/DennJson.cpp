@@ -125,7 +125,8 @@ namespace Denn
 	{ 
 		return (*m_object).find(key)->second;
 	}
-	// move
+    // move
+    #if 1
 	JsonValue& JsonValue::operator= (JsonValue&& v)
 	{
 		//move type
@@ -139,9 +140,14 @@ namespace Denn
 		case Type::IS_STRING: m_string = std::move(v.m_string); break;
 		case Type::IS_ARRAY:  m_array = std::move(v.m_array); break;
 		case Type::IS_OBJECT: m_object = std::move(v.m_object); break;
-		}
+        }
+        //leave ref
+        v.m_type = Type::IS_NULL;
+        v.m_ptr  = nullptr;
+        //return this
 		return *this;
-	}
+    }
+    #endif
     JsonValue& JsonValue::operator= (const JsonValue& v)
     {
         //move type
