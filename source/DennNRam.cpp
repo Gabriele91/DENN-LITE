@@ -562,6 +562,11 @@ namespace NRam
                 //update
                 output << "\t• R" << r << " => " << values.back()(0,0) << std::endl;
             }
+
+            // Print mem at last timestep
+            auto& last_gate_op = step.m_ops[step.m_ops.size() - 1];
+            auto& values       = std::get<1>(last_gate_op);
+            output << "\t• Mem " << Dump::json_matrix(values[values.size() - 2]) << std::endl;
        
         }
         return output.str();
