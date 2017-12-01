@@ -530,6 +530,7 @@ namespace NRam
 
                     ColVector selected_value_a = avg(regs, coeff_a);
                     Matrix C = gate(selected_value_a, in_mem);
+                    //append output
                     regs.conservativeResize(regs.rows() + 1, regs.cols());
                     regs.row(regs.rows() - 1) = C;
                     // Add to history execution

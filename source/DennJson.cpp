@@ -798,10 +798,11 @@ namespace Denn
 			if (!jmatrix[r].is_array()) return matrix;
 			//array
 			const JsonArray& jrow = jmatrix[r].array();
+            //resize
+            matrix.conservativeResize(jmatrix.size(), jrow.size());
 			//cols
 			for (size_t c = 0; c < jrow.size(); ++c)
 			{
-				matrix.conservativeResize(r + 1, c + 1);
 				matrix(r, c) = jrow[c].number();
 			}
 		}

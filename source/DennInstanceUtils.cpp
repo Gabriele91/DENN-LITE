@@ -17,6 +17,22 @@ namespace Denn
 		const auto& hidden_layers = (*parameters.m_hidden_layers);
 		const auto& active_layers = (*parameters.m_active_functions);
 		const auto& active_output = (*parameters.m_output_active_function);
+		//return NeuralNetwork
+		return build_mlp_network(n_features,n_class, hidden_layers, active_layers, active_output);
+	}
+
+	//build a mlp network from parameters
+	NeuralNetwork build_mlp_network
+	(
+		  size_t n_features
+		, size_t n_class
+		, const std::vector<unsigned int>& hidden_layers
+		, const std::vector<std::string>& active_layers
+		, const std::string& active_output
+	)
+	{
+		//mlp network
+		NeuralNetwork mlp_nn;
 		//push all hidden layers
 		if (hidden_layers.size())
 		{

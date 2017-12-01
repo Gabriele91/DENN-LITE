@@ -112,43 +112,62 @@ namespace NRam
 				return; //exit
 			}
 			//network
-			m_network = build_mlp_network(m_nram.m_n_regs, m_nram.m_nn_output, parameters);
-			m_network[m_network.size() - 1].set_active_function(ActiveFunctionFactory::get("linear"));
+			std::vector<unsigned int> hl_size;
+			std::vector<std::string> hl_afun;
+			auto& jhl_size = jdata["arguments"]["hidden_layers"];
+			auto& jhl_afun = jdata["arguments"]["active_functions"];
+			bool  parser_network_success =  jhl_size.is_array() 
+			                             && jhl_afun.is_array() 
+									     && jhl_size.array().size() == jhl_afun.array().size();
+			for (size_t l = 0; l != jhl_size.array().size() && parser_network_success; ++l)
+			{
+				hl_size.push_back(jhl_size.array()[l].number());
+				hl_afun.push_back(jhl_afun.array()[l].string());
+			}
+			//
+			if(!parser_network_success)
+			{
+				//error to parsing
+				std::cerr << "network configuration is wrong" << std::endl;
+				//end
+				return; //exit
+			}
+			//build network
+			m_network = build_mlp_network(m_nram.m_n_regs, m_nram.m_nn_output, hl_size, hl_afun, "linear");
 			////////////////////////////////////////////////////////////////////////////////////////////////
 			//test
 		    auto& network = jdata["network"];
-			bool  parser_network_success = network.is_array();
+			bool  parser_matrix_network_success = network.is_array();
 			//parsing
-			for (size_t l = 0; l < m_network.size() && parser_network_success; ++l)
+			for (size_t l = 0; l < m_network.size() && parser_matrix_network_success; ++l)
 			{
 				//test
-				parser_network_success = network[l].is_array();
+				parser_matrix_network_success = network[l].is_array();
 				//for all layers
-				for (size_t m = 0; m < m_network[l].size() && parser_network_success; ++m)
+				for (size_t m = 0; m < m_network[l].size() && parser_matrix_network_success; ++m)
 				{
 					//test
-					if (!(parser_network_success != network[l].is_array())) break;
+					if (!(parser_matrix_network_success = network[l].is_array())) break;
 					//get
-					Matrix  matrix = matrix_from_json_array(network[l][m]);
-					Matrix& nn_mat = m_network[l][m];
+					Matrix matrix = matrix_from_json_array(network[l][m]);
 					//test
-					if (nn_mat.rows() == matrix.rows() && nn_mat.cols() == matrix.cols())
+					if (m_network[l][m].rows() == matrix.rows() && m_network[l][m].cols() == matrix.cols())
 					{
 						//ok
-						nn_mat = matrix;
+						m_network[l][m].array() = matrix.array();
 					}
 					else
 					{
 						//fail
-						parser_network_success = false;
+						parser_matrix_network_success = false;
 						break;
 					}
 				}
 			}
-			if (!parser_network_success)
+			if (!parser_matrix_network_success)
 			{
 				//error to parsing
-				std::cerr << "network configuration is wrong" << std::endl;
+				std::cerr << "network's matrix configuration is wrong" << std::endl;
 				//end
 				return; //exit
 			}
