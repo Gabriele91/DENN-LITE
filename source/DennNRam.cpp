@@ -119,7 +119,7 @@ namespace NRam
                         output << "\t• " 
                                << gate_name 
                                << "(" 
-                               << values[0](0,0)
+                               << values[1](0,0)
                                << ") => "
                                << values.back()(0,0)
                                << std::endl;
@@ -128,9 +128,9 @@ namespace NRam
                         output << "\t• " 
                                << gate_name 
                                << "(" 
-                               << values[0](0,0)
+                               << values[1](0,0)
                                << ","
-                               << values[2](0,0)
+                               << values[3](0,0)
                                << ") => "
                                << values.back()(0,0)
                                << std::endl;
@@ -530,13 +530,14 @@ namespace NRam
 
                     ColVector selected_value_a = avg(regs, coeff_a);
                     Matrix C = gate(selected_value_a, in_mem);
+                    //append output
                     regs.conservativeResize(regs.rows() + 1, regs.cols());
                     regs.row(regs.rows() - 1) = C;
                     // Add to history execution
                     debug.push_op(
                           gate
-                        , defuzzy_mem(coeff_a)
-                        , defuzzy_mem(selected_value_a)
+                        , defuzzy_mem_cols(coeff_a)
+                        , defuzzy_mem_cols(selected_value_a)
                         , defuzzy_mem(in_mem)
                         , defuzzy_mem(C)
                     );
@@ -561,10 +562,10 @@ namespace NRam
                     // Add to history execution
                     debug.push_op(
                           gate
-                        , defuzzy_mem(coeff_a)
-                        , defuzzy_mem(selected_value_a)
-                        , defuzzy_mem(coeff_b)
-                        , defuzzy_mem(selected_value_b)
+                        , defuzzy_mem_cols(coeff_a)
+                        , defuzzy_mem_cols(selected_value_a)
+                        , defuzzy_mem_cols(coeff_b)
+                        , defuzzy_mem_cols(selected_value_b)
                         , defuzzy_mem(in_mem)
                         , defuzzy_mem(C)
                     );
