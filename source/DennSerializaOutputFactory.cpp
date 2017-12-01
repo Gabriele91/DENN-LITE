@@ -18,7 +18,7 @@ namespace Denn
 		//find
 		auto it = s_map().find(name);
 		//return
-		return it->second(stream, params);
+		return it == s_map().end() ? nullptr : it->second(stream, params);
 	}
 	void SerializeOutputFactory::append(const std::string& name, SerializeOutputFactory::CreateObject fun, size_t size)
 	{

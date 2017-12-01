@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <functional>
 #include <memory>
+#include <iostream>
 //lib include
 #include <Eigen/Eigen>
 #include <zlib.h>
@@ -43,15 +44,19 @@ namespace Denn
 	using Scalar	 = float;
 	#endif
 
+	template < typename T >
+	using RowVectorT  = typename Eigen::Matrix<T, 1, Eigen::Dynamic>;
 	using RowVectorLD = typename Eigen::Matrix<long double, 1, Eigen::Dynamic>;
-	using RowVectorD = typename Eigen::Matrix<double, 1, Eigen::Dynamic>;
-	using RowVectorF = typename Eigen::Matrix<float,  1, Eigen::Dynamic>;
-	using RowVector  = typename Eigen::Matrix<Scalar,  1, Eigen::Dynamic>;
+	using RowVectorD  = typename Eigen::Matrix<double, 1, Eigen::Dynamic>;
+	using RowVectorF  = typename Eigen::Matrix<float,  1, Eigen::Dynamic>;
+	using RowVector   = typename Eigen::Matrix<Scalar,  1, Eigen::Dynamic>;
 
+	template < typename T >
+	using ColVectorT  = typename Eigen::Matrix<T, Eigen::Dynamic, 1>;
 	using ColVectorLD = typename Eigen::Matrix<long double, Eigen::Dynamic, 1>;
 	using ColVectorD  = typename Eigen::Matrix<double, Eigen::Dynamic, 1>;
 	using ColVectorF  = typename Eigen::Matrix<float,  Eigen::Dynamic, 1>;
-	using ColVector  = typename Eigen::Matrix<Scalar,  Eigen::Dynamic, 1>;
+	using ColVector   = typename Eigen::Matrix<Scalar,  Eigen::Dynamic, 1>;
 
 	template < typename T >
 	using MatrixT	 = typename Eigen::Matrix< T, Eigen::Dynamic, Eigen::Dynamic>;
@@ -59,6 +64,13 @@ namespace Denn
 	using MatrixD	 = typename Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>;
 	using MatrixF	 = typename Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>;
 	using Matrix 	 = typename Eigen::Matrix< Scalar, Eigen::Dynamic, Eigen::Dynamic > ;
+
+	template < typename T >
+	using MatrixListT  = std::vector < MatrixT< T > >;
+	using MatrixListF  = std::vector < MatrixF >;
+	using MatrixListD  = std::vector < MatrixD >;
+	using MatrixListLD = std::vector < MatrixLD >;
+	using MatrixList   = std::vector < Matrix >;
 }
 //utilities
 namespace Denn
@@ -92,7 +104,7 @@ namespace Denn
 	{
 		#if 0
 		T value_mod = value % base;
-		while  (value_mod < T(0)) value_mod += value;
+		while  (value_mod < T(0)) value_mod += base;
 		return value_mod;
 		#else 
 		//from JS

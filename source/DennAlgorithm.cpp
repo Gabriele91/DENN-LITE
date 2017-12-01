@@ -2,27 +2,22 @@
 
 namespace Denn
 {
-	DennAlgorithm::DennAlgorithm
-	(
-		  DataSetLoader*      dataset_loader
-		, const Parameters&   params
-		, const NeuralNetwork nn_default
-		, CostFunction		  target_function
-		, std::ostream&       output
-		, ThreadPool*		  thpool
-	)
-	: m_main_random(*params.m_seed)
-    , m_thpool(thpool)
-	, m_target_function(target_function)
-	, m_output(RuntimeOutputFactory::create(*params.m_runtime_output_type, output, *this))
-	, m_default(std::make_shared<Individual>
-	    ( *params.m_default_f
+	DennAlgorithm::DennAlgorithm(Instance&	instance, const Parameters&   params)
+	: m_main_random(instance.random_engine())
+    , m_thpool(instance.thread_pool())
+	, m_loss_function(instance.loss_function())
+	, m_validation_function(instance.validation_function())
+	, m_test_function(instance.test_function())
+	, m_output(RuntimeOutputFactory::create(*params.m_runtime_output_type, 
+											 instance.output_stream(), *this))
+	, m_default(std::make_shared<Individual>( 
+		  *params.m_default_f
 		, *params.m_default_cr
 	    , *params.m_perc_of_best
-		, nn_default
+		, instance.neural_network()
 		))
-	, m_dataset_loader(dataset_loader)
-	, m_dataset_batch(dataset_loader)
+	, m_dataset_loader(&instance.dataset_loader())
+	, m_dataset_batch(&instance.dataset_loader())
 	, m_params(params)
 	{
 	}
@@ -67,7 +62,8 @@ namespace Denn
 			m_default,
 			current_batch(),
 			m_random_function,
-			m_target_function
+			*m_loss_function,
+			m_thpool
 		);
 		//method of evoluction
 		m_e_method = EvolutionMethodFactory::create(m_params.m_evolution_type, *this);
@@ -89,16 +85,11 @@ namespace Denn
 		//restart init
 		m_restart_ctx = RestartContext();
 		//best
-		if(m_e_method->best_from_validation())
-		{
-			//maximize
-			m_best_ctx = BestContext(nullptr, -std::numeric_limits<Scalar>::max());
-		}
-		else 
-		{
-			//minimize
-			m_best_ctx = BestContext(nullptr, std::numeric_limits<Scalar>::max());				
-		}
+		Scalar worst_eval = m_e_method->best_from_validation() 
+						  ? validation_function_worst() 
+						  : loss_function_worst();
+		//default best
+		m_best_ctx = BestContext(nullptr, worst_eval);
 		execute_update_best();
 		//start output
 		if (m_output) m_output->start();
@@ -121,9 +112,8 @@ namespace Denn
 		//validation
 		DataSetScalar test;
 		m_dataset_loader->read_test(test);
-		//compute
-		auto y = m_best_ctx.m_best->m_network.apply(test.m_features);
-		Scalar eval = Denn::CostFunction::accuracy(test.m_labels, y);
+		//compute test
+		Scalar eval = (*m_test_function)(*m_best_ctx.m_best, test);
 		//return
 		return eval;
 	}
@@ -132,9 +122,8 @@ namespace Denn
 		//validation
 		DataSetScalar test;
 		m_dataset_loader->read_test(test);
-		//compute
-		auto y = individual.m_network.apply(test.m_features);
-		Scalar eval = Denn::CostFunction::accuracy(test.m_labels, y);
+		//compute		
+		Scalar eval = (*m_test_function)(individual, test);
 		//return
 		return eval;
 	}
@@ -162,23 +151,25 @@ namespace Denn
 		DataSetScalar validation;
 		m_dataset_loader->read_validation(validation);
 		//best
-		Scalar best_eval = std::numeric_limits<Scalar>::min();
+		Scalar best_eval =  validation_function_worst();
 		size_t	   best_i= 0;
 		//find best
 		for (size_t i = 0; i != current_np(); ++i)
 		{
-			auto y = population[i]->m_network.apply(validation.m_features);
-			Scalar eval = Denn::CostFunction::accuracy(validation.m_labels, y);
-			//safe
-			if (std::isnan(eval)) eval = std::numeric_limits<Scalar>::min();
-			//maximize (accuracy)
-			if (!i || best_eval < eval)
+			auto& i_target = *population[i];
+			//test
+			Scalar eval = (*m_validation_function)(i_target, validation);
+			//safe, nan = worst
+			if (std::isnan(eval)) eval = validation_function_worst();
+			//find best
+			if(!i && validation_function_compare(eval,best_eval))
 			{
 				best_i = i;
 				best_eval = eval;
 			}
 		}
-		out_i = best_i;
+		//find best
+		out_i    = best_i;
 		out_eval = best_eval;
 		return true;
 
@@ -193,7 +184,7 @@ namespace Denn
 		DataSetScalar validation;
 		m_dataset_loader->read_validation(validation);
 		//list eval
-		std::vector<Scalar> validation_evals(population.size(), std::numeric_limits<Scalar>::min());
+		std::vector<Scalar> validation_evals(population.size(), validation_function_worst());
 		//alloc promises
 		m_promises.resize(np);
 		//for all
@@ -206,17 +197,22 @@ namespace Denn
 			m_promises[i] = thpool.push_task([&]()
 			{
 				//test
-				auto y = i_target.m_network.apply(validation.m_features);
-				eval = Denn::CostFunction::accuracy(validation.m_labels, y);
-				//safe
-				if (std::isnan(eval)) eval = std::numeric_limits<Scalar>::min();
+				eval = (*m_validation_function)(i_target, validation);
+				//safe, nan = worst
+				if (std::isnan(eval)) eval = validation_function_worst();;
 			});
 		}
 		//wait
 		for (auto& promise : m_promises) promise.wait();
 		//find best
-		//maximize (accuracy)
-		out_i    = std::distance(validation_evals.begin(), std::max_element(validation_evals.begin(), validation_evals.end()));
+		if(m_validation_function->minimize())
+		{
+			out_i = std::distance(validation_evals.begin(), std::min_element(validation_evals.begin(), validation_evals.end()));
+		}
+		else 
+		{
+			out_i = std::distance(validation_evals.begin(), std::max_element(validation_evals.begin(), validation_evals.end()));			
+		}
 		out_eval = validation_evals[out_i];
 		return true;
 
@@ -226,7 +222,7 @@ namespace Denn
 	//Intermedie steps
 	void DennAlgorithm::execute_a_pass(size_t pass, size_t n_sub_pass)
 	{
-		execute_target_function_on_all_population(m_population.parents());
+		execute_loss_function_on_all_population(m_population.parents());
 		///////////////////////////////////////////////////////////////////
 		//output
 		if(m_output) m_output->start_a_pass();
@@ -258,15 +254,15 @@ namespace Denn
 	void DennAlgorithm::execute_update_best()
 	{
 		if(m_e_method->best_from_validation()) execute_update_best_on_validation();
-		else             					   execute_update_best_on_target_function();
+		else             					   execute_update_best_on_loss_function();
 	}	
 	void DennAlgorithm::execute_update_best_on_validation()
 	{
 		//find best
 		Scalar curr_eval = Scalar(0.0);
 		auto curr = find_best_on_validation(curr_eval);
-		//maximize (accuracy)
-		if (m_best_ctx.m_eval < curr_eval)
+		//validation best
+		if (validation_function_compare(curr_eval, m_best_ctx.m_eval))
 		{
 			//must copy because "restart" 
 			//not copy element then 
@@ -276,12 +272,12 @@ namespace Denn
 			m_best_ctx.m_eval = curr_eval;
 		}
 	}
-	void DennAlgorithm::execute_update_best_on_target_function()
+	void DennAlgorithm::execute_update_best_on_loss_function()
 	{
 		//find best
 		auto curr = m_population.parents().best();
-		//minimize (target function)
-		if (curr->m_eval < m_best_ctx.m_eval)
+		//loss best
+		if (loss_function_compare(curr->m_eval, m_best_ctx.m_eval))
 		{
 			//must copy because "restart" 
 			//not copy element then 
@@ -296,7 +292,7 @@ namespace Denn
 		//if not enabled then not reset
 		if(!*m_params.m_restart_enable) return ;
 		//inc count
-		if ((m_best_ctx.m_eval - m_restart_ctx.m_last_eval) <= (Scalar)m_params.m_restart_delta)
+		if (std::abs(m_best_ctx.m_eval - m_restart_ctx.m_last_eval) <= (Scalar)m_params.m_restart_delta)
 		{
 			++m_restart_ctx.m_test_count;
 		}
@@ -317,7 +313,8 @@ namespace Denn
 				, m_default							     //default individual
 				, current_batch()						 //current batch
 				, m_random_function				         //random generator
-				, m_target_function				         //fitness function	  
+				, *m_loss_function				         //fitness function
+				, m_thpool								 //threads
 			);
 			m_restart_ctx.m_test_count = 0;
 			m_restart_ctx.m_last_eval = m_best_ctx.m_eval;
@@ -378,40 +375,37 @@ namespace Denn
 		//Compute new individual
 		m_e_method->create_a_individual(m_population, i, *new_son);
 		//eval
-		auto y = new_son->m_network.apply(current_batch().m_features);
-		new_son->m_eval = m_target_function(current_batch().m_labels, y);
+		new_son->m_eval = (*m_loss_function)(*new_son, current_batch());
 	}
 	
 	/////////////////////////////////////////////////////////////////
 	//fitness function on a population
 	void DennAlgorithm::execute_fitness_on(Population& population) const
 	{
-		execute_target_function_on_all_population(population);
+		execute_loss_function_on_all_population(population);
 	}
-	void DennAlgorithm::execute_target_function_on_all_population(Population& population) const
+	void DennAlgorithm::execute_loss_function_on_all_population(Population& population) const
 	{
 		//eval on batch
-		if (m_thpool) parallel_execute_target_function_on_all_population(population, *m_thpool);
-		else 		  serial_execute_target_function_on_all_population(population);
+		if (m_thpool) parallel_execute_loss_function_on_all_population(population, *m_thpool);
+		else 		  serial_execute_loss_function_on_all_population(population);
 	}
-	void DennAlgorithm::serial_execute_target_function_on_all_population(Population& population) const
+	void DennAlgorithm::serial_execute_loss_function_on_all_population(Population& population) const
 	{
 		//np
 		size_t np = current_np();
 		//for all
 		for (size_t i = 0; i != np; ++i)
 		{
-			//ref to target
+			//ref to loss
 			auto& i_target = *population[i];
 			//eval
-			auto y = i_target.m_network.apply(current_batch().m_features);
-			i_target.m_eval = m_target_function(current_batch().m_labels, y);
-			//safe
-			if (std::isnan(i_target.m_eval))
-				i_target.m_eval = std::numeric_limits<Scalar>::max();
+			i_target.m_eval = (*m_loss_function)(i_target, current_batch());
+			//safe, nan = worst
+			if (std::isnan(i_target.m_eval)) i_target.m_eval = loss_function_worst(); 
 		}
 	}
-	void DennAlgorithm::parallel_execute_target_function_on_all_population(Population& population, ThreadPool& thpool) const
+	void DennAlgorithm::parallel_execute_loss_function_on_all_population(Population& population, ThreadPool& thpool) const
 	{
 		//get np
 		size_t np = current_np();
@@ -426,11 +420,9 @@ namespace Denn
 			m_promises[i] = thpool.push_task([this,&i_target]()
 			{
 				//test
-				auto y = i_target.m_network.apply(current_batch().m_features);
-				i_target.m_eval = m_target_function(current_batch().m_labels, y);
-				//safe
-				if (std::isnan(i_target.m_eval))
-					i_target.m_eval = std::numeric_limits<Scalar>::max();
+				i_target.m_eval = (*m_loss_function)(i_target, current_batch());
+				//safe, nan = worst
+				if (std::isnan(i_target.m_eval)) i_target.m_eval = loss_function_worst(); 
 			});
 		}
 		//wait

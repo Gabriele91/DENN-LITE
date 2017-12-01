@@ -21,7 +21,7 @@ namespace Denn
 		, size_t clazz
 	)
 	{
-		m_active_function = ActiveFunctionFactory::name_of(active_function) == "linear" ? nullptr : active_function;
+		set_active_function(active_function);
 		m_weights.resize(features, clazz);
 		m_baias.resize(1, clazz);
 	}
@@ -37,10 +37,10 @@ namespace Denn
 		return std::static_pointer_cast<Layer>(std::make_shared<PerceptronLayer>(*this));
 	}
 	//////////////////////////////////////////////////
-	Matrix PerceptronLayer::apply(const Matrix& input) 
+	Matrix PerceptronLayer::apply(const Matrix& input) const
 	{
 		//get output
-		Matrix layer_output = (input * m_weights).rowwise() + Eigen::Map<RowVector>(m_baias.data(), m_baias.cols()*m_baias.rows());
+		Matrix layer_output = (input * m_weights).rowwise() + Eigen::Map<RowVector>((Scalar*)m_baias.data(), m_baias.cols()*m_baias.rows());
 		//activation function?
 		if (m_active_function) return m_active_function(layer_output);
 		else                   return layer_output;
@@ -95,6 +95,15 @@ namespace Denn
         return std::vector<Matrix>{dEdW /* this[0] = w */, dEdb /* this[1] = b */};
         //J = Scalar(0.5) * lambda * m_weights.array().square().sum() / Scalar(input_samples);
     }
+	//////////////////////////////////////////////////
+	ActiveFunction PerceptronLayer::get_active_function() 
+	{
+		return m_active_function;
+	}
+	void PerceptronLayer::set_active_function(ActiveFunction active_function)
+	{
+		m_active_function = ActiveFunctionFactory::name_of(active_function) == "linear" ? nullptr : active_function;
+	}
     //////////////////////////////////////////////////
 	size_t PerceptronLayer::size() const
 	{

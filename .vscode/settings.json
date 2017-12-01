@@ -66,6 +66,12 @@
         "locale": "cpp",
         "valarray": "cpp",
         "set": "cpp",
-        "__nullptr": "cpp"
+        "__nullptr": "cpp",
+        "cinttypes": "cpp",
+        "__string": "cpp",
+        "string_view": "cpp",
+        "__hash_table": "cpp",
+        "unordered_map": "cpp",
+        "__locale": "cpp"
     }
 }

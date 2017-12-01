@@ -21,6 +21,11 @@ namespace Denn
 
 	Random& Mutation::population_random(size_t i)     const { return m_algorithm.population_random(i);}
 	Random& Mutation::random(size_t i)			      const { return m_algorithm.random(i); }
+	
+	//help, how is the best
+	bool Mutation::loss_function_compare(Scalar left, Scalar right) const       { return  m_algorithm.loss_function_compare(left,right);  }
+	bool Mutation::validation_function_compare(Scalar left, Scalar right) const { return  m_algorithm.validation_function_compare(left,right);  }
+	bool Mutation::test_function_compare(Scalar left, Scalar right) const       { return  m_algorithm.test_function_compare(left,right);  }
 
 	#ifndef RANDOM_SAFE_MUTATION
 	Random& Mutation::main_random()					  const { return m_algorithm.main_random(); }
@@ -38,7 +43,7 @@ namespace Denn
 		//find
 		auto it = m_map().find(name);
 		//return
-		return it->second(algorithm);
+		return it == m_map().end() ? nullptr : it->second(algorithm);
 	}
 	void MutationFactory::append(const std::string& name, MutationFactory::CreateObject fun, size_t size)
 	{

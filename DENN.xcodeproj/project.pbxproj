@@ -536,9 +536,10 @@
 		CDE1978B1F7E420300A6160B /* DennRuntimeOutputItems.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennRuntimeOutputItems.cpp; sourceTree = "<group>"; };
 		CDE1978C1F7E420300A6160B /* DennSerializaOutputFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennSerializaOutputFactory.cpp; sourceTree = "<group>"; };
 		CDE1978D1F7E420300A6160B /* DennSerializeOutputItems.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennSerializeOutputItems.cpp; sourceTree = "<group>"; };
-		CDE1978E1F7E420300A6160B /* main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		CDE1978E1F7E420300A6160B /* _old_main._cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = _old_main._cpp; sourceTree = "<group>"; };
 		CDE197901F7E420300A6160B /* TicksTime.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TicksTime.cpp; sourceTree = "<group>"; };
 		CDE197B21F7E432D00A6160B /* libz.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libz.tbd; path = usr/lib/libz.tbd; sourceTree = SDKROOT; };
+		E087E6531FBB27230003B8A1 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		E08E3DA11F8B90190016A723 /* DennDump.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = DennDump.cpp; sourceTree = "<group>"; };
 		E0A523351F8F788D007E91D0 /* DennCrossoverBin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennCrossoverBin.cpp; sourceTree = "<group>"; };
 		E0A523361F8F788D007E91D0 /* DennCrossoverExp.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennCrossoverExp.cpp; sourceTree = "<group>"; };
@@ -1714,7 +1715,8 @@
 				CDE1978B1F7E420300A6160B /* DennRuntimeOutputItems.cpp */,
 				CDE1978C1F7E420300A6160B /* DennSerializaOutputFactory.cpp */,
 				CDE1978D1F7E420300A6160B /* DennSerializeOutputItems.cpp */,
-				CDE1978E1F7E420300A6160B /* main.cpp */,
+				CDE1978E1F7E420300A6160B /* _old_main._cpp */,
+				E087E6531FBB27230003B8A1 /* main.cpp */,
 				CDE197901F7E420300A6160B /* TicksTime.cpp */,
 				E08E3DA11F8B90190016A723 /* DennDump.cpp */,
 			);

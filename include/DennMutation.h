@@ -39,6 +39,10 @@ namespace Denn
 
 		Random& population_random(size_t i)  const;
 		Random& random(size_t i)  const;
+		//help, how is the best
+		bool loss_function_compare(Scalar left, Scalar right) const;
+		bool validation_function_compare(Scalar left, Scalar right) const;
+		bool test_function_compare(Scalar left, Scalar right) const;
 
 		#ifndef RANDOM_SAFE_MUTATION
 		Random& main_random()  const;

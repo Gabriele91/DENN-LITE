@@ -1,0 +1,550 @@
+//
+//  main.cpp
+//  DENN
+//
+//  Created by Gabriele Di Bari on 14/11/17.
+//  Copyright © 2017 Gabriele. All rights reserved.
+//
+#include <iostream>
+#include <ctime>
+#include <fstream>
+#include <utility>
+#include "Denn.h"
+#include "DennDump.h"
+#include "DennMainUtils.h"
+
+namespace Denn
+{
+    using MatrixList  = std::vector < Matrix >;
+    using GateList    = std::vector < Gate::SPtr >;
+    using MemoryTuple = std::tuple< Matrix, Matrix >;
+
+    MatrixList fuzzy_encode(const MatrixT<int>& M) const
+    {
+        MatrixList encoded_mem;
+        for(size_t s = 0; s < M.rows(); s++)
+        {
+            Matrix sample = Matrix::Zero(M.cols(), M.cols());
+            for (size_t n = 0; n < M.cols(); n++)
+            {
+                sample(n, MatrixT<int>::Index(M(s, n))) = Scalar(1.0);
+            }
+            encoded_mem.push_back(sample);
+        }
+
+        return encoded_mem;
+    }
+
+    class Task
+    {
+    public:
+        Task(size_t m_batch_size, size_t m_max_int) : m_batch_size(m_batch_size), m_max_int(m_max_int) {}
+
+        virtual MemoryTuple operator() () {
+            return {};
+        }
+
+        virtual MemoryTuple operator() (size_t) {
+            return {};
+        }
+
+    protected:
+
+        size_t m_batch_size;
+        size_t m_max_int;
+    };
+
+    class TaskAccess : public Task
+    {
+    public:
+        TaskAccess(size_t m_batch_size, size_t m_max_int) : Task(m_batch_size, m_max_int) {}
+
+        MemoryTuple operator() () override
+        {
+            std::srand((unsigned int) time(0));
+
+            Matrix s_in_mem = (Matrix::Random(m_batch_size, m_max_int) +
+                    Matrix::Ones(m_batch_size, m_max_int)) * (m_max_int/2);
+            Matrix in_mem = s_in_mem.unaryExpr((Scalar(*)(Scalar))std::ceil);
+            in_mem.col(m_max_int - 1) = RowVector::Zero(in_mem.rows());
+            in_mem.col(0) = RowVectorT<int>::Ones(in_mem.rows()) * 2;
+
+            MatrixT<int> out_mem = in_mem;
+            for (size_t r = 0; r < out_mem.rows(); ++r)
+                out_mem(r, 0) = out_mem(r, Matrix::Index(out_mem(r, 0)));
+
+            return {in_mem, out_mem};
+        };
+    };
+
+    class TaskCopy : public Task
+    {
+    public:
+        TaskCopy(size_t m_batch_size, size_t m_max_int) : Task(m_batch_size, m_max_int) {}
+
+        MemoryTuple operator() () override
+        {
+            std::srand((unsigned int) time(0));
+            Matrix s_in_mem = (Matrix::Random(m_batch_size, m_max_int) +
+                              Matrix::Ones(m_batch_size, m_max_int)) * (m_max_int / 2);
+            MatrixT<int> in_mem = s_in_mem.cast<int>();
+            in_mem.block(0, m_max_int / 2, in_mem.rows(), in_mem.cols() - m_max_int / 2) =
+                MatrixT<int>::Zero(m_batch_size, m_max_int / 2);
+            in_mem.col(0) = RowVectorT<int>::Ones(in_mem.rows()) * MatrixT<int>::Index(m_max_int / 2);
+
+            MatrixT<int> out_mem = in_mem;
+            out_mem.block(0, m_max_int / 2, in_mem.rows(), in_mem.cols() - m_max_int / 2)
+                    = in_mem.block(0, 1, in_mem.rows(), m_max_int / 2);
+            return {in_mem, out_mem};
+        }
+    };
+
+    class TaskIncrement : Task
+    {
+    public:
+        TaskIncrement(size_t m_batch_size, size_t m_max_int) : Task(m_batch_size, m_max_int) {}
+
+        MemoryTuple operator() (size_t step) override
+        {
+            if (step >= m_max_int) throw 20;
+
+            std::srand((unsigned int) time(0));
+
+            Matrix s_in_mem = (Matrix::Random(m_batch_size, m_max_int) +
+                              Matrix::Ones(m_batch_size, m_max_int)) * (m_max_int / 2);
+            MatrixT<int> in_mem = s_in_mem.cast<int>();
+            in_mem.block(0, Matrix::Index(step), in_mem.rows(), Matrix::Index(m_max_int - step)) =
+                MatrixT<int>::Zero(m_batch_size, m_max_int - step);
+
+            MatrixT<int> out_mem = in_mem;
+            for(size_t c = 0; c < step; c++)
+                out_mem.col(c) += ColVectorT< int >::Ones(out_mem.rows());
+
+            return {in_mem, out_mem};
+        }
+    };
+
+    class NRam
+    {
+    public:
+
+        NRam(  const size_t batch_size
+             , const size_t max_int
+             , const size_t n_regs
+             , const size_t timesteps
+             , const GateList& gates
+             , const Denn::Parameters& parameters
+             )
+        : m_batch_size(batch_size)
+        , m_max_int(max_int)
+        , m_n_regs(n_regs)
+        , m_timesteps(timesteps)
+        , m_gates(gates)
+        {
+            // Past cardinality
+            size_t i = 0;
+            size_t output_columns = 0;
+            for(auto& gate : gates)
+            {
+                output_columns += (n_regs + i++) * gate->arity();
+            }
+
+            // Same size for every c_i
+            for(size_t j = 0; j < n_regs; ++j)
+            {
+                output_columns += n_regs + i;
+            }
+
+            // Size for f_t
+            output_columns += 1;
+
+            m_network = build_mlp_network(m_n_regs, output_columns, parameters);
+        }
+
+        void execute(Random& random_engine)
+        {
+            // TODO: While not converged
+
+            // Init memory
+            Task t(m_batch_size, m_max_int);
+            auto mems = t();
+            MatrixList in_mem = std::get<0>(mems);
+            MatrixT<int> out_mem = std::get<1>(mems);
+
+            //Init
+            for (auto& layer  : m_network)
+                for (auto& matrix : *layer)
+                {
+    //                matrix = matrix.unaryExpr([&](Scalar x)->Scalar{ return 1.0; });
+                    matrix = matrix.unaryExpr([&](Scalar x)->Scalar{ return random_engine.uniform(); });
+                }
+            //init regs
+            MatrixList fuzzy_regs(m_max_int, Matrix::Zero(m_batch_size, m_n_regs));
+            //all to 0 (fuzzy)
+            fuzzy_regs[0].fill(1);
+
+            Matrix step_cost = train(fuzzy_regs, in_mem, out_mem);
+            Scalar cost = step_cost.sum();
+        }
+
+        Matrix train(MatrixList& fuzzy_regs, MatrixList& in_mem, MatrixT<int>& out_mem)
+        {
+            //execute network
+            std::vector< Scalar > p_t(m_batch_size, Scalar(1.0));               // Probability that execution is finished at timestep t
+            std::vector< Scalar > prob_incomplete(m_batch_size, Scalar(1.0));   // Probability that the execution is not finished before timestep t
+            std::vector< Scalar > cum_prob_complete(m_batch_size, Scalar(0.0)); // Cumulative probability of p_i
+
+            //time step
+            Matrix cost = Matrix::Zero(1, m_batch_size);
+            for(size_t timestep = 0; timestep < m_timesteps; timestep++)
+            {
+                Matrix out = m_network.apply(fuzzy_regs[0]);
+
+                // Run the circuit
+                for(size_t s = 0; s != m_batch_size; ++s)
+                {
+                    Scalar fi = run_circuit(out, fuzzy_regs, in_mem, s);
+
+                    if(timestep == m_timesteps-1)
+                        p_t[s] =  1 - cum_prob_complete[s];
+                    else
+                        p_t[s] = fi * prob_incomplete[s];
+
+                    cum_prob_complete[s] += p_t[s];
+                    prob_incomplete[s] *= 1 - fi;
+                    //
+                    cost(0, s) += p_t[s] * calculate_sample_cost(in_mem[s], out_mem.row(0));
+                }
+            }
+
+            return cost;
+        }
+
+        Matrix train_test(Matrix& coeffs, MatrixList& fuzzy_regs, MatrixList& in_mem, MatrixT<int>& out_mem)
+        {
+            //execute network
+            std::vector< Scalar > p_t(m_batch_size, Scalar(1.0));               // Probability that execution is finished at timestep t
+            std::vector< Scalar > prob_incomplete(m_batch_size, Scalar(1.0));   // Probability that the execution is not finished before timestep t
+            std::vector< Scalar > cum_prob_complete(m_batch_size, Scalar(0.0)); // Cumulative probability of p_i
+
+            //time step
+            Matrix cost = Matrix::Zero(1, m_batch_size);
+            for(size_t timestep = 0; timestep < m_timesteps; timestep++)
+            {
+                // Run the circuit
+                for(size_t s = 0; s != m_batch_size; ++s)
+                {
+                    Scalar fi = run_circuit(coeffs, fuzzy_regs, in_mem, s);
+
+                    if(timestep == m_timesteps-1)
+                        p_t[s] =  1 - cum_prob_complete[s];
+                    else
+                        p_t[s] = fi * prob_incomplete[s];
+
+                    cum_prob_complete[s] += p_t[s];
+                    prob_incomplete[s] *= 1 - fi;
+                    //
+                    cost(0, s) -= p_t[s] * calculate_sample_cost(in_mem[s], out_mem.row(0));
+                }
+            }
+
+            return cost;
+        }
+
+        Matrix fuzzy_reg_at(const MatrixList& fuzzy_regs, size_t c)
+        {
+            Matrix out(m_n_regs, m_max_int);
+            // Iterate through numbers of distribution
+            for(size_t p = 0; p!=fuzzy_regs.size(); ++p)
+            {
+                // Iterate through registers
+                for(size_t r = 0; r!=m_n_regs; ++r)
+                {
+                    out(r, p) = fuzzy_regs[p](c, r);
+                }
+            }
+            return out;
+        }
+
+        /**
+         * Set the new value of a register for a sample.
+         *
+         * @param fuzzy_regs
+         * @param new_reg Register new distribution
+         * @param idx_reg
+         * @param sample
+         * @return
+         */
+        MatrixList& set_fuzzy_reg_at(MatrixList& fuzzy_regs, const Matrix& new_reg, size_t idx_reg, size_t sample)
+        {
+            for (size_t idx_value = 0; idx_value < fuzzy_regs.size(); ++idx_value)
+            {
+                fuzzy_regs[idx_value](sample, idx_reg) = new_reg(0, idx_value);
+            }
+            return fuzzy_regs;
+        }
+
+        Scalar calculate_sample_cost(Matrix& M, const RowVector& desired_mem)
+        {
+            Scalar s_cost = 0;
+            for (size_t idx = 0; idx < M.rows(); ++idx)
+            {
+                s_cost += Denn::CostFunction::safe_log(M(idx, Matrix::Index(desired_mem(idx))));
+            }
+            return s_cost;
+        }
+
+        Matrix avg(const Matrix& regs, const Matrix& in)
+        {
+            return in * regs;
+        }
+
+        MatrixT< size_t > defuzzy_mem(const Matrix& M)
+        {
+            MatrixT< size_t > m(1, M.rows());
+            for(size_t r = 0; r < M.rows(); r++)
+            {
+                Scalar max_value = Scalar(0.0);
+                size_t max_index = 0;
+                for(size_t c = 0; c < M.cols(); ++c)
+                {
+                    if (max_value < M(r, c))
+                    {
+                        max_value = M(r, c);
+                        max_index = c;
+                    }
+                }
+                m(0, r) = max_index;
+            }
+
+            return m;
+        }
+
+        Scalar run_circuit(Matrix& nn_out_decision, MatrixList& fuzzy_regs, MatrixList& in_mem,  size_t s)
+        {
+            //get regs
+            Matrix regs = fuzzy_reg_at(fuzzy_regs, s);
+            //start col
+            size_t ptr_col = 0, coefficient_size = m_n_regs;
+            // Execute circuit
+            size_t i = 0;
+            for (; i != m_gates.size(); ++i, ++coefficient_size)
+            {
+                auto &gate = *m_gates[i];
+                switch (gate.arity())
+                {
+                    case Gate::CONST:
+                    {
+                        auto C = gate( in_mem[s] );
+                        regs.conservativeResize(regs.rows()+1, regs.cols());
+                        regs.row(regs.rows()-1) = C;
+                    }
+                        break;
+                    case Gate::UNARY:
+                    {
+                        Matrix A = nn_out_decision.block(s, ptr_col, 1, coefficient_size);
+//                        Matrix a = nn_out_decision.block(s, ptr_col, 1, m_n_regs + i);
+//                        Matrix A = Denn::CostFunction::softmax(a);
+                        ptr_col += coefficient_size;
+
+                        auto C = gate(avg(regs, A), in_mem[s]);
+                        regs.conservativeResize(regs.rows()+1, regs.cols());
+                        regs.row(regs.rows()-1) = C;
+                    }
+                        break;
+                    case Gate::BINARY:
+                    {
+                        Matrix A = nn_out_decision.block(s, ptr_col, 1, coefficient_size);
+//                        Matrix a = nn_out_decision.block(s, ptr_col, 1, m_n_regs + i);
+//                        Matrix A = Denn::CostFunction::softmax(a);
+                        ptr_col += coefficient_size;
+
+                        Matrix B = nn_out_decision.block(s, ptr_col, 1, coefficient_size);
+//                        Matrix b = nn_out_decision.block(s, ptr_col, 1, m_n_regs + i);
+//                        Matrix B = Denn::CostFunction::softmax(b);
+                        ptr_col += coefficient_size;
+
+                        Matrix C = gate(avg(regs, A), avg(regs, B), in_mem[s]);
+                        //append output
+                        regs.conservativeResize(regs.rows()+1, regs.cols());
+                        regs.row(regs.rows()-1) = C;
+                    }
+                        break;
+                    default:  break;
+                }
+            }
+            // Update regs after circuit execution
+            for(; i < m_gates.size() + m_n_regs; ++i)
+            {
+                Matrix C = nn_out_decision.block(s, ptr_col, 1, coefficient_size);
+//                auto   c = nn_out_decision.block(s, ptr_col, 1, m_n_regs + idx_reg);
+//                Matrix C = Denn::CostFunction::softmax(c);
+                ptr_col += coefficient_size;
+                set_fuzzy_reg_at(fuzzy_regs, avg(regs, C), i - m_gates.size(), s);
+            }
+
+            //return fi
+            return Denn::PointFunction::sigmoid(nn_out_decision.col(nn_out_decision.cols()-1)(s));
+        }
+
+    protected:
+
+        //build a mlp network from parameters
+        NeuralNetwork build_mlp_network
+        (
+              size_t n_features
+            , size_t n_classes
+            , const Denn::Parameters& parameters
+        )
+        {
+            //mlp network
+            NeuralNetwork mlp_nn;
+            //hidden layer list
+            const auto& hidden_layers = (*parameters.m_hidden_layers);
+            //push all hidden layers
+            if (hidden_layers.size())
+            {
+                //add first layer
+                mlp_nn.add_layer(PerceptronLayer(
+                          ActiveFunctionFactory::get("relu")
+                        , n_features
+                        , hidden_layers[0]
+                ));
+                //add next layers
+                for (size_t i = 0; i != hidden_layers.size() - 1; ++i)
+                {
+                    mlp_nn.add_layer(PerceptronLayer(
+                              ActiveFunctionFactory::get("relu")
+                            , hidden_layers[i]
+                            , hidden_layers[i + 1]
+                    ));
+                }
+
+                //add last layer
+                mlp_nn.add_layer(PerceptronLayer(
+                        ActiveFunctionFactory::get("linear")
+                        , hidden_layers[hidden_layers.size() - 1]
+                        , n_classes
+                ));
+            }
+            //else add only input layer
+            else
+            {
+                //add last layer
+                mlp_nn.add_layer(PerceptronLayer(
+                        ActiveFunctionFactory::get("linear")
+                        , n_features
+                        , n_classes
+                ));
+            }
+            //return NeuralNetwork
+            return mlp_nn;
+        }
+
+        size_t        m_batch_size;
+        size_t        m_max_int;
+        size_t        m_n_regs;
+        size_t        m_timesteps;
+        GateList      m_gates;
+        NeuralNetwork m_network;
+    };
+}
+
+void log_timestep(Denn::NRam& nn, const size_t& t, const size_t& c, const Denn::MatrixList& regs, const Denn::MatrixList& M, const Denn::Scalar& cost)
+{
+    using namespace Denn;
+
+    MESSAGE("i = " << t << ", Regs: " << Dump::json_matrix(nn.defuzzy_mem(nn.fuzzy_reg_at(regs, c))) << ", Modified mem: " << Dump::json_matrix(nn.defuzzy_mem(M[c])) << ", " << cost);
+}
+
+void execute_copy_task(Denn::NRam& test)
+{
+    using namespace Denn;
+
+    // Generate mem
+    TaskCopy t(1, 10);
+    auto mems = t();
+    auto in_mem = std::get<0>(mems);
+    auto des_mem = std::get<1>(mems);
+
+    // Generate fuzzy
+    MatrixList fuzzy_regs(10, Matrix::Zero(1, 4));
+    fuzzy_regs[0].fill(1);
+
+    log_timestep(test, 0, 0, fuzzy_regs, in_mem, Scalar(0.0));
+
+    MatrixList timestep_coeffs;
+    Matrix coeffs(1, 103);
+    coeffs << /* a_1 */ 0, 1, 0, 0, /* a_2 */ 0, 0, 0, 1, 0, /* a_3 */ 1, 0, 0, 0, 0, 0, /* b_3 */ 1, 0, 0, 0, 0, 0, /* a_4 */ 0, 0, 0, 0, 1, 0, 0, /* a_5 */ 1, 0, 0, 0, 0, 0, 0, 0, /* b_5 */ 1, 0, 0, 0, 0, 0, 0, 0, /* a_6 */ 0, 0, 0, 0, 1, 0, 0, 0, 0, /* b_6 */ 1, 0, 0, 0, 0, 0, 0, 0, 0, /* c_1 */ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* c_2 */ 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, /* c_3 */ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* c_4 */ 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, /* f_i */ 0.2;
+    Scalar cost = test.train_test(coeffs, fuzzy_regs, in_mem, des_mem).sum();
+    log_timestep(test, 1, 0, fuzzy_regs, in_mem, cost);
+
+    coeffs << /* a_1 */ 0, 0, 0, 1, /* a_2 */ 0, 0, 1, 0, 0, /* a_3 */ 0, 0, 0, 1, 0, 0, /* b_3 */ 0, 1, 0, 0, 0, 0, /* a_4 */ 1, 0, 0, 0, 0, 0, 0, /* a_5 */ 0, 1, 0, 0, 0, 0, 0, 0, /* b_5 */ 0, 0, 0, 0, 0, 1, 0, 0, /* a_6 */ 0, 0, 0, 0, 0, 0, 1, 0, 0, /* b_6 */ 0, 0, 0, 0, 1, 0, 0, 0, 0, /* c_1 */ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* c_2 */ 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, /* c_3 */ 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, /* c_4 */ 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, /* f_i */ 0.2;
+    cost = test.train_test(coeffs, fuzzy_regs, in_mem, des_mem).sum();
+    log_timestep(test, 2, 0, fuzzy_regs, in_mem, cost);
+
+    coeffs << /* a_1 */ 0, 0, 0, 1, /* a_2 */ 0, 0, 1, 0, 0, /* a_3 */ 0, 0, 0, 1, 0, 0, /* b_3 */ 0, 1, 0, 0, 0, 0, /* a_4 */ 1, 0, 0, 0, 0, 0, 0, /* a_5 */ 0, 1, 0, 0, 0, 0, 0, 0, /* b_5 */ 0, 0, 0, 0, 0, 1, 0, 0, /* a_6 */ 0, 0, 0, 0, 0, 0, 1, 0, 0, /* b_6 */ 0, 0, 0, 0, 1, 0, 0, 0, 0, /* c_1 */ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* c_2 */ 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, /* c_3 */ 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, /* c_4 */ 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, /* f_i */ 0.2;
+    cost = test.train_test(coeffs, fuzzy_regs, in_mem, des_mem).sum();
+    log_timestep(test, 3, 0, fuzzy_regs, in_mem, cost);
+
+
+    coeffs << /* a_1 */ 0, 0, 0, 1, /* a_2 */ 0, 0, 1, 0, 0, /* a_3 */ 0, 0, 0, 1, 0, 0, /* b_3 */ 0, 1, 0, 0, 0, 0, /* a_4 */ 1, 0, 0, 0, 0, 0, 0, /* a_5 */ 0, 1, 0, 0, 0, 0, 0, 0, /* b_5 */ 0, 0, 0, 0, 0, 1, 0, 0, /* a_6 */ 0, 0, 0, 0, 0, 0, 1, 0, 0, /* b_6 */ 0, 0, 0, 0, 1, 0, 0, 0, 0, /* c_1 */ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* c_2 */ 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, /* c_3 */ 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, /* c_4 */ 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, /* f_i */ 0.2;
+    cost = test.train_test(coeffs, fuzzy_regs, in_mem, des_mem).sum();
+    log_timestep(test, 4, 0, fuzzy_regs, in_mem, cost);
+
+    coeffs << /* a_1 */ 0, 0, 0, 1, /* a_2 */ 0, 0, 1, 0, 0, /* a_3 */ 0, 0, 0, 1, 0, 0, /* b_3 */ 0, 1, 0, 0, 0, 0, /* a_4 */ 1, 0, 0, 0, 0, 0, 0, /* a_5 */ 0, 1, 0, 0, 0, 0, 0, 0, /* b_5 */ 0, 0, 0, 0, 0, 1, 0, 0, /* a_6 */ 0, 0, 0, 0, 0, 0, 1, 0, 0, /* b_6 */ 0, 0, 0, 0, 1, 0, 0, 0, 0, /* c_1 */ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* c_2 */ 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, /* c_3 */ 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, /* c_4 */ 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, /* f_i */ 0.2;
+    cost = test.train_test(coeffs, fuzzy_regs, in_mem, des_mem).sum();
+    log_timestep(test, 5, 0, fuzzy_regs, in_mem, cost);
+
+
+    coeffs << /* a_1 */ 0, 0, 0, 1, /* a_2 */ 0, 0, 1, 0, 0, /* a_3 */ 0, 0, 0, 1, 0, 0, /* b_3 */ 0, 1, 0, 0, 0, 0, /* a_4 */ 1, 0, 0, 0, 0, 0, 0, /* a_5 */ 0, 1, 0, 0, 0, 0, 0, 0, /* b_5 */ 0, 0, 0, 0, 0, 1, 0, 0, /* a_6 */ 0, 0, 0, 0, 0, 0, 1, 0, 0, /* b_6 */ 0, 0, 0, 0, 1, 0, 0, 0, 0, /* c_1 */ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* c_2 */ 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, /* c_3 */ 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, /* c_4 */ 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, /* f_i */ 0.2;
+    cost = test.train_test(coeffs, fuzzy_regs, in_mem, des_mem).sum();
+    log_timestep(test, 6, 0, fuzzy_regs, in_mem, cost);
+
+    coeffs << /* a_1 */ 0, 0, 0, 1, /* a_2 */ 0, 0, 1, 0, 0, /* a_3 */ 0, 0, 0, 1, 0, 0, /* b_3 */ 0, 1, 0, 0, 0, 0, /* a_4 */ 1, 0, 0, 0, 0, 0, 0, /* a_5 */ 0, 1, 0, 0, 0, 0, 0, 0, /* b_5 */ 0, 0, 0, 0, 0, 1, 0, 0, /* a_6 */ 0, 0, 0, 0, 0, 0, 1, 0, 0, /* b_6 */ 0, 0, 0, 0, 1, 0, 0, 0, 0, /* c_1 */ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* c_2 */ 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, /* c_3 */ 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, /* c_4 */ 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, /* f_i */ 0.2;
+    cost = test.train_test(coeffs, fuzzy_regs, in_mem, des_mem).sum();
+    log_timestep(test, 7, 0, fuzzy_regs, in_mem, cost);
+
+
+    coeffs << /* a_1 */ 0, 0, 0, 1, /* a_2 */ 0, 0, 1, 0, 0, /* a_3 */ 0, 0, 0, 1, 0, 0, /* b_3 */ 0, 1, 0, 0, 0, 0, /* a_4 */ 1, 0, 0, 0, 0, 0, 0, /* a_5 */ 0, 1, 0, 0, 0, 0, 0, 0, /* b_5 */ 0, 0, 0, 0, 0, 1, 0, 0, /* a_6 */ 0, 0, 0, 0, 0, 0, 1, 0, 0, /* b_6 */ 0, 0, 0, 0, 1, 0, 0, 0, 0, /* c_1 */ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* c_2 */ 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, /* c_3 */ 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, /* c_4 */ 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, /* f_i */ 0.2;
+    cost = test.train_test(coeffs, fuzzy_regs, in_mem, des_mem).sum();
+    log_timestep(test, 8, 0, fuzzy_regs, in_mem, cost);
+
+    coeffs << /* a_1 */ 0, 0, 0, 1, /* a_2 */ 0, 0, 1, 0, 0, /* a_3 */ 0, 0, 0, 1, 0, 0, /* b_3 */ 0, 1, 0, 0, 0, 0, /* a_4 */ 1, 0, 0, 0, 0, 0, 0, /* a_5 */ 0, 1, 0, 0, 0, 0, 0, 0, /* b_5 */ 0, 0, 0, 0, 0, 1, 0, 0, /* a_6 */ 0, 0, 0, 0, 0, 0, 1, 0, 0, /* b_6 */ 0, 0, 0, 0, 1, 0, 0, 0, 0, /* c_1 */ 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, /* c_2 */ 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, /* c_3 */ 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, /* c_4 */ 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, /* f_i */ 0.2;
+    cost = test.train_test(coeffs, fuzzy_regs, in_mem, des_mem).sum();
+    log_timestep(test, 9, 0, fuzzy_regs, in_mem, cost);
+
+    MESSAGE( std::endl << "Output mem: " << Dump::json_matrix(test.defuzzy_mem(in_mem[0])) << ", desired mem: " << Dump::json_matrix(des_mem.row(0)));
+}
+
+int main(int argc, const char** argv)
+{
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    using namespace Denn;
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    Parameters arguments(argc, argv);
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+
+    NRam test(
+        1, // Samples
+        10, // Max int
+        4, // Registers
+        1, // Timesteps
+        {
+            GateFactory::create("read"),
+            GateFactory::create("inc"),
+            GateFactory::create("add"),
+            GateFactory::create("dec"),
+            GateFactory::create("min"),
+            GateFactory::create("write")
+        },
+        arguments
+    );
+
+    execute_copy_task(test);
+
+    // Execute network
+    Random random_engine /*(16112017)*/;
+    //test.execute(random_engine);
+    return 0;
+}

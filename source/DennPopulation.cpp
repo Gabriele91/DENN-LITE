@@ -1,3 +1,4 @@
+#include "Config.h"
 #include "DennPopulation.h"
 namespace Denn
 {
@@ -31,8 +32,12 @@ namespace Denn
 		//find best
 		for (size_t i = 0; i != m_individuals.size(); ++i)
 		{
-			//minimize (cross_entropy)
-			if (!i || m_individuals[i]->m_eval < best_eval)
+			//
+			if 
+			(!i 
+			 || ( m_minimize_loss_function && m_individuals[i]->m_eval < best_eval)
+			 || (!m_minimize_loss_function && m_individuals[i]->m_eval > best_eval)
+			)
 			{
 				best_i = i;
 				best_eval = m_individuals[i]->m_eval;
@@ -82,34 +87,69 @@ namespace Denn
 		, const Individual::SPtr& i_default
 		, const DataSet& dataset
 		, const RandomFunction random_func
-		, CostFunction target_function
+		, Evaluation& loss_function
+		, ThreadPool* thread_pool
 	)
 	{
-		//init pop
-		for (Population& population : m_pop_buffer)
+		//minimize?
+		m_minimize_loss_function = loss_function.minimize();
+		parents().m_minimize_loss_function = m_minimize_loss_function;
+		sons().m_minimize_loss_function = m_minimize_loss_function;
+		//init
+		if(thread_pool)
 		{
+			//alloc promises
+			PromiseList promises;
+			//eval
+			Population& p_ref = parents();
+			Population& s_ref = sons();
 			//size
-			population.resize(np);
-			//init
-			for (Individual::SPtr& i_individual : population)
+			p_ref.resize(np);
+			s_ref.resize(np);
+			//parallel
+			for (size_t i = 0; i != np; ++i)
 			{
-				i_individual = i_default->copy();
+				promises.push_back(thread_pool->push_task([&,i]()
+				{
+					//copy layout
+					p_ref[i] = i_default->copy();
+					s_ref[i] = i_default->copy();
+					//init
+					for (auto& layer : p_ref[i]->m_network)
+					for (auto& matrix : *layer)
+					{
+						matrix = matrix.unaryExpr(random_func);
+					}
+					//eval
+					p_ref[i]->m_eval = loss_function(*p_ref[i], dataset);
+				}));
 			}
+			//wait
+			for (auto& p : promises) p.wait();
 		}
-		//ref to current
-		Population& population = parents();
-		//random init
-		for (auto& individual : population)
-		for (auto& layer : individual->m_network)
-		for (auto& matrix : *layer)
+		else 
 		{
-			matrix = matrix.unaryExpr(random_func);
-		}
-		//eval
-		for (size_t i = 0; i != population.size(); ++i)
-		{
-			auto y = population[i]->m_network.apply(dataset.features());
-			population[i]->m_eval = target_function(dataset.labels(), y);
+			//eval
+			Population& p_ref = parents();
+			Population& s_ref = sons();
+			//size
+			p_ref.resize(np);
+			s_ref.resize(np);
+			//parallel
+			for (size_t i = 0; i != np; ++i)
+			{
+				//copy layout
+				p_ref[i] = i_default->copy();
+				s_ref[i] = i_default->copy();
+				//init
+				for (auto& layer : p_ref[i]->m_network)
+				for (auto& matrix : *layer)
+				{
+					matrix = matrix.unaryExpr(random_func);
+				}
+				//eval
+				p_ref[i]->m_eval = loss_function(*p_ref[i], dataset);
+			}
 		}
 	}
 	//size
@@ -163,14 +203,29 @@ namespace Denn
 	//swap
 	void DoubleBufferPopulation::the_best_sons_become_parents()
 	{
-		//minimize (cross_entropy)
-		for (size_t i = 0; i != parents().size(); ++i)
+		//minimize
+		if(m_minimize_loss_function)
 		{
-			if (sons()[i]->m_eval < parents()[i]->m_eval)
+			for (size_t i = 0; i != parents().size(); ++i)
 			{
-				auto individual_tmp = parents()[i];
-				parents()[i] = sons()[i];
-				sons()[i] = individual_tmp;
+				if (sons()[i]->m_eval < parents()[i]->m_eval)
+				{
+					auto individual_tmp = parents()[i];
+					parents()[i] = sons()[i];
+					sons()[i] = individual_tmp;
+				}
+			}
+		}
+		else 
+		{
+			for (size_t i = 0; i != parents().size(); ++i)
+			{
+				if (sons()[i]->m_eval > parents()[i]->m_eval)
+				{
+					auto individual_tmp = parents()[i];
+					parents()[i] = sons()[i];
+					sons()[i] = individual_tmp;
+				}
 			}
 		}
 	}
@@ -183,35 +238,71 @@ namespace Denn
 	//restart
 	void DoubleBufferPopulation::restart
 	(
-		  Individual::SPtr best
+		  Individual::SPtr 		  best
 		, const size_t            where_put_best
 		, const Individual::SPtr& i_default
 		, const DataSet&          dataset
 		, const RandomFunction    random_func
-		, CostFunction            target_function
+		, Evaluation& 			  loss_function
+		, ThreadPool*			  thread_pool
 	)
 	{
-		//ref to current
-		Population& population = parents();
-		//random init
-		for (auto& individual : population)
-		{
-			//Copy default params
-			individual->copy_attributes(*i_default);
-			//Reinit layers
-			for (auto& layer : individual->m_network)
-			for (auto& matrix : *layer)
+		//minimize?
+		m_minimize_loss_function = loss_function.minimize();
+		parents().m_minimize_loss_function = m_minimize_loss_function;
+		sons().m_minimize_loss_function = m_minimize_loss_function;
+		//init
+		if(thread_pool)
+		{	
+			//alloc promises
+			PromiseList promises;
+			//eval
+			Population& p_ref = parents();
+			Population& s_ref = sons();
+			//parallel
+			for (size_t i = 0; i != p_ref.size(); ++i)
 			{
-				matrix = matrix.unaryExpr(random_func);
+				promises.push_back(thread_pool->push_task([&,i]()
+				{
+					//Copy default params
+					p_ref[i]->copy_attributes(*i_default);
+					s_ref[i]->copy_attributes(*i_default);
+					//init
+					for (auto& layer : p_ref[i]->m_network)
+					for (auto& matrix : *layer)
+					{
+						matrix = matrix.unaryExpr(random_func);
+					}
+					//eval
+					p_ref[i]->m_eval = loss_function(*p_ref[i], dataset);
+				}));
+			}
+			//wait
+			for (auto& p : promises) p.wait();	
+		}
+		else 
+		{			
+			//eval
+			Population& p_ref = parents();
+			Population& s_ref = sons();
+			//parallel
+			for (size_t i = 0; i != p_ref.size(); ++i)
+			{
+				//Copy default params
+				p_ref[i]->copy_attributes(*i_default);
+				s_ref[i]->copy_attributes(*i_default);
+				//init
+				for (auto& layer : p_ref[i]->m_network)
+				for (auto& matrix : *layer)
+				{
+					matrix = matrix.unaryExpr(random_func);
+				}
+				//eval
+				p_ref[i]->m_eval = loss_function(*p_ref[i], dataset);
 			}
 		}
 		//must copy, The Best Individual can't to be changed during the DE process
-		population[where_put_best] = best->copy();
-		//eval
-		for (size_t i = 0; i != population.size(); ++i)
-		{
-			auto y = population[i]->m_network.apply(dataset.features());
-			population[i]->m_eval = target_function(dataset.labels(), y);
-		}
+		parents()[where_put_best] = best->copy();
+		parents()[where_put_best]->m_eval = loss_function(*parents()[where_put_best], dataset);
 	}
 }

@@ -35,7 +35,8 @@ namespace Denn
 			for(long k=-nn; k!=(nn+1); ++k)
 			{
 				long i = Denn::positive_mod(k + (long)id_target, np);
-				if( population[i]->m_eval <  population[id_l_best]->m_eval) id_l_best = i;
+				if(loss_function_compare(population[i]->m_eval, population[id_l_best]->m_eval)) 
+					id_l_best = i;
 			}
 			//local best ref
 			const Individual& l_best = *population[id_l_best];	
@@ -88,7 +89,7 @@ namespace Denn
 						w_final_array[i] = Denn::lerp(w_l_m_array[i], w_g_m_array[i], scalar_weight);
 
 					//clamp
-					w_final.unaryExpr(m_algorithm.clamp_function());
+					w_final = w_final.unaryExpr(m_algorithm.clamp_function());
 				}
 			}
 		}
@@ -205,7 +206,7 @@ namespace Denn
 				for(Matrix::Index i=0; i != w_final.size(); ++i)
 					w_final_array[i] = Denn::lerp(w_l_m_array[i], w_g_m_array[i], scalar_weight);
 				//clamp
-				w_final.unaryExpr(m_algorithm.clamp_function());
+				w_final = w_final.unaryExpr(m_algorithm.clamp_function());
 			}
 		}
 	};

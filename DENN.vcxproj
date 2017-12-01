@@ -23,18 +23,25 @@
     <ClInclude Include="include\Denn.h" />
     <ClInclude Include="include\DennActiveFunction.h" />
     <ClInclude Include="include\DennConstants.h" />
+    <ClInclude Include="include\DennInstance.h" />
     <ClInclude Include="include\DennCostFunction.h" />
     <ClInclude Include="include\DennDatasetLoader.h" />
     <ClInclude Include="include\DennAlgorithm.h" />
     <ClInclude Include="include\DennCrossover.h" />
     <ClInclude Include="include\DennDataSet.h" />
+    <ClInclude Include="include\DennEvaluation.h" />
+    <ClInclude Include="include\DennJson.h" />
+    <ClInclude Include="include\DennNRamDatasetTask.h" />
+    <ClInclude Include="include\DennNRamGate.h" />
+    <ClInclude Include="include\DennNRam.h" />
+    <ClInclude Include="include\DennNRamTask.h" />
     <ClInclude Include="include\DennTestSetStream.h" />
     <ClInclude Include="include\DennDump.h" />
     <ClInclude Include="include\DennEvolutionMethod.h" />
     <ClInclude Include="include\DennFilesystem.h" />
     <ClInclude Include="include\DennIndividual.h" />
     <ClInclude Include="include\DennLayer.h" />
-    <ClInclude Include="include\DennMainUtils.h" />
+    <ClInclude Include="include\DennInstanceUtils.h" />
     <ClInclude Include="include\DennMutation.h" />
     <ClInclude Include="include\DennNeuralNetwork.h" />
     <ClInclude Include="include\DennParameters.h" />
@@ -60,6 +67,9 @@
     <ClCompile Include="source\DennCrossover\DennCrossoverInterm.cpp" />
     <ClCompile Include="source\DennCrossover\DennCrossoverNone.cpp" />
     <ClCompile Include="source\DennDump.cpp" />
+    <ClCompile Include="source\DennEvaluationFactory.cpp" />
+    <ClCompile Include="source\DennEvaluation\DennAccuracy.cpp" />
+    <ClCompile Include="source\DennEvaluation\DennCrossentropy.cpp" />
     <ClCompile Include="source\DennEvolutionMethodFactory.cpp" />
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodBackPropagation.cpp" />
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodDE.cpp" />
@@ -71,9 +81,28 @@
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodShaDE.cpp" />
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodTDE.cpp" />
     <ClCompile Include="source\DennFilesystem.cpp" />
+    <ClCompile Include="source\DennGates\DennGateAdd.cpp" />
+    <ClCompile Include="source\DennGates\DennGateDec.cpp" />
+    <ClCompile Include="source\DennGates\DennGateEquality.cpp" />
+    <ClCompile Include="source\DennGates\DennGateInc.cpp" />
+    <ClCompile Include="source\DennGates\DennGateLessEqualThan.cpp" />
+    <ClCompile Include="source\DennGates\DennGateLessThan.cpp" />
+    <ClCompile Include="source\DennGates\DennGateMax.cpp" />
+    <ClCompile Include="source\DennGates\DennGateMin.cpp" />
+    <ClCompile Include="source\DennGates\DennGateOne.cpp" />
+    <ClCompile Include="source\DennGates\DennGateRead.cpp" />
+    <ClCompile Include="source\DennGates\DennGateSub.cpp" />
+    <ClCompile Include="source\DennGates\DennGateTwo.cpp" />
+    <ClCompile Include="source\DennGates\DennGateWrite.cpp" />
+    <ClCompile Include="source\DennGates\DennGateZero.cpp" />
     <ClCompile Include="source\DennIndividual.cpp" />
+    <ClCompile Include="source\DennInstance.cpp" />
+    <ClCompile Include="source\DennInstance\DennDefaultInstance.cpp" />
+    <ClCompile Include="source\DennInstance\DennNRamInstance.cpp" />
+    <ClCompile Include="source\DennInstance\DennNRamTestInstance.cpp" />
+    <ClCompile Include="source\DennJson.cpp" />
     <ClCompile Include="source\DennLayer.cpp" />
-    <ClCompile Include="source\DennMainUtils.cpp" />
+    <ClCompile Include="source\DennInstanceUtils.cpp" />
     <ClCompile Include="source\DennMutationFactory.cpp" />
     <ClCompile Include="source\DennMutation\DennMutationBest.cpp" />
     <ClCompile Include="source\DennMutation\DennMutationCurrentToBest.cpp" />
@@ -82,6 +111,11 @@
     <ClCompile Include="source\DennMutation\DennMutationRand.cpp" />
     <ClCompile Include="source\DennMutation\DennMutationTrigonometric.cpp" />
     <ClCompile Include="source\DennNeuralNetwork.cpp" />
+    <ClCompile Include="source\DennNRam.cpp" />
+    <ClCompile Include="source\DennNRamDatasetTask.cpp" />
+    <ClCompile Include="source\DennNRamGate.cpp" />
+    <ClCompile Include="source\DennNRamTask.cpp" />
+    <ClCompile Include="source\DennNRamTaskItems.cpp" />
     <ClCompile Include="source\DennParameters.cpp" />
     <ClCompile Include="source\DennPerceptronLayer.cpp" />
     <ClCompile Include="source\DennPopulation.cpp" />
@@ -193,7 +227,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>$(DefineConstants);NOMINMAX;USE_FAST_UNIFORM;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>$(DefineConstants);NOMINMAX;USE_FAST_UNIFORM;_CRT_SECURE_NO_WARNINGS_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)/dips/include;$(ProjectDir)/include;</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
@@ -231,7 +265,7 @@
       </PrecompiledHeader>
       <Optimization>Full</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
-      <PreprocessorDefinitions>$(DefineConstants);NOMINMAX;USE_FAST_UNIFORM;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>$(DefineConstants);NOMINMAX;USE_FAST_UNIFORM;_CRT_SECURE_NO_WARNINGSNDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalIncludeDirectories>$(ProjectDir)/dips/include;$(ProjectDir)/include;</AdditionalIncludeDirectories>
       <EnableParallelCodeGeneration>true</EnableParallelCodeGeneration>
       <EnableEnhancedInstructionSet>AdvancedVectorExtensions</EnableEnhancedInstructionSet>

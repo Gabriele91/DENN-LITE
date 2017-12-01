@@ -3,6 +3,7 @@
 #include "ThreadPool.h"
 #include "DennRandom.h"
 #include "DennCostFunction.h"
+#include "DennEvaluation.h"
 #include "DennDatasetLoader.h"
 #include "DennParameters.h"
 #include "DennPopulation.h"
@@ -11,10 +12,11 @@
 #include "DennEvolutionMethod.h"
 #include "DennRuntimeOutput.h"
 #include "DennTestSetStream.h"
+#include "DennInstance.h"
 
 namespace Denn
 {
-
+//Def DennAlgorithm
 class DennAlgorithm
 {
 public:
@@ -23,10 +25,7 @@ public:
 	using LayerList      = typename NeuralNetwork::LayerList;
 	//Search space
 	using DBPopulation   = DoubleBufferPopulation;
-	using RandomFunction = typename DoubleBufferPopulation::RandomFunction;
-	using CostFunction   = typename DoubleBufferPopulation::CostFunction;
-	//DE parallel
-	using PromiseList    = std::vector< std::future<void> >;
+	using RandomFunction = std::function<Scalar(Scalar)>;
 	//Ref mutation crossover
 	using ClampFunction  = std::function<Scalar(Scalar)>;
 	//Vector of random
@@ -63,15 +62,8 @@ public:
 		}
 	};
 	////////////////////////////////////////////////////////////////////////
-	DennAlgorithm
-	(
-		  DataSetLoader*      dataset_loader
-		, const Parameters&   params
-		, const NeuralNetwork nn_default
-		, CostFunction		  target_function
-		, std::ostream&       output
-		, ThreadPool*		  thpool = nullptr
-	);	
+	DennAlgorithm(Instance&	instance, const Parameters&   params);	
+
 	//big loop
 	virtual Individual::SPtr execute();
 
@@ -159,6 +151,70 @@ public:
 		return m_dataset_loader;
 	}
 
+	Evaluation::SPtr loss_function() const 
+	{
+		return m_loss_function;
+	}
+	
+	Evaluation::SPtr validation_function() const 
+	{
+		return m_validation_function;
+	}
+
+	Evaluation::SPtr test_function() const 
+	{
+		return m_test_function;
+	}
+
+
+	bool loss_function_compare(Scalar left, Scalar right) const
+	{
+		return  m_loss_function->minimize() 
+		    ?   left < right
+			:  right < left
+			;
+	}
+
+	bool validation_function_compare(Scalar left, Scalar right) const
+	{
+		return  m_validation_function->minimize() 
+		    ?   left < right
+			:  right < left
+			;
+	}
+
+	bool test_function_compare(Scalar left, Scalar right) const
+	{
+		return  m_test_function->minimize() 
+		    ?  left < right
+			:  right < left
+			;
+	}
+
+	Scalar loss_function_worst() const
+	{
+		return  m_loss_function->minimize() 
+		    ?   std::numeric_limits<Scalar>::max() 
+			:  -std::numeric_limits<Scalar>::max()
+			;
+	}
+
+	Scalar validation_function_worst() const
+	{
+		return  m_validation_function->minimize() 
+		    ?   std::numeric_limits<Scalar>::max() 
+			:  -std::numeric_limits<Scalar>::max()
+			;
+	}
+
+	Scalar test_function_worst() const
+	{
+		return  m_test_function->minimize() 
+		    ?   std::numeric_limits<Scalar>::max() 
+			:  -std::numeric_limits<Scalar>::max()
+			;
+	}
+
 protected:
 	//init
 	bool init();
@@ -173,7 +229,7 @@ protected:
 	void execute_a_sub_pass(size_t pass, size_t sub_pass);
 	void execute_update_best();
 	void execute_update_best_on_validation();
-	void execute_update_best_on_target_function();
+	void execute_update_best_on_loss_function();
 	void execute_update_restart(size_t pass);	
 	/////////////////////////////////////////////////////////////////
 	//execute a pass
@@ -183,9 +239,9 @@ protected:
 	void  execute_generation_task(size_t i);
 	/////////////////////////////////////////////////////////////////
 	//eval all
-	void execute_target_function_on_all_population(Population& population) const;
-	void serial_execute_target_function_on_all_population(Population& population) const;
-	void parallel_execute_target_function_on_all_population(Population& population,ThreadPool& thpool) const;
+	void execute_loss_function_on_all_population(Population& population) const;
+	void serial_execute_loss_function_on_all_population(Population& population) const;
+	void parallel_execute_loss_function_on_all_population(Population& population,ThreadPool& thpool) const;
 	/////////////////////////////////////////////////////////////////
 	//gen random function
 	RandomFunction gen_random_func() const;
@@ -195,14 +251,16 @@ protected:
 	bool next_batch();
 	/////////////////////////////////////////////////////////////////
 	//Random engine
-	mutable Random 		  m_main_random;
-	mutable RandomList    m_population_random;
+	Random&	m_main_random;
+	mutable RandomList m_population_random;
 	//multi threads
 	ThreadPool*			  m_thpool;
 	mutable PromiseList	  m_promises;
 	//serach space
 	DBPopulation          m_population;
-	CostFunction          m_target_function;	
+	Evaluation::SPtr      m_loss_function;
+	Evaluation::SPtr      m_validation_function;
+	Evaluation::SPtr      m_test_function;
 	RuntimeOutput::SPtr   m_output;
 	//dataset
 	Individual::SPtr      m_default;

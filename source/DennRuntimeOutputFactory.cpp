@@ -12,7 +12,7 @@ namespace Denn
 	const DoubleBufferPopulation& RuntimeOutput::population()       const{ return m_algorithm.population(); }
 	const size_t                  RuntimeOutput::current_np()       const{ return m_algorithm.current_np(); }
 	//map
-	static std::map< std::string, RuntimeOutputFactory::CreateObject >& ro_cmap()
+	static std::map< std::string, RuntimeOutputFactory::CreateObject >& ro_map()
 	{
 		static std::map< std::string, RuntimeOutputFactory::CreateObject > ro_map;
 		return ro_map;
@@ -21,20 +21,20 @@ namespace Denn
 	RuntimeOutput::SPtr RuntimeOutputFactory::create(const std::string& name, std::ostream& stream, const DennAlgorithm& algorithm)
 	{
 		//find
-		auto it = ro_cmap().find(name);
+		auto it = ro_map().find(name);
 		//return
-		return it->second(stream,algorithm);
+		return it == ro_map().end() ? nullptr : it->second(stream,algorithm);
 	}
 	void RuntimeOutputFactory::append(const std::string& name, RuntimeOutputFactory::CreateObject fun, size_t size)
 	{
 		//add
-		ro_cmap()[name] = fun;
+		ro_map()[name] = fun;
 	}
 	//list of methods
 	std::vector< std::string > RuntimeOutputFactory::list_of_runtime_outputs()
 	{
 		std::vector< std::string > list;
-		for (const auto & pair : ro_cmap()) list.push_back(pair.first);
+		for (const auto & pair : ro_map()) list.push_back(pair.first);
 		return list;
 	}
 	std::string  RuntimeOutputFactory::names_of_runtime_outputs(const std::string& sep)
@@ -49,8 +49,8 @@ namespace Denn
 	bool RuntimeOutputFactory::exists(const std::string& name)
 	{
 		//find
-		auto it = ro_cmap().find(name);
+		auto it = ro_map().find(name);
 		//return 
-		return it != ro_cmap().end();
+		return it != ro_map().end();
 	}
 }

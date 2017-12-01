@@ -1,5 +1,6 @@
 #pragma once
 #include "Config.h"
+#include "DennActiveFunction.h"
 
 namespace Denn
 {
@@ -14,13 +15,15 @@ namespace Denn
 		//EIGEN_MAKE_ALIGNED_OPERATOR_NEW	
 		///////////////////////////////////////////////////////////////////////////
 		virtual Layer::SPtr copy() const  				                                                 = 0;
-		virtual Matrix apply(const Matrix& input)									                     = 0;
+		virtual Matrix apply(const Matrix& input) const								                     = 0;
 		virtual Matrix              feedforward(const Matrix& input, Matrix& ff_out)													      = 0;
 		virtual Matrix              backpropagate_delta   (const Matrix& bp_delta, const Matrix& ff_out)								      = 0;
 		virtual std::vector<Matrix> backpropagate_gradient(const Matrix& bp_delta, const Matrix& ff_out, size_t input_samples, Scalar lambda) = 0;
 		virtual size_t size() const											                             = 0;
 		virtual Matrix& operator[](size_t i)								                             = 0;
-		virtual const Matrix& operator[](size_t i) const						                         = 0;
+		virtual const Matrix& operator[](size_t i) const						                         = 0;		
+		virtual ActiveFunction get_active_function()													 = 0;
+		virtual void           set_active_function(ActiveFunction active_function)						 = 0;
 		///////////////////////////////////////////////////////////////////////////
 		class Iterator 
 		{

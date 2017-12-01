@@ -190,8 +190,9 @@ namespace Denn
 		read_only<bool>				    m_serialize_neural_network{ "serialize_neural_network", bool(true),  false /* true? */ };
         read_only<bool>                 m_use_validation          { "use_validation",           bool(true),  true /* false? */ };
 
-		read_only<unsigned int>	         m_seed				{ "seed", (unsigned int)(std::random_device{}())  };
+		read_only<unsigned int>	         m_seed			 { "seed", (unsigned int)(std::random_device{}())  };
 
+		read_only<std::string>	         m_instance      { "instance", "default" };
 		read_only<size_t>	             m_generations   { "generation", size_t(1000)  };
 		read_only<size_t>	             m_sub_gens      { "sub_gens"  , size_t(100)   };
 		read_only<size_t>	             m_np            { "number_parents",size_t(16) };
@@ -217,7 +218,7 @@ namespace Denn
 		read_only<size_t>                m_degl_neighborhood { "degl_neighborhood", Scalar(1)   };
 		//TDE
 		read_only<Scalar>				 m_trig_m        { "trig_m", Scalar(0.05) };
-
+		//DE common info
 		read_only<Scalar>	             m_clamp_max     { "clamp_max",  Scalar( 10.0) };
 		read_only<Scalar>	             m_clamp_min     { "clamp_min",  Scalar(-10.0) };
 		read_only<Scalar>	             m_range_max     { "random_max", Scalar( 1.0 ) };
@@ -226,18 +227,27 @@ namespace Denn
 		read_only<long>	                 m_restart_count { "restart_count", size_t(-1)    };
 		read_only<Scalar>	             m_restart_delta { "restart_delta", Scalar(0.001) };
 		read_only<size_t>	             m_threads_omp   { "threads_omp", size_t(2) };
-		read_only<size_t>	             m_threads_pop   { "threads_pop", size_t(2) };		
+		read_only<size_t>	             m_threads_pop   { "threads_pop", size_t(2) };
 		read_only<size_t>	             m_history_size  { "history_size", size_t(1) };
+		//type of DE
 		read_only<std::string>           m_mutation_type { "mutation","rand/1" };
 		read_only<std::string>           m_crossover_type{ "crossover","bin" };
 		read_only<std::string>           m_evolution_type    { "evolution_method","JDE" };
 		read_only<std::string>           m_sub_evolution_type{ "sub_evolution_method","JDE" };
+		//network
 		read_only<Scalar>					   m_learning_rate		   { "learning_rate", Scalar(0.05) };
 		read_only<Scalar>					   m_regularize			   { "regularize", Scalar(0.0) };
 		read_only< std::vector<unsigned int> > m_hidden_layers         { "hidden_layers"         /* , none */ };
 		read_only< std::vector<std::string> >  m_active_functions      { "active_functions"      /* , none */ };
 		read_only< std::string >               m_output_active_function{ "output_active_function" ,  "softmax" };
-
+		//nram attribute
+		read_only< size_t >					   m_max_int			   { "max_int"                  , size_t(10) };
+		read_only< size_t >					   m_n_registers		   { "n_registers"              , size_t(4) };
+		read_only< size_t >					   m_time_steps			   { "time_steps"               , size_t(1) };
+		read_only< std::string >               m_task				   { "task"                  /* , none */ };
+		read_only< std::vector<std::string> >  m_gates				   { "gates"                 /* , none */ };
+		//nram test 
+		read_only< size_t >					   m_n_test				   { "n_test", size_t(1) };
 		//params info
 		std::vector< ParameterInfo >     m_params_info;
 	
