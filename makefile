@@ -63,17 +63,15 @@ endif
 ifeq ($(shell uname -s),Linux)
 # too slow -fopenmp 
 C_FLAGS += -pthread 
-endif
-
 #clang
-ifeq ($(findstring clang,$(VERION_COMPILER)), clang)
-# none
-else 
+ifneq ($(findstring clang,$(VERION_COMPILER)), clang) 
 # remove gcc warning (eigen)
 C_FLAGS += -Wno-int-in-bool-context
 # only linux + gcc
 C_FLAGS += -lpthread
 endif
+endif
+
 
 # MacOS flags
 ifeq ($(shell uname -s),Darwin)

@@ -127,7 +127,7 @@ namespace NRam
 				for (size_t m = 0; m < m_network[l].size() && parser_network_success; ++m)
 				{
 					//test
-					if (!(parser_network_success = network[l].is_array())) break;
+					if (!(parser_network_success == network[l].is_array())) break;
 					//get
 					Matrix  matrix = matrix_from_json_array(network[l][m]);
 					Matrix& nn_mat = m_network[l][m];
