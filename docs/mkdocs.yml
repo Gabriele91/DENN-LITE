@@ -1,0 +1,6 @@
+site_name: 'DENN-LITE Documentation'
+
+docs_dir: 'sources'
+
+theme:
+  name: 'material'
