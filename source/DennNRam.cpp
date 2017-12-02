@@ -110,13 +110,13 @@ namespace NRam
                 switch(arity)
                 {
                     case Gate::Arity::CONST:
-                        output << "\t• " 
+                        output << u8"\t• "
                                << gate_name << " => "
                                << values.back()(0,0)
                                << std::endl;
                     break;
                     case Gate::Arity::UNARY:
-                        output << "\t• " 
+                        output << u8"\t• "
                                << gate_name 
                                << "(" 
                                << values[1](0,0)
@@ -125,7 +125,7 @@ namespace NRam
                                << std::endl;
                     break;
                     case Gate::Arity::BINARY:
-                        output << "\t• " 
+                        output << u8"\t• "
                                << gate_name 
                                << "(" 
                                << values[1](0,0)
@@ -148,13 +148,13 @@ namespace NRam
                 auto& r      = std::get<0>(update);
                 auto& values = std::get<1>(update);
                 //update
-                output << "\t• R" << r << " => " << values.back()(0,0) << std::endl;
+                output << u8"\t• R" << r << " => " << values.back()(0,0) << std::endl;
             }
 
             // Print mem at last timestep
             auto& last_gate_op = step.m_ops.back();
             auto& values       = std::get<1>(last_gate_op);
-            output << "\t• Mem " << Dump::json_matrix(values[values.size() - 2]) << std::endl;
+            output << u8"\t• Mem " << Dump::json_matrix(values[values.size() - 2]) << std::endl;
        
         }
         return output.str();

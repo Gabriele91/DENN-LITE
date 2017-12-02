@@ -159,6 +159,9 @@
     <ClInclude Include="include\DennArguments.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="include\DennParameterInfo.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\TicksTime.cpp">
@@ -369,6 +372,9 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="source\DennArguments.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennParameterInfo.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>

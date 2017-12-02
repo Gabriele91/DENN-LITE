@@ -55,6 +55,7 @@
     <ClInclude Include="include\DennVersion.h" />
     <ClInclude Include="include\IOFileWrapper.h" />
     <ClInclude Include="include\DennRandom.h" />
+    <ClInclude Include="include\DennParameterInfo.h" />
     <ClInclude Include="include\ThreadPool.h" />
     <ClInclude Include="include\TicksTime.h" />
   </ItemGroup>
@@ -118,6 +119,7 @@
     <ClCompile Include="source\DennNRamGate.cpp" />
     <ClCompile Include="source\DennNRamTask.cpp" />
     <ClCompile Include="source\DennNRamTaskItems.cpp" />
+    <ClCompile Include="source\DennParameterInfo.cpp" />
     <ClCompile Include="source\DennParameters.cpp" />
     <ClCompile Include="source\DennPerceptronLayer.cpp" />
     <ClCompile Include="source\DennPopulation.cpp" />
