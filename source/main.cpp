@@ -23,8 +23,10 @@ int main(int argc,const char** argv)
     //execute test
 	if (instance)
     {
-        if(instance->execute()) return 0;
-        else                    return 128;
+        if(instance->execute()) 
+			return 0;
+        else                   
+			return 128;
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////
     return 255;

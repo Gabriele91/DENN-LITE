@@ -13,92 +13,53 @@
 
 namespace Denn
 {
-    Arguments::Arguments(int nargs, const char** vargs)
-    : m_rem_arg(nargs)
-    , m_pointer(vargs)
-    {
-    }
-
-    const char* Arguments::get_string()
-    {
-        assert(m_rem_arg);
-        --m_rem_arg;
-        return *(m_pointer++);
-    }
-
-    int Arguments::get_int() 
-    {
-        return atoi(get_string());
-    }
-
-    double Arguments::get_double()
-    {
-        return atof(get_string());
-    }
-
-    int Arguments::remaining() const
-    {
-        return m_rem_arg;
-    }
-
-    void Arguments::back_of_one()
-    {
-        ++m_rem_arg;
-        --m_pointer;
-    }
-
-    bool Arguments::start_with_minus() const
-    {
-        return (*m_pointer)[0] == '-';
-    }
-
     //CPP type to str param
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<bool>(){ return "bool"; }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type<bool>(){ return "bool"; }
     
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<char>()                        { return "string"; }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< const char* >()               { return "string"; }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::string >()               { return "string"; }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector< std::string > >(){ return "list(string)"; }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type<char>()                        { return "string"; }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type< const char* >()               { return "string"; }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type< std::string >()               { return "string"; }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type< std::vector< std::string > >(){ return "list(string)"; }
     
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<short>()    { return "int"; }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<int>()      { return "int"; }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<long>()     { return "int"; }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<long long>(){ return "int"; }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type<short>()    { return "int"; }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type<int>()      { return "int"; }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type<long>()     { return "int"; }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type<long long>(){ return "int"; }
     
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<unsigned short>()    { return "uint"; }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<unsigned int>()      { return "uint"; }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<unsigned long>()     { return "uint"; }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<unsigned long long>(){ return "uint"; }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type<unsigned short>()    { return "uint"; }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type<unsigned int>()      { return "uint"; }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type<unsigned long>()     { return "uint"; }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type<unsigned long long>(){ return "uint"; }
     
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<float>()      { return "float"; }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<double>()     { return "float"; }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<long double>(){ return "float"; }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type<float>()      { return "float"; }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type<double>()     { return "float"; }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type<long double>(){ return "float"; }
     
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<MatrixF>() { return "matrix"; }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<MatrixD>() { return "matrix"; }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type<MatrixLD>(){ return "matrix"; }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type<MatrixF>() { return "matrix"; }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type<MatrixD>() { return "matrix"; }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type<MatrixLD>(){ return "matrix"; }
 
-	template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<short> >()		  { return "list(int)"; }
-	template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<int> >()		  { return "list(int)"; }
-	template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<long> >()		  { return "list(int)"; }
-	template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<long long> >()	  { return "list(int)"; }
-	template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<unsigned short> >()		  { return "list(uint)"; }
-	template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<unsigned int> >()		  { return "list(uint)"; }
-	template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<unsigned long> >()		  { return "list(uint)"; }
-	template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<unsigned long long> >()	  { return "list(uint)"; }
-	template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<float> >()        { return "list(float)";  }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<double> >()       { return "list(float)";  }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<long double> >()  { return "list(float)";  }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<MatrixF> >()      { return "list(matrix)";  }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<MatrixD> >()      { return "list(matrix)";  }
-    template<> const char* Parameters::ParameterInfo::cpp_type_to_arg_type< std::vector<MatrixLD> >()     { return "list(matrix)";  }
+	template<> const char* ParameterInfo::cpp_type_to_arg_type< std::vector<short> >()		  { return "list(int)"; }
+	template<> const char* ParameterInfo::cpp_type_to_arg_type< std::vector<int> >()		  { return "list(int)"; }
+	template<> const char* ParameterInfo::cpp_type_to_arg_type< std::vector<long> >()		  { return "list(int)"; }
+	template<> const char* ParameterInfo::cpp_type_to_arg_type< std::vector<long long> >()	  { return "list(int)"; }
+	template<> const char* ParameterInfo::cpp_type_to_arg_type< std::vector<unsigned short> >()		  { return "list(uint)"; }
+	template<> const char* ParameterInfo::cpp_type_to_arg_type< std::vector<unsigned int> >()		  { return "list(uint)"; }
+	template<> const char* ParameterInfo::cpp_type_to_arg_type< std::vector<unsigned long> >()		  { return "list(uint)"; }
+	template<> const char* ParameterInfo::cpp_type_to_arg_type< std::vector<unsigned long long> >()	  { return "list(uint)"; }
+	template<> const char* ParameterInfo::cpp_type_to_arg_type< std::vector<float> >()        { return "list(float)";  }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type< std::vector<double> >()       { return "list(float)";  }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type< std::vector<long double> >()  { return "list(float)";  }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type< std::vector<MatrixF> >()      { return "list(matrix)";  }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type< std::vector<MatrixD> >()      { return "list(matrix)";  }
+    template<> const char* ParameterInfo::cpp_type_to_arg_type< std::vector<MatrixLD> >()     { return "list(matrix)";  }
     
     
     Parameters::Parameters() 
     :m_params_info
     ({
         ParameterInfo{
-            m_instance, "Type of instance [" + InstanceFactory::names_of_instances() + "]", { "--" + m_instance.name(), "--test_type", "-ins", "-tt" },
+            m_instance, "Type of instance", { "--test_type", "-ins", "-tt" },
             [this](Arguments& args) -> bool  
             { 
                 std::string str_m_type = args.get_string() ;
@@ -112,48 +73,28 @@ namespace Denn
             , { "string", InstanceFactory::list_of_instances() }
         },
         ParameterInfo{ 
-            m_generations, "Global number of generation [or backpropagation pass]", { "--" + m_generations.name(), "-t", "-g"  }, 
-            [this](Arguments& args) -> bool { m_generations = args.get_int() ; return true; } 
+            m_generations, "Global number of generation [or backpropagation pass]", { "-t", "-g"  }
         },
         ParameterInfo{ 
-            m_sub_gens, "Number of generation [or backpropagation pass] per batch", { "--" + m_sub_gens.name(), "-s" , "-sg" },
-            [this](Arguments& args) -> bool { m_sub_gens = args.get_int() ; return true; }
+            m_sub_gens, "Number of generation [or backpropagation pass] per batch", { "-s" , "-sg" }
         },
         ParameterInfo{
-            m_np, "Number of parents", { "--" + m_np.name(),    "-np"  }, 
-            [this](Arguments& args) -> bool { m_np = args.get_int() ; return true; }
+            m_np, "Number of parents", { "-np"  }
         },
         ParameterInfo{
-            m_seed, "Random generator seed", { "--" + m_seed.name(),    "-sd"  }, 
-            [this](Arguments& args) -> bool { m_seed = args.get_int() ; return true; }
+            m_seed, "Random generator seed", { "-sd"  }
         },
         ParameterInfo{
-            m_batch_size, "Batch size", { "--" + m_batch_size.name(), "-b" },
-            [this](Arguments& args) -> bool 
-			{
-				m_batch_size = args.get_int();
-				return true; 
-			}
+            m_batch_size, "Batch size", { "--" + m_batch_size.name(), "-b" }
         },
         ParameterInfo{
-            m_batch_offset, "Batch offset, how many records will be replaced in the next batch [<= batch size]", { "--" + m_batch_offset.name(), "-bo" },
-            [this](Arguments& args) -> bool {  m_batch_offset = args.get_int();  return true; }
+            m_batch_offset, "Batch offset, how many records will be replaced in the next batch [<= batch size]", { "-bo" }
         },
         ParameterInfo{
-            m_use_validation, "Use the validation test", { "--" + m_use_validation.name(), "-uv" },
-            [this](Arguments& args) -> bool
-            {
-                std::string arg(args.get_string());
-                m_use_validation =
-                    arg == std::string("true")
-                ||  arg == std::string("yes")
-                ||  arg == std::string("t")
-                ||  arg == std::string("y") ;
-                return true;
-            }
+            m_use_validation, "Use the validation test", { "-uv" }
         },
         ParameterInfo{
-            m_evolution_type, "Type of evolution method [" + EvolutionMethodFactory::names_of_evolution_methods() + "]", { "--" + m_evolution_type.name(), "--evolution",    "-em"  },
+            m_evolution_type, "Type of evolution method", { "--evolution",    "-em"  },
             [this](Arguments& args) -> bool  
             { 
                 std::string str_m_type = args.get_string() ;
@@ -168,8 +109,8 @@ namespace Denn
         },
         ParameterInfo{
               m_sub_evolution_type
-            , "Type of sub evolution method [" + EvolutionMethodFactory::names_of_evolution_methods() + "] (PHISTORY)"
-            , { "--" + m_sub_evolution_type.name(), "--sub-evolution",    "-sem"  }
+            , "Type of sub evolution method (PHISTORY)"
+            , { "--sub-evolution",    "-sem"  }
             , [this](Arguments& args) -> bool
               {
                   std::string str_m_type = args.get_string() ;
@@ -184,8 +125,8 @@ namespace Denn
         },
         ParameterInfo{
               m_mutation_type
-            , "Type of DE mutation [" + MutationFactory::names_of_mutations() + "]"
-            , { "--" + m_mutation_type.name(),    "-m"  }
+            , "Type of DE mutation"
+            , { "-m"  }
             , [this](Arguments& args) -> bool
               {
                   std::string str_m_type = args.get_string() ;
@@ -200,8 +141,8 @@ namespace Denn
         },
         ParameterInfo{
               m_crossover_type
-            , "Type of DE crossover [" + CrossoverFactory::names_of_crossovers() + "]"
-            , { "--" + m_crossover_type.name(),    "-co"  }
+            , "Type of DE crossover"
+            , { "-co"  }
             , [this](Arguments& args) -> bool
               {
                   std::string str_c_type = args.get_string();
@@ -216,91 +157,72 @@ namespace Denn
         },
 
         ParameterInfo{
-            m_history_size, "Size of population history (PHISTORY)", { "--" + m_history_size.name(),    "-hs"  }, 
-            [this](Arguments& args) -> bool { m_history_size = args.get_int() ; return true; }
+            m_history_size, "Size of population history (PHISTORY)", { "-hs"  }
         },
 
         ParameterInfo{ 
-            m_default_f, "Default F factor for DE", { "--" + m_default_f.name() ,    "-f"  }, 
-            [this](Arguments& args) -> bool { m_default_f = args.get_double() ;  return true; } 
+            m_default_f, "Default F factor for DE", { "-f"  }
         },
         ParameterInfo{ 
-            m_default_cr, "Default CR factor for DE", { "--" + m_default_cr.name() ,    "-cr"  }, 
-            [this](Arguments& args) -> bool { m_default_cr = args.get_double() ;  return true; }
+            m_default_cr, "Default CR factor for DE", { "-cr" }
         },
                             
         ParameterInfo{ 
-            m_jde_f, "Probability of change of F (JDE)", { "--" + m_jde_f.name(),    "-jf"  }, 
-            [this](Arguments& args) -> bool { m_jde_f = args.get_double() ;  return true; } 
+            m_jde_f, "Probability of change of F (JDE)", { "-jf"  }
         },
         ParameterInfo{ 
-            m_jde_cr, "Probability of change of CR (JDE)", { "--" + m_jde_cr.name(),    "-jcr"  }, 
-            [this](Arguments& args) -> bool { m_jde_cr = args.get_double() ;  return true; } 
+            m_jde_cr, "Probability of change of CR (JDE)", { "-jcr"  }
         },
 				
 		ParameterInfo{
-			m_archive_size, "Archive size (JADE/SHADE)",{ "--" + m_archive_size.name(),    "-as" },
-			[this](Arguments& args) -> bool { m_archive_size = args.get_int();  return true; }
+			m_archive_size, "Archive size (JADE/SHADE)",{ "-as" }
 		},				
 		ParameterInfo{
-			m_f_cr_adapt, "Auto adaptation factor of f and c parameters (JADE)",{ "--" + m_f_cr_adapt.name(),    "-afcr" },
-			[this](Arguments& args) -> bool { m_f_cr_adapt = args.get_double();  return true; }
+			m_f_cr_adapt, "Auto adaptation factor of f and c parameters (JADE)",{ "-afcr" }
 		},
 
 		ParameterInfo{
-			m_shade_h, "Size of archive of mu_f and mu_cr in SHADE",{ "--" + m_shade_h.name(),    "-shah" },
-			[this](Arguments& args) -> bool { m_shade_h = args.get_int();  return true; }
+			m_shade_h, "Size of archive of mu_f and mu_cr in SHADE",{ "-shah" }
 		}, 
 
 		ParameterInfo{
-			m_min_np, "Minimum number of parents (L-SHADE)",{ "--" + m_min_np.name(),    "-mnp" },
-			[this](Arguments& args) -> bool { m_min_np = args.get_int(); return true; }
+			m_min_np, "Minimum number of parents (L-SHADE)",{ "-mnp" }
 		},
 		ParameterInfo{
-				m_max_nfe, "Maximum number of fitness evaluation (L-SHADE)",{ "--" + m_max_nfe.name(),  "-mnfe" },
-			[this](Arguments& args) -> bool { m_max_nfe = args.get_int(); return true; }
+				m_max_nfe, "Maximum number of fitness evaluation (L-SHADE)",{ "-mnfe" }
 		},
 		ParameterInfo{
-			m_mu_cr_terminal_value, "Terminal value of MU Cr (L-SHADE)",{ "--" + m_mu_cr_terminal_value.name(),  "-mcrtv" },
-			[this](Arguments& args) -> bool { m_mu_cr_terminal_value = args.get_double(); return true; }
+			m_mu_cr_terminal_value, "Terminal value of MU Cr (L-SHADE)",{ "-mcrtv" }
 		},
 
 		ParameterInfo{
-			m_perc_of_best, "Percentage of best (Current P Best/NO [L-]SHADE)",{ "--" + m_perc_of_best.name(), "-pob", "-p" },
-			[this](Arguments& args) -> bool { m_perc_of_best = args.get_double();  return true; }
+			m_perc_of_best, "Percentage of best (Current P Best/NO [L-]SHADE)",{ "-pob", "-p" }
 		},	
 
 		ParameterInfo{
-			m_degl_scalar_weight, "Scalar weight used to combinate local mutant with global mutant (DEGL)",{ "--" + m_degl_scalar_weight.name(),    "-glw" },
-			[this](Arguments& args) -> bool { m_degl_scalar_weight = args.get_double();  return true; }
+			m_degl_scalar_weight, "Scalar weight used to combinate local mutant with global mutant (DEGL)",{ "-glw" }
 		},				
 		ParameterInfo{
-			m_degl_neighborhood, "Neighborhood of target where is searched the best (DEGL)",{ "--" + m_degl_neighborhood.name(), "-glnn" },
-			[this](Arguments& args) -> bool { m_degl_neighborhood = args.get_int();  return true; }
+			m_degl_neighborhood, "Neighborhood of target where is searched the best (DEGL)",{ "-glnn" }
 		},	
 		ParameterInfo{
-			m_trig_m, "Probability of the mutation to be trigonometric (TDE)",{ "--" + m_trig_m.name(), "-tm" },
-			[this](Arguments& args) -> bool { m_trig_m = args.get_double();  return true; }
+			m_trig_m, "Probability of the mutation to be trigonometric (TDE)",{ "-tm" }
         },
         
         ParameterInfo{ 
-            m_clamp_min, "Minimum size of weight", { "--" + m_clamp_min.name(),    "-cmin"  }, 
-            [this](Arguments& args) -> bool { m_clamp_min = args.get_double() ; return true;  } 
+            m_clamp_min, "Minimum size of weight", { "-cmin"  }
         },
         ParameterInfo{ 
-            m_clamp_max, "Maximum size of weight", { "--" + m_clamp_max.name(),    "-cmax"  }, 
-            [this](Arguments& args) -> bool { m_clamp_max = args.get_double() ; return true;  } 
+            m_clamp_max, "Maximum size of weight", { "-cmax"  }
         },
         ParameterInfo{ 
-            m_range_min, "Minimum size of weight in random initialization", { "--" + m_range_min.name(),    "-rmin"  }, 
-            [this](Arguments& args) -> bool { m_range_min = args.get_double() ;  return true; } 
+            m_range_min, "Minimum size of weight in random initialization", { "-rmin"  }
         },
         ParameterInfo{ 
-            m_range_max, "Maximum size of weight in random initialization", { "--" + m_range_max.name(),    "-rmax"  }, 
-            [this](Arguments& args) -> bool { m_range_max = args.get_double() ;  return true; } 
+            m_range_max, "Maximum size of weight in random initialization", { "-rmax"  }
         },
         ParameterInfo{ 
-            m_restart_count, "Number of change of batches before restart (if accuracy not increase)", { "--" + m_restart_count.name(),    "-rc"  }, 
+            m_restart_count, "Number of change of batches before restart (if accuracy not increase)", { "-rc"  }, 
             [this](Arguments& args) -> bool  
             { 
                 m_restart_count = args.get_int() ; 
@@ -309,7 +231,7 @@ namespace Denn
             } 
         },
         ParameterInfo{ 
-            m_restart_delta, "Delta factor to determine if accuracy is increased", { "--" + m_restart_delta.name(),    "-rd"  }, 
+            m_restart_delta, "Delta factor to determine if accuracy is increased", { "-rd"  }, 
             [this](Arguments& args) -> bool 
             {
                 m_restart_delta = args.get_double() ; 
@@ -318,7 +240,7 @@ namespace Denn
             } 
         },
         ParameterInfo{ 
-			m_learning_rate, "Learning rate of backpropagation for each pass", { "--" + m_learning_rate.name(),    "-lrbp"  },
+			m_learning_rate, "Learning rate of backpropagation for each pass", { "-lrbp"  },
             [this](Arguments& args) -> bool 
             {
 				m_learning_rate = args.get_double() ;
@@ -326,7 +248,7 @@ namespace Denn
             } 
         },
         ParameterInfo{ 
-			m_regularize, "Regularize of backpropagation for each pass", { "--" + m_regularize.name(),    "-rbp"  },
+			m_regularize, "Regularize of backpropagation for each pass", { "-rbp"  },
             [this](Arguments& args) -> bool 
             {
 				m_regularize = args.get_double() ;
@@ -334,7 +256,7 @@ namespace Denn
             } 
         },
         ParameterInfo{
-            m_hidden_layers, "Size of hidden layers", { "--" + m_hidden_layers.name(),    "-hl"  },
+            m_hidden_layers, "Size of hidden layers", { "-hl"  },
             [this](Arguments& args) -> bool 
             { 
                 while(args.remaining() && !args.start_with_minus())
@@ -346,7 +268,7 @@ namespace Denn
             }
         },
         ParameterInfo{
-            m_active_functions, "Activation functions of hidden layers [" + ActiveFunctionFactory::names_of_active_functions() + "]", { "--" + m_active_functions.name(), "--activation_functions" ,  "-hlaf"  },
+            m_active_functions, "Activation functions of hidden layers", { "--activation_functions" ,  "-hlaf"  },
             [this](Arguments& args) -> bool 
             { 
                 while(args.remaining() && !args.start_with_minus())
@@ -365,7 +287,7 @@ namespace Denn
 			,{ "list(string)",  ActiveFunctionFactory::list_of_active_functions() }
         },
         ParameterInfo{
-			m_output_active_function, "Activation function of output layer [" + ActiveFunctionFactory::names_of_active_functions() + "]", { "--" + m_output_active_function.name(), "--output_activation_functions" ,  "-oaf"  },
+			m_output_active_function, "Activation function of output layer", { "--output_activation_functions" ,  "-oaf"  },
             [this](Arguments& args) -> bool 
             { 
                 std::string str_c_type = args.get_string();
@@ -381,19 +303,16 @@ namespace Denn
 			,{ "string",  ActiveFunctionFactory::list_of_active_functions() }
         },
 		ParameterInfo{
-			m_max_int, "Max int of nram's registers",{ "--" + m_max_int.name(), "-nrmi" },
-			[this](Arguments& args) -> bool { m_max_int = args.get_int();  return true; }
+			m_max_int, "Max int of nram's registers",{ "-nrmi" }
 		},
 		ParameterInfo{
-			m_n_registers, "Number of nram's registers",{ "--" + m_n_registers.name(), "-nrr" },
-			[this](Arguments& args) -> bool { m_n_registers = args.get_int();  return true; }
+			m_n_registers, "Number of nram's registers",{ "-nrr" }
 		},
 		ParameterInfo{
-			m_time_steps, "Time steps of nram machine",{ "--" + m_time_steps.name(), "-nrts" },
-			[this](Arguments& args) -> bool { m_time_steps = args.get_int();  return true; }
+			m_time_steps, "Time steps of nram machine",{ "-nrts" }
 		},
         ParameterInfo{
-			m_task, "Task of nram machine [" + NRam::TaskFactory::names_of_tasks() + "]", { "--" + m_task.name(), "-nrtk"  },
+			m_task, "Task of nram machine", { "-nrtk"  },
             [this](Arguments& args) -> bool 
             { 
                 std::string str_c_type = args.get_string();
@@ -409,7 +328,7 @@ namespace Denn
 			,{ "string",  NRam::TaskFactory::list_of_tasks() }
         }, 
         ParameterInfo{
-			m_gates, "List of gates of nram machine [" + NRam::GateFactory::names_of_gates() + "]", { "--" + m_gates.name(), "-nrg"  },
+			m_gates, "List of gates of nram machine", { "-nrg"  },
             [this](Arguments& args) -> bool 
             { 
                 while(args.remaining() && !args.start_with_minus())
@@ -428,59 +347,38 @@ namespace Denn
 			,{ "list(string)",  NRam::GateFactory::list_of_gates() }
         },
 		ParameterInfo{
-			m_n_test, "Number of test of nram",{ "--" + m_n_test.name(), "-nrnt" },
-			[this](Arguments& args) -> bool { m_time_steps = args.get_int();  return true; }
+			m_n_test, "Number of test of nram",{ "-nrnt" }
 		},				
         ParameterInfo{
-            m_dataset_filename, "Path of dataset file (gz) or network file input (json)", { "--" + m_dataset_filename.name(), "-d", "-i" }, 
-            [this](Arguments& args) -> bool {  m_dataset_filename = args.get_string();  return true; } 
+            m_dataset_filename, "Path of dataset file (gz) or network file input (json)", { "-d", "-i" }
         },
         ParameterInfo{ 
-            m_output_filename, "Path of output file (json)", { "--" + m_output_filename.name(), "-o" }, 
-            [this](Arguments& args) {  m_output_filename = args.get_string(); return true;  } 
+            m_output_filename, "Path of output file (json)", { "-o" } 
         },
         ParameterInfo{
-            m_runtime_output_type, "Select type of runtime output [" + RuntimeOutputFactory::names_of_runtime_outputs() + "]", { "--" + m_runtime_output_type.name(),    "-ro"  }, 
-            [this](Arguments& args) -> bool { m_runtime_output_type = args.get_string() ; return true; }
-        },
-        ParameterInfo{
-            m_runtime_output_file, "Write the runtime output to stream [::cout, ::cerr, <file>]", { "--" + m_runtime_output_file.name(),    "-rof"  }, 
-            [this](Arguments& args) -> bool { m_runtime_output_file = args.get_string() ; return true; }
-        },
-        ParameterInfo{
-            m_compute_test_per_pass, "Compute the test accuracy for each pass", { "--" + m_compute_test_per_pass.name(),    "-ctps"  }, 
+            m_runtime_output_type, "Select type of runtime output", { "-ro"  }, 
             [this](Arguments& args) -> bool 
-            { 
-                std::string arg(args.get_string());
-                m_compute_test_per_pass = 
-                    arg == std::string("true") 
-                ||  arg == std::string("yes") 
-                ||  arg == std::string("t")
-                ||  arg == std::string("y") ; 
-                return true; 
-            }
+			{ 
+				m_runtime_output_type = args.get_string() ; 
+				return true;
+			}
+			,{ "string",  NRam::TaskFactory::list_of_tasks() }
         },
         ParameterInfo{
-            m_serialize_neural_network, "Serialize the neural network of best individual", { "--" + m_serialize_neural_network.name(),    "-snn"  },
-            [this](Arguments& args) -> bool 
-            { 
-                std::string arg(args.get_string());
-				m_serialize_neural_network =
-                    arg == std::string("true") 
-                ||  arg == std::string("yes") 
-                ||  arg == std::string("t")
-                ||  arg == std::string("y") ; 
-                return true; 
-            }
+            m_runtime_output_file, "Write the runtime output to stream [::cout, ::cerr, <file>]", { "-rof"  }
+        },
+        ParameterInfo{
+            m_compute_test_per_pass, "Compute the test accuracy for each pass", { "-ctps"  }
+        },
+        ParameterInfo{
+            m_serialize_neural_network, "Serialize the neural network of best individual", { "-snn"  }
         },
 
         ParameterInfo{ 
-            m_threads_omp, "Number of threads using by OpenMP", { "--" + m_threads_omp.name(),    "-omp"  }, 
-            [this](Arguments& args) -> bool { m_threads_omp = args.get_int() ;  return true; } 
+            m_threads_omp, "Number of threads using by OpenMP", { "-omp"  }
         },
         ParameterInfo{ 
-            m_threads_pop, "Number of threads using for  generate a new population", { "--" + m_threads_pop.name(),    "-tp"  }, 
-            [this](Arguments& args) -> bool { m_threads_pop = args.get_int() ;  return true; } 
+            m_threads_pop, "Number of threads using for  generate a new population", { "-tp"  }
         },
         ParameterInfo{
             "Print list of instances", { "--instances-list", "-ilist"  }, 
@@ -622,7 +520,15 @@ namespace Denn
             }
             s_out << return_n_space(Denn::clamp<size_t>(space_line,0,max_space_line));
             s_out << param.m_description;
-            s_out << std::endl;
+			//show choises
+			if (param.m_domain.m_type == ParameterDomain::CHOISE)
+			{
+				s_out << Dump::json_array<std::string>(param.m_domain.m_choises) << "\n";
+			}
+			else
+			{
+				s_out << std::endl;
+			}
         }
         s_out << std::endl;
         return s_out.str();
