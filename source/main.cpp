@@ -10,7 +10,6 @@
 #include <fstream>
 #include <utility>
 #include "Denn.h"
-#include <Windows.h>
 
 int main(int argc,const char** argv)
 {

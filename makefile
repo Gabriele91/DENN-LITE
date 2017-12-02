@@ -63,8 +63,10 @@ endif
 ifeq ($(shell uname -s),Linux)
 # too slow -fopenmp 
 C_FLAGS += -pthread 
-#clang
-ifneq ($(findstring clang,$(VERION_COMPILER)), clang) 
+#no clang
+ifneq ($(findstring clang,$(VERION_COMPILER)), clang)
+# must to be a release mode (no checking)
+# RELEASE_FLAGS += --enable-checking=release
 # remove gcc warning (eigen)
 C_FLAGS += -Wno-int-in-bool-context
 # only linux + gcc
