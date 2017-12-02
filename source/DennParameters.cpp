@@ -248,7 +248,7 @@ namespace Denn
             m_hidden_layers, "Size of hidden layers", { "-hl"  },
             [this](Arguments& args) -> bool 
             { 
-                while(args.remaining() && !args.start_with_minus())
+                while(!args.end_vals())
                 {
                     m_hidden_layers.get().push_back(args.get_int());
                 }
@@ -260,7 +260,7 @@ namespace Denn
             m_active_functions, "Activation functions of hidden layers", { "--activation_functions" ,  "-hlaf"  },
             [this](Arguments& args) -> bool 
             { 
-                while(args.remaining() && !args.start_with_minus())
+                while(!args.end_vals())
                 {
                     std::string str_c_type = args.get_string();
                     //all lower case
@@ -320,7 +320,7 @@ namespace Denn
 			m_gates, "List of gates of nram machine", { "-nrg"  },
             [this](Arguments& args) -> bool 
             { 
-                while(args.remaining() && !args.start_with_minus())
+                while(!args.end_vals())
                 {
                     std::string str_c_type = args.get_string();
                     //all lower case
@@ -428,11 +428,11 @@ namespace Denn
 
     void Parameters::get_params_from_args(int nargs, const char **vargs, bool jump_first)
     {
-        Arguments args(nargs, vargs);
+        MainArguments args(nargs, vargs);
         //jump first
-        if (args.remaining() && jump_first) args.get_string();
+        if (!args.eof() && jump_first) args.get_string();
         //start
-        while (args.remaining())
+        while (!args.eof())
         {
             bool is_a_valid_arg = false;
             bool parameters_arguments_are_correct = false;

@@ -3,23 +3,19 @@
 
 namespace Denn
 {
-
+//Abstract class args
 class Arguments
 {
-
 public:
 
-	Arguments(int nargs, const char** vargs);
-
-	const char* get_string();
-	int get_int();
-	bool get_bool();
-	double get_double();
+	virtual const char* get_string() = 0;
+	virtual int get_int()			 = 0;
+	virtual bool get_bool()			 = 0;
+	virtual double get_double()		 = 0;
 	
-	int remaining() const;
-
-	void back_of_one();
-	bool start_with_minus() const;
+	virtual bool eof() const      = 0;
+	virtual bool back()			  = 0;
+	virtual bool end_vals() const = 0;
 
 private:
 
@@ -34,7 +30,7 @@ private:
 		static std::vector<T> get(Arguments& args)
 		{
 			std::vector< T > strs;
-			while (args.remaining() && !args.start_with_minus()) strs.push_back(args.get<T>());
+			while (!args.end_vals()) strs.push_back(args.get<T>());
 			return strs;
 		}
 	};
@@ -42,15 +38,55 @@ private:
 public:
 
 	template < class T > T get() { return Helper<T>::get(*this); }
+};
+//Stream of main input arguments
+class MainArguments : public Arguments
+{
+public:
+
+	MainArguments(int nargs, const char** vargs);
+
+	const char* get_string() override;
+	int get_int() override;
+	bool get_bool() override;
+	double get_double() override;
+
+	bool eof() const override;
+	bool back() override;
+	bool end_vals() const override;
 
 protected:
 
-	int		      m_rem_arg;
-	const char**  m_pointer;
+	int			 m_n_arg;
+	int			 m_rem_arg;
+	const char** m_pointer;
 
 };
+//Stream of inputs from a string
+class StringArguments : public Arguments
+{
+public:
 
+	StringArguments(const char* values, const std::vector<char>& end_vals);
 
+	const char* get_string() override;
+	int get_int() override;
+	bool get_bool() override;
+	double get_double() override;
+
+	bool eof() const override;
+	bool back() override;
+	bool end_vals() const override;
+
+protected:
+
+	void next_arg();
+	void prev_arg();
+	std::vector<char> m_end_vals;
+	const char*       m_values;
+	const char*       m_values_start;
+
+};
 //CPP type argument
 template <> struct Arguments::Helper< bool > { static bool get(Arguments& args) { return args.get_bool(); } };
 template <> struct Arguments::Helper< char > { static char get(Arguments& args) { return args.get_string()[0]; } };
