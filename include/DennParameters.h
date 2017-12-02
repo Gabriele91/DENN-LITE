@@ -29,7 +29,7 @@ namespace Denn
 		ReadOnly<unsigned int>	         m_seed			 { "seed", (unsigned int)(std::random_device{}())  };
 
 		ReadOnly<std::string>	         m_instance      { "instance", "default" };
-		ReadOnly<size_t>	             m_generations   { "generation", size_t(1000)  };
+		ReadOnly<size_t>	             m_generations   { "generations", size_t(1000) };
 		ReadOnly<size_t>	             m_sub_gens      { "sub_gens"  , size_t(100)   };
 		ReadOnly<size_t>	             m_np            { "number_parents",size_t(16) };
 		//DE
@@ -89,10 +89,12 @@ namespace Denn
 	
 		Parameters();
 		Parameters(int nargs, const char **vargs, bool jump_first = true);
-
-		void get_params_from_args(int nargs, const char **vargs, bool jump_first = true);
+		bool get_params(int nargs, const char **vargs, bool jump_first = true);
 
 	private:
+
+		bool from_args(int nargs, const char **vargs);
+		bool from_config(const std::string& source);
 
 		static bool compare_n_args(const std::vector< std::string >& keys, const char* arg);
 		static std::string return_n_space(size_t n);

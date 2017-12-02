@@ -377,6 +377,12 @@
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodTDE.cpp">
       <Filter>Source\DennEvolutionMethod</Filter>
     </ClCompile>
+    <ClCompile Include="source\DennParametersArgs.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennParametersConfig.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="tests\run_bench.sh">

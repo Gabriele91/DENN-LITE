@@ -121,6 +121,8 @@
     <ClCompile Include="source\DennNRamTaskItems.cpp" />
     <ClCompile Include="source\DennParameterInfo.cpp" />
     <ClCompile Include="source\DennParameters.cpp" />
+    <ClCompile Include="source\DennParametersArgs.cpp" />
+    <ClCompile Include="source\DennParametersConfig.cpp" />
     <ClCompile Include="source\DennPerceptronLayer.cpp" />
     <ClCompile Include="source\DennPopulation.cpp" />
     <ClCompile Include="source\DennRuntimeOutputFactory.cpp" />

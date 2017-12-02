@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cmath>
 #include <cassert>
+#include <cctype>
 //default CPP include
 #include <limits>
 #include <map>
@@ -121,6 +122,19 @@ namespace Denn
 			pos += new_str.length();
 		}
 		return str;
+	}
+
+	inline bool case_insensitive_equal(const std::string& lstr, const std::string& rstr)
+	{
+		//not equal len
+		if (lstr.size() != rstr.size()) return false;
+		//test
+		for (std::string::const_iterator c1 = lstr.begin(), c2 = rstr.begin(); c1 != lstr.end(); ++c1, ++c2)
+		{
+			if (std::tolower(*c1) != std::tolower(*c2)) return false;
+		}
+		//..
+		return true;
 	}
 
 	/// Shifts a matrix/vector row-wise.

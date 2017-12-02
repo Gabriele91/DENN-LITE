@@ -65,10 +65,21 @@ namespace Denn
 
 	const char* StringArguments::get_string()
 	{
-		assert(eof());
-		const char* value = m_values;
-		next_arg();
-		return value;
+		assert(!eof());
+		//add into buffer
+		m_buffer.clear();
+		while (!std::isspace(*m_values))
+		{
+			m_buffer += *m_values;  
+			++m_values;
+		}
+		//jump spaces
+		while (std::isspace(*m_values) && !end_vals())
+		{
+			++m_values;
+		}
+		//get
+		return m_buffer.c_str();
 	}
 
 	bool StringArguments::get_bool()
@@ -93,13 +104,19 @@ namespace Denn
 
 	bool StringArguments::eof() const
 	{
-		return (*m_values) != '\0';
+		return (*m_values) == '\0';
 	}
 	
 	bool StringArguments::back()
 	{
 		if (m_values == m_values_start) return false;
-		prev_arg();
+		//jump first char of last value
+		--m_values;
+		//jump spaces
+		while (std::isspace(*m_values) && !end_vals()) --m_values;
+		//go to first char of last value
+		while (!std::isspace(*(m_values-1)) && !end_vals() && m_values != m_values_start) --m_values;
+		//ok
 		return true;
 	}
 
@@ -110,33 +127,10 @@ namespace Denn
 			if ((*m_values) == end) return true;
 		return false;
 	}
-	
-	void StringArguments::next_arg()
-	{
-		//jump value
-		while (!std::isspace(*m_values) && !end_vals())
-		{
-			++m_values;
-		}
-		//jump spaces
-		while (std::isspace(*m_values) && !end_vals())
-		{
-			++m_values;
-		}
-	}
-	void StringArguments::prev_arg()
-	{
-		//jump value
-		while (!std::isspace(*m_values) && !end_vals() && m_values != m_values_start)
-		{
-			--m_values;
-		}
-		//jump spaces
-		while (std::isspace(*m_values) && !end_vals())
-		{
-			--m_values;
-		}
 
+	const char* StringArguments::get_ptr() const
+	{
+		return m_values;
 	}
 	/////////////////////////////////////////////////////////////////////////
 }

@@ -110,6 +110,8 @@ namespace Denn
 
 		ParameterOwner();
 
+		bool test(const ParameterInfo& owner) const;
+
 		template< class T >
 		ParameterOwner(const ReadOnly< T >& owner)
 		: m_filter_type(ALL)

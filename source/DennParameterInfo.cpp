@@ -24,8 +24,38 @@ namespace Denn
 	, m_owner_variable(nullptr)
 	{
 	}
+	bool ParameterOwner::test(const ParameterInfo& owner) const
+	{
+		//ignore test
+		if (!owner.has_an_associated_variable() && !m_owner_variable) return true;
+		//associated to other owner
+		if (owner.m_associated_variable != m_owner_variable) return false;
+		//test
+		switch (m_filter_type)
+		{
+		//all type
+		default:
+		case NONE:
+		case ALL: return true;
+		//not in
+		case EXCEPT:
+			for (const Variant& value : m_filter_values)
+			{
+				if (value.equal(owner.m_associated_variable->variant(), false)) return false;
+			}
+			return true;
+		//in
+		case ONLY:
+			for (const Variant& value : m_filter_values)
+			{
+				if (value.equal(owner.m_associated_variable->variant(), false)) return true;
+			}
+			return false;
+		}
+
+	}
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	ParameterInfo::ParameterInfo() { }
+	ParameterInfo::ParameterInfo() : m_associated_variable(nullptr) { }
 
 	ParameterInfo::ParameterInfo
 	(

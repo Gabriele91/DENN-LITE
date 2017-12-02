@@ -78,11 +78,12 @@ public:
 	bool back() override;
 	bool end_vals() const override;
 
+	const char* get_ptr() const;
+
 protected:
 
-	void next_arg();
-	void prev_arg();
 	std::vector<char> m_end_vals;
+	std::string		  m_buffer;
 	const char*       m_values;
 	const char*       m_values_start;
 

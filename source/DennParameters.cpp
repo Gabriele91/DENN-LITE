@@ -10,6 +10,7 @@
 #include "DennNRamGate.h"
 #include "DennNRamTask.h"
 #include "DennVersion.h"
+#include "DennFilesystem.h"
 #include <sstream>
 #include <iostream>
 
@@ -420,44 +421,26 @@ namespace Denn
     })
     {
     }
-
+			
     Parameters::Parameters(int nargs, const char **vargs, bool jump_first) : Parameters()
     {
-        get_params_from_args(nargs, vargs, jump_first);
+		if (!get_params(nargs, vargs, jump_first)) throw std::runtime_error("fail to parse parameters");
     }
 
-    void Parameters::get_params_from_args(int nargs, const char **vargs, bool jump_first)
-    {
-        MainArguments args(nargs, vargs);
-        //jump first
-        if (!args.eof() && jump_first) args.get_string();
-        //start
-        while (!args.eof())
-        {
-            bool is_a_valid_arg = false;
-            bool parameters_arguments_are_correct = false;
-            const char *p = args.get_string();
-            for(auto& action : m_params_info)
-            {
-                if(compare_n_args(action.m_arg_key, p))
-                {
-                    parameters_arguments_are_correct = action.m_action(args);
-                    is_a_valid_arg = true;
-                    break;
-                } 
-            }
-            if(!is_a_valid_arg) 
-            {
-                std::cerr << "parameter " << p << " not found" << std::endl;
-                exit(1);
-            }
-            else if(!parameters_arguments_are_correct) 
-            {
-                std::cerr << "arguments of parameter " << p << " are not correct" << std::endl;
-                exit(1);
-            }
-        }
-    }
+	bool Parameters::get_params(int nargs, const char **vargs, bool jump_first)
+	{
+		//args
+		if (!nargs || (nargs <= 1 && jump_first)) return true;
+		//config
+		if (Denn::Filesystem::get_extension(vargs[jump_first]) == ".config")
+		{
+			return from_config(Denn::Filesystem::text_file_read_all(vargs[jump_first]));
+		}
+		else
+		{
+			return from_args(nargs-1, &vargs[jump_first]);
+		}
+	}
 
     bool Parameters::compare_n_args(const std::vector< std::string >& keys, const char* arg)
     {
