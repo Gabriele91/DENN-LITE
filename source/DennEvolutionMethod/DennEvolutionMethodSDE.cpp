@@ -7,6 +7,7 @@
 #include "DennCrossover.h"
 namespace Denn
 {
+#if 0
 	class SDEMethod : public EvolutionMethod
 	{
 	public:
@@ -61,5 +62,5 @@ namespace Denn
 
 	};
 	REGISTERED_EVOLUTION_METHOD(SDEMethod, "SDE")
-
+#endif
 }

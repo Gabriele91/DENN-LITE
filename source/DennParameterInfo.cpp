@@ -24,19 +24,6 @@ namespace Denn
 	, m_owner_variable(nullptr)
 	{
 	}
-
-	ParameterOwner::ParameterOwner(const GenericReadOnly& owner)
-	: m_filter_type(ALL)
-	, m_owner_variable(&owner)
-	{
-	}
-
-	ParameterOwner::ParameterOwner(const Filter filter, std::vector< Variant >& value, const GenericReadOnly& owner)
-	: m_filter_type(filter)
-	, m_filter_values(value)
-	, m_owner_variable(&owner)
-	{
-	}
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	ParameterInfo::ParameterInfo() { }
 

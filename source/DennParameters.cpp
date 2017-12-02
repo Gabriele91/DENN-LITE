@@ -18,7 +18,7 @@ namespace Denn
     Parameters::Parameters() 
     :m_params_info
     ({
-        ParameterInfo{
+        ParameterInfo {
             m_instance, "Type of instance", { "--test_type", "-ins", "-tt" },
             [this](Arguments& args) -> bool  
             { 
@@ -32,28 +32,28 @@ namespace Denn
             }
             , { "string", InstanceFactory::list_of_instances() }
         },
-        ParameterInfo{ 
+        ParameterInfo { 
             m_generations, "Global number of generation [or backpropagation pass]", { "-t", "-g"  }
         },
-        ParameterInfo{ 
+        ParameterInfo { 
             m_sub_gens, "Number of generation [or backpropagation pass] per batch", { "-s" , "-sg" }
         },
-        ParameterInfo{
+        ParameterInfo {
             m_np, "Number of parents", { "-np"  }
         },
-        ParameterInfo{
+        ParameterInfo {
             m_seed, "Random generator seed", { "-sd"  }
         },
-        ParameterInfo{
+        ParameterInfo {
             m_batch_size, "Batch size", { "--" + m_batch_size.name(), "-b" }
         },
-        ParameterInfo{
+        ParameterInfo {
             m_batch_offset, "Batch offset, how many records will be replaced in the next batch [<= batch size]", { "-bo" }
         },
-        ParameterInfo{
+        ParameterInfo {
             m_use_validation, "Use the validation test", { "-uv" }
         },
-        ParameterInfo{
+        ParameterInfo {
             m_evolution_type, "Type of evolution method", { "--evolution",    "-em"  },
             [this](Arguments& args) -> bool  
             { 
@@ -67,9 +67,10 @@ namespace Denn
             }
             , { "string", EvolutionMethodFactory::list_of_evolution_methods() }
         },
-        ParameterInfo{
+        ParameterInfo {
               m_sub_evolution_type
-            , "Type of sub evolution method (PHISTORY)"
+			, { m_evolution_type, { Variant("PHISTORY"), Variant("P2HISTORY")  } }
+            , "Type of sub evolution method (PHISTORY/P2HISTORY)"
             , { "--sub-evolution",    "-sem"  }
             , [this](Arguments& args) -> bool
               {
@@ -83,7 +84,7 @@ namespace Denn
               }
             , { "string", EvolutionMethodFactory::list_of_evolution_methods() }
         },
-        ParameterInfo{
+        ParameterInfo {
               m_mutation_type
             , "Type of DE mutation"
             , { "-m"  }
@@ -99,7 +100,7 @@ namespace Denn
               }
             , { "string", MutationFactory::list_of_mutations() }
         },
-        ParameterInfo{
+        ParameterInfo {
               m_crossover_type
             , "Type of DE crossover"
             , { "-co"  }
@@ -116,54 +117,82 @@ namespace Denn
             , { "string", CrossoverFactory::list_of_crossovers() }
         },
 
-        ParameterInfo{
-            m_history_size, "Size of population history (PHISTORY)", { "-hs"  }
+        ParameterInfo {
+              m_history_size
+			, { m_evolution_type,{ Variant("PHISTORY"), Variant("P2HISTORY") } }
+			, "Size of population history (PHISTORY)"
+		    , { "-hs"  }
         },
 
-        ParameterInfo{ 
+        ParameterInfo { 
             m_default_f, "Default F factor for DE", { "-f"  }
         },
-        ParameterInfo{ 
+        ParameterInfo { 
             m_default_cr, "Default CR factor for DE", { "-cr" }
         },
                             
-        ParameterInfo{ 
-            m_jde_f, "Probability of change of F (JDE)", { "-jf"  }
+        ParameterInfo { 
+              m_jde_f
+			, { m_evolution_type,{ Variant("JDE") } }
+			, "Probability of change of F (JDE)"
+			, { "-jf"  }
         },
-        ParameterInfo{ 
-            m_jde_cr, "Probability of change of CR (JDE)", { "-jcr"  }
+        ParameterInfo { 
+              m_jde_cr
+		    , { m_evolution_type,{ Variant("JDE") } }
+			, "Probability of change of CR (JDE)"
+		    , { "-jcr"  }
         },
 				
 		ParameterInfo{
-			m_archive_size, "Archive size (JADE/SHADE)",{ "-as" }
+			 m_archive_size
+			, { m_evolution_type,{ Variant("JADE"), Variant("SHADE"), Variant("L-SHADE") } }
+			, "Archive size (JADE/SHADE/L-SHADE)",{ "-as" }
 		},				
 		ParameterInfo{
-			m_f_cr_adapt, "Auto adaptation factor of f and c parameters (JADE)",{ "-afcr" }
+			  m_f_cr_adapt
+			, { m_evolution_type,{ Variant("JADE") } }
+		    , "Auto adaptation factor of f and c parameters (JADE)"
+		    , { "-afcr" }
 		},
 
 		ParameterInfo{
-			m_shade_h, "Size of archive of mu_f and mu_cr in SHADE",{ "-shah" }
+			  m_shade_h
+			, { m_evolution_type,{ Variant("JADE"), Variant("SHADE"), Variant("L-SHADE") } }
+		    , "Size of archive of mu_f and mu_cr (SHADE/L-SHADE)",{ "-shah" }
 		}, 
 
 		ParameterInfo{
-			m_min_np, "Minimum number of parents (L-SHADE)",{ "-mnp" }
+			m_min_np
+			, { m_evolution_type,{ Variant("L-SHADE") } }
+			, "Minimum number of parents (L-SHADE)",{ "-mnp" }
 		},
 		ParameterInfo{
-				m_max_nfe, "Maximum number of fitness evaluation (L-SHADE)",{ "-mnfe" }
+			  m_max_nfe
+			, { m_evolution_type,{ Variant("L-SHADE") } }
+			, "Maximum number of fitness evaluation (L-SHADE)",{ "-mnfe" }
 		},
 		ParameterInfo{
-			m_mu_cr_terminal_value, "Terminal value of MU Cr (L-SHADE)",{ "-mcrtv" }
+			  m_mu_cr_terminal_value
+			, { m_evolution_type,{ Variant("L-SHADE") } }
+			, "Terminal value of MU Cr (L-SHADE)",{ "-mcrtv" }
 		},
 
-		ParameterInfo{
-			m_perc_of_best, "Percentage of best (Current P Best/NO [L-]SHADE)",{ "-pob", "-p" }
+		ParameterInfo {
+			  m_perc_of_best
+			, { m_mutation_type, { Variant("curr_p_best") } }
+			, "Percentage of best (curr_p_best)",{ "-pob", "-p" }
 		},	
 
 		ParameterInfo{
-			m_degl_scalar_weight, "Scalar weight used to combinate local mutant with global mutant (DEGL)",{ "-glw" }
+			  m_degl_scalar_weight
+			, { m_mutation_type, { Variant("degl"), Variant("deglbp") } }
+			, "Scalar weight used to combinate local mutant with global mutant (degl/deglbp)",{ "-glw" }
 		},				
 		ParameterInfo{
-			m_degl_neighborhood, "Neighborhood of target where is searched the best (DEGL)",{ "-glnn" }
+			  m_degl_neighborhood
+			, { m_mutation_type, { Variant("degl"), Variant("deglbp") } }
+			, "Neighborhood of target where is searched the best (degl/deglbp)",{ "-glnn" }
 		},	
 		ParameterInfo{
 			m_trig_m, "Probability of the mutation to be trigonometric (TDE)",{ "-tm" }

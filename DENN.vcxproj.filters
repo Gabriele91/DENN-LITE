@@ -362,12 +362,6 @@
     <ClCompile Include="source\DennInstance\DennNRamTestInstance.cpp">
       <Filter>Source\DennInstance</Filter>
     </ClCompile>
-    <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodSDE.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodTDE.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="source\DennMutation\DennMutationTrigonometric.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -376,6 +370,12 @@
     </ClCompile>
     <ClCompile Include="source\DennParameterInfo.cpp">
       <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodSDE.cpp">
+      <Filter>Source\DennEvolutionMethod</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodTDE.cpp">
+      <Filter>Source\DennEvolutionMethod</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

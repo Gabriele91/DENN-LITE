@@ -109,8 +109,32 @@ namespace Denn
 		const GenericReadOnly*       m_owner_variable;
 
 		ParameterOwner();
-		ParameterOwner(const GenericReadOnly& owner);
-		ParameterOwner(const Filter filter, std::vector< Variant >& value, const GenericReadOnly& owner);
+
+		template< class T >
+		ParameterOwner(const ReadOnly< T >& owner)
+		: m_filter_type(ALL)
+		, m_owner_variable(&owner)
+		{
+
+		}
+
+		template< class T >
+		ParameterOwner(const ReadOnly< T >& owner, const std::vector< Variant >& value)
+		: m_filter_type(ONLY)
+		, m_filter_values(value)
+		, m_owner_variable(&owner)
+		{
+
+		}
+
+		template< class T >
+		ParameterOwner(const ReadOnly< T >& owner, const Filter filter, const std::vector< Variant >& value)
+		: m_filter_type(filter)
+		, m_filter_values(value)
+		, m_owner_variable(&owner)
+		{
+
+		}
 	};
 
 	struct ParameterInfo
