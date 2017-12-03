@@ -131,6 +131,15 @@ namespace Denn
 	//build thread pool
 	bool build_thread_pool(std::unique_ptr<ThreadPool>& thpool, const Denn::Parameters& parameters)
 	{
+		//parallel (OpenMP)
+		#ifdef EIGEN_HAS_OPENMP
+		if (*parameters.m_threads_omp)
+		{
+		omp_set_num_threads((int)*parameters.m_threads_omp);
+		Eigen::setNbThreads((int)*parameters.m_threads_omp);
+		Eigen::initParallel();
+		}
+		#endif
 		//parallel (Thread Pool)
 		//ptr
 		std::unique_ptr<ThreadPool> uptr_thpool;
