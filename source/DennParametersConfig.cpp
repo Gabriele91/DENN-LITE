@@ -77,6 +77,31 @@ namespace Denn
 			|| conf_skip_multilines_comment(line, source)) eat = true;
 		return eat;
 	}
+	static bool conf_skip_line_space(const char*& source)
+	{
+		bool a_space_is_skipped = false;
+		while (conf_is_space(*source) && *source != '\n')
+		{
+			//to true
+			a_space_is_skipped = true;
+			//jump
+			++source;
+			//exit
+			if (!*source) break;
+		}
+		return a_space_is_skipped;
+	}
+	static bool conf_skip_line_comment(const char*& inout)
+	{
+		//not a line comment
+		if ((*inout) != '/' || *(inout + 1) != '/') return false;
+		//skeep
+		while (*(inout) != EOF && *(inout) != '\0'&& *(inout) != '\n') ++(inout);
+		//jump endline
+		if ((*(inout)) == '\n') return true;
+		//ok
+		return true;
+	}
 	//////////////////////////////////////////////////////////////////////////////////		
 	static bool conf_rev_skip_line_comment(size_t& line, const char* start, const char*& inout)
 	{
@@ -154,6 +179,40 @@ namespace Denn
 		{
 			if(source == start) break;
 		}
+	}
+	static bool conf_rev_skip_line_space(const char* start, const char*& source)
+	{
+		bool a_space_is_skipped = false;
+		while (conf_is_space(*source) && *source != '\n')
+		{
+			//to true
+			a_space_is_skipped = true;
+			//jump
+			--source;
+			//exit
+			if (source != start) break;
+		}
+		return a_space_is_skipped;
+	}
+	static bool conf_rev_skip_line_comment(const char* start, const char*& inout)
+	{
+		//copy
+		const char* in = inout;
+		//stat with endline
+		if ((*(in)) != '\n') return false;
+		//came back to //
+		while (in != start && ((*in) != '/' && *(in - 1) != '/')) --in;
+		//jump //
+		if ((*in) != '/' || *(in - 1) != '/')
+		{
+			//jmp //
+			inout = (in - 1) == (start)
+				? in - 1
+				: in - 2;
+			//ok
+			return true;
+		}
+		return false;
 	}
 	//////////////////////////////////////////////////////////////////////////////////		
 	struct conf_string_out { std::string m_str; bool m_success; };
@@ -338,17 +397,20 @@ namespace Denn
 				//parse argument
 				StringArguments args
 				(
-					  [&](const char* ptr)
-					  { 
-						  if(conf_skip_space_and_comments(line, ptr) && *(ptr-1) == '\n')
-						  {
-							 --line;
-							 --ptr;
-						  }
+					  [&line](StringArguments& self, const char*& skip_ptr)
+					  {
+							while (conf_skip_line_space(skip_ptr)
+								|| conf_skip_line_comment(skip_ptr)
+								|| conf_skip_multilines_comment(line, skip_ptr));
 					  }
-					, [&](const char* start,const char* ptr)
-					  { 
-					     conf_rev_skip_space_and_comments(line, start, ptr);
+					, [&line](StringArguments& self, const char* start,const char*& skip_ptr)
+					  {
+						  while (conf_rev_skip_line_space(start, skip_ptr)
+							  || conf_rev_skip_line_comment(start, skip_ptr)
+							  || conf_rev_skip_multilines_comment(line, start, skip_ptr))
+						  {
+							  if(skip_ptr == start) break;
+						  }
 					  }
 					, ptr
 					, { '\n', '{', '}' }

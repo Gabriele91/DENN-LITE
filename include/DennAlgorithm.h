@@ -24,8 +24,9 @@ public:
 	//Alias
 	using LayerList      = typename NeuralNetwork::LayerList;
 	//Search space
-	using DBPopulation   = DoubleBufferPopulation;
-	using RandomFunction = std::function<Scalar(Scalar)>;
+	using DBPopulation         = DoubleBufferPopulation;
+	using RandomFunction       = std::function<Scalar(Scalar)>;
+	using RandomFunctionThread = std::function<Scalar(Scalar, size_t)>;
 	//Ref mutation crossover
 	using ClampFunction  = std::function<Scalar(Scalar)>;
 	//Vector of random
@@ -165,8 +166,7 @@ public:
 	{
 		return m_test_function;
 	}
-
-
+	
 	bool loss_function_compare(Scalar left, Scalar right) const
 	{
 		return  m_loss_function->minimize() 
@@ -244,7 +244,8 @@ protected:
 	void parallel_execute_loss_function_on_all_population(Population& population,ThreadPool& thpool) const;
 	/////////////////////////////////////////////////////////////////
 	//gen random function
-	RandomFunction gen_random_func() const;
+	RandomFunction       gen_random_func() const;
+	RandomFunctionThread gen_random_func_thread() const;
 	//gen clamp function
 	ClampFunction gen_clamp_func() const;
 	//load next batch
@@ -273,7 +274,6 @@ protected:
 	Parameters 		      m_params;
 	EvolutionMethod::SPtr m_e_method;
 	//function for DE
-	RandomFunction		  m_random_function;
 	ClampFunction		  m_clamp_function;
 };
 

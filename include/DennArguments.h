@@ -66,8 +66,8 @@ protected:
 class StringArguments : public Arguments
 {
 public:
-	using SkipSpace = std::function< void(const char*& ptr) >;
-	using BackSkipSpace = std::function< void(const char* start_ptr, const char*& ptr) >;
+	using SkipSpace = std::function< void(StringArguments& self,const char*& ptr) >;
+	using BackSkipSpace = std::function< void(StringArguments& self, const char* start_ptr, const char*& ptr) >;
 
 	StringArguments(const char* values, const std::vector<char>& end_vals);
 	StringArguments(SkipSpace skip_space, BackSkipSpace back_skip_space, const char* values, const std::vector<char>& end_vals);

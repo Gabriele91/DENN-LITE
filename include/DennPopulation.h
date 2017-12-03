@@ -64,8 +64,9 @@ namespace Denn
 	class DoubleBufferPopulation
 	{
 	public:
-        //Pointer
-        using RandomFunction = std::function<Scalar(Scalar)>;
+		//Pointer
+		using RandomFunction = std::function<Scalar(Scalar)>;
+		using RandomFunctionThread = std::function<Scalar(Scalar,size_t)>;
         //attributes
 		Population m_pop_buffer[ size_t(PopulationType::PT_SIZE) ];
 		bool m_minimize_loss_function { true };
@@ -77,6 +78,7 @@ namespace Denn
 			, const RandomFunction    random_func
 			, Evaluation&		      loss_function
 			, ThreadPool*			  thread_pool = nullptr
+			, RandomFunctionThread    thread_random = nullptr
 		);
 		//size
 		size_t size() const;
@@ -109,6 +111,7 @@ namespace Denn
 			, const RandomFunction    random_func
 			, Evaluation&		      loss_function
 			, ThreadPool*			  thread_pool = nullptr
+			, RandomFunctionThread    thread_random = nullptr
 		);
 	};
 }

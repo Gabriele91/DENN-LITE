@@ -34,8 +34,6 @@ namespace Denn
 			m_dataset_batch.start_read_batch(*m_params.m_batch_size, *m_params.m_batch_offset);
 		//init random engine
 		m_main_random.reinit(*m_params.m_seed);
-		//gen random function
-		m_random_function = gen_random_func();
 		//gen clamp functions
 		m_clamp_function = gen_clamp_func();
 		//clear random engines
@@ -58,12 +56,13 @@ namespace Denn
 		//init pop
 		m_population.init
 		(
-			np,
-			m_default,
-			current_batch(),
-			m_random_function,
-			*m_loss_function,
-			m_thpool
+			   np
+			,  m_default
+			,  current_batch()
+			,  gen_random_func()
+			, *m_loss_function
+			,  m_thpool
+			,  gen_random_func_thread()
 		);
 		//method of evoluction
 		m_e_method = EvolutionMethodFactory::create(m_params.m_evolution_type, *this);
@@ -312,9 +311,10 @@ namespace Denn
 				, main_random().index_rand(current_np()) //where put
 				, m_default							     //default individual
 				, current_batch()						 //current batch
-				, m_random_function				         //random generator
+				, gen_random_func()				         //random generator
 				, *m_loss_function				         //fitness function
 				, m_thpool								 //threads
+				, gen_random_func_thread()				 //random generator (by thread)
 			);
 			m_restart_ctx.m_test_count = 0;
 			m_restart_ctx.m_last_eval = m_best_ctx.m_eval;
@@ -438,6 +438,15 @@ namespace Denn
 		return [this,min,max](Scalar x) -> Scalar
 		{
 			return Scalar(main_random().uniform(min, max));
+		};
+	}
+	DennAlgorithm::RandomFunctionThread DennAlgorithm::gen_random_func_thread() const
+	{
+		Scalar min = m_params.m_range_min;
+		Scalar max = m_params.m_range_max;
+		return [this, min, max](Scalar x, size_t i) -> Scalar
+		{
+			return Scalar(population_random(i).uniform(min, max));
 		};
 	}
 	//gen clamp function	

@@ -89,6 +89,7 @@ namespace Denn
 		, const RandomFunction random_func
 		, Evaluation& loss_function
 		, ThreadPool* thread_pool
+		, RandomFunctionThread thread_random
 	)
 	{
 		//minimize?
@@ -96,7 +97,7 @@ namespace Denn
 		parents().m_minimize_loss_function = m_minimize_loss_function;
 		sons().m_minimize_loss_function = m_minimize_loss_function;
 		//init
-		if(thread_pool)
+		if(thread_pool && thread_random)
 		{
 			//alloc promises
 			PromiseList promises;
@@ -114,11 +115,13 @@ namespace Denn
 					//copy layout
 					p_ref[i] = i_default->copy();
 					s_ref[i] = i_default->copy();
+					//build fun
+					auto rand_point = [=](Scalar x)->Scalar { return thread_random(x, i); };
 					//init
 					for (auto& layer : p_ref[i]->m_network)
 					for (auto& matrix : *layer)
 					{
-						matrix = matrix.unaryExpr(random_func);
+						matrix = matrix.unaryExpr(rand_point);
 					}
 					//eval
 					p_ref[i]->m_eval = loss_function(*p_ref[i], dataset);
@@ -245,6 +248,7 @@ namespace Denn
 		, const RandomFunction    random_func
 		, Evaluation& 			  loss_function
 		, ThreadPool*			  thread_pool
+		, RandomFunctionThread    thread_random
 	)
 	{
 		//minimize?
@@ -252,7 +256,7 @@ namespace Denn
 		parents().m_minimize_loss_function = m_minimize_loss_function;
 		sons().m_minimize_loss_function = m_minimize_loss_function;
 		//init
-		if(thread_pool)
+		if(thread_pool && thread_random)
 		{	
 			//alloc promises
 			PromiseList promises;
@@ -267,11 +271,13 @@ namespace Denn
 					//Copy default params
 					p_ref[i]->copy_attributes(*i_default);
 					s_ref[i]->copy_attributes(*i_default);
+					//build fun
+					auto rand_point = [=](Scalar x)->Scalar { return thread_random(x, i); };
 					//init
 					for (auto& layer : p_ref[i]->m_network)
 					for (auto& matrix : *layer)
 					{
-						matrix = matrix.unaryExpr(random_func);
+						matrix = matrix.unaryExpr(rand_point);
 					}
 					//eval
 					p_ref[i]->m_eval = loss_function(*p_ref[i], dataset);
