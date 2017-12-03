@@ -61,7 +61,25 @@ namespace Denn
 	, m_values(values)
 	, m_values_start(values)
 	{
+		m_skip_space = [this](const char*& ptr)
+		{
+			 while (std::isspace(*ptr) && !this->end_vals()) ++ptr;
+		};
+		m_back_skip_space = [this](const char* start, const char*& ptr)
+		{ 
+			while (std::isspace(*ptr) && !this->end_vals()) --ptr;
+		};
 	}
+
+	StringArguments::StringArguments(SkipSpace skip_space, BackSkipSpace back_skip_space, const char* values, const std::vector<char>& end_vals)
+	: m_skip_space(skip_space)
+	, m_back_skip_space(back_skip_space)
+	, m_end_vals(end_vals)
+	, m_values(values)
+	, m_values_start(values)
+	{
+	}
+
 
 	const char* StringArguments::get_string()
 	{
@@ -73,11 +91,8 @@ namespace Denn
 			m_buffer += *m_values;  
 			++m_values;
 		}
-		//jump spaces
-		while (std::isspace(*m_values) && !end_vals())
-		{
-			++m_values;
-		}
+		//skip space
+		m_skip_space(m_values);
 		//get
 		return m_buffer.c_str();
 	}
@@ -113,7 +128,7 @@ namespace Denn
 		//jump first char of last value
 		--m_values;
 		//jump spaces
-		while (std::isspace(*m_values) && !end_vals()) --m_values;
+		m_back_skip_space(m_values_start, m_values);
 		//go to first char of last value
 		while (!std::isspace(*(m_values-1)) && !end_vals() && m_values != m_values_start) --m_values;
 		//ok

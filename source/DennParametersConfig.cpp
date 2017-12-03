@@ -9,7 +9,7 @@ namespace Denn
 		return (c >= '0' && c <= '9') || ((c & ~' ') >= 'A' && (c & ~' ') <= 'F');
 	}
 
-	static inline bool json_is_space(char c)
+	static inline bool conf_is_space(char c)
 	{
 		return c == ' ' || (c >= '\t' && c <= '\r');
 	}	
@@ -18,11 +18,45 @@ namespace Denn
 	{
 		return (c <= '9') ? c - '0' : (c & ~' ') - 'A' + 10;
 	}
-	//////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////		
+	static bool conf_skip_line_comment(size_t& line, const char*& inout)
+	{
+		//not a line comment
+		if ((*inout) != '/' || *(inout+1) != '/') return false;
+		//skeep
+		while (*(inout) != EOF && *(inout) != '\0'&& *(inout) != '\n') ++(inout);
+		//jump endline
+		if ((*(inout)) == '\n')
+		{
+			++line;  ++inout;
+		}
+		//ok
+		return true;
+	}
+	static bool conf_skip_multilines_comment(size_t& line, const char*& inout)
+	{
+		//not a multilines comment
+		if ((*inout) != '/' || *(inout + 1) != '*') return false;
+		//jump
+		while 
+		(
+			*(inout) != EOF &&
+			*(inout) != '\0' && 
+				((*inout) != '*' || *(inout + 1) != '/')
+		)
+		{
+			line += (*(inout)) == '\n';
+			++inout;
+		}
+		//jmp last one
+		if ((*inout) == '*' && *(inout + 1) == '/') inout += 2;
+		//ok
+		return true;
+	}
 	static bool conf_skip_space(size_t& line, const char*& source)
 	{
 		bool a_space_is_skipped = false;
-		while (json_is_space(*source))
+		while (conf_is_space(*source))
 		{
 			//to true
 			a_space_is_skipped = true;
@@ -34,8 +68,94 @@ namespace Denn
 			if (!*source) break;
 		}
 		return a_space_is_skipped;
+	}	
+	static bool conf_skip_space_and_comments(size_t& line, const char*& source)
+	{
+		bool eat = false;
+		while (conf_skip_space(line, source)
+			|| conf_skip_line_comment(line, source)
+			|| conf_skip_multilines_comment(line, source)) eat = true;
+		return eat;
 	}
-		
+	//////////////////////////////////////////////////////////////////////////////////		
+	static bool conf_rev_skip_line_comment(size_t& line, const char* start, const char*& inout)
+	{
+		//copy
+		const char* in = inout;
+		//stat with endline
+		if ((*(in)) != '\n') return false;
+		//came back to //
+		while (in != start && ((*in) != '/' && *(in-1) != '/')) --in;
+		//jump //
+		if ((*in) != '/' || *(in-1) != '/')
+		{
+			//jmp //
+			inout =  (in - 1) == (start) 
+					? in - 1
+					: in - 2;
+			//remove line
+			--line;
+			//ok
+			return true;
+		}
+		return false;
+	}
+	static bool conf_rev_skip_multilines_comment(size_t& line, const char* start, const char*& inout)
+	{
+		//copy
+		const char* in = inout;
+		size_t tmp_line = line;
+		//test
+		if(in == start) return false;
+		//not a multilines comment
+		if ((*in) != '/' || *(in - 1) != '*') return false;
+		//jump
+		while 
+		(in != start && ((*in) != '*' || *(in - 1) != '/'))
+		{
+			tmp_line -= (*(in)) == '\n';
+			--in;
+		}
+		//is /*
+		if ((*in) == '*' && *(in - 1) == '/')
+		{
+			//jmp /*
+			inout =  (in - 1) == (start) 
+					? in - 1
+					: in - 2;
+			//update line count
+			line += tmp_line;
+			//ok
+			return true;
+		}
+		return false;
+	}
+	static bool conf_rev_skip_space(size_t& line, const char* start, const char*& source)
+	{
+		bool a_space_is_skipped = false;
+		while (conf_is_space(*source))
+		{
+			//to true
+			a_space_is_skipped = true;
+			//count line
+			if (*source == '\n') --line;
+			//jump
+			--source;
+			//exit
+			if (source != start) break;
+		}
+		return a_space_is_skipped;
+	}	
+	static void conf_rev_skip_space_and_comments(size_t& line, const char* start, const char*& source)
+	{
+		while (conf_rev_skip_space(line, start, source)
+			|| conf_rev_skip_line_comment(line, start, source)
+			|| conf_rev_skip_multilines_comment(line, start, source))
+		{
+			if(source == start) break;
+		}
+	}
+	//////////////////////////////////////////////////////////////////////////////////		
 	struct conf_string_out { std::string m_str; bool m_success; };
 	static conf_string_out conf_string(size_t& line, const char*& source)
 	{
@@ -185,7 +305,7 @@ namespace Denn
 			return false;
 		}
 		//jump
-		conf_skip_space(line, ptr);
+		conf_skip_space_and_comments(line, ptr);
 		//action
 		bool is_a_valid_arg = false;
 		//vals			
@@ -216,7 +336,23 @@ namespace Denn
 			if (found)
 			{
 				//parse argument
-				StringArguments args(ptr, { '\n', '{', '}' });
+				StringArguments args
+				(
+					  [&](const char* ptr)
+					  { 
+						  if(conf_skip_space_and_comments(line, ptr) && *(ptr-1) == '\n')
+						  {
+							 --line;
+							 --ptr;
+						  }
+					  }
+					, [&](const char* start,const char* ptr)
+					  { 
+					     conf_rev_skip_space_and_comments(line, start, ptr);
+					  }
+					, ptr
+					, { '\n', '{', '}' }
+				);
 				if (!action.m_action(args))
 				{
 					std::cerr << line << ": not valid arguments for command \'" << command << "\'" << std::endl;
@@ -224,13 +360,13 @@ namespace Denn
 				}
 				//update
 				ptr = args.get_ptr();
-				conf_skip_space(line, ptr);
+				conf_skip_space_and_comments(line, ptr);
 				//sub args?
 				if (*ptr == '{')
 				{
 					//jump {
 					++ptr;
-					conf_skip_space(line, ptr);
+					conf_skip_space_and_comments(line, ptr);
 					//sub args
 					do
 					{
@@ -245,7 +381,7 @@ namespace Denn
 					}
 					//jump }
 					++ptr;
-					conf_skip_space(line, ptr);
+					conf_skip_space_and_comments(line, ptr);
 				}
 				//ok
 				is_a_valid_arg = true;
@@ -259,7 +395,7 @@ namespace Denn
 			return false;
 		}
 		//jump
-		conf_skip_space(line, ptr);
+		conf_skip_space_and_comments(line, ptr);
 		return true;
 	}
 
@@ -269,7 +405,7 @@ namespace Denn
 		const char* ptr = source.c_str();
 		size_t line = 0;
 		//jump
-		conf_skip_space(line, ptr);
+		conf_skip_space_and_comments(line, ptr);
 		//parsing
 		while (*ptr)
 		{
@@ -282,7 +418,7 @@ namespace Denn
 				return false;
 			}
 			//find '{'
-			conf_skip_space(line, ptr);
+			conf_skip_space_and_comments(line, ptr);
 			//test
 			if (*ptr != '{')
 			{
@@ -291,7 +427,7 @@ namespace Denn
 			}
 			//jump {
 			++ptr;
-			conf_skip_space(line, ptr);
+			conf_skip_space_and_comments(line, ptr);
 			//type
 			if (command == "args")
 			{
@@ -309,7 +445,7 @@ namespace Denn
 			}
 			//jump }
 			++ptr;
-			conf_skip_space(line, ptr);
+			conf_skip_space_and_comments(line, ptr);
 			//loop
 		}
 		return true;
