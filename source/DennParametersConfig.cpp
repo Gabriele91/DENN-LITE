@@ -260,6 +260,7 @@ namespace Denn
 		}
 		//jump
 		conf_skip_space(line, ptr);
+		return true;
 	}
 
 	bool Parameters::from_config(const std::string& source)
