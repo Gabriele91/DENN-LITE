@@ -30,7 +30,7 @@ C_FLAGS = -fPIC -D_FORCE_INLINES
 # CPP FLAGS
 CC_FLAGS = -std=c++14 -I $(DIPS_INCLUDE) -I $(S_INC)
 # RELEASE_FLAGS
-RELEASE_FLAGS = -O3 -DNDEBUG -fomit-frame-pointer
+RELEASE_FLAGS = -O3 -DNDEBUG -fomit-frame-pointer -Wno-unused-result
 # DEBUG_FLAGS
 DEBUG_FLAGS = -g -D_DEBUG -Wall 
 # Linker
