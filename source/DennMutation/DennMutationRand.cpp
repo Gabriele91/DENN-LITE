@@ -3,7 +3,6 @@
 #include <algorithm>
 #include <sstream>
 #include <iterator>
-#include <assert.h>
 namespace Denn
 {
 	class RandOne : public Mutation

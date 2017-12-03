@@ -111,13 +111,13 @@ namespace Denn
 	}
 	Matrix& PerceptronLayer::operator[](size_t i)
 	{
-		assert(i < 2);
+		denn_assert(i < 2);
 		if (i & 0x1) return  m_baias;  //1
 		else		 return  m_weights;//0
 	}
 	const Matrix& PerceptronLayer::operator[](size_t i) const
 	{
-		assert(i < 2);
+		denn_assert(i < 2);
 		if (i & 0x1) return  m_baias;  //1
 		else		 return  m_weights;//0
 	}

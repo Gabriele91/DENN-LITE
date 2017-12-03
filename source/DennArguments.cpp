@@ -13,7 +13,7 @@ namespace Denn
 
 	const char* MainArguments::get_string()
 	{
-		assert(m_rem_arg);
+		denn_assert(m_rem_arg);
 		--m_rem_arg;
 		return *(m_pointer++);
 	}
@@ -83,7 +83,7 @@ namespace Denn
 
 	const char* StringArguments::get_string()
 	{
-		assert(!eof());
+		denn_assert(!eof());
 		//add into buffer
 		m_buffer.clear();
 		while (!std::isspace(*m_values))

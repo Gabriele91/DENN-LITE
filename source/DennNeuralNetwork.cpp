@@ -34,7 +34,7 @@ namespace Denn
 	Matrix NeuralNetwork::apply(const Matrix& input) const
 	{
 		//no layer?
-		assert(m_layers.size());
+		denn_assert(m_layers.size());
 		//input layer
 		Matrix output = m_layers[0]->apply(input);
 		//hidden layers
@@ -75,7 +75,7 @@ namespace Denn
     std::vector < Matrix > operator + (  const std::vector< Matrix >& left
                                        , const std::vector< Matrix >& right)
     {
-        assert(left.size()==right.size());
+        denn_assert(left.size()==right.size());
         std::vector< Matrix > output(left.size());
         for(size_t i = 0; i != left.size(); ++i) output[i] = left[i] + right[i];
         return output;
@@ -92,7 +92,7 @@ namespace Denn
 	)
 	{		
 		//no layer?
-		assert(m_layers.size());
+		denn_assert(m_layers.size());
         //input size
         size_t input_size = input.rows();
 		//output of layer

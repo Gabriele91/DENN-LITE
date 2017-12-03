@@ -130,7 +130,7 @@ namespace Filesystem
         if(!size) std::fclose(file);
         /////////////////////////////////////////////////////////////////////
         out.resize(size, 0);
-        assert(std::fread(&out[0], size, 1, file));
+        denn_assert_code(std::fread(&out[0], size, 1, file));
         /////////////////////////////////////////////////////////////////////
         std::fclose(file);
         //return
@@ -152,7 +152,7 @@ namespace Filesystem
         if(!size) std::fclose(file);
         /////////////////////////////////////////////////////////////////////
         out.resize(size);
-        assert(std::fread(&out[0], size, 1, file));
+        denn_assert_code(std::fread(&out[0], size, 1, file));
         /////////////////////////////////////////////////////////////////////
         std::fclose(file);
         //return

@@ -240,7 +240,7 @@ namespace NRam
 	bool NRamEval::minimize() const { return true; }
 	Scalar NRamEval::operator () (const Individual& individual, const DataSet& ds)
 	{
-		assert(m_context);
+		denn_assert(m_context);
 		//network
 		auto& nn = individual.m_network;
 		//Dataset

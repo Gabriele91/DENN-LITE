@@ -42,6 +42,9 @@ namespace NRam
 			//stream
 			if (!build_outputstream(m_runtime_output_stream, m_runtime_output_file_stream, parameters)) return;
 			////////////////////////////////////////////////////////////////////////////////////////////////
+			// Number of input
+			m_tests = parameters.m_n_test;
+			////////////////////////////////////////////////////////////////////////////////////////////////
 			// test config file
 			if (!(*parameters.m_dataset_filename).size()) return;
 			//test file
@@ -65,12 +68,49 @@ namespace NRam
 				return; //exit
 			}
 			////////////////////////////////////////////////////////////////////////////////////////////////
-			// Number of input
-			m_tests = parameters.m_n_test;
+			// arguments
+			if(!jdata.document().is_object())
+			{
+				//error to parsing
+				std::cerr << "json not valid" << std::endl;
+				//end
+				return; //exit
+			}			
+			// is a object json
+			if(jdata.document().object().find("arguments") == jdata.document().object().end())
+			{
+				//error to parsing
+				std::cerr << "not find \'arguments\' in json" << std::endl;
+				//end
+				return; //exit
+			}
+			//ref to args
+			auto& jarguments = jdata["arguments"].object();
+			////////////////////////////////////////////////////////////////////////////////////////////////
+			//test arguments
+			std::vector< std::string > name_of_args
+			{
+				"gates",
+				"max_int",
+				"n_registers",
+				"task",
+				"hidden_layers",
+				"active_functions",
+			};
+			for(const std::string& arg_name : name_of_args)
+			{
+				if(jarguments.find(arg_name) == jarguments.end())
+				{
+					//error to parsing
+					std::cerr << "not find \'arguments." << arg_name << "\' in json" << std::endl;
+					//end
+					return; //exit
+				}
+			}
 			////////////////////////////////////////////////////////////////////////////////////////////////
 			// gete list of gates
 			std::vector< Gate::SPtr > gates;
-			for (auto& gate_name : jdata["arguments"]["gates"].array())
+			for (auto& gate_name : jarguments["gates"].array())
 			{
 				gates.push_back(GateFactory::create(gate_name.string()));
 			} 			
@@ -86,9 +126,9 @@ namespace NRam
 			m_nram.init
 			(
 				  1 //1 test
-				, jdata["arguments"]["max_int"].number()
-				, jdata["arguments"]["n_registers"].number()
-				, jdata["arguments"]["time_steps"].number()
+				, jarguments["max_int"].number()
+				, jarguments["n_registers"].number()
+				, jarguments["time_steps"].number()
 				, gates
 			);
 			//test
@@ -102,20 +142,20 @@ namespace NRam
 			//get eval & set context
 			m_eval = EvaluationFactory::get<NRamEval>("nram")->set_context(m_nram);
 			//task
-			m_task = TaskFactory::create(jdata["arguments"]["task"].string(), 1, m_nram.m_max_int, m_nram.m_n_regs, m_random_engine);
+			m_task = TaskFactory::create(jarguments["task"].string(), 1, m_nram.m_max_int, m_nram.m_n_regs, m_random_engine);
 			//test
 			if(!m_task)
 			{
 				//error to parsing
-				std::cerr << "task: " << jdata["arguments"]["task"].string() << " not exists" << std::endl;
+				std::cerr << "task: " << jarguments["task"].string() << " not exists" << std::endl;
 				//end
 				return; //exit
 			}
 			//network
 			std::vector<unsigned int> hl_size;
 			std::vector<std::string> hl_afun;
-			auto& jhl_size = jdata["arguments"]["hidden_layers"];
-			auto& jhl_afun = jdata["arguments"]["active_functions"];
+			auto& jhl_size = jarguments["hidden_layers"];
+			auto& jhl_afun = jarguments["active_functions"];
 			bool  parser_network_success =  jhl_size.is_array() 
 			                             && jhl_afun.is_array() 
 									     && jhl_size.array().size() == jhl_afun.array().size();
@@ -135,7 +175,14 @@ namespace NRam
 			//build network
 			m_network = build_mlp_network(m_nram.m_n_regs, m_nram.m_nn_output, hl_size, hl_afun, "linear");
 			////////////////////////////////////////////////////////////////////////////////////////////////
-			//test
+			// Network
+			if (jdata.document().object().find("network") == jdata.document().object().end())
+			{
+				//error to parsing
+				std::cerr << "not find \'network\' in json" << std::endl;
+				//end
+				return; //exit
+			}
 		    auto& network = jdata["network"];
 			bool  parser_matrix_network_success = network.is_array();
 			//parsing

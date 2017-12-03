@@ -30,9 +30,21 @@
 #if defined( _MSC_VER )
 	#define ASPACKED( __Declaration__ ) __pragma( pack(push, 1) ) __Declaration__ __pragma( pack(pop) )
 	#define operator_override
+	#define denn_noop __noop 
 #else 
 	#define ASPACKED( __Declaration__ ) __Declaration__ __attribute__((__packed__))
 	#define operator_override override
+	#define denn_noop (__ASSERT_VOID_CAST (0))
+#endif
+//Debug
+#if !defined(  NDEBUG )
+	#define debug_message(_msg_) std::cout<< _msg_ <<std::endl;
+	#define denn_assert(_exp_) assert(_exp_)
+	#define denn_assert_code(_code_)  assert( _code_ );
+#else
+	#define debug_message(_msg_)
+	#define denn_assert(_exp_) denn_noop
+	#define denn_assert_code(_code_)  _code_ ;
 #endif
 //alias
 namespace Denn
@@ -79,7 +91,7 @@ namespace Denn
 	template<typename T, class Compare>
 	inline constexpr T clamp(const T& value, const T& lo, const T& hi, Compare comp)
 	{
-		return assert(!comp(hi, lo)), comp(value, lo) ? lo : comp(hi, value) ? hi : value;
+		return denn_assert(!comp(hi, lo)), comp(value, lo) ? lo : comp(hi, value) ? hi : value;
 	}
 
 	template< typename T >
@@ -184,18 +196,7 @@ namespace Denn
 	}
 }
 
-//Debug
-#ifdef  _DEBUG
-	#define MESSAGE_DEBUG( _msg_ ) std::cout<< _msg_ <<std::endl;
-	#define ASSERT_DEBUG( _code_ ) assert(_code_);
-	#define ASSERT_DEBUG_MSG( _code_, _msg_ )\
-			{ if (!(_code_)) { std::cout << _msg_ << std::endl; } assert(_code_); } 
-#else
-	#define MESSAGE_DEBUG( _msg_ ) 
-	#define ASSERT_DEBUG( _code_ ) 
-	#define ASSERT_DEBUG_MSG( _code_, _msg_ )\
-			{ if (!(_code_)) { std::cout << _msg_ << std::endl; } assert(_code_); } 
-#endif
+
 
 namespace Denn
 {
