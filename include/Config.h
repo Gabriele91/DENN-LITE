@@ -34,7 +34,11 @@
 #else 
 	#define ASPACKED( __Declaration__ ) __Declaration__ __attribute__((__packed__))
 	#define operator_override override
-	#define denn_noop (__ASSERT_VOID_CAST (0))
+	#ifdef __clang__
+		#define denn_noop ((void)0)
+	#else
+		#define denn_noop (__ASSERT_VOID_CAST (0))
+	#endif 
 #endif
 //Debug
 #if !defined(  NDEBUG )
