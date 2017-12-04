@@ -95,7 +95,7 @@ namespace NRam
 				"n_registers",
 				"task",
 				"hidden_layers",
-				"active_functions",
+				"activation_functions",
 			};
 			for(const std::string& arg_name : name_of_args)
 			{
@@ -155,7 +155,7 @@ namespace NRam
 			std::vector<unsigned int> hl_size;
 			std::vector<std::string> hl_afun;
 			auto& jhl_size = jarguments["hidden_layers"];
-			auto& jhl_afun = jarguments["active_functions"];
+			auto& jhl_afun = jarguments["activation_functions"];
 			bool  parser_network_success =  jhl_size.is_array() 
 			                             && jhl_afun.is_array() 
 									     && jhl_size.array().size() == jhl_afun.array().size();
