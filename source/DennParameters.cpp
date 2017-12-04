@@ -55,6 +55,9 @@ namespace Denn
             m_use_validation, "Use the validation test", { "-uv" }
         },
         ParameterInfo {
+            m_reval_pop_on_batch, "Reevaluate the population on change of a batch", { "-rpob" }
+        },
+        ParameterInfo {
             m_evolution_type, "Type of evolution method", { "--evolution",    "-em"  },
             [this](Arguments& args) -> bool  
             { 

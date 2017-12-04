@@ -25,6 +25,7 @@ namespace Denn
 		ReadOnly<bool>				    m_compute_test_per_pass   { "compute_test_per_pass",    bool(true),  true /* false? */ };
 		ReadOnly<bool>				    m_serialize_neural_network{ "serialize_neural_network", bool(true),  false /* true? */ };
         ReadOnly<bool>                  m_use_validation          { "use_validation",           bool(true),  true /* false? */ };
+        ReadOnly<bool>                  m_reval_pop_on_batch      { "reval_pop_on_batch",       bool(true),  true /* false? */ };
 
 		ReadOnly<unsigned int>	         m_seed			 { "seed", (unsigned int)(std::random_device{}())  };
 

@@ -221,7 +221,9 @@ namespace Denn
 	//Intermedie steps
 	void DennAlgorithm::execute_a_pass(size_t pass, size_t n_sub_pass)
 	{
-		execute_loss_function_on_all_population(m_population.parents());
+		///////////////////////////////////////////////////////////////////
+		if (*m_params.m_reval_pop_on_batch || pass == 0) 
+			execute_loss_function_on_all_population(m_population.parents());
 		///////////////////////////////////////////////////////////////////
 		//output
 		if(m_output) m_output->start_a_pass();
