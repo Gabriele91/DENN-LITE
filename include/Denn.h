@@ -9,7 +9,7 @@
 #include  "DennRandom.h"
 
 //NeuralNetwork includes
-#include  "DennActiveFunction.h"
+#include  "DennActivationFunction.h"
 #include  "DennLayer.h"
 #include  "DennPerceptronLayer.h"
 #include  "DennNeuralNetwork.h"

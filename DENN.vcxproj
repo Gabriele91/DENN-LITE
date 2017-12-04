@@ -29,7 +29,7 @@
   <ItemGroup>
     <ClInclude Include="include\Config.h" />
     <ClInclude Include="include\Denn.h" />
-    <ClInclude Include="include\DennActiveFunction.h" />
+    <ClInclude Include="include\DennActivationFunction.h" />
     <ClInclude Include="include\DennArguments.h" />
     <ClInclude Include="include\DennConstants.h" />
     <ClInclude Include="include\DennInstance.h" />
@@ -68,8 +68,8 @@
     <ClInclude Include="include\TicksTime.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\DennActiveFunctionFactory.cpp" />
-    <ClCompile Include="source\DennActiveFunctionItems.cpp" />
+    <ClCompile Include="source\DennActivationFunctionFactory.cpp" />
+    <ClCompile Include="source\DennActivationFunctionItems.cpp" />
     <ClCompile Include="source\DennAlgorithm.cpp" />
     <ClCompile Include="source\DennArguments.cpp" />
     <ClCompile Include="source\DennCrossoverFactory.cpp" />

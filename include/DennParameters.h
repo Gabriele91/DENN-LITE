@@ -75,8 +75,8 @@ namespace Denn
 		ReadOnly<Scalar>					   m_learning_rate		   { "learning_rate", Scalar(0.05) };
 		ReadOnly<Scalar>					   m_regularize			   { "regularize", Scalar(0.0) };
 		ReadOnly< std::vector<unsigned int> > m_hidden_layers         { "hidden_layers"         /* , none */ };
-		ReadOnly< std::vector<std::string> >  m_active_functions      { "active_functions"      /* , none */ };
-		ReadOnly< std::string >               m_output_active_function{ "output_active_function" ,  "softmax" };
+		ReadOnly< std::vector<std::string> >  m_activation_functions      { "activation_functions"      /* , none */ };
+		ReadOnly< std::string >               m_output_activation_function{ "output_activation_function" ,  "softmax" };
 		//nram attribute
 		ReadOnly< size_t >					   m_max_int			   { "max_int"                  , size_t(10) };
 		ReadOnly< size_t >					   m_n_registers		   { "n_registers"              , size_t(4) };

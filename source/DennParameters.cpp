@@ -1,7 +1,7 @@
 #include "DennParameters.h"
 #include "DennMutation.h"
 #include "DennCrossover.h"
-#include "DennActiveFunction.h"
+#include "DennActivationFunction.h"
 #include "DennEvolutionMethod.h"
 #include "DennRuntimeOutput.h"
 #include "DennSerializeOutput.h"
@@ -261,7 +261,7 @@ namespace Denn
             }
         },
         ParameterInfo{
-            m_active_functions, "Activation functions of hidden layers", { "--activation_functions" ,  "-hlaf"  },
+            m_activation_functions, "Activation functions of hidden layers", {  "-hlaf"  },
             [this](Arguments& args) -> bool 
             { 
                 while(!args.end_vals())
@@ -270,30 +270,30 @@ namespace Denn
                     //all lower case
                     std::transform(str_c_type.begin(),str_c_type.end(), str_c_type.begin(), ::tolower);
                     //test
-                    if(!ActiveFunctionFactory::exists(str_c_type)) return false;
+                    if(!ActivationFunctionFactory::exists(str_c_type)) return false;
                     //push
-                    m_active_functions.get().push_back(str_c_type);
+                    m_activation_functions.get().push_back(str_c_type);
                 }
                 //ok
-                return m_active_functions.get().size() != 0; 
+                return m_activation_functions.get().size() != 0; 
             }
-			,{ "list(string)",  ActiveFunctionFactory::list_of_active_functions() }
+			,{ "list(string)",  ActivationFunctionFactory::list_of_activation_functions() }
         },
         ParameterInfo{
-			m_output_active_function, "Activation function of output layer", { "--output_activation_functions" ,  "-oaf"  },
+			m_output_activation_function, "Activation function of output layer", { "-oaf"  },
             [this](Arguments& args) -> bool 
             { 
                 std::string str_c_type = args.get_string();
                 //all lower case
                 std::transform(str_c_type.begin(),str_c_type.end(), str_c_type.begin(), ::tolower);
                 //test
-                if(!ActiveFunctionFactory::exists(str_c_type)) return false;
+                if(!ActivationFunctionFactory::exists(str_c_type)) return false;
                 //save
-				m_output_active_function = str_c_type;
+				m_output_activation_function = str_c_type;
                 //ok
                 return true;
             }
-			,{ "string",  ActiveFunctionFactory::list_of_active_functions() }
+			,{ "string",  ActivationFunctionFactory::list_of_activation_functions() }
         },
 		ParameterInfo{
 			m_max_int, "Max int of nram's registers",{ "-nrmi" }
@@ -391,7 +391,7 @@ namespace Denn
         },
         ParameterInfo{
             "Print list of activation functions", { "--active_functions-list", "--activation_functions-list",    "-aflist"  }, 
-            [this](Arguments& args) -> bool { std::cout << ActiveFunctionFactory::names_of_active_functions() << std::endl; return true; } 
+            [this](Arguments& args) -> bool { std::cout << ActivationFunctionFactory::names_of_activation_functions() << std::endl; return true; } 
         },
         ParameterInfo{
             "Print list of nram's taks", { "--nram-task-list", "--task-list", "-nrtlist"  },
