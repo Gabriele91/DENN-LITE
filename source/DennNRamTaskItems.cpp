@@ -160,7 +160,7 @@ namespace NRam
 			//init out mem
 			Matrix out_mem = in_mem;
             out_mem.block(0, offset, in_mem.rows(), in_mem.cols() - offset - 1) \
-                    = in_mem.block(0, 1, in_mem.rows(), offset - 1).reverse();
+                    = out_mem.block(0, 1, in_mem.rows(), offset - 1).rowwise().reverse();
 
             //return
 			return std::make_tuple(in_mem, out_mem, Task::init_regs());
