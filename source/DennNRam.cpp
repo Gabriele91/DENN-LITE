@@ -313,17 +313,14 @@ namespace NRam
     {
         switch (extraction_type)
         {
-            case (NRamLayout::RegisterExtaction::P_ZERO):
+			default:
+            case NRamLayout::RegisterExtaction::P_ZERO:
             {
                 return M.col(0).transpose();
             }
-            case (NRamLayout::RegisterExtaction::P_DEFUZZYED):
+            case NRamLayout::RegisterExtaction::P_DEFUZZYED:
             {
                 return defuzzy_mem(M);
-            }
-            default:
-            {
-                return M.col(0).transpose();
             }
         }
     }
@@ -372,8 +369,7 @@ namespace NRam
             //for all timestep, run on s
             for (size_t timestep = 0; timestep < context.m_timesteps; timestep++)
             {
-                Matrix out = network.apply(
-                        get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
+                Matrix out = network.apply(get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
                 //execute circuit
                 Scalar fi = run_circuit(context, out, regs, in_mem);
 
