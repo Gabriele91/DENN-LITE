@@ -198,6 +198,18 @@ namespace Denn
 		//return
 		return true;
 	}
+
+	template < typename Matrix >
+	inline typename Matrix::Scalar distance_pow2(const Matrix& a, const Matrix& b)
+	{
+		return (a.array() - b.array()).square().sum();
+	} 
+
+	template < typename Matrix >
+	inline typename Matrix::Scalar distance(const Matrix& a, const Matrix& b)
+	{
+		return std::sqrt(distance_pow2(a,b));
+	} 
 }
 
 

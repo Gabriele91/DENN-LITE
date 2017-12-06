@@ -191,13 +191,13 @@ namespace Denn
 
 		ParameterInfo{
 			  m_degl_scalar_weight
-			, { m_mutation_type, { Variant("degl"), Variant("deglbp") } }
-			, "Scalar weight used to combinate local mutant with global mutant (degl/deglbp)",{ "-glw" }
+			, { m_mutation_type, { Variant("degl"), Variant("pro_degl"), Variant("deglbp") } }
+			, "Scalar weight used to combinate local mutant with global mutant (degl/pro_degl/deglbp)",{ "-glw" }
 		},				
 		ParameterInfo{
 			  m_degl_neighborhood
-			, { m_mutation_type, { Variant("degl"), Variant("deglbp") } }
-			, "Neighborhood of target where is searched the best (degl/deglbp)",{ "-glnn" }
+			, { m_mutation_type, { Variant("degl"), Variant("pro_degl"), Variant("deglbp") } }
+			, "Neighborhood of target where is searched the best (degl/pro_degl/deglbp)",{ "-glnn" }
 		},	
 		ParameterInfo{
 			m_trig_m, "Probability of the mutation to be trigonometric (TDE)",{ "-tm" }
