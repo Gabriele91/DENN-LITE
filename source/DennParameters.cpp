@@ -13,6 +13,7 @@
 #include "DennFilesystem.h"
 #include <sstream>
 #include <iostream>
+#include <DennNRam.h>
 
 namespace Denn
 {     
@@ -340,8 +341,29 @@ namespace Denn
 			,{ "list(string)",  NRam::GateFactory::list_of_gates() }
         },
 		ParameterInfo{
-			m_n_test, "Number of test of nram",{ "-nrnt" }
-		},				
+			m_n_test, "Number of test of nram", { "-nrnt" }
+		},
+		ParameterInfo{
+			m_registers_values_extraction_type, "Type of extraction to apply to NRAM registers", { "-nrrvet" },
+            [this](Arguments& args) -> bool
+            {
+                std::string type = args.get_string();
+                if (type == "zero")
+                {
+                    m_registers_values_extraction_type = NRam::NRamLayout::RegisterExtaction::P_ZERO;
+                }
+                else if (type == "defuzzyed")
+                {
+                    m_registers_values_extraction_type = NRam::NRamLayout::RegisterExtaction::P_DEFUZZYED;
+                }
+                else
+                {
+                    return false;
+                }
+                return true;
+            },
+            { "string", std::vector<std::string> {"zero", "defuzzyed"} }
+		},
         ParameterInfo{
             m_dataset_filename, "Path of dataset file (gz) or network file input (json)", { "-d", "-i" }
         },

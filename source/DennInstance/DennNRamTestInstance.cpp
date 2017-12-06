@@ -129,6 +129,7 @@ namespace NRam
 				, jarguments["max_int"].number()
 				, jarguments["n_registers"].number()
 				, jarguments["time_steps"].number()
+				, jarguments["registers_values_extract"].number()
 				, gates
 			);
 			//test

@@ -18,6 +18,12 @@ namespace NRam
     {
     public:
 
+        enum RegisterExtaction
+        {
+            P_ZERO      = 0,
+			P_DEFUZZYED = 1
+        };
+
         NRamLayout();
 
         void init
@@ -26,6 +32,7 @@ namespace NRam
 			const size_t max_int,
 			const size_t n_regs,
 			const size_t timesteps,
+            const size_t registers_values_extraction_type,
 			const GateList& gates
         );
 
@@ -34,6 +41,7 @@ namespace NRam
         size_t      m_n_regs;
         size_t      m_timesteps;
         size_t      m_nn_output;
+        size_t      m_registers_values_extraction_type;
         GateList    m_gates;
     };
 	
@@ -98,6 +106,8 @@ namespace NRam
     Matrix defuzzy_mem(const Matrix &M);
 
     Matrix defuzzy_mem_cols(const Matrix &M);
+
+    Matrix get_registers_values(const Matrix &M, size_t extraction_type);
 
     Scalar calculate_sample_cost(Matrix &M, const RowVector &desired_mem);
 

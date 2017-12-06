@@ -23,6 +23,7 @@ namespace NRam
         const size_t max_int,
         const size_t n_regs,
         const size_t timesteps,
+        const size_t registers_values_extraction_type,
         const GateList& gates
     )
     {
@@ -31,6 +32,7 @@ namespace NRam
         m_max_int = max_int;
         m_n_regs = n_regs;
         m_timesteps = timesteps;
+        m_registers_values_extraction_type = registers_values_extraction_type;
 	    m_gates = gates;
         // Past cardinality
         size_t i = 0;
@@ -307,6 +309,25 @@ namespace NRam
         return m;
     }
 
+    Matrix get_registers_values(const Matrix &M, size_t extraction_type)
+    {
+        switch (extraction_type)
+        {
+            case (NRamLayout::RegisterExtaction::P_ZERO):
+            {
+                return M.col(0).transpose();
+            }
+            case (NRamLayout::RegisterExtaction::P_DEFUZZYED):
+            {
+                return defuzzy_mem(M);
+            }
+            default:
+            {
+                return M.col(0).transpose();
+            }
+        }
+    }
+
     Scalar calculate_sample_cost(Matrix &M, const RowVector &desired_mem)
     {
         Scalar s_cost = 0;
@@ -337,10 +358,10 @@ namespace NRam
         for (Matrix::Index s = 0; s < linear_in_mem.rows(); ++s)
         {
             //Alloc regs
-            Matrix regs = Matrix::Zero(context.m_n_regs,context.m_max_int); 
+            Matrix regs = Matrix::Zero(context.m_n_regs,context.m_max_int);
             //P(X=0)
             regs.col(0).fill(1);
-            //In mem fazzy
+            //In mem fuzzy
             Matrix in_mem = fuzzy_encode(linear_in_mem.row(s));
             //Cost helper
             Scalar p_t = Scalar(1.0);
@@ -351,8 +372,8 @@ namespace NRam
             //for all timestep, run on s
             for (size_t timestep = 0; timestep < context.m_timesteps; timestep++)
             {
-                //execute nn
-                Matrix out = network.apply(regs.col(0).transpose()).transpose();
+                Matrix out = network.apply(
+                        get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
                 //execute circuit
                 Scalar fi = run_circuit(context, out, regs, in_mem);
 
@@ -482,7 +503,7 @@ namespace NRam
                 //new step
                 execution_debug.push_step();
                 //execute nn
-                Matrix out = network.apply(regs.col(0).transpose()).transpose();
+                Matrix out = network.apply(get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
                 //execute circuit
                 Scalar fi = run_circuit(context, out, regs, in_mem, execution_debug);
             }
