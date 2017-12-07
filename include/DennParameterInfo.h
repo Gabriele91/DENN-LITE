@@ -73,7 +73,8 @@ namespace Denn
 		bool m_serializable{ true };
 
 		//friends
-		friend class Parameters;
+		friend class  Parameters;
+		friend class  ParametersParseHelp;
 		friend struct ParameterInfo;
 
 	};

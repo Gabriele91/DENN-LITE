@@ -4,6 +4,11 @@
 namespace Denn
 {
 	//////////////////////////////////////////////////////////////////////////////////
+	static inline bool conf_is_digit(char c)
+	{
+		return (c >= '0' && c <= '9');
+	}
+
 	static inline bool conf_is_xdigit(char c)
 	{
 		return (c >= '0' && c <= '9') || ((c & ~' ') >= 'A' && (c & ~' ') <= 'F');
@@ -17,6 +22,18 @@ namespace Denn
 	static inline int conf_char_to_int(char c)
 	{
 		return (c <= '9') ? c - '0' : (c & ~' ') - 'A' + 10;
+	}
+	
+	static long conf_string_to_int(const char*& source)
+	{
+		//+/-
+		char ch = *source;
+		if (ch == '-') ++source;
+		//integer part
+		long result = 0;
+		while (conf_is_digit(*source)) result = (result * 10) + (*source++ - '0');
+		//result
+		return ch == '-' ? -result : result;
 	}
 	//////////////////////////////////////////////////////////////////////////////////		
 	static bool conf_skip_line_comment(size_t& line, const char*& inout)
@@ -347,120 +364,206 @@ namespace Denn
 		return out;
 	}
 	//////////////////////////////////////////////////////////////////////////////////
-	static bool conf_parse_arg
-	(
-		  const std::vector< ParameterInfo >& info
-		, size_t& line
-		, const char*& ptr
-		, ParameterInfo ower = ParameterInfo()
-	)
+	class ParametersParseHelp
 	{
-		//command
-		std::string command = conf_name(ptr);
-		//test
-		if (!command.size())
-		{
-			std::cerr << line << ": command not valid" << std::endl;
-			return false;
-		}
-		//jump
-		conf_skip_space_and_comments(line, ptr);
-		//action
-		bool is_a_valid_arg = false;
-		//vals			
-		for (auto& action : info)
-		{
-			//test
-			if (!action.m_associated_variable) continue;
-			if (!action.m_owener.test(ower)) continue;
-			//search param 
-			bool found = false;
-			//as shell arg or command
-			if (command[0] == '-')
+		public:
+			//////////////////////////////////////////////////////////////////////////////////
+			static bool conf_parse_arg
+			(
+				  const std::vector< ParameterInfo >& info
+				, size_t& line
+				, const char*& ptr
+				, ParameterInfo ower = ParameterInfo()
+			)
 			{
-				for (const std::string& key : action.m_arg_key)
+				//command
+				std::string command = conf_name(ptr);
+				//test
+				if (!command.size())
 				{
-					if (key == command)
+					std::cerr << line << ": command not valid" << std::endl;
+					return false;
+				}
+				//jump
+				conf_skip_space_and_comments(line, ptr);
+				//action
+				bool is_a_valid_arg = false;
+				//vals			
+				for (auto& action : info)
+				{
+					//test
+					if (!action.m_associated_variable) continue;
+					if (!action.m_owener.test(ower)) continue;
+					//search param 
+					bool found = false;
+					//as shell arg or command
+					if (command[0] == '-')
 					{
-						found = true;
+						for (const std::string& key : action.m_arg_key)
+						{
+							if (key == command)
+							{
+								found = true;
+								break;
+							}
+						}
+					}
+					else
+					{
+						found = command == action.m_associated_variable->name();
+					}
+					//parse a line 
+					if (found)
+					{
+						//parse argument
+						StringArguments args
+						(
+							  [&line](StringArguments& self, const char*& skip_ptr)
+							  {
+									while (conf_skip_line_space(skip_ptr)
+										|| conf_skip_line_comment(skip_ptr)
+										|| conf_skip_multilines_comment(line, skip_ptr));
+							  }
+							, [&line](StringArguments& self, const char* start,const char*& skip_ptr)
+							  {
+								  while (conf_rev_skip_line_space(start, skip_ptr)
+									  || conf_rev_skip_line_comment(start, skip_ptr)
+									  || conf_rev_skip_multilines_comment(line, start, skip_ptr))
+								  {
+									  if(skip_ptr == start) break;
+								  }
+							  }
+							, ptr
+							, { '\n', '{', '}' }
+						);
+						if (!action.m_action(args))
+						{
+							std::cerr << line << ": not valid arguments for command \'" << command << "\'" << std::endl;
+							return false;
+						}
+						//update
+						ptr = args.get_ptr();
+						conf_skip_space_and_comments(line, ptr);
+						//sub args?
+						if (*ptr == '{')
+						{
+							//jump {
+							++ptr;
+							conf_skip_space_and_comments(line, ptr);
+							//sub args
+							do
+							{
+								if (!conf_parse_arg(info, line, ptr, action)) return false;
+							} 
+							while (*ptr && (*ptr) != '}');
+							//test
+							if (*ptr != '}')
+							{
+								std::cerr << line << ": } not found" << std::endl;
+								return false;
+							}
+							//jump }
+							++ptr;
+							conf_skip_space_and_comments(line, ptr);
+						}
+						//ok
+						is_a_valid_arg = true;
 						break;
 					}
 				}
-			}
-			else
-			{
-				found = command == action.m_associated_variable->name();
-			}
-			//parse a line 
-			if (found)
-			{
-				//parse argument
-				StringArguments args
-				(
-					  [&line](StringArguments& self, const char*& skip_ptr)
-					  {
-							while (conf_skip_line_space(skip_ptr)
-								|| conf_skip_line_comment(skip_ptr)
-								|| conf_skip_multilines_comment(line, skip_ptr));
-					  }
-					, [&line](StringArguments& self, const char* start,const char*& skip_ptr)
-					  {
-						  while (conf_rev_skip_line_space(start, skip_ptr)
-							  || conf_rev_skip_line_comment(start, skip_ptr)
-							  || conf_rev_skip_multilines_comment(line, start, skip_ptr))
-						  {
-							  if(skip_ptr == start) break;
-						  }
-					  }
-					, ptr
-					, { '\n', '{', '}' }
-				);
-				if (!action.m_action(args))
+				//fail
+				if (!is_a_valid_arg)
 				{
-					std::cerr << line << ": not valid arguments for command \'" << command << "\'" << std::endl;
+					std::cerr << line << ": command \'" << command << "\' not found" << std::endl;
 					return false;
 				}
-				//update
-				ptr = args.get_ptr();
+				//jump
 				conf_skip_space_and_comments(line, ptr);
-				//sub args?
-				if (*ptr == '{')
+				return true;
+			}
+			//////////////////////////////////////////////////////////////////////////////////
+			static bool conf_parse_net
+			(
+				  Parameters& params
+				, size_t& line
+				, const char*& ptr
+			)
+			{
+				//layer type
+				std::string layer_type = conf_name(ptr);
+				//type
+				if (layer_type == "lp" || layer_type == "layer_perceptron")
 				{
-					//jump {
-					++ptr;
-					conf_skip_space_and_comments(line, ptr);
-					//sub args
-					do
+					//jump space
+					while (conf_skip_line_space(ptr)
+						|| conf_skip_line_comment(ptr)
+						|| conf_skip_multilines_comment(line, ptr));
+					//get int
+					long layer_size = conf_string_to_int(ptr);
+					//more than 0
+					if (layer_size <= 0)
 					{
-						if (!conf_parse_arg(info, line, ptr, action)) return false;
-					} 
-					while (*ptr && (*ptr) != '}');
-					//test
-					if (*ptr != '}')
-					{
-						std::cerr << line << ": } not found" << std::endl;
+						std::cerr << line << ": layer size (" << layer_size << ") not valid " << std::endl;
 						return false;
 					}
-					//jump }
-					++ptr;
-					conf_skip_space_and_comments(line, ptr);
+					//jump space
+					while (conf_skip_line_space(ptr)
+						|| conf_skip_line_comment(ptr)
+						|| conf_skip_multilines_comment(line, ptr));
+					//get activation function
+					if (layer_size <= 0)
+					{
+						std::cerr << line << ": layer size (" << layer_size << ") not valid " << std::endl;
+						return false;
+					}
+					//jump space
+					while (conf_skip_line_space(ptr)
+						|| conf_skip_line_comment(ptr)
+						|| conf_skip_multilines_comment(line, ptr));
+					//activation function (default linear
+					std::string layer_af = conf_name(ptr);
+					//test
+					if (!layer_af.size()) layer_af = "linear";
+					//test
+					if (!ActivationFunctionFactory::exists(layer_af))
+					{
+						std::cerr << line << ": activation function (" << layer_af << ") not exists " << std::endl;
+						return false;
+					}
+					//add
+					params.m_hidden_layers.get().push_back(layer_size);
+					params.m_activation_functions.get().push_back(layer_af);
 				}
-				//ok
-				is_a_valid_arg = true;
-				break;
-			}
-		}
-		//fail
-		if (!is_a_valid_arg)
-		{
-			std::cerr << line << ": command \'" << command << "\' not found" << std::endl;
-			return false;
-		}
-		//jump
-		conf_skip_space_and_comments(line, ptr);
-		return true;
-	}
+				else if (layer_type == "out" || layer_type == "output")
+				{
+					//jump space
+					while (conf_skip_line_space(ptr)
+						|| conf_skip_line_comment(ptr)
+						|| conf_skip_multilines_comment(line, ptr));
+					//activation function (default linear
+					std::string layer_af = conf_name(ptr);
+					//test
+					if (!layer_af.size()) layer_af = "linear";
+					//test
+					if (!ActivationFunctionFactory::exists(layer_af))
+					{
+						std::cerr << line << ": activation function (" << layer_af << ") not exists " << std::endl;
+						return false;
+					}
+					//add
+					params.m_output_activation_function = layer_af;
+				}
+				else
+				{
+					std::cerr << line << ": layer " << layer_type << " is unsupported" << std::endl;
+					return false;
+				}
+				//jump spaces
+				conf_skip_space_and_comments(line, ptr);
 
+			}
+	};
+	//////////////////////////////////////////////////////////////////////////////////
 	bool Parameters::from_config(const std::string& source)
 	{
 		//ptr
@@ -495,7 +598,15 @@ namespace Denn
 			{
 				do
 				{
-					if (!conf_parse_arg(m_params_info, line, ptr)) return false;
+					if (!ParametersParseHelp::conf_parse_arg(m_params_info, line, ptr)) return false;
+				}
+				while (*ptr && (*ptr) != '}');
+			}
+			else if (command == "network")
+			{
+				do
+				{
+					if (!ParametersParseHelp::conf_parse_net(*this, line, ptr)) return false;
 				}
 				while (*ptr && (*ptr) != '}');
 			}

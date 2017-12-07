@@ -313,7 +313,7 @@ namespace NRam
     {
         switch (extraction_type)
         {
-			default:
+            default:
             case NRamLayout::RegisterExtaction::P_ZERO:
             {
                 return M.col(0).transpose();
