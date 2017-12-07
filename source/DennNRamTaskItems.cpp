@@ -123,12 +123,12 @@ namespace NRam
 			//init in mem
 			in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.index_rand(m_max_int - 1)); });
 
+            // Set pointers
+            in_mem.col(0) = ColVector::Ones(in_mem.rows()) * idx_1;
+            in_mem.col(1) = ColVector::Ones(in_mem.rows()) * idx_2;
+
 			//init out mem
 			Matrix out_mem = in_mem;
-
-            // Set pointers
-            out_mem.col(0) = ColVector::Ones(out_mem.rows()) * idx_1;
-            out_mem.col(1) = ColVector::Ones(out_mem.rows()) * idx_2;
 
             // Swap
             ColVector col_idx_1 = out_mem.col(idx_1);
