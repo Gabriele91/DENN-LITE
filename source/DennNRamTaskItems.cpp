@@ -125,6 +125,12 @@ namespace NRam
 
 			//init out mem
 			Matrix out_mem = in_mem;
+
+            // Set pointers
+            out_mem.col(0) = ColVector::Ones(out_mem.rows()) * idx_1;
+            out_mem.col(1) = ColVector::Ones(out_mem.rows()) * idx_2;
+
+            // Swap
             ColVector col_idx_1 = out_mem.col(idx_1);
             out_mem.col(idx_1) = out_mem.col(idx_2);
             out_mem.col(idx_2) = col_idx_1;
