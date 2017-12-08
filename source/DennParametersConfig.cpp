@@ -393,7 +393,7 @@ namespace Denn
 				{
 					//test
 					if (!action.m_associated_variable) continue;
-					if (!action.m_owener.test(ower)) continue;
+					if (!action.m_oweners.test(ower)) continue;
 					//search param 
 					bool found = false;
 					//as shell arg or command

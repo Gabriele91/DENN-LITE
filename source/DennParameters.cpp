@@ -91,6 +91,7 @@ namespace Denn
         },
         ParameterInfo {
               m_mutation_type
+		    , { m_evolution_type }
             , "Type of DE mutation"
             , { "-m"  }
             , [this](Arguments& args) -> bool
@@ -107,6 +108,7 @@ namespace Denn
         },
         ParameterInfo {
               m_crossover_type
+			, { m_evolution_type }
             , "Type of DE crossover"
             , { "-co"  }
             , [this](Arguments& args) -> bool
@@ -163,7 +165,7 @@ namespace Denn
 
 		ParameterInfo{
 			  m_shade_h
-			, { m_evolution_type,{ Variant("JADE"), Variant("SHADE"), Variant("L-SHADE") } }
+			, { m_evolution_type,{ Variant("SHADE"), Variant("L-SHADE") } }
 		    , "Size of archive of mu_f and mu_cr (SHADE/L-SHADE)",{ "-shah" }
 		}, 
 

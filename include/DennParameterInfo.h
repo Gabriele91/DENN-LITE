@@ -12,7 +12,7 @@ namespace Denn
 	class  Parameters;
 	class  GenericReadOnly;
 	struct ParameterDomain;
-	struct ParameterOwner;
+	struct ParameterOwners;
 	struct ParameterInfo;
 	//////////////////////////////////////////////
 	class GenericReadOnly
@@ -96,7 +96,7 @@ namespace Denn
 		ParameterDomain(const std::string& domain, const std::vector< std::string >& choises);
 	};
 
-	struct ParameterOwner
+	struct ParameterOwners
 	{
 		enum Filter
 		{
@@ -105,46 +105,79 @@ namespace Denn
 			EXCEPT,
 			ONLY
 		};
-		const Filter			     m_filter_type;
-		const std::vector< Variant > m_filter_values;
-		const GenericReadOnly*       m_owner_variable;
 
-		ParameterOwner();
+		struct ParameterOwner
+		{
+			const Filter			     m_filter_type;
+			const std::vector< Variant > m_filter_values;
+			const GenericReadOnly*       m_owner_variable;
+
+			ParameterOwner();
+
+			bool test(const ParameterInfo& owner) const;
+
+			template< class T >
+			ParameterOwner(const ReadOnly< T >& owner)
+			: m_filter_type(ALL)
+			, m_owner_variable(&owner)
+			{
+
+			}
+
+			template< class T >
+			ParameterOwner(const ReadOnly< T >& owner, const std::vector< Variant >& value)
+			: m_filter_type(ONLY)
+			, m_filter_values(value)
+			, m_owner_variable(&owner)
+			{
+
+			}
+
+			template< class T >
+			ParameterOwner(const ReadOnly< T >& owner, const Filter filter, const std::vector< Variant >& value)
+			: m_filter_type(filter)
+			, m_filter_values(value)
+			, m_owner_variable(&owner)
+			{
+
+			}
+		};
+
+		ParameterOwners();
+
+		ParameterOwners(const std::vector < ParameterOwner >& owners);
 
 		bool test(const ParameterInfo& owner) const;
 
 		template< class T >
-		ParameterOwner(const ReadOnly< T >& owner)
-		: m_filter_type(ALL)
-		, m_owner_variable(&owner)
+		ParameterOwners(const ReadOnly< T >& owner)
 		{
-
+			m_owners.emplace_back(owner);
 		}
 
 		template< class T >
-		ParameterOwner(const ReadOnly< T >& owner, const std::vector< Variant >& value)
-		: m_filter_type(ONLY)
-		, m_filter_values(value)
-		, m_owner_variable(&owner)
+		ParameterOwners(const ReadOnly< T >& owner, const std::vector< Variant >& value)
 		{
-
+			m_owners.emplace_back(owner, value);
 		}
 
 		template< class T >
-		ParameterOwner(const ReadOnly< T >& owner, const Filter filter, const std::vector< Variant >& value)
-		: m_filter_type(filter)
-		, m_filter_values(value)
-		, m_owner_variable(&owner)
+		ParameterOwners(const ReadOnly< T >& owner, const Filter filter, const std::vector< Variant >& value)
 		{
-
+			m_owners.emplace_back(owner, filter, value);
 		}
+	
+	protected:
+
+		std::vector < ParameterOwner > m_owners;
+
 	};
 
 	struct ParameterInfo
 	{
 
 		const GenericReadOnly*		      m_associated_variable;
-		const ParameterOwner			  m_owener;
+		const ParameterOwners			  m_oweners;
 		std::string				   		  m_description;
 		std::vector< std::string  > 	  m_arg_key;
 		std::function< bool(Arguments&) > m_action;
@@ -174,14 +207,14 @@ namespace Denn
 		ParameterInfo
 		(
 			  ReadOnly< T >&			          associated_variable
-			, const ParameterOwner			      owener
+			, const ParameterOwners			      owener
 			, const std::string&				  description
 			, const std::vector< std::string  >&  arg_key
 			, std::function< bool(Arguments&) >   action = nullptr
 			, const ParameterDomain&              domain = ParameterDomain(cpp_type_to_arg_type<T>())
 		)
 			: m_associated_variable(&associated_variable)
-			, m_owener(owener)
+			, m_oweners(owener)
 			, m_description(description)
 			, m_arg_key(arg_key)
 			, m_domain(domain)
@@ -201,7 +234,7 @@ namespace Denn
 		ParameterInfo
 		(
 			  const std::string&				  description
-			, const ParameterOwner			      owener
+			, const ParameterOwners			      owener
 			, const std::vector< std::string  >&  arg_key
 			, std::function< bool(Arguments&) >   action
 			, const ParameterDomain&              domain = ParameterDomain(std::string())

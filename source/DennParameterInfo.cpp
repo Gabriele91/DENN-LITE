@@ -19,12 +19,13 @@ namespace Denn
 	{
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
-	ParameterOwner::ParameterOwner()
+	ParameterOwners::ParameterOwner::ParameterOwner()
 	: m_filter_type(NONE)
 	, m_owner_variable(nullptr)
 	{
 	}
-	bool ParameterOwner::test(const ParameterInfo& owner) const
+
+	bool ParameterOwners::ParameterOwner::test(const ParameterInfo& owner) const
 	{
 		//ignore test
 		if (!owner.has_an_associated_variable() && !m_owner_variable) return true;
@@ -55,6 +56,23 @@ namespace Denn
 
 	}
 	////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	ParameterOwners::ParameterOwners()
+	{
+	}	
+	ParameterOwners::ParameterOwners(const std::vector < ParameterOwner >& owners)
+	: m_owners(owners)
+	{
+	}
+	bool ParameterOwners::test(const ParameterInfo& test_owner) const
+	{
+		//ignore test
+		if (!test_owner.has_an_associated_variable() && !m_owners.size()) return true;
+		//test
+		for (auto& the_owenr : m_owners) if (the_owenr.test(test_owner)) return true;
+		//fail
+		return false;
+	}
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	ParameterInfo::ParameterInfo() : m_associated_variable(nullptr) { }
 
 	ParameterInfo::ParameterInfo
@@ -75,13 +93,13 @@ namespace Denn
 	ParameterInfo::ParameterInfo
 	(
 		  const std::string&				  description
-		, const ParameterOwner			      owener
+		, const ParameterOwners			      owener
 		, const std::vector< std::string  >&  arg_key
 		, std::function< bool(Arguments&) >   action
 		, const ParameterDomain&              domain
 	)
 	: m_associated_variable(nullptr)
-	, m_owener(owener)
+	, m_oweners(owener)
 	, m_description(description)
 	, m_arg_key(arg_key)
 	, m_action(action)
