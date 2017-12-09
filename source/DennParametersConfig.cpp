@@ -510,17 +510,7 @@ namespace Denn
 					while (conf_skip_line_space(ptr)
 						|| conf_skip_line_comment(ptr)
 						|| conf_skip_multilines_comment(line, ptr));
-					//get activation function
-					if (layer_size <= 0)
-					{
-						std::cerr << line << ": layer size (" << layer_size << ") not valid " << std::endl;
-						return false;
-					}
-					//jump space
-					while (conf_skip_line_space(ptr)
-						|| conf_skip_line_comment(ptr)
-						|| conf_skip_multilines_comment(line, ptr));
-					//activation function (default linear
+					//activation function (default linear)
 					std::string layer_af = conf_name(ptr);
 					//test
 					if (!layer_af.size()) layer_af = "linear";
@@ -540,7 +530,7 @@ namespace Denn
 					while (conf_skip_line_space(ptr)
 						|| conf_skip_line_comment(ptr)
 						|| conf_skip_multilines_comment(line, ptr));
-					//activation function (default linear
+					//activation function (default linear)
 					std::string layer_af = conf_name(ptr);
 					//test
 					if (!layer_af.size()) layer_af = "linear";
