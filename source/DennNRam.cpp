@@ -341,6 +341,7 @@ namespace NRam
     }
 	////////////////////////////////////////////////////////////////////////////////////////
 	//Train
+	//tlocal
     Scalar train
     (
       const NRamLayout &context
@@ -350,9 +351,9 @@ namespace NRam
     )
     {
 		//init by threads
-		thread_local Matrix regs;
-		thread_local Matrix in_mem;
-		thread_local Matrix out;
+		Matrix regs;
+		Matrix in_mem;
+		Matrix out;
 		//time step
         Scalar full_cost = Scalar(0.0);
         // Run the circuit
@@ -405,9 +406,9 @@ namespace NRam
     , Matrix& in_mem
     )
     {
-		thread_local Matrix C;
-		thread_local ColVector a, b, c;
-		thread_local Matrix coeff_a, coeff_b, coeff_c;
+		Matrix C;
+		ColVector a, b, c;
+		Matrix coeff_a, coeff_b, coeff_c;
 		//start col
         size_t ptr_col = 0, coefficient_size = context.m_n_regs;
         // Execute circuit
