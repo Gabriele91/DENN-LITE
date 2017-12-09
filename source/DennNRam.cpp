@@ -348,18 +348,22 @@ namespace NRam
     , const Matrix& linear_in_mem
     , const Matrix& linear_out_mem
     )
-    {		
-        //time step
+    {
+		//init by threads
+		thread_local Matrix regs;
+		thread_local Matrix in_mem;
+		thread_local Matrix out;
+		//time step
         Scalar full_cost = Scalar(0.0);
         // Run the circuit
         for (Matrix::Index s = 0; s < linear_in_mem.rows(); ++s)
         {
             //Alloc regs
-            Matrix regs = Matrix::Zero(context.m_n_regs,context.m_max_int);
+            regs = Matrix::Zero(context.m_n_regs,context.m_max_int);
             //P(X=0)
             regs.col(0).fill(1);
             //In mem fuzzy
-            Matrix in_mem = fuzzy_encode(linear_in_mem.row(s));
+			in_mem = fuzzy_encode(linear_in_mem.row(s));
             //Cost helper
             Scalar p_t = Scalar(1.0);
             Scalar prob_incomplete = Scalar(1.0);
@@ -369,7 +373,8 @@ namespace NRam
             //for all timestep, run on s
             for (size_t timestep = 0; timestep < context.m_timesteps; timestep++)
             {
-                Matrix out = network.apply(get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
+				//NN
+				out = network.apply(get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
                 //execute circuit
                 Scalar fi = run_circuit(context, out, regs, in_mem);
 
@@ -400,7 +405,10 @@ namespace NRam
     , Matrix& in_mem
     )
     {
-        //start col
+		thread_local Matrix C;
+		thread_local ColVector a, b, c;
+		thread_local Matrix coeff_a, coeff_b, coeff_c;
+		//start col
         size_t ptr_col = 0, coefficient_size = context.m_n_regs;
         // Execute circuit
         size_t i = 0;
@@ -411,33 +419,33 @@ namespace NRam
             {
                 case Gate::CONST:
                 {
-                    Matrix C = gate(in_mem);
+                    C = gate(in_mem);
                     regs.conservativeResize(regs.rows() + 1, regs.cols());
                     regs.row(regs.rows() - 1) = C;
                 }
                 break;
                 case Gate::UNARY:
                 {
-                    ColVector a    = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
-                    Matrix coeff_a = CostFunction::softmax_col(a);
+                    a = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
+                    coeff_a = CostFunction::softmax_col(a);
                     ptr_col += coefficient_size;
 
-                    Matrix C = gate(avg(regs, coeff_a), in_mem);
+                    C = gate(avg(regs, coeff_a), in_mem);
                     regs.conservativeResize(regs.rows() + 1, regs.cols());
                     regs.row(regs.rows() - 1) = C;
                 }
                 break;
                 case Gate::BINARY:
                 {
-                    ColVector a    = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
-                    Matrix coeff_a = CostFunction::softmax_col(a);
+                    a = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
+                    coeff_a = CostFunction::softmax_col(a);
                     ptr_col += coefficient_size;
 
-                    ColVector b    = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
-                    Matrix coeff_b = CostFunction::softmax_col(b);
+                    b = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
+                    coeff_b = CostFunction::softmax_col(b);
                     ptr_col += coefficient_size;
 
-                    Matrix C = gate(avg(regs, coeff_a), avg(regs, coeff_b), in_mem);
+                    C = gate(avg(regs, coeff_a), avg(regs, coeff_b), in_mem);
                     //append output
                     regs.conservativeResize(regs.rows() + 1, regs.cols());
                     regs.row(regs.rows() - 1) = C;
@@ -452,9 +460,9 @@ namespace NRam
         for (size_t r = 0; i < context.m_gates.size() + context.m_n_regs; ++i, ++r)
         {
 			// get row
-            ColVector c = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
+            c = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
 			// softmax
-            Matrix coeff_c = CostFunction::softmax_col(c);
+            coeff_c = CostFunction::softmax_col(c);
 			// update
 			regs.row(r) = avg(regs, coeff_c).transpose();
 			// next
