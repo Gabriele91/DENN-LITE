@@ -459,10 +459,14 @@ namespace Denn
 		//args
 		if (!nargs || (nargs <= 1 && jump_first)) return true;
 		//config
-		if (Denn::Filesystem::get_extension(vargs[jump_first]) == ".config")
-		{
-			return from_config(Denn::Filesystem::text_file_read_all(vargs[jump_first]));
-		}
+        if (Denn::Filesystem::get_extension(vargs[jump_first]) == ".config")
+        {
+            return from_config(Denn::Filesystem::text_file_read_all(vargs[jump_first]));
+        }
+        else if (Denn::Filesystem::get_extension(vargs[jump_first]) == ".json")
+        {
+            return from_json(Denn::Filesystem::text_file_read_all(vargs[jump_first]));
+        }
 		else
 		{
 			return from_args(nargs-1, &vargs[jump_first]);

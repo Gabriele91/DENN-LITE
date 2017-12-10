@@ -96,7 +96,8 @@ namespace Denn
 	private:
 
 		bool from_args(int nargs, const char **vargs);
-		bool from_config(const std::string& source);
+        bool from_config(const std::string& source);
+        bool from_json(const std::string& source);
 
 		static bool compare_n_args(const std::vector< std::string >& keys, const char* arg);
 		static std::string return_n_space(size_t n);

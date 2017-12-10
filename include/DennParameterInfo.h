@@ -19,8 +19,23 @@ namespace Denn
 	{
 	public:
 		virtual std::string name()  const = 0;
-		virtual Variant variant()   const = 0;
+        virtual Variant variant()   const = 0;
+        virtual VariantType type()  const = 0;
 		virtual bool serializable() const = 0;
+    
+    protected:
+        
+        //set       
+        virtual void* get_ptr() = 0;
+        //get (no const) value
+        template< typename T >
+        T& get() { return *((T*)get_ptr()); }
+        template< typename T >
+        void set(const T& value) { get<T>() = value; }
+        //friends
+        friend class  Parameters;
+        friend class  ParametersParseHelp;
+        friend struct ParameterInfo;
 	};
 
 	template <class T>
@@ -36,7 +51,9 @@ namespace Denn
 		//no cast
 		const T& get() const { return m_data; }
 		//get variant
-		virtual Variant variant() const	  override { return get(); }
+		virtual Variant variant() const override { return get(); }
+        //type
+        virtual VariantType type() const override { return static_variant_type<T>(); }
 		//get name
 		virtual std::string name() const  override { return m_name; }
 		//get if serializable
@@ -63,15 +80,14 @@ namespace Denn
 			m_data = T(arg);
 			return m_data;
 		}
-
 		//get (no const) value
 		T& get() { return m_data; }
-
+        //set
+        virtual void* get_ptr() override { return &m_data; }
 		//name/data/serializable
 		std::string m_name;
 		T m_data;
 		bool m_serializable{ true };
-
 		//friends
 		friend class  Parameters;
 		friend class  ParametersParseHelp;
