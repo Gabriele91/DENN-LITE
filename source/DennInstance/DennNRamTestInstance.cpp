@@ -22,6 +22,7 @@ namespace NRam
 		std::ofstream  m_runtime_output_file_stream;  //n.b. before of context dec
 		std::ofstream  m_serialize_output_file_stream;//n.b. before of context dec
 		bool		   m_success_init{ false };
+		Json 		   m_jdata;
 		//context
 		const Denn::Parameters&	      m_parameters;    //< parameters
 		mutable NRamLayout            m_nram;		   //< nram layout		
@@ -56,20 +57,20 @@ namespace NRam
 			//json str
 			std::string json_source = Filesystem::text_file_read_all(*parameters.m_dataset_filename);
 			//load
-			Json jdata(json_source);
+			m_jdata = Json(json_source);
 			//errors?
-			if(jdata.errors().size())
+			if(m_jdata.errors().size())
 			{
 				//error to parsing
 				std::cerr << "json parse errors:" << std::endl;
 				//print all errors
-				std::cerr << jdata.errors() << std::endl;
+				std::cerr << m_jdata.errors() << std::endl;
 				//end
 				return; //exit
 			}
 			////////////////////////////////////////////////////////////////////////////////////////////////
 			// arguments
-			if(!jdata.document().is_object())
+			if(!m_jdata.document().is_object())
 			{
 				//error to parsing
 				std::cerr << "json not valid" << std::endl;
@@ -77,7 +78,7 @@ namespace NRam
 				return; //exit
 			}			
 			// is a object json
-			if(jdata.document().object().find("arguments") == jdata.document().object().end())
+			if(m_jdata.document().object().find("arguments") == m_jdata.document().object().end())
 			{
 				//error to parsing
 				std::cerr << "not find \'arguments\' in json" << std::endl;
@@ -85,7 +86,7 @@ namespace NRam
 				return; //exit
 			}
 			//ref to args
-			auto& jarguments = jdata["arguments"].object();
+			auto& jarguments = m_jdata["arguments"].object();
 			////////////////////////////////////////////////////////////////////////////////////////////////
 			//test arguments
 			std::vector< std::string > name_of_args
@@ -177,14 +178,14 @@ namespace NRam
 			m_network = build_mlp_network(m_nram.m_n_regs, m_nram.m_nn_output, hl_size, hl_afun, "linear");
 			////////////////////////////////////////////////////////////////////////////////////////////////
 			// Network
-			if (jdata.document().object().find("network") == jdata.document().object().end())
+			if (m_jdata.document().object().find("network") == m_jdata.document().object().end())
 			{
 				//error to parsing
 				std::cerr << "not find \'network\' in json" << std::endl;
 				//end
 				return; //exit
 			}
-		    auto& network = jdata["network"];
+		    auto& network = m_jdata["network"];
 			bool  parser_matrix_network_success = network.is_array();
 			//parsing
 			for (size_t l = 0; l < m_network.size() && parser_matrix_network_success; ++l)
@@ -319,8 +320,18 @@ namespace NRam
 			{
 				//open file
 				std::ofstream jfile(*m_parameters.m_output_filename, std::ofstream::out);
+				//json to serialize
+				JsonObject jexecution;
+				//save tests
+				jexecution["tests"] = jtests;
+				//saveadd layout
+				jexecution["layout"] = JsonObject();
+				jexecution["layout"]["gates"] = m_jdata["arguments"]["gates"];
+				jexecution["layout"]["max_int"] = m_jdata["arguments"]["max_int"];
+				jexecution["layout"]["n_registers"] = m_jdata["arguments"]["n_registers"];
+				jexecution["layout"]["time_steps"] = m_jdata["arguments"]["time_steps"];
 				//write
-				jfile << jtests;
+				jfile << jexecution;
 			}
 			////////////////////////////////////////////////////////////////////////////////////////////////
 			//success

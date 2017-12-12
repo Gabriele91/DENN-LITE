@@ -64,7 +64,7 @@ namespace NRam
         };
         using Steps  = std::vector< Step >;
         
-        ExecutionDebug();
+        ExecutionDebug(const NRamLayout& layout);
         ExecutionDebug(const ExecutionDebug& debug);
 
         void push_step();
@@ -82,7 +82,8 @@ namespace NRam
         Steps m_steps;
         //help
         static Gate::Arity get_arity(size_t value_size);
-
+        //layout
+        NRamLayout m_layout;
     };
 
     using ListExecutionDebug      = std::vector< ExecutionDebug >;

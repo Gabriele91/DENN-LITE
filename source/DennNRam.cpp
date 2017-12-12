@@ -53,8 +53,15 @@ namespace NRam
     }
 	////////////////////////////////////////////////////////////////////////////////////////
 	// debugger
-	ExecutionDebug::ExecutionDebug(){}
-    ExecutionDebug::ExecutionDebug(const ExecutionDebug& debug){ m_steps = debug.m_steps; }
+	ExecutionDebug::ExecutionDebug(const NRamLayout& layout)
+    {
+        m_layout = layout;
+    }
+    ExecutionDebug::ExecutionDebug(const ExecutionDebug& debug)
+    { 
+        m_steps = debug.m_steps;
+        m_layout = debug.m_layout;
+    }
     void ExecutionDebug::push_step()
     {
         m_steps.resize(m_steps.size()+1);
@@ -86,12 +93,29 @@ namespace NRam
             case 6: return Gate::Arity::BINARY; 
         }
     }
+    //gate name
+    static std::string get_gate_or_register_name_from_id(const GateList& gates,size_t regs,size_t value)
+    {
+        if ( value < regs ) return "R(" + std::to_string(value) + ")";
+        size_t id = value-regs;
+        //get
+        if(id < gates.size())
+        {
+            std::string gate_name = gates[value-regs]->name();
+            gate_name[0] = std::toupper(gate_name[0]);
+            return gate_name;
+        }
+        //
+        return "Unknow";
+    }
 	//shell
     std::string ExecutionDebug::shell() const
     {
         std::stringstream output;            
         for(size_t s = 0; s != m_steps.size(); ++s)
         {
+            #define get_name_input_from(out_id)\
+                get_gate_or_register_name_from_id( m_layout.m_gates, m_layout.m_n_regs,  values[out_id](0,0) )
             //get step
             auto& step = m_steps[s];
             //print step
@@ -108,7 +132,7 @@ namespace NRam
                 //gate name
                 std::string  gate_name= name; 
                 gate_name[0] = std::toupper(gate_name[0]);
-
+                //output by type
                 switch(arity)
                 {
                     case Gate::Arity::CONST:
@@ -121,6 +145,8 @@ namespace NRam
                         output << u8"\t• "
                                << gate_name 
                                << "(" 
+                               << get_name_input_from(0)
+                               << " : "
                                << values[1](0,0)
                                << ") => "
                                << values.back()(0,0)
@@ -130,12 +156,27 @@ namespace NRam
                         output << u8"\t• "
                                << gate_name 
                                << "(" 
+                               << get_name_input_from(0)
+                               << " : "
                                << values[1](0,0)
-                               << ","
+                               << ", "
+                               << get_name_input_from(2)
+                               << " : "
                                << values[3](0,0)
-                               << ") => "
-                               << values.back()(0,0)
-                               << std::endl;
+                               << ") => ";
+                        //print memory (write)
+                        if(gate_name == "Write")
+                        {
+                            output 
+                            << values.back()(0,0) 
+                            << ", mem["<<values[1](0,0)<<"] : "
+                            << values[4](0,values[1](0,0)) 
+                            << std::endl;
+                        }
+                        else 
+                        {
+                            output << values.back()(0,0) << std::endl;
+                        }
                     break;
                     //none
                     default: break;
@@ -150,13 +191,14 @@ namespace NRam
                 auto& r      = std::get<0>(update);
                 auto& values = std::get<1>(update);
                 //update
-                output << u8"\t• R" << r << " => " << values.back()(0,0) << std::endl;
+                output << u8"\t• R" << r << " <= " << get_name_input_from(0) << " : " <<  values.back()(0,0) << std::endl;
             }
-
             // Print mem at last timestep
             auto& last_gate_op = step.m_ops.back();
             auto& values       = std::get<1>(last_gate_op);
             output << u8"\t• Mem " << Dump::json_matrix(values[values.size() - 2]) << std::endl;
+            //undef get_value_from
+            #undef get_name_input_from
        
         }
         return output.str();
@@ -501,7 +543,7 @@ namespace NRam
             //Cost helper
             Scalar p_t = Scalar(1.0);
             //debugger
-            ExecutionDebug execution_debug;
+            ExecutionDebug execution_debug(context);
             //for all timestep, run on s
             for (size_t timestep = 0; timestep < context.m_timesteps; timestep++)
             {
