@@ -42,7 +42,7 @@ namespace Denn
 	DataSetScalar& TestSetStream::read_batch(size_t n_rows)
 	{
 		//test
-		assert(n_rows <= m_batch.m_features.size());
+		denn_assert(n_rows <= m_batch.m_features.size());
 		//olready read
 		const size_t c_features = m_dataset->get_main_header_info().m_n_features;
 		const size_t c_labels = m_dataset->get_main_header_info().m_n_classes;

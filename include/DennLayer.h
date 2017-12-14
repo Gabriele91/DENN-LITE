@@ -1,6 +1,6 @@
 #pragma once
 #include "Config.h"
-#include "DennActiveFunction.h"
+#include "DennActivationFunction.h"
 
 namespace Denn
 {
@@ -22,8 +22,8 @@ namespace Denn
 		virtual size_t size() const											                             = 0;
 		virtual Matrix& operator[](size_t i)								                             = 0;
 		virtual const Matrix& operator[](size_t i) const						                         = 0;		
-		virtual ActiveFunction get_active_function()													 = 0;
-		virtual void           set_active_function(ActiveFunction active_function)						 = 0;
+		virtual ActivationFunction get_activation_function()													 = 0;
+		virtual void           set_activation_function(ActivationFunction active_function)						 = 0;
 		///////////////////////////////////////////////////////////////////////////
 		class Iterator 
 		{

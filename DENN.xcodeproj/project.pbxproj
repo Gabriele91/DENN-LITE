@@ -493,7 +493,7 @@
 		CDE1975B1F7E420300A6160B /* zlibstatic.lib */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = zlibstatic.lib; sourceTree = "<group>"; };
 		CDE1975D1F7E420300A6160B /* Config.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Config.h; sourceTree = "<group>"; };
 		CDE1975E1F7E420300A6160B /* Denn.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Denn.h; sourceTree = "<group>"; };
-		CDE1975F1F7E420300A6160B /* DennActiveFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DennActiveFunction.h; sourceTree = "<group>"; };
+		CDE1975F1F7E420300A6160B /* DennActivationFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DennActivationFunction.h; sourceTree = "<group>"; };
 		CDE197601F7E420300A6160B /* DennAlgorithm.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DennAlgorithm.h; sourceTree = "<group>"; };
 		CDE197611F7E420300A6160B /* DennConstants.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DennConstants.h; sourceTree = "<group>"; };
 		CDE197621F7E420300A6160B /* DennCostFunction.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DennCostFunction.h; sourceTree = "<group>"; };
@@ -518,8 +518,8 @@
 		CDE197751F7E420300A6160B /* ThreadPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ThreadPool.h; sourceTree = "<group>"; };
 		CDE197761F7E420300A6160B /* TicksTime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TicksTime.h; sourceTree = "<group>"; };
 		CDE197771F7E420300A6160B /* makefile */ = {isa = PBXFileReference; explicitFileType = text.script.sh; fileEncoding = 4; path = makefile; sourceTree = "<group>"; };
-		CDE197791F7E420300A6160B /* DennActiveFunctionFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennActiveFunctionFactory.cpp; sourceTree = "<group>"; };
-		CDE1977A1F7E420300A6160B /* DennActiveFunctionItems.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennActiveFunctionItems.cpp; sourceTree = "<group>"; };
+		CDE197791F7E420300A6160B /* DennActivationFunctionFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennActivationFunctionFactory.cpp; sourceTree = "<group>"; };
+		CDE1977A1F7E420300A6160B /* DennActivationFunctionItems.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennActivationFunctionItems.cpp; sourceTree = "<group>"; };
 		CDE1977B1F7E420300A6160B /* DennAlgorithm.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennAlgorithm.cpp; sourceTree = "<group>"; };
 		CDE1977C1F7E420300A6160B /* DennCrossoverFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennCrossoverFactory.cpp; sourceTree = "<group>"; };
 		CDE1977E1F7E420300A6160B /* DennEvolutionMethodFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennEvolutionMethodFactory.cpp; sourceTree = "<group>"; };
@@ -1661,7 +1661,7 @@
 				E0C2239D1F87E48500ECE11D /* DennMainUtils.h */,
 				CDE1975D1F7E420300A6160B /* Config.h */,
 				CDE1975E1F7E420300A6160B /* Denn.h */,
-				CDE1975F1F7E420300A6160B /* DennActiveFunction.h */,
+				CDE1975F1F7E420300A6160B /* DennActivationFunction.h */,
 				CDE197601F7E420300A6160B /* DennAlgorithm.h */,
 				CDE197611F7E420300A6160B /* DennConstants.h */,
 				CDE197621F7E420300A6160B /* DennCostFunction.h */,
@@ -1697,8 +1697,8 @@
 				E0A523411F8F788D007E91D0 /* DennMutation */,
 				E0C4D3071F8A587100797530 /* DennTestSetStream.cpp */,
 				E0C2239C1F87E47D00ECE11D /* DennMainUtils.cpp */,
-				CDE197791F7E420300A6160B /* DennActiveFunctionFactory.cpp */,
-				CDE1977A1F7E420300A6160B /* DennActiveFunctionItems.cpp */,
+				CDE197791F7E420300A6160B /* DennActivationFunctionFactory.cpp */,
+				CDE1977A1F7E420300A6160B /* DennActivationFunctionItems.cpp */,
 				CDE1977B1F7E420300A6160B /* DennAlgorithm.cpp */,
 				CDE1977C1F7E420300A6160B /* DennCrossoverFactory.cpp */,
 				CDE1977E1F7E420300A6160B /* DennEvolutionMethodFactory.cpp */,

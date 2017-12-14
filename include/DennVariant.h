@@ -342,7 +342,7 @@ namespace Denn
 
 		Variant(const char* c_str)
 		{
-			set_type(VR_C_STRING);
+			set_type(VR_STD_STRING);
 			*((std::string*)(m_ptr)) = c_str;
 		}
 
@@ -402,13 +402,80 @@ namespace Denn
 			return *((T*)&m_ptr);
 		}
 
-
 		//type
 		VariantType get_type() const
 		{
 			return m_type;
 		}
 
+		bool equal (const Variant& right, bool case_sensitive = true) const
+		{
+			if (get_type() != right.get_type()) return false;
+			//all cases
+			switch (get_type())
+			{
+			case VR_NONE:  return true;
+			case VR_BOOL:  return get<bool>() == right.get<bool>();
+			case VR_CHAR:  return get<char>() == right.get<char>();
+			case VR_SHORT: return get<short>() == right.get<short>();
+			case VR_INT:  return get<int>() == right.get<int>();
+			case VR_LONG:  return get<long>() == right.get<long>();
+			case VR_LONGLONG:  return get<long long>() == right.get<long long>();
+
+			case VR_UCHAR:  return get<unsigned char>() == right.get<char>();
+			case VR_USHORT:  return get<unsigned short>() == right.get<unsigned short>();
+			case VR_UINT:  return get<unsigned int>() == right.get<unsigned int>();
+			case VR_ULONG:  return get<unsigned long>() == right.get<unsigned long>();
+			case VR_ULONGLONG:  return get<unsigned long>() == right.get<unsigned long>();
+
+			case VR_FLOAT:  return get<float>() == right.get<float>();
+			case VR_DOUBLE:  return get<double>() == right.get<double>();
+			case VR_LONG_DOUBLE:  return get<long double>() == right.get<long double>();
+
+			case VR_FLOAT_MATRIX: return get<MatrixF>() == right.get<MatrixF>();
+			case VR_DOUBLE_MATRIX: return get<MatrixD>() == right.get<MatrixD>();
+			case VR_LONG_DOUBLE_MATRIX: return get<MatrixLD>() == right.get<MatrixLD>();
+			//not support
+			case VR_INDIVIDUAL:
+			case VR_POPULATION:
+			case VR_STD_VECTOR_SHORT:
+			case VR_STD_VECTOR_INT:
+			case VR_STD_VECTOR_LONG:
+			case VR_STD_VECTOR_LONGLONG:
+			case VR_STD_VECTOR_USHORT:
+			case VR_STD_VECTOR_UINT:
+			case VR_STD_VECTOR_ULONG:
+			case VR_STD_VECTOR_ULONGLONG:
+			case VR_STD_VECTOR_FLOAT:
+			case VR_STD_VECTOR_DOUBLE:
+			case VR_STD_VECTOR_LONG_DOUBLE:
+			case VR_STD_VECTOR_FLOAT_MATRIX:
+			case VR_STD_VECTOR_DOUBLE_MATRIX:
+			case VR_STD_VECTOR_LONG_DOUBLE_MATRIX:
+			case VR_STD_VECTOR_STRING:
+				return false;
+			//string
+			case VR_C_STRING:
+			case VR_STD_STRING:
+				if(case_sensitive) return get<std::string>() == right.get<std::string>();
+				else return case_insensitive_equal(get<std::string>(),right.get<std::string>());
+			//pointer
+			case VR_PTR: 
+				return m_ptr == right.m_ptr;
+			//ok
+			default: break;
+			}
+		}
+
+		bool operator == (const Variant& right) const
+		{
+			return equal(right);
+		}
+
+		bool operator != (const Variant& right) const
+		{
+			return !equal(right);
+		}
 		//query
 		bool is_none() const
 		{

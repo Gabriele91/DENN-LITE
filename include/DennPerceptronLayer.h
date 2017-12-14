@@ -1,7 +1,7 @@
 #pragma once
 #include "Config.h"
 #include "DennLayer.h"
-#include "DennActiveFunction.h"
+#include "DennActivationFunction.h"
 
 namespace Denn
 {
@@ -18,7 +18,7 @@ namespace Denn
 
 		PerceptronLayer
 		(
-			  ActiveFunction active_function
+			  ActivationFunction active_function
 			, size_t features
 			, size_t clazz
 		);
@@ -36,8 +36,8 @@ namespace Denn
 		virtual Matrix              backpropagate_delta   (const Matrix& bp_delta, const Matrix& ff_out)                                      override;
 		virtual std::vector<Matrix> backpropagate_gradient(const Matrix& bp_delta, const Matrix& ff_out, size_t input_samples, Scalar lambda) override;
 		//////////////////////////////////////////////////
-		virtual ActiveFunction get_active_function()							   override;
-		virtual void           set_active_function(ActiveFunction active_function) override;
+		virtual ActivationFunction get_activation_function()							   override;
+		virtual void           set_activation_function(ActivationFunction active_function) override;
 		//////////////////////////////////////////////////
 		virtual size_t size() const operator_override;		
 		virtual Matrix& operator[](size_t i) operator_override;
@@ -48,6 +48,6 @@ namespace Denn
 
 		Matrix         m_weights;
 		Matrix         m_baias;
-		ActiveFunction m_active_function{ nullptr };
+		ActivationFunction m_activation_function{ nullptr };
 	};
 }

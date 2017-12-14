@@ -30,7 +30,7 @@ C_FLAGS = -fPIC -D_FORCE_INLINES
 # CPP FLAGS
 CC_FLAGS = -std=c++14 -I $(DIPS_INCLUDE) -I $(S_INC)
 # RELEASE_FLAGS
-RELEASE_FLAGS = -O3
+RELEASE_FLAGS = -O3 -DNDEBUG -fomit-frame-pointer -Wno-unused-result
 # DEBUG_FLAGS
 DEBUG_FLAGS = -g -D_DEBUG -Wall 
 # Linker
@@ -63,8 +63,10 @@ endif
 ifeq ($(shell uname -s),Linux)
 # too slow -fopenmp 
 C_FLAGS += -pthread 
-#clang
-ifneq ($(findstring clang,$(VERION_COMPILER)), clang) 
+#no clang
+ifneq ($(findstring clang,$(VERION_COMPILER)), clang)
+# must to be a release mode (no checking)
+# RELEASE_FLAGS += --enable-checking=release
 # remove gcc warning (eigen)
 C_FLAGS += -Wno-int-in-bool-context
 # only linux + gcc

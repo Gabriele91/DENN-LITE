@@ -15,8 +15,8 @@ namespace Denn
 		NeuralNetwork mlp_nn;
 		//hidden layer list
 		const auto& hidden_layers = (*parameters.m_hidden_layers);
-		const auto& active_layers = (*parameters.m_active_functions);
-		const auto& active_output = (*parameters.m_output_active_function);
+		const auto& active_layers = (*parameters.m_activation_functions);
+		const auto& active_output = (*parameters.m_output_activation_function);
 		//return NeuralNetwork
 		return build_mlp_network(n_features,n_class, hidden_layers, active_layers, active_output);
 	}
@@ -38,7 +38,7 @@ namespace Denn
 		{
 			//add first layer
 			mlp_nn.add_layer(PerceptronLayer(
-				active_layers.size() ? ActiveFunctionFactory::get(active_layers[0]) : nullptr
+				active_layers.size() ? ActivationFunctionFactory::get(active_layers[0]) : nullptr
 				, n_features
 				, hidden_layers[0]
 			));
@@ -46,14 +46,14 @@ namespace Denn
 			for (size_t i = 0; i != hidden_layers.size() - 1; ++i)
 			{
 				mlp_nn.add_layer(PerceptronLayer(
-					(i + 1 < active_layers.size()) ? ActiveFunctionFactory::get(active_layers[i + 1]) : nullptr
+					(i + 1 < active_layers.size()) ? ActivationFunctionFactory::get(active_layers[i + 1]) : nullptr
 					, hidden_layers[i]
 					, hidden_layers[i + 1]
 				));
 			}
 			//add last layer
 			mlp_nn.add_layer(PerceptronLayer(
-				ActiveFunctionFactory::get(active_output)
+				ActivationFunctionFactory::get(active_output)
 				, hidden_layers[hidden_layers.size() - 1]
 				, n_class
 			));
@@ -61,7 +61,7 @@ namespace Denn
 		//else add only input layer
 		else
 		{
-			mlp_nn.add_layer(PerceptronLayer(ActiveFunctionFactory::get(active_output), n_features, n_class));
+			mlp_nn.add_layer(PerceptronLayer(ActivationFunctionFactory::get(active_output), n_features, n_class));
 		}
 		//return NeuralNetwork
 		return mlp_nn;
@@ -131,6 +131,15 @@ namespace Denn
 	//build thread pool
 	bool build_thread_pool(std::unique_ptr<ThreadPool>& thpool, const Denn::Parameters& parameters)
 	{
+		//parallel (OpenMP)
+		#ifdef EIGEN_HAS_OPENMP
+		if (*parameters.m_threads_omp)
+		{
+		omp_set_num_threads((int)*parameters.m_threads_omp);
+		Eigen::setNbThreads((int)*parameters.m_threads_omp);
+		Eigen::initParallel();
+		}
+		#endif
 		//parallel (Thread Pool)
 		//ptr
 		std::unique_ptr<ThreadPool> uptr_thpool;

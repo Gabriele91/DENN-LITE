@@ -1,4 +1,5 @@
 #pragma once 
+#include "Config.h"
 #include <cstdio>
 #include <string>
 #include <zlib.h>
@@ -178,7 +179,7 @@ public:
     
     void seek_end(size_t pos = 0)
     {
-        assert(0);
+        denn_assert(0);
         gzseek(m_file, (int)pos, SEEK_END);
     }
     

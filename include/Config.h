@@ -3,6 +3,7 @@
 #include <cstring>
 #include <cmath>
 #include <cassert>
+#include <cctype>
 //default CPP include
 #include <limits>
 #include <map>
@@ -29,9 +30,25 @@
 #if defined( _MSC_VER )
 	#define ASPACKED( __Declaration__ ) __pragma( pack(push, 1) ) __Declaration__ __pragma( pack(pop) )
 	#define operator_override
+	#define denn_noop __noop 
 #else 
 	#define ASPACKED( __Declaration__ ) __Declaration__ __attribute__((__packed__))
 	#define operator_override override
+	#ifdef __clang__
+		#define denn_noop ((void)0)
+	#else
+		#define denn_noop (__ASSERT_VOID_CAST (0))
+	#endif 
+#endif
+//Debug
+#if !defined(  NDEBUG )
+	#define debug_message(_msg_) std::cout<< _msg_ <<std::endl;
+	#define denn_assert(_exp_) assert(_exp_)
+	#define denn_assert_code(_code_)  assert( _code_ );
+#else
+	#define debug_message(_msg_)
+	#define denn_assert(_exp_) denn_noop
+	#define denn_assert_code(_code_)  _code_ ;
 #endif
 //alias
 namespace Denn
@@ -78,7 +95,7 @@ namespace Denn
 	template<typename T, class Compare>
 	inline constexpr T clamp(const T& value, const T& lo, const T& hi, Compare comp)
 	{
-		return assert(!comp(hi, lo)), comp(value, lo) ? lo : comp(hi, value) ? hi : value;
+		return denn_assert(!comp(hi, lo)), comp(value, lo) ? lo : comp(hi, value) ? hi : value;
 	}
 
 	template< typename T >
@@ -121,6 +138,19 @@ namespace Denn
 			pos += new_str.length();
 		}
 		return str;
+	}
+
+	inline bool case_insensitive_equal(const std::string& lstr, const std::string& rstr)
+	{
+		//not equal len
+		if (lstr.size() != rstr.size()) return false;
+		//test
+		for (std::string::const_iterator c1 = lstr.begin(), c2 = rstr.begin(); c1 != lstr.end(); ++c1, ++c2)
+		{
+			if (std::tolower(*c1) != std::tolower(*c2)) return false;
+		}
+		//..
+		return true;
 	}
 
 	/// Shifts a matrix/vector row-wise.
@@ -168,20 +198,21 @@ namespace Denn
 		//return
 		return true;
 	}
+
+	template < typename Matrix >
+	inline typename Matrix::Scalar distance_pow2(const Matrix& a, const Matrix& b)
+	{
+		return (a.array() - b.array()).square().sum();
+	} 
+
+	template < typename Matrix >
+	inline typename Matrix::Scalar distance(const Matrix& a, const Matrix& b)
+	{
+		return std::sqrt(distance_pow2(a,b));
+	} 
 }
 
-//Debug
-#ifdef  _DEBUG
-	#define MESSAGE_DEBUG( _msg_ ) std::cout<< _msg_ <<std::endl;
-	#define ASSERT_DEBUG( _code_ ) assert(_code_);
-	#define ASSERT_DEBUG_MSG( _code_, _msg_ )\
-			{ if (!(_code_)) { std::cout << _msg_ << std::endl; } assert(_code_); } 
-#else
-	#define MESSAGE_DEBUG( _msg_ ) 
-	#define ASSERT_DEBUG( _code_ ) 
-	#define ASSERT_DEBUG_MSG( _code_, _msg_ )\
-			{ if (!(_code_)) { std::cout << _msg_ << std::endl; } assert(_code_); } 
-#endif
+
 
 namespace Denn
 {

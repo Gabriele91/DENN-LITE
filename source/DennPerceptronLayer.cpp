@@ -1,4 +1,4 @@
-#include "DennActiveFunction.h"
+#include "DennActivationFunction.h"
 #include "DennPerceptronLayer.h"
 
 namespace Denn
@@ -16,12 +16,12 @@ namespace Denn
 
 	PerceptronLayer::PerceptronLayer
 	(
-		  ActiveFunction active_function
+		  ActivationFunction active_function
 		, size_t features
 		, size_t clazz
 	)
 	{
-		set_active_function(active_function);
+		set_activation_function(active_function);
 		m_weights.resize(features, clazz);
 		m_baias.resize(1, clazz);
 	}
@@ -42,7 +42,7 @@ namespace Denn
 		//get output
 		Matrix layer_output = (input * m_weights).rowwise() + Eigen::Map<RowVector>((Scalar*)m_baias.data(), m_baias.cols()*m_baias.rows());
 		//activation function?
-		if (m_active_function) return m_active_function(layer_output);
+		if (m_activation_function) return m_activation_function(layer_output);
 		else                   return layer_output;
 	}
 	Matrix PerceptronLayer::feedforward(const Matrix& input, Matrix& ff_out)
@@ -50,10 +50,10 @@ namespace Denn
 		//get output
 		ff_out = (input * m_weights).rowwise() + Eigen::Map<RowVector>(m_baias.data(), m_baias.cols()*m_baias.rows());
 		//activation function?
-		if (m_active_function)
+		if (m_activation_function)
 		{
 			Matrix out_matrix(ff_out);
-            m_active_function(out_matrix);
+            m_activation_function(out_matrix);
 			return out_matrix;
 		} 
 		else
@@ -64,11 +64,11 @@ namespace Denn
     Matrix PerceptronLayer::backpropagate_delta(const Matrix& bp_delta, const Matrix& ff_out)
     {
         //////////////////////////////////////////////////////////////////////
-        if (m_active_function.exists_function_derivate())
+        if (m_activation_function.exists_function_derivate())
         {
             //derivate of active function
             Matrix d_f(ff_out);
-            d_f = m_active_function.derive(d_f); // g := D_f(x))
+            d_f = m_activation_function.derive(d_f); // g := D_f(x))
             return d_f.transpose().cwiseProduct(m_weights * bp_delta);
         }
         else
@@ -96,13 +96,13 @@ namespace Denn
         //J = Scalar(0.5) * lambda * m_weights.array().square().sum() / Scalar(input_samples);
     }
 	//////////////////////////////////////////////////
-	ActiveFunction PerceptronLayer::get_active_function() 
+	ActivationFunction PerceptronLayer::get_activation_function() 
 	{
-		return m_active_function;
+		return m_activation_function;
 	}
-	void PerceptronLayer::set_active_function(ActiveFunction active_function)
+	void PerceptronLayer::set_activation_function(ActivationFunction active_function)
 	{
-		m_active_function = ActiveFunctionFactory::name_of(active_function) == "linear" ? nullptr : active_function;
+		m_activation_function = ActivationFunctionFactory::name_of(active_function) == "linear" ? nullptr : active_function;
 	}
     //////////////////////////////////////////////////
 	size_t PerceptronLayer::size() const
@@ -111,13 +111,13 @@ namespace Denn
 	}
 	Matrix& PerceptronLayer::operator[](size_t i)
 	{
-		assert(i < 2);
+		denn_assert(i < 2);
 		if (i & 0x1) return  m_baias;  //1
 		else		 return  m_weights;//0
 	}
 	const Matrix& PerceptronLayer::operator[](size_t i) const
 	{
-		assert(i < 2);
+		denn_assert(i < 2);
 		if (i & 0x1) return  m_baias;  //1
 		else		 return  m_weights;//0
 	}

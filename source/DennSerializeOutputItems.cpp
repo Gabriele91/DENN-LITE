@@ -24,7 +24,7 @@ namespace Denn
 			output() << "\t\"arguments\" :" << std::endl;
 			output() << "\t{" << std::endl;
 			//get only serializables
-			std::vector < const Denn::Parameters::ParameterInfo* > params_serializable;
+			std::vector < const ParameterInfo* > params_serializable;
 			for (auto& params : args.m_params_info)
 				if (params.serializable())  params_serializable.emplace_back(&params);
 			//serialize
@@ -88,7 +88,7 @@ namespace Denn
 		virtual void serialize_parameters(const Denn::Parameters& args) override
 		{
 			//get only serializables
-			std::vector < const Denn::Parameters::ParameterInfo* > params_serializable;
+			std::vector < const ParameterInfo* > params_serializable;
 			for (auto& params : args.m_params_info)
 				if (params.serializable())  params_serializable.emplace_back(&params);
 			//print header

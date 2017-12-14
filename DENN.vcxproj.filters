@@ -102,7 +102,7 @@
     <ClInclude Include="include\Denn.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\DennActiveFunction.h">
+    <ClInclude Include="include\DennActivationFunction.h">
       <Filter>Include</Filter>
     </ClInclude>
     <ClInclude Include="include\DennConstants.h">
@@ -156,6 +156,12 @@
     <ClInclude Include="include\DennJson.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="include\DennArguments.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DennParameterInfo.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\TicksTime.cpp">
@@ -200,10 +206,10 @@
     <ClCompile Include="source\DennSerializeOutputItems.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="source\DennActiveFunctionFactory.cpp">
+    <ClCompile Include="source\DennActivationFunctionFactory.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="source\DennActiveFunctionItems.cpp">
+    <ClCompile Include="source\DennActivationFunctionItems.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="source\DennLayer.cpp">
@@ -355,6 +361,30 @@
     </ClCompile>
     <ClCompile Include="source\DennInstance\DennNRamTestInstance.cpp">
       <Filter>Source\DennInstance</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennMutation\DennMutationTrigonometric.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennArguments.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennParameterInfo.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodSDE.cpp">
+      <Filter>Source\DennEvolutionMethod</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodTDE.cpp">
+      <Filter>Source\DennEvolutionMethod</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennParametersArgs.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennParametersConfig.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennParametersJson.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

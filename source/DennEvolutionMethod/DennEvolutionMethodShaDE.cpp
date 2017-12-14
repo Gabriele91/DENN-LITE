@@ -331,8 +331,7 @@ namespace Denn
 				//reduce
 				dpopulation.resize(new_np);
 				//test
-				assert(current_np() == new_np);
-				//MESSAGE("np: " << new_np);
+				denn_assert(current_np() == new_np);
 			}
 		}
 	};

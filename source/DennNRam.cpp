@@ -23,6 +23,7 @@ namespace NRam
         const size_t max_int,
         const size_t n_regs,
         const size_t timesteps,
+        const size_t registers_values_extraction_type,
         const GateList& gates
     )
     {
@@ -31,6 +32,7 @@ namespace NRam
         m_max_int = max_int;
         m_n_regs = n_regs;
         m_timesteps = timesteps;
+        m_registers_values_extraction_type = registers_values_extraction_type;
 	    m_gates = gates;
         // Past cardinality
         size_t i = 0;
@@ -51,8 +53,15 @@ namespace NRam
     }
 	////////////////////////////////////////////////////////////////////////////////////////
 	// debugger
-	ExecutionDebug::ExecutionDebug(){}
-    ExecutionDebug::ExecutionDebug(const ExecutionDebug& debug){ m_steps = debug.m_steps; }
+	ExecutionDebug::ExecutionDebug(const NRamLayout& layout)
+    {
+        m_layout = layout;
+    }
+    ExecutionDebug::ExecutionDebug(const ExecutionDebug& debug)
+    { 
+        m_steps = debug.m_steps;
+        m_layout = debug.m_layout;
+    }
     void ExecutionDebug::push_step()
     {
         m_steps.resize(m_steps.size()+1);
@@ -84,12 +93,29 @@ namespace NRam
             case 6: return Gate::Arity::BINARY; 
         }
     }
+    //gate name
+    static std::string get_gate_or_register_name_from_id(const GateList& gates,size_t regs,size_t value)
+    {
+        if ( value < regs ) return "R(" + std::to_string(value) + ")";
+        size_t id = value-regs;
+        //get
+        if(id < gates.size())
+        {
+            std::string gate_name = gates[value-regs]->name();
+            gate_name[0] = std::toupper(gate_name[0]);
+            return gate_name;
+        }
+        //
+        return "Unknow";
+    }
 	//shell
     std::string ExecutionDebug::shell() const
     {
         std::stringstream output;            
         for(size_t s = 0; s != m_steps.size(); ++s)
         {
+            #define get_name_input_from(out_id)\
+                get_gate_or_register_name_from_id( m_layout.m_gates, m_layout.m_n_regs,  values[out_id](0,0) )
             //get step
             auto& step = m_steps[s];
             //print step
@@ -106,34 +132,51 @@ namespace NRam
                 //gate name
                 std::string  gate_name= name; 
                 gate_name[0] = std::toupper(gate_name[0]);
-
+                //output by type
                 switch(arity)
                 {
                     case Gate::Arity::CONST:
-                        output << "\t• " 
+                        output << u8"\t• "
                                << gate_name << " => "
                                << values.back()(0,0)
                                << std::endl;
                     break;
                     case Gate::Arity::UNARY:
-                        output << "\t• " 
+                        output << u8"\t• "
                                << gate_name 
                                << "(" 
+                               << get_name_input_from(0)
+                               << " : "
                                << values[1](0,0)
                                << ") => "
                                << values.back()(0,0)
                                << std::endl;
                     break;
                     case Gate::Arity::BINARY:
-                        output << "\t• " 
+                        output << u8"\t• "
                                << gate_name 
                                << "(" 
+                               << get_name_input_from(0)
+                               << " : "
                                << values[1](0,0)
-                               << ","
+                               << ", "
+                               << get_name_input_from(2)
+                               << " : "
                                << values[3](0,0)
-                               << ") => "
-                               << values.back()(0,0)
-                               << std::endl;
+                               << ") => ";
+                        //print memory (write)
+                        if(gate_name == "Write")
+                        {
+                            output 
+                            << values.back()(0,0) 
+                            << ", mem["<<values[1](0,0)<<"] : "
+                            << values[4](0,values[1](0,0)) 
+                            << std::endl;
+                        }
+                        else 
+                        {
+                            output << values.back()(0,0) << std::endl;
+                        }
                     break;
                     //none
                     default: break;
@@ -148,13 +191,14 @@ namespace NRam
                 auto& r      = std::get<0>(update);
                 auto& values = std::get<1>(update);
                 //update
-                output << "\t• R" << r << " => " << values.back()(0,0) << std::endl;
+                output << u8"\t• R" << r << " <= " << get_name_input_from(0) << " : " <<  values.back()(0,0) << std::endl;
             }
-
             // Print mem at last timestep
             auto& last_gate_op = step.m_ops.back();
             auto& values       = std::get<1>(last_gate_op);
-            output << "\t• Mem " << Dump::json_matrix(values[values.size() - 2]) << std::endl;
+            output << u8"\t• Mem " << Dump::json_matrix(values[values.size() - 2]) << std::endl;
+            //undef get_value_from
+            #undef get_name_input_from
        
         }
         return output.str();
@@ -240,7 +284,7 @@ namespace NRam
 	bool NRamEval::minimize() const { return true; }
 	Scalar NRamEval::operator () (const Individual& individual, const DataSet& ds)
 	{
-		assert(m_context);
+		denn_assert(m_context);
 		//network
 		auto& nn = individual.m_network;
 		//Dataset
@@ -307,6 +351,22 @@ namespace NRam
         return m;
     }
 
+    Matrix get_registers_values(const Matrix &M, size_t extraction_type)
+    {
+        switch (extraction_type)
+        {
+            default:
+            case NRamLayout::RegisterExtaction::P_ZERO:
+            {
+                return M.col(0).transpose();
+            }
+            case NRamLayout::RegisterExtaction::P_DEFUZZYED:
+            {
+                return defuzzy_mem(M);
+            }
+        }
+    }
+
     Scalar calculate_sample_cost(Matrix &M, const RowVector &desired_mem)
     {
         Scalar s_cost = 0;
@@ -323,6 +383,7 @@ namespace NRam
     }
 	////////////////////////////////////////////////////////////////////////////////////////
 	//Train
+	//tlocal
     Scalar train
     (
       const NRamLayout &context
@@ -330,18 +391,22 @@ namespace NRam
     , const Matrix& linear_in_mem
     , const Matrix& linear_out_mem
     )
-    {		
-        //time step
+    {
+		//init by threads
+		Matrix regs;
+		Matrix in_mem;
+		Matrix out;
+		//time step
         Scalar full_cost = Scalar(0.0);
         // Run the circuit
         for (Matrix::Index s = 0; s < linear_in_mem.rows(); ++s)
         {
             //Alloc regs
-            Matrix regs = Matrix::Zero(context.m_n_regs,context.m_max_int); 
+            regs = Matrix::Zero(context.m_n_regs,context.m_max_int);
             //P(X=0)
             regs.col(0).fill(1);
-            //In mem fazzy
-            Matrix in_mem = fuzzy_encode(linear_in_mem.row(s));
+            //In mem fuzzy
+			in_mem = fuzzy_encode(linear_in_mem.row(s));
             //Cost helper
             Scalar p_t = Scalar(1.0);
             Scalar prob_incomplete = Scalar(1.0);
@@ -351,8 +416,8 @@ namespace NRam
             //for all timestep, run on s
             for (size_t timestep = 0; timestep < context.m_timesteps; timestep++)
             {
-                //execute nn
-                Matrix out = network.apply(regs.col(0).transpose()).transpose();
+				//NN
+				out = network.apply(get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
                 //execute circuit
                 Scalar fi = run_circuit(context, out, regs, in_mem);
 
@@ -383,7 +448,10 @@ namespace NRam
     , Matrix& in_mem
     )
     {
-        //start col
+		Matrix C;
+		ColVector a, b, c;
+		Matrix coeff_a, coeff_b, coeff_c;
+		//start col
         size_t ptr_col = 0, coefficient_size = context.m_n_regs;
         // Execute circuit
         size_t i = 0;
@@ -394,33 +462,33 @@ namespace NRam
             {
                 case Gate::CONST:
                 {
-                    Matrix C = gate(in_mem);
+                    C = gate(in_mem);
                     regs.conservativeResize(regs.rows() + 1, regs.cols());
                     regs.row(regs.rows() - 1) = C;
                 }
                 break;
                 case Gate::UNARY:
                 {
-                    ColVector a    = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
-                    Matrix coeff_a = CostFunction::softmax_col(a);
+                    a = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
+                    coeff_a = CostFunction::softmax_col(a);
                     ptr_col += coefficient_size;
 
-                    Matrix C = gate(avg(regs, coeff_a), in_mem);
+                    C = gate(avg(regs, coeff_a), in_mem);
                     regs.conservativeResize(regs.rows() + 1, regs.cols());
                     regs.row(regs.rows() - 1) = C;
                 }
                 break;
                 case Gate::BINARY:
                 {
-                    ColVector a    = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
-                    Matrix coeff_a = CostFunction::softmax_col(a);
+                    a = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
+                    coeff_a = CostFunction::softmax_col(a);
                     ptr_col += coefficient_size;
 
-                    ColVector b    = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
-                    Matrix coeff_b = CostFunction::softmax_col(b);
+                    b = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
+                    coeff_b = CostFunction::softmax_col(b);
                     ptr_col += coefficient_size;
 
-                    Matrix C = gate(avg(regs, coeff_a), avg(regs, coeff_b), in_mem);
+                    C = gate(avg(regs, coeff_a), avg(regs, coeff_b), in_mem);
                     //append output
                     regs.conservativeResize(regs.rows() + 1, regs.cols());
                     regs.row(regs.rows() - 1) = C;
@@ -435,9 +503,9 @@ namespace NRam
         for (size_t r = 0; i < context.m_gates.size() + context.m_n_regs; ++i, ++r)
         {
 			// get row
-            ColVector c = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
+            c = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
 			// softmax
-            Matrix coeff_c = CostFunction::softmax_col(c);
+            coeff_c = CostFunction::softmax_col(c);
 			// update
 			regs.row(r) = avg(regs, coeff_c).transpose();
 			// next
@@ -475,14 +543,14 @@ namespace NRam
             //Cost helper
             Scalar p_t = Scalar(1.0);
             //debugger
-            ExecutionDebug execution_debug;
+            ExecutionDebug execution_debug(context);
             //for all timestep, run on s
             for (size_t timestep = 0; timestep < context.m_timesteps; timestep++)
             {
                 //new step
                 execution_debug.push_step();
                 //execute nn
-                Matrix out = network.apply(regs.col(0).transpose()).transpose();
+                Matrix out = network.apply(get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
                 //execute circuit
                 Scalar fi = run_circuit(context, out, regs, in_mem, execution_debug);
             }
