@@ -5,7 +5,7 @@ namespace Denn
 {
     //default int
     template < typename T >
-    static std::vector< T > json_jarray_to_vector(JsonArray& jarray)
+    inline std::vector< T > json_jarray_to_vector(JsonArray& jarray)
     {
         std::vector< T > out; out.resize(jarray.size());
         for (size_t i = 0; i != jarray.size(); ++i) out[i] = (T)jarray[i].number();
@@ -13,7 +13,7 @@ namespace Denn
     }
     //others type
     template <>
-    static std::vector< std::string > json_jarray_to_vector< std::string >(JsonArray& jarray)
+    inline std::vector< std::string > json_jarray_to_vector< std::string >(JsonArray& jarray)
     {
         std::vector< std::string > out; out.resize(jarray.size());
         for (size_t i = 0; i != jarray.size(); ++i) out[i] = jarray[i].string();
