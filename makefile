@@ -6,6 +6,7 @@ SCALAR	        ?= FLOAT
 HAVE_TERM       := $(shell echo $$TERM)
 VERION_COMPILER := `$(COMPILER) --version`
 ENABLE_BLAS     := false
+USE_OPENBLAS    := false
 #undef to none (linux)
 ifndef HAVE_TERM
 	HAVE_TERM = none
@@ -87,8 +88,17 @@ ifeq ($(ENABLE_BLAS),true)
 RELEASE_FLAGS += -DEIGEN_USE_BLAS
 #link blas
 ifeq ($(shell uname -s),Darwin)
+###############################
+#OpenBLAS
+ifeq ($(USE_OPENBLAS),true)
+C_FLAGS += -I $(shell brew --prefix openblas)/include
+LDFLAGS += -L $(shell brew --prefix openblas)/lib
+LDFLAGS += -lblas
+else 
 #mac os blas
 LDFLAGS += -framework Accelerate 
+endif
+###############################
 else 
 #linux blas (static)
 LDFLAGS += -lblas
