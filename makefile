@@ -5,6 +5,7 @@ TOP             ?=$(shell pwd)
 SCALAR	        ?= FLOAT
 HAVE_TERM       := $(shell echo $$TERM)
 VERION_COMPILER := `$(COMPILER) --version`
+ENABLE_BLAS     := false
 #undef to none (linux)
 ifndef HAVE_TERM
 	HAVE_TERM = none
@@ -80,6 +81,21 @@ ifeq ($(shell uname -s),Darwin)
 #No OpenMP 
 RELEASE_FLAGS += -march=native
 endif
+
+ifeq ($(ENABLE_BLAS),true)
+#enable blas (eigen)
+RELEASE_FLAGS += -DEIGEN_USE_BLAS
+#link blas
+ifeq ($(shell uname -s),Darwin)
+#mac os blas
+LDFLAGS += -framework Accelerate 
+else 
+#linux blas (static)
+LDFLAGS += -lblas
+endif
+#endif
+endif
+
 ##
 # Support function for colored output
 # Args:
