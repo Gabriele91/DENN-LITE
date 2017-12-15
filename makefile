@@ -83,28 +83,32 @@ ifeq ($(shell uname -s),Darwin)
 RELEASE_FLAGS += -march=native
 endif
 
+# BLAS
 ifeq ($(ENABLE_BLAS),true)
 #enable blas (eigen)
 RELEASE_FLAGS += -DEIGEN_USE_BLAS
-#link blas
+#MacOS/Linux
 ifeq ($(shell uname -s),Darwin)
 ###############################
-#OpenBLAS
+#link blas macOS
 ifeq ($(USE_OPENBLAS),true)
 C_FLAGS += -I $(shell brew --prefix openblas)/include
 LDFLAGS += -L $(shell brew --prefix openblas)/lib
 LDFLAGS += -lblas
 else 
-#mac os blas
 LDFLAGS += -framework Accelerate 
-endif
+endif #END OpenBLAS/BLAS
+else  #END MacOS
 ###############################
+#link blas Linux
+ifeq ($(USE_OPENBLAS),true)
+LDFLAGS += -lopenblas
 else 
-#linux blas (static)
 LDFLAGS += -lblas
-endif
-#endif
-endif
+endif #END OpenBLAS/BLAS
+endif #END Linux
+###############################
+endif #END BLAS
 
 ##
 # Support function for colored output
