@@ -126,6 +126,7 @@ namespace NRam
             // Set pointers
             in_mem.col(0) = ColVector::Ones(in_mem.rows()) * idx_1;
             in_mem.col(1) = ColVector::Ones(in_mem.rows()) * idx_2;
+            in_mem.col(in_mem.cols() - 1) = ColVector::Zero(in_mem.rows());
 
 			//init out mem
 			Matrix out_mem = in_mem;
@@ -134,6 +135,10 @@ namespace NRam
             ColVector col_idx_1 = out_mem.col(idx_1);
             out_mem.col(idx_1) = out_mem.col(idx_2);
             out_mem.col(idx_2) = col_idx_1;
+
+            // Cut out the the memory parts that does not make part of the expected output
+            out_mem.block(0, 0, out_mem.rows(), 2) = Matrix::Ones(out_mem.rows(), 2) * -1;
+            out_mem.col(in_mem.cols() - 1) = ColVector::Ones(in_mem.rows()) * -1;
 
 			//return
 			return std::make_tuple(in_mem, out_mem, Task::init_regs());
@@ -167,6 +172,9 @@ namespace NRam
 			Matrix out_mem = in_mem;
             out_mem.block(0, offset, in_mem.rows(), in_mem.cols() - offset - 1) \
                     = out_mem.block(0, 1, in_mem.rows(), offset - 1).rowwise().reverse();
+
+            // Cut out from the cost calculation the memory part that does not make part of the expected output
+            out_mem.block(0, 0, in_mem.rows(), offset) = Matrix::Ones(out_mem.rows(), offset) * -1;
 
             //return
 			return std::make_tuple(in_mem, out_mem, Task::init_regs());

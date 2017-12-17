@@ -5,6 +5,7 @@
 #include "Denn.h"
 #include "DennNRam.h"
 #include "DennNRamTask.h"
+#include "DennDump.h"
 #include  <cctype>
 #include  <sstream>
 
@@ -372,7 +373,8 @@ namespace NRam
         Scalar s_cost = 0;
         for (size_t idx = 0; idx < M.rows(); ++idx)
         {
-            s_cost += Denn::CostFunction::safe_log(M(idx, Matrix::Index(desired_mem(idx))));
+            if (Matrix::Index(desired_mem(idx)) != -1)
+                s_cost += Denn::CostFunction::safe_log(M(idx, Matrix::Index(desired_mem(idx))));
         }
         return s_cost;
     }
