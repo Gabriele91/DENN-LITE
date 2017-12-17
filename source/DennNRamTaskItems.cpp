@@ -250,5 +250,103 @@ namespace NRam
         }
     };
     REGISTERED_TASK(TaskPermutation, "permutation")
+
+	class TaskListK : public Task
+	{
+	public:
+		TaskListK
+				(
+						size_t batch_size
+						, size_t max_int
+						, size_t n_regs
+						, Random& random
+				)
+				: Task(batch_size, max_int, n_regs, random)
+		{
+		}
+
+		MemoryTuple operator()() override
+		{
+			using namespace Eigen;
+
+			//alloc
+			Matrix::Index list_size = (m_max_int - 4) / 2;
+			Matrix in_mem(m_batch_size, m_max_int);
+			Matrix list_elements(m_batch_size, list_size);
+
+			//init in mem
+			list_elements = list_elements.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.index_rand(m_max_int - 1)); });
+
+			// Initialize the permutation for all the examples
+			for (size_t r = 0; r < in_mem.rows(); ++r)
+			{
+				PermutationMatrix< Dynamic, Dynamic > perm(list_size);
+				perm.setIdentity();
+
+				std::random_device rd;
+				std::mt19937 g(rd());
+
+				std::shuffle(perm.indices().data(), perm.indices().data() + perm.indices().size(), g);
+
+				Matrix m_permutation = perm
+						.indices()
+						.cast<Scalar>()
+						.transpose();
+
+				for (Matrix::Index e = 0; e < m_permutation.cols(); ++e)
+				{
+					Matrix::Index current_element_pointer = Matrix::Index(m_permutation(0, e)); // Pointer inside the list of the current element
+
+					// Search the next element in the list m_permutation
+					Matrix::Index pointer_to_the_next = 0; // Pointer of the next element in the list respect to the current
+					for (; pointer_to_the_next < m_permutation.cols(); ++pointer_to_the_next)
+					{
+						if (Matrix::Index(m_permutation(0, pointer_to_the_next)) == (current_element_pointer + 1))
+							break;
+					}
+
+					// If the current element is the first element in the list then update the head pointer in the memory
+					if (current_element_pointer == 0)
+						in_mem(r, 0) = 3 + 2 * e;
+
+					// Set the pointer to the next elements in the list
+					if (pointer_to_the_next != m_permutation.size())
+						in_mem(r, 3 + 2 * e) = 3 + 2 * pointer_to_the_next;
+					else
+						in_mem(r, 3 + 2 * e) = in_mem.cols() - 1;
+
+					// Set the value of the node of the current list element
+					in_mem(r, 3 + 2 * e + 1) = list_elements(r, e);
+				}
+			}
+			in_mem.col(2) = ColVector::Ones(in_mem.rows()) * 2; // Set pointer to vector memory position where the searched element will be writed
+			in_mem.col(1) = in_mem.col(1).unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.index_rand(list_size - 1)); }); // Set the position in the list to read to read
+			in_mem.col(in_mem.cols() - 1) = ColVector::Zero(in_mem.rows()); // Set NULL value in memory
+
+			//init out mem
+			Matrix out_mem = in_mem;
+			for (size_t r = 0; r < out_mem.rows(); ++r)
+			{
+				// Search the element to read and substitute to the memory section indicated at the 2^nd position of the memory itself
+				Scalar output = 0.0;
+				Matrix::Index pointer = Matrix::Index(out_mem(r, 0));
+				for (Matrix::Index hop = 0; hop <= Matrix::Index(out_mem(r, 1)); ++hop)
+				{
+					output = out_mem(r, pointer + 1);
+					pointer = out_mem(r, pointer);
+				}
+				out_mem(r, Matrix::Index(out_mem(r, 2))) = output;
+			}
+
+			// Cut out from the cost calculation the memory part that does not make part of the expected output
+			out_mem.block(0, 0, out_mem.rows(), 2) = Matrix::Ones(out_mem.rows(), 2) * -1;
+			out_mem.block(0, 3, out_mem.rows(), out_mem.cols() - 3)
+					= Matrix::Ones(out_mem.rows(), out_mem.cols() - 3) * -1;
+
+			//return
+			return std::make_tuple(in_mem, out_mem, Task::init_regs());
+		}
+	};
+	REGISTERED_TASK(TaskListK, "listk")
 }
 }
