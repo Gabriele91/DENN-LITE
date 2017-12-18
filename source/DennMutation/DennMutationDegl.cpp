@@ -1,5 +1,6 @@
 #include "DennMutation.h"
 #include "DennAlgorithm.h"
+#include "DennCostFunction.h"
 #include <algorithm>
 #include <sstream>
 #include <iterator>
@@ -284,24 +285,16 @@ namespace Denn
 			//backpropagation
 			for(short nbp=0; nbp!=2; ++nbp)
 			{
-				nn_l.backpropagation_with_sgd
-				(
-					[](const Matrix& predict, const Matrix& y)
-					{
-						return predict - y;
-					}
-					, m_algorithm.current_batch().m_features
+				nn_g.backpropagation_gradient_descent
+				(	
+					  m_algorithm.current_batch().m_features
 					, m_algorithm.current_batch().m_labels
 					, *parameters().m_learning_rate
 					, *parameters().m_regularize
 				);
-				nn_g.backpropagation_with_sgd
-				(
-					[](const Matrix& predict, const Matrix& y)
-					{
-						return predict - y;
-					}
-					, m_algorithm.current_batch().m_features
+				nn_l.backpropagation_gradient_descent
+				(	
+					  m_algorithm.current_batch().m_features
 					, m_algorithm.current_batch().m_labels
 					, *parameters().m_learning_rate
 					, *parameters().m_regularize

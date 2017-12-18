@@ -22,7 +22,7 @@ namespace Denn
 
     bool Parameters::from_json(const std::string& source)
     {
-        //parser json
+        //init json parse 
         Json json_input(source);
         //parse error
         if (json_input.errors().size())
