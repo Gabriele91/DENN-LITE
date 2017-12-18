@@ -1,5 +1,5 @@
 #include "DennNeuralNetwork.h"
-
+#include "DennCostFunction.h"
 namespace Denn
 {	
 	////////////////////////////////////////////////////////////////
@@ -44,134 +44,132 @@ namespace Denn
 		}
 		//return
 		return output;
+	}	
+	/////////////////////////////////////////////////////////////////////////
+	NeuralNetwork::BackpropagationDelta operator + (  const NeuralNetwork::BackpropagationDelta& left
+													, const NeuralNetwork::BackpropagationDelta& right)
+	{
+        denn_assert(left.size()==right.size());
+        NeuralNetwork::BackpropagationDelta output(left.size());
+        for(size_t i = 0; i != left.size(); ++i) output[i] = left[i] + right[i];
+        return output;		
 	}
 
-    struct SGD_BackpropagationContext : public NeuralNetwork::BackpropagationContext
-    {
-        std::vector< Matrix >                 m_deltas;
-        std::vector< std::vector < Matrix > > m_gradients;
-        
-        SGD_BackpropagationContext(size_t size)
-        : m_deltas(size)
-        , m_gradients(size)
-        {
-        }
-        
-        virtual void clear() override
-        {
-            //all delta to 0
-            for(auto& delta : m_deltas) delta.fill(0);
-            //all gradient to 0
-            for(auto& gradient : m_gradients)
-            for(auto& matrix   : gradient   )
-            {
-                matrix.fill(0);
-            }
-        }
-    };
-    //SGD BackpropagationContext pointer
-    using SGD_BackpropagationContext_sptr = std::shared_ptr<SGD_BackpropagationContext>;
-    //util
-    std::vector < Matrix > operator + (  const std::vector< Matrix >& left
-                                       , const std::vector< Matrix >& right)
-    {
+	NeuralNetwork::BackpropagationGradient operator + (  const NeuralNetwork::BackpropagationGradient& left
+													   , const NeuralNetwork::BackpropagationGradient& right)
+	{
         denn_assert(left.size()==right.size());
-        std::vector< Matrix > output(left.size());
-        for(size_t i = 0; i != left.size(); ++i) output[i] = left[i] + right[i];
-        return output;
-    }
-    
-	//execute 
-    NeuralNetwork::BackpropagationContext_sptr NeuralNetwork::backpropagation_with_sgd(
-		  std::function<Matrix(const Matrix& x, const Matrix& y)> loss_function
-		, const Matrix& input
-		, const Matrix& y
-		, const Scalar learn_rate
-		, const Scalar regular_param
-        , NeuralNetwork::BackpropagationContext_sptr context
-	)
-	{		
-		//no layer?
-		denn_assert(m_layers.size());
-        //input size
-        size_t input_size = input.rows();
-		//output of layer
-		std::vector< Matrix > z_outputs(m_layers.size());
-		std::vector< Matrix > s_outputs(m_layers.size());
+		//alloc
+        NeuralNetwork::BackpropagationGradient output(left.size());
+		//compute
+        for(size_t i = 0; i != left.size(); ++i)
+		{
+			denn_assert(left[i].size()==right[i].size());
+			//alloc
+			output[i].resize(left[i].size());
+			//compute
+			for(size_t j = 0; j != left[i].size(); ++j)
+			{
+				output[i][j] = left[i][j] + right[i][j];
+			} 
+		}
+        return output;		
+	}
+
+	NeuralNetwork::BackpropagationContext operator + ( const NeuralNetwork::BackpropagationContext& left
+											       	 , const NeuralNetwork::BackpropagationContext& right)
+	{
+		NeuralNetwork::BackpropagationDelta    left_delta;
+		NeuralNetwork::BackpropagationGradient left_gradient;
+		NeuralNetwork::BackpropagationDelta    right_delta;
+		NeuralNetwork::BackpropagationGradient right_gradient;
+		std::tie(left_delta, left_gradient) = left;
+		std::tie(right_delta, right_gradient) = left;
+		return std::make_tuple( left_delta+right_delta, left_gradient+right_gradient );
+		
+	}
+
+	NeuralNetwork::BackpropagationContext NeuralNetwork::compute_gradient(  const Matrix& input 
+																		  , const Matrix& labels
+																		  , Scalar regular_param) const
+	{
 		//////////////////////////////////////////////////////////////////////
-		//FEED FORWAORD PROPAGATION
+		BackpropagationDelta    deltas(m_layers.size());
+		BackpropagationGradient gradients(m_layers.size());
+		//////////////////////////////////////////////////////////////////////
+		//FEED-FORWAORD PROPAGATION
+		//output of layers
+		std::vector< Matrix > z(m_layers.size());
+		std::vector< Matrix > s(m_layers.size());
 		//output
-		z_outputs[0] = m_layers[0]->feedforward(input, s_outputs[0]);
+		z[0] = m_layers[0]->feedforward(input, s[0]);
 		//hidden layers
 		for (size_t i = 1; i < m_layers.size(); ++i)
 		{
-			z_outputs[i] = m_layers[i]->feedforward(z_outputs[i-1], s_outputs[i]);
+			z[i] = m_layers[i]->feedforward(z[i-1], s[i]);
 		}
 		//////////////////////////////////////////////////////////////////////
-        bool first_pass  = false;
-        auto sgd_context = std::dynamic_pointer_cast<SGD_BackpropagationContext>(context);
-        //test
-        if(!sgd_context)
-        {
-            sgd_context = std::make_shared<SGD_BackpropagationContext>(m_layers.size());
-            context     = sgd_context;
-            first_pass  = true;
-        }
-        auto& deltas    = sgd_context->m_deltas;
-        auto& gradients = sgd_context->m_gradients;
-		//////////////////////////////////////////////////////////////////////
-		#define S_LAST s_outputs.back()
-		#define Z_LAST z_outputs.back()
-
-		#define S(idx) s_outputs[idx]
-		#define Z(idx) z_outputs[idx]
-		#define W(idx) (*m_layers[idx])[0]
-		#define D(idx) deltas[idx]
-		#define G(idx) gradients[idx]
-
-        #define L(idx) (*m_layers[idx])
-        if(first_pass)
-        {
-            // BACK PROPAGATION (COMPUTE DELTA)
-            deltas.back() = loss_function(Z_LAST, y).transpose();
-            
-            for (long i = m_layers.size() - 2; i>-1; --i)
-                D(i) = L(i + 1).backpropagate_delta(D(i + 1), S(i));
-            
-            // BACK PROPAGATION (COMPUTE GRADIENT)
-            for (long i = m_layers.size() - 1; i>0; --i)
-                G(i) = L(i).backpropagate_gradient(D(i), Z(i-1), input_size, regular_param);
-            
-            //input layer
-            G(0) = L(0).backpropagate_gradient(D(0), input, input_size, regular_param);
-        }
-        else
-        {
-            // BACK PROPAGATION (COMPUTE DELTA)
-            deltas.back() += loss_function(Z_LAST, y).transpose();
-            
-            for (long i = m_layers.size() - 2; i>-1; --i)
-                D(i) += L(i + 1).backpropagate_delta(D(i + 1), S(i));
-            
-            // BACK PROPAGATION (COMPUTE GRADIENT)
-            for (long i = m_layers.size() - 1; i>0; --i)
-                G(i) = G(i) + L(i).backpropagate_gradient(D(i), Z(i-1), input_size, regular_param);
-            
-            //input layer
-            G(0) = G(0) + L(0).backpropagate_gradient(D(0), input, input.rows(), regular_param);
-        }
-		//[S]GD
-		for (size_t i = 0; i < m_layers.size(); ++i)
+		//BACK-PROPAGATION
+		Matrix        output_nn = CostFunction::softmax_row_samples(z.back());
+		Matrix::Index nsamples  = input.rows();
+		//compute delta	
+		for (long i = 0, j = m_layers.size()-1; i < m_layers.size(); ++i, --j)
 		{
-			for (size_t m = 0; m < m_layers[i]->size(); ++m)
+			if(!i)
 			{
-				L(i)[m] += (Scalar(-1.0) * learn_rate) * G(i)[m];
+				deltas[j] = m_layers[j]->backpropagate_derive( ( output_nn-labels ).transpose(), s[j] ) / nsamples;
+			}
+			else
+			{
+				deltas[j] = m_layers[j]->backpropagate_derive(m_layers[j+1]->backpropagate_delta( deltas[j+1] ), s[j]);
 			}
 		}
-		//return
-		return context;
-
+		//compute gradient
+		for (long i = 0, j = -1; i < m_layers.size(); ++i, ++j)
+		{	
+			if(!i)
+			{
+				gradients[i] = m_layers[i]->backpropagate_gradient(deltas[i], input);
+			}
+			else
+			{
+				gradients[i] = m_layers[i]->backpropagate_gradient(deltas[i], z[j]);
+			}
+		}
+		//////////////////////////////////////////////////////////////////////
+		//get values
+		return std::make_tuple(deltas, gradients);
 	}
+
+	void NeuralNetwork::gradient_descent(BackpropagationContext&& bpcontext, Scalar learn_rate)
+	{
+		//////////////////////////////////////////////////////////////////////
+		BackpropagationDelta    deltas;
+		BackpropagationGradient gradients;
+		//////////////////////////////////////////////////////////////////////
+		std::tie(deltas,gradients) = bpcontext;
+		//////////////////////////////////////////////////////////////////////
+		//Mu
+		Scalar mu = Scalar(-1.0) * learn_rate;
+		//////////////////////////////////////////////////////////////////////
+		//GD
+		for (size_t i = 0; i < m_layers.size(); ++i)
+		for (size_t m = 0; m < m_layers[i]->size(); ++m)
+		{
+			(*m_layers[i])[m] += mu * gradients[i][m];
+		}
+	}
+
+	void NeuralNetwork::backpropagation_gradient_descent
+    (
+		  const Matrix& input
+        , const Matrix& labels
+		, const Scalar learn_rate  
+	    , const Scalar regular_param
+	)
+	{
+		gradient_descent(compute_gradient(input, labels, regular_param), learn_rate);
+	}	
 	/////////////////////////////////////////////////////////////////////////
 	size_t NeuralNetwork::size() const
 	{

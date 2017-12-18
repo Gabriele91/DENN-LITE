@@ -47,7 +47,16 @@ namespace Denn
             m_seed, "Random generator seed", { "-sd"  }
         },
         ParameterInfo {
-            m_batch_size, "Batch size", { "--" + m_batch_size.name(), "-b" }
+            m_batch_size, "Batch size", { "-b" },
+            [this](Arguments& args) -> bool  
+            { 
+                //int value
+                m_batch_size = args.get_int();
+                //if m_batch_offset == 0 then offset = size
+                if(!(*m_batch_offset)) m_batch_offset = *m_batch_size;
+                //ok 
+                return true;
+            }
         },
         ParameterInfo {
             m_batch_offset, "Batch offset, how many records will be replaced in the next batch [<= batch size]", { "-bo" }

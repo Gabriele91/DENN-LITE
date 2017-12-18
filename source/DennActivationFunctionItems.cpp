@@ -21,7 +21,8 @@ namespace Denn
 	REGISTERED_ACTIVATION_FUNCTION("linear", linear<Matrix>, dx_linear<Matrix>)
 
 	//ActivationFunction (local)
-	REGISTERED_ACTIVATION_FUNCTION("softmax", CostFunction::softmax_row_samples<Matrix>)
+	//Now it is used to the loss function, it is unnecessary (only for back compatibility)
+	REGISTERED_ACTIVATION_FUNCTION("softmax", CostFunction::implace_softmax_row_samples<Matrix>) 
 
 	//ActivationFunction (point)
 	#define POINTF_AS_ACTIVEF(ufunc)\
