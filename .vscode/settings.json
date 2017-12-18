@@ -72,6 +72,8 @@
         "string_view": "cpp",
         "__hash_table": "cpp",
         "unordered_map": "cpp",
-        "__locale": "cpp"
+        "__locale": "cpp",
+        "__functional_base": "cpp",
+        "stack": "cpp"
     }
 }
