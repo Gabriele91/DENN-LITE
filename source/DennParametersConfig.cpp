@@ -558,7 +558,7 @@ namespace Denn
                 }
                 //jump spaces
                 conf_skip_space_and_comments(line, ptr);
-
+                return true;
             }
     };
     //////////////////////////////////////////////////////////////////////////////////
