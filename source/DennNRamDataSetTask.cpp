@@ -83,5 +83,15 @@ namespace NRam
 		d_out = m_train;
 		return true;
 	}
+
+	size_t DataSetTask::number_of_batch_read() const 
+	{
+		return 1;
+	}
+
+	void DataSetTask::clear_batch_counter()
+	{
+		//none
+	}
 } 
 }

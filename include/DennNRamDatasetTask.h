@@ -42,6 +42,10 @@ namespace NRam
 
 		bool read_batch(DataSet& t_out, bool loop = true) override;
 
+		size_t number_of_batch_read() const override;
+
+		void clear_batch_counter() override;
+
 	protected:
 
 		DataSetScalar    m_train;
