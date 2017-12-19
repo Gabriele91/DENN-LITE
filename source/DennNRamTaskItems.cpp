@@ -192,11 +192,14 @@ namespace NRam
 			// Initialize starting memory
 			Matrix in_mem(m_batch_size, m_max_int);
 			in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int)); });
+			
+			in_mem.col(0) = ColVector::Ones(in_mem.rows()) * 4;
+			in_mem.col(1) = ColVector::Ones(in_mem.rows()) * 8;
 
 			// Set pointers of elements to swap
-			in_mem.col(0) = in_mem.block(0, 0, in_mem.rows(), 1).unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(2, m_max_int - 1)); });
-			for (Matrix::Index r = 0; r < in_mem.rows(); ++r)
-				in_mem(r, 1) = Scalar(std::floor(m_random.uniform(Matrix::Index(in_mem(r, 0)) + 1, m_max_int - 1)));
+			//in_mem.col(0) = in_mem.block(0, 0, in_mem.rows(), 1).unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(2, m_max_int - 1)); });
+			//for (Matrix::Index r = 0; r < in_mem.rows(); ++r)
+			//	in_mem(r, 1) = Scalar(std::floor(m_random.uniform(Matrix::Index(in_mem(r, 0)) + 1, m_max_int - 1)));
 		
 			// Set NULL values to the last column as terminator
 			in_mem.col(in_mem.cols() - 1) = ColVector::Zero(in_mem.rows());
@@ -392,11 +395,6 @@ namespace NRam
 				out_mem(r, Matrix::Index(out_mem(r, 2))) = output;
 			}
 
-			// Cut out from the cost calculation the memory part that does not make part of the expected output
-			out_mem.block(0, 0, out_mem.rows(), 2) = Matrix::Ones(out_mem.rows(), 2) * -1;
-			out_mem.block(0, 3, out_mem.rows(), out_mem.cols() - 3)
-					= Matrix::Ones(out_mem.rows(), out_mem.cols() - 3) * -1;
-
 			//return
 			return std::make_tuple(in_mem, out_mem, Task::init_regs());
 		}
@@ -498,14 +496,86 @@ namespace NRam
 						pointer = Matrix::Index(out_mem(r, pointer));
 				}
 			}
-			out_mem.block(0, 1, out_mem.rows(), out_mem.cols() - 1) =
-				Matrix::Ones(out_mem.rows(), out_mem.cols() - 1) * -1;
 
 			//return
 			return std::make_tuple(in_mem, out_mem, Task::init_regs());
 		}
 	};
 	REGISTERED_TASK(TaskListSearch, "listsearch")
+
+	/**
+	 * 
+	 */ 
+	class TaskMerge : public Task
+	{
+	public:
+		TaskMerge
+        (
+            size_t batch_size
+            , size_t max_int
+            , size_t n_regs
+            , Random& random
+        )
+        : Task(batch_size, max_int, n_regs, random)
+		{
+		}
+
+		MemoryTuple operator()() override
+		{
+			// Initialize some parameters and create the memory
+			Matrix::Index remaining_size = m_max_int - 6;
+			bool odd_space = !(remaining_size % 2 == 0);
+			bool odd_subvector_space = !(remaining_size % 4 == 0);
+
+			Matrix::Index list_size_a = remaining_size / 4, 
+										list_size_b = (odd_subvector_space ? list_size_a + 1 : list_size_a);
+			
+			Matrix::Index list_size_a_plus_b = Matrix::Index(std::ceil(remaining_size / 2));
+			Matrix in_mem(m_batch_size, m_max_int);
+			Matrix list_elements_a(m_batch_size, list_size_a);
+			Matrix list_elements_b(m_batch_size, list_size_b);
+			Matrix list_elements_a_plus_b = Matrix::Zero(m_batch_size, list_size_a_plus_b);
+
+			// Initilize memories and sort them
+			list_elements_a = list_elements_a.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int - 1)); });
+			list_elements_b = list_elements_b.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int - 1)); });
+			sort_rows_ascending(list_elements_a);
+			sort_rows_ascending(list_elements_b);
+
+			// Initialize the output memory and sort it
+			MESSAGE("A: " << Dump::json_matrix(list_elements_a))
+			MESSAGE("B: " << Dump::json_matrix(list_elements_b))
+			list_elements_a_plus_b.block(0, 0, list_elements_a_plus_b.rows(), list_size_a) = list_elements_a;
+			list_elements_a_plus_b.block(0, list_size_a, list_elements_a_plus_b.rows(), list_size_b) = list_elements_b;
+			MESSAGE("A + B: " << Dump::json_matrix(list_elements_a_plus_b))
+			sort_rows_ascending(list_elements_a_plus_b);
+			MESSAGE("A + B Sorted: " << Dump::json_matrix(list_elements_a_plus_b))
+
+			// Add data to starting NRAM memory
+			in_mem.col(0) = ColVector::Ones(in_mem.rows()) * 3; // Starting point of list A
+			in_mem.col(1) = ColVector::Ones(in_mem.rows()) * (3 + list_size_a + 1); // Starting point of list B
+			in_mem.col(2) = ColVector::Ones(in_mem.rows()) * (3 + (2 * list_size_a) + (odd_subvector_space ? 3 : 2)); // Starting point of list A + B
+			in_mem.block(0, 3, in_mem.rows(), list_size_a) = list_elements_a; // Copy of A
+			in_mem.col(3 + list_size_a) = ColVector::Constant(in_mem.rows(), -1); // Setting divider
+			in_mem.block(0, 3 + list_size_a + 1, in_mem.rows(), list_size_b) = list_elements_b; // Copy B
+			in_mem.col(3 + (list_size_a_plus_b) + 1) = ColVector::Constant(in_mem.rows(), -1); // Setting divider
+			in_mem.block(0, 3 + (list_size_a_plus_b) + 2, in_mem.rows(), in_mem.cols() - (3 + (list_size_a_plus_b) + 1) - 2) =
+				Matrix::Zero(in_mem.rows(), in_mem.cols() - (3 + (list_size_a_plus_b) + 1) - 2); // Nullify A + B memory section
+			if (odd_space)
+				in_mem.block(0, in_mem.cols() - 2, in_mem.rows(), 2) = Matrix::Constant(in_mem.rows(), 2, -1);
+			else
+				in_mem.col(in_mem.cols() - 1) = ColVector::Constant(in_mem.rows(), -1);
+			MESSAGE("MEM: " << Dump::json_matrix(in_mem))
+
+			// Create and initialize desired memory
+			Matrix out_mem = in_mem;
+			out_mem.block(0, 3 + (list_size_a_plus_b) + 2, out_mem.rows(), out_mem.cols() - (3 + list_size_a_plus_b + 2) - (odd_space ? 2 : 1)) =
+				list_elements_a_plus_b;
+
+			return std::make_tuple(in_mem, out_mem, Task::init_regs());
+		}
+	};
+	REGISTERED_TASK(TaskMerge, "merge")
 
 }
 }

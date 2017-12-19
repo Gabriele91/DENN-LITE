@@ -209,7 +209,37 @@ namespace Denn
 	inline typename Matrix::Scalar distance(const Matrix& a, const Matrix& b)
 	{
 		return std::sqrt(distance_pow2(a,b));
-	} 
+	}
+
+	template < typename Matrix >
+	void sort_ascending(Matrix& m) 
+	{
+  	std::sort(m.derived().data(), m.derived().data() + m.derived().size());
+	}
+
+	template < typename Matrix >
+	void sort_rows_ascending(Matrix& m)
+	{
+		m.transposeInPlace();
+		std::sort(m.derived().data(), m.derived().data() + m.derived().size());
+		m.transposeInPlace();
+	}
+
+	template < typename Matrix >
+	void sort_descending(Matrix& m) 
+	{
+  	std::sort(m.derived().data(), m.derived().data() + m.derived().size());
+		std::reverse(m.derived().data(), m.derived().data() + m.derived().size());
+	}
+
+	template < typename Matrix >
+	void sort_rows_descending(Matrix& m)
+	{
+		m.transposeInPlace();
+		std::sort(m.derived().data(), m.derived().data() + m.derived().size());
+		std::reverse(m.derived().data(), m.derived().data() + m.derived().size());
+		m.transposeInPlace();
+	}
 }
 
 
