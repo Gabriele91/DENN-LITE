@@ -397,7 +397,7 @@ namespace Denn
             )
             {
                 //it's close
-                if((*ptr) != '}') return true;
+                if((*ptr) == '}') return true;
                 //command
                 std::string command = conf_name(ptr);
                 //test
@@ -506,7 +506,7 @@ namespace Denn
             )
             {
                 //it's close
-                if((*ptr) != '}') return true;
+                if((*ptr) == '}') return true;
                 //layer type
                 std::string layer_type = conf_name(ptr);
                 //type
