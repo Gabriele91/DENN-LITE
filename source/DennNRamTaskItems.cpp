@@ -199,8 +199,8 @@ namespace NRam
 			// Set pointers of elements to swap
 			for (Matrix::Index r = 0; r < in_mem.rows(); ++r)
 			{
-				in_mem(r, 0) = std::round(m_random.uniform(2, m_max_int - 3)); 
-				in_mem(r, 1) = std::round(m_random.uniform(in_mem(r, 0) + 1, m_max_int - 2)); 
+				in_mem(r, 0) = m_random.uirand(2, m_max_int - 3); 
+				in_mem(r, 1) = m_random.uirand(in_mem(r, 0) + 1, m_max_int - 2); 
 			}
 			
 			// Set NULL values to the last column as terminator
