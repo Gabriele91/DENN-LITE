@@ -193,14 +193,16 @@ namespace NRam
 			Matrix in_mem(m_batch_size, m_max_int);
 			in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int)); });
 			
-			in_mem.col(0) = ColVector::Ones(in_mem.rows()) * 4;
-			in_mem.col(1) = ColVector::Ones(in_mem.rows()) * 8;
+			//in_mem.col(0) = ColVector::Ones(in_mem.rows()) * 4;
+			//in_mem.col(1) = ColVector::Ones(in_mem.rows()) * 8;
 
 			// Set pointers of elements to swap
-			//in_mem.col(0) = in_mem.block(0, 0, in_mem.rows(), 1).unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(2, m_max_int - 1)); });
-			//for (Matrix::Index r = 0; r < in_mem.rows(); ++r)
-			//	in_mem(r, 1) = Scalar(std::floor(m_random.uniform(Matrix::Index(in_mem(r, 0)) + 1, m_max_int - 1)));
-		
+			for (Matrix::Index r = 0; r < in_mem.rows(); ++r)
+			{
+				in_mem(r, 0) = std::round(m_random.uniform(2, m_max_int - 3)); 
+				in_mem(r, 1) = std::round(m_random.uniform(in_mem(r, 0) + 1, m_max_int - 2)); 
+			}
+			
 			// Set NULL values to the last column as terminator
 			in_mem.col(in_mem.cols() - 1) = ColVector::Zero(in_mem.rows());
 
@@ -211,14 +213,19 @@ namespace NRam
 			for (Matrix::Index r = 0; r < out_mem.rows(); ++r)
 			{
 				// Swap
-				Scalar first_value = out_mem(r, Matrix::Index(out_mem(r, 0)));
-				out_mem(r, Matrix::Index(out_mem(r, 0))) = out_mem(r, Matrix::Index(out_mem(r, 1)));
-				out_mem(r, Matrix::Index(out_mem(r, 1))) = first_value;
+				std::swap(
+					 out_mem(r, Matrix::Index(in_mem(r, 0)))
+				   , out_mem(r, Matrix::Index(in_mem(r, 1)))
+				);
 			}
 
 			// Cut out the the memory parts that does not make part of the expected output
 			out_mem.block(0, 0, out_mem.rows(), 2) = Matrix::Ones(out_mem.rows(), 2) * -1;
 			out_mem.col(in_mem.cols() - 1) = ColVector::Ones(in_mem.rows()) * -1;
+
+			//test
+			//MESSAGE("in mem:" << Dump::json_matrix(in_mem));
+			//MESSAGE("out mem:" << Dump::json_matrix(out_mem));
 
 			return std::make_tuple(in_mem, out_mem, Task::init_regs());
 		}
