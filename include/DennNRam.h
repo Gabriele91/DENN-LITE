@@ -110,13 +110,13 @@ namespace NRam
 
     Matrix get_registers_values(const Matrix &M, size_t extraction_type);
 
-    Scalar calculate_sample_cost(Matrix &M, const RowVector &desired_mem);
+    Scalar calculate_sample_cost(Matrix &M, const RowVector &desired_mem,  const Matrix& mask);
 
     Scalar run_circuit(const NRamLayout &context, const Matrix& nn_out_decision, Matrix& regs, Matrix& in_mem);
 
     Scalar run_circuit(const NRamLayout &context, const Matrix& nn_out_decision, Matrix& regs, Matrix& in_mem, ExecutionDebug& debug);
 
-    Scalar train(const NRamLayout &context, const NeuralNetwork &nn,  const Matrix& in_mem, const Matrix &out_mem);
+    Scalar train(const NRamLayout &context, const NeuralNetwork &nn,  const Matrix& in_mem, const Matrix &out_mem, const Matrix& mask);
 
     ResultAndExecutionDebug execute(const NRamLayout &context, const NeuralNetwork& network, const Matrix& linear_in_mem);
 

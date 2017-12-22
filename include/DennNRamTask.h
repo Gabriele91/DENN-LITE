@@ -10,7 +10,7 @@ namespace Denn
 namespace NRam 
 {
 	//memory struct
-	using MemoryTuple = std::tuple<Matrix, Matrix, Matrix>;
+	using MemoryTuple = std::tuple<Matrix, Matrix, Matrix, Matrix>;
 	
 	//Task
     class Task : public std::enable_shared_from_this< Task >
@@ -39,6 +39,13 @@ namespace NRam
          * @return MatrixList
          */
 		Matrix init_regs() const;
+
+		/**
+		 *  Initialize mask of nram evalauation
+		 * @param Memory size
+		 * @return Matrix of ones
+		 */
+		Matrix init_mask() const;
 
 		//info
 		size_t  get_batch_size()    const;
