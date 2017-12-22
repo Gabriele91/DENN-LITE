@@ -17,6 +17,12 @@ namespace Denn
 			m_batch_size
 			, m_dataset->get_main_header_info().m_n_features
 		);
+		//mask
+		m_batch.m_mask.conservativeResize
+		(
+			  1
+			, m_dataset->get_main_header_info().m_n_features
+		);
 		//init labels
 		m_batch.m_labels.conservativeResize
 		(
@@ -82,6 +88,8 @@ namespace Denn
 			offset += to_read;
 			m_cache_rows_read += to_read;
 		}
+		//first read?
+		bool is_first_read = !m_cache_batch.m_features.rows();
 		//copy next
 		while (n_read < n_rows)
 		{
@@ -90,6 +98,11 @@ namespace Denn
 			//read
 			m_cache_rows_read = 0;
 			m_dataset->read_batch(m_cache_batch);
+			//copy mask
+			if(is_first_read)
+			{
+				m_batch.m_mask = m_cache_batch.m_mask;
+			}
 			//compute n rows to read
 			size_t to_read = std::min<size_t>(m_cache_batch.m_features.rows(), read_remaning);
 			//read
