@@ -68,7 +68,9 @@ namespace NRam
 				, *parameters.m_max_int
 				, *parameters.m_n_registers
 				, *parameters.m_time_steps
-                , *parameters.m_registers_values_extraction_type
+                , *parameters.m_registers_values_extraction_type != "defuzzyed" 
+				  ? NRamLayout::P_ZERO 
+				  : NRamLayout::P_DEFUZZYED
 				, gates
 			);
 			//get eval & set context
