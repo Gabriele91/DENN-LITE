@@ -30,6 +30,9 @@ namespace NRam
 	//Initialize R registers to zero (i.e. set P(x = 0) = 1.0).
 	Matrix Task::init_regs() const { return Matrix::Zero(m_batch_size, m_n_regs); }
 	
+	//init mask
+	Matrix Task::init_mask() const { return Matrix::Ones(1, m_max_int); }
+
 	//info
 	size_t  Task::get_batch_size()    const { return m_batch_size; }
 	size_t  Task::get_max_int()       const { return m_max_int; }

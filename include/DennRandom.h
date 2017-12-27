@@ -66,8 +66,14 @@ namespace Denn
 		//random integer in [0, max)
 		int irand(int max = std::numeric_limits<int>::max());
 
+		//random integer in [min, max)
+		int irand(int min, int max);
+
 		//unsigned int in [0, max)
 		unsigned int uirand(unsigned int max = std::numeric_limits<unsigned int>::max());
+
+		//unsigned int in [min, max)
+		unsigned int uirand(unsigned int min, unsigned int max);
 
 		//random integer in [0,size)
 		size_t index_rand(size_t max = std::numeric_limits<size_t>::max());

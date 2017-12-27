@@ -305,7 +305,7 @@ namespace Denn
 		//first
 		if (!pass) m_restart_ctx.m_last_eval = m_best_ctx.m_eval;
 		//test
-		if ((Scalar)m_params.m_restart_count <= m_restart_ctx.m_test_count)
+		if (m_restart_ctx.m_test_count >= (Scalar)m_params.m_restart_count)
 		{
 			m_population.restart
 			(

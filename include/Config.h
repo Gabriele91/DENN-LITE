@@ -76,11 +76,11 @@ namespace Denn
 	using ColVector   = typename Eigen::Matrix<Scalar,  Eigen::Dynamic, 1>;
 
 	template < typename T >
-	using MatrixT	 = typename Eigen::Matrix< T, Eigen::Dynamic, Eigen::Dynamic>;
+	using MatrixT	 = typename Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>;
 	using MatrixLD	 = typename Eigen::Matrix<long double, Eigen::Dynamic, Eigen::Dynamic>;
 	using MatrixD	 = typename Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic>;
 	using MatrixF	 = typename Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>;
-	using Matrix 	 = typename Eigen::Matrix< Scalar, Eigen::Dynamic, Eigen::Dynamic > ;
+	using Matrix 	 = typename Eigen::Matrix<Scalar, Eigen::Dynamic, Eigen::Dynamic > ;
 
 	template < typename T >
 	using MatrixListT  = std::vector < MatrixT< T > >;
@@ -88,6 +88,69 @@ namespace Denn
 	using MatrixListD  = std::vector < MatrixD >;
 	using MatrixListLD = std::vector < MatrixLD >;
 	using MatrixList   = std::vector < Matrix >;
+
+
+	/* Map Version */
+	template < typename T >
+	using MapRowVectorT  = typename Eigen::Map< RowVectorT<T> >;
+	using MapRowVectorLD = typename Eigen::Map< RowVectorLD >;
+	using MapRowVectorD  = typename Eigen::Map< RowVectorD >;
+	using MapRowVectorF  = typename Eigen::Map< RowVectorF >;
+	using MapRowVector   = typename Eigen::Map< RowVector >;
+
+	template < typename T >
+	using MapColVectorT  = typename Eigen::Map< ColVectorT<T> >;
+	using MapColVectorLD = typename Eigen::Map< ColVectorLD >;
+	using MapColVectorD  = typename Eigen::Map< ColVectorD >;
+	using MapColVectorF  = typename Eigen::Map< ColVectorF >;
+	using MapColVector   = typename Eigen::Map< ColVector >;
+
+	template < typename T >
+	using MapMatrixT	 = typename Eigen::Map< MatrixT<T> >;
+	using MapMatrixLD	 = typename Eigen::Map< MatrixLD >;
+	using MapMatrixD	 = typename Eigen::Map< MatrixD >;
+	using MapMatrixF	 = typename Eigen::Map< MatrixF >;
+	using MapMatrix 	 = typename Eigen::Map< Matrix > ;
+
+	template < typename T >
+	using MapMatrixListT  = std::vector < MapMatrixT< T > >;
+	using MapMatrixListF  = std::vector < MapMatrixF >;
+	using MapMatrixListD  = std::vector < MapMatrixD >;
+	using MapMatrixListLD = std::vector < MapMatrixLD >;
+	using MapMatrixList   = std::vector < MapMatrix >;
+
+	//rows to map
+	template < typename T >
+	inline MapRowVectorT< T > as_map(RowVectorT< T >& value)
+	{ return MapRowVectorT< T >(value.data(), value.size()); }
+	inline MapRowVectorLD as_map(RowVectorLD& value)
+	{ return MapRowVectorLD(value.data(), value.size()); }
+	inline MapRowVectorD as_map(RowVectorD& value)
+	{ return MapRowVectorD(value.data(), value.size()); }
+	inline MapRowVectorF as_map(RowVectorF& value)
+	{ return MapRowVectorF(value.data(), value.size()); }
+
+	//cols to map
+	template < typename T >
+	inline MapColVectorT< T > as_map(ColVectorT< T >& value)
+	{ return MapColVectorT< T >(value.data(), value.size()); }
+	inline MapColVectorLD as_map(ColVectorLD& value)
+	{ return MapColVectorLD(value.data(), value.size()); }
+	inline MapColVectorD as_map(ColVectorD& value)
+	{ return MapColVectorD(value.data(), value.size()); }
+	inline MapColVectorF as_map(ColVectorF& value)
+	{ return MapColVectorF(value.data(), value.size()); }
+
+	//matrix to map
+	template < typename T >
+	inline MapMatrixT< T > as_map(MatrixT< T >& value)
+	{ return MapMatrixT< T >(value.data(), value.rows(), value.cols()); }
+	inline MapMatrixLD as_map(MatrixLD& value)
+	{ return MapMatrixLD(value.data(), value.rows(), value.cols()); }
+	inline MapMatrixD as_map(MatrixD& value)
+	{ return MapMatrixD(value.data(), value.rows(), value.cols()); }
+	inline MapMatrixF as_map(MatrixF& value)
+	{ return MapMatrixF(value.data(), value.rows(), value.cols()); }
 }
 //utilities
 namespace Denn

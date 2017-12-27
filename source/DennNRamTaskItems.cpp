@@ -46,7 +46,7 @@ namespace NRam
 			for (Matrix::Index r = 0; r < out_mem.rows(); ++r)  
 				out_mem(r, 0) = out_mem(r, Matrix::Index(out_mem(r, 0)));
 
-			return std::make_tuple(in_mem, out_mem, Task::init_regs());
+			return std::make_tuple(in_mem, out_mem, Task::init_mask(), Task::init_regs());
 		};
 	}; 
 	REGISTERED_TASK(TaskAccess, "access")
@@ -82,7 +82,7 @@ namespace NRam
 			for (Matrix::Index c = 0; c < in_mem.cols() - 1; ++c)  
 				out_mem.col(c) += ColVector::Ones(out_mem.rows());
 			
-			return std::make_tuple(in_mem, out_mem, Task::init_regs());
+			return std::make_tuple(in_mem, out_mem, Task::init_mask(), Task::init_regs());
 		}
 	};
 	REGISTERED_TASK(TaskIncrement, "increment")
@@ -121,10 +121,11 @@ namespace NRam
 			out_mem.block(0, offset, in_mem.rows(), in_mem.cols() - offset - 1) = in_mem.block(0, 1, in_mem.rows(), offset - 1);
 
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
-			out_mem.block(0, 0, in_mem.rows(), offset) = Matrix::Constant(out_mem.rows(), offset, -1);
-			out_mem.col(out_mem.cols() - 1) = ColVector::Constant(out_mem.rows(), -1);
+			Matrix mask = Task::init_mask(); //[1, max_int]
+			mask.leftCols(offset) = RowVector::Zero(offset);
+			mask.rightCols(1)     = RowVector::Zero(1);
 
-			return std::make_tuple(in_mem, out_mem, Task::init_regs());
+			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
 	};
 	REGISTERED_TASK(TaskCopy, "copy")
@@ -164,10 +165,11 @@ namespace NRam
 				= out_mem.block(0, 1, in_mem.rows(), offset - 1).rowwise().reverse();
 
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
-			out_mem.block(0, 0, in_mem.rows(), offset) = Matrix::Constant(out_mem.rows(), offset, -1);
-			out_mem.col(out_mem.cols() - 1) = ColVector::Constant(out_mem.rows(), -1);
+			Matrix mask = Task::init_mask(); //[1, max_int]
+			mask.leftCols(offset) = RowVector::Zero(offset);
+			mask.rightCols(1)     = RowVector::Zero(1);
 
-			return std::make_tuple(in_mem, out_mem, Task::init_regs());
+			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
 	};
 	REGISTERED_TASK(TaskReverse, "reverse")
@@ -201,8 +203,8 @@ namespace NRam
 			// Set pointers of elements to swap
 			for (Matrix::Index r = 0; r < in_mem.rows(); ++r)
 			{
-				in_mem(r, 0) = std::round(m_random.uniform(2, m_max_int - 3)); 
-				in_mem(r, 1) = std::round(m_random.uniform(in_mem(r, 0) + 1, m_max_int - 2)); 
+				in_mem(r, 0) = m_random.uirand(2, m_max_int - 1); 
+				in_mem(r, 1) = m_random.uirand(in_mem(r, 0) + 1, m_max_int); 
 			}
 			
 			// Set NULL values to the last column as terminator
@@ -222,14 +224,15 @@ namespace NRam
 			}
 
 			// Cut out the the memory parts that does not make part of the expected output
-			out_mem.block(0, 0, out_mem.rows(), 2) = Matrix::Constant(out_mem.rows(), 2, -1);
-			out_mem.col(in_mem.cols() - 1) = ColVector::Constant(in_mem.rows(), -1);
+			Matrix mask = Task::init_mask(); //[1, max_int]
+			mask.leftCols(2)  = RowVector::Zero(2);
+			mask.rightCols(1) = RowVector::Zero(1);
 
 			//test
 			//MESSAGE("in mem:" << Dump::json_matrix(in_mem));
 			//MESSAGE("out mem:" << Dump::json_matrix(out_mem));
 
-			return std::make_tuple(in_mem, out_mem, Task::init_regs());
+			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
 	};
 	REGISTERED_TASK(TaskSwap, "swap")
@@ -299,13 +302,13 @@ namespace NRam
 					out_mem.block(r, 1, 1, offset - 1) = A * perm.transpose();
 				}
 
-					// Cut out from the cost calculation the memory part that does not make part of the expected output
-				out_mem.col(0) = ColVector::Ones(out_mem.rows()) * -1;
-				out_mem.block(0, offset, out_mem.rows(), out_mem.cols() - offset)
-					= Matrix::Ones(out_mem.rows(), offset) * -1;
+				// Cut out from the cost calculation the memory part that does not make part of the expected output
+				Matrix mask = Task::init_mask(); //[1, max_int]
+				mask.leftCols(1)       = RowVector::Zero(1);
+				mask.rightCols(offset) = RowVector::Zero(offset);
 
 				//return
-				return std::make_tuple(in_mem, out_mem, Task::init_regs());
+				return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 			}
 	};
 	REGISTERED_TASK(TaskPermutation, "permutation")
@@ -323,13 +326,13 @@ namespace NRam
 	{
 	public:
 		TaskListK
-				(
-						size_t batch_size
-						, size_t max_int
-						, size_t n_regs
-						, Random& random
-				)
-				: Task(batch_size, max_int, n_regs, random)
+		(
+			  size_t batch_size
+			, size_t max_int
+			, size_t n_regs
+			, Random& random
+		)
+		: Task(batch_size, max_int, n_regs, random)
 		{
 		}
 
@@ -407,7 +410,7 @@ namespace NRam
 			}
 
 			//return
-			return std::make_tuple(in_mem, out_mem, Task::init_regs());
+			return std::make_tuple(in_mem, out_mem, Task::init_mask(), Task::init_regs());
 		}
 	};
 	REGISTERED_TASK(TaskListK, "listk")
@@ -423,13 +426,13 @@ namespace NRam
 	{
 	public:
 		TaskListSearch
-				(
-						size_t batch_size
-						, size_t max_int
-						, size_t n_regs
-						, Random& random
-				)
-				: Task(batch_size, max_int, n_regs, random)
+		(
+			  size_t batch_size
+			, size_t max_int
+			, size_t n_regs
+			, Random& random
+		)
+		: Task(batch_size, max_int, n_regs, random)
 		{
 		}
 
@@ -511,7 +514,7 @@ namespace NRam
 			}
 
 			//return
-			return std::make_tuple(in_mem, out_mem, Task::init_regs());
+			return std::make_tuple(in_mem, out_mem, Task::init_mask(), Task::init_regs());
 		}
 	};
 	REGISTERED_TASK(TaskListSearch, "listsearch")
@@ -582,7 +585,7 @@ namespace NRam
 			out_mem.block(0, 3 + (list_size_a_plus_b) + 2, out_mem.rows(), out_mem.cols() - (3 + list_size_a_plus_b + 2) - (odd_space ? 2 : 1)) =
 				list_elements_a_plus_b;
 
-			return std::make_tuple(in_mem, out_mem, Task::init_regs());
+			return std::make_tuple(in_mem, out_mem, Task::init_mask(), Task::init_regs());
 		}
 	};
 	REGISTERED_TASK(TaskMerge, "merge")

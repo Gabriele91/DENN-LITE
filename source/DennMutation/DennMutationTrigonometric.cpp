@@ -26,7 +26,7 @@ namespace Denn
 			const Individual& nn_b = *population[rand_deck.get_random_id(id_target)];
 			const Individual& nn_c = *population[rand_deck.get_random_id(id_target)];
 			//parameters
-			Scalar p = abs(nn_a.m_eval) + abs(nn_b.m_eval) + abs(nn_c.m_eval);
+			Scalar p = std::abs(nn_a.m_eval) + std::abs(nn_b.m_eval) + std::abs(nn_c.m_eval);
 			Scalar p_a = nn_a.m_eval / p;
 			Scalar p_b = nn_b.m_eval / p;
 			Scalar p_c = nn_c.m_eval / p;
