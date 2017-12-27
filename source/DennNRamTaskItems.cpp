@@ -1,3 +1,4 @@
+#include "Config.h"
 #include "Denn.h"
 #include "DennNRam.h"
 #include "DennNRamTask.h"
@@ -9,7 +10,8 @@ namespace NRam
 {
 
 	/**
-	 * [Access] Given a value k and an array A, return A[k]. Input is given as k, A[0], .., A[n −
+	 * [Access] 
+	 * Given a value k and an array A, return A[k]. Input is given as k, A[0], .., A[n −
    * 1], NULL and the network should replace the first memory cell with A[k].
 	 */
 	class TaskAccess : public Task
@@ -50,7 +52,8 @@ namespace NRam
 	REGISTERED_TASK(TaskAccess, "access")
 
   /**
-	 * [Increment] Given an array A, increment all its elements by 1. Input is given as
+	 * [Increment] 
+	 * Given an array A, increment all its elements by 1. Input is given as
    * A[0], ..., A[n − 1], NULL and the expected output is A[0] + 1, ..., A[n − 1] + 1.
 	 */
 	class TaskIncrement : public Task
@@ -85,7 +88,8 @@ namespace NRam
 	REGISTERED_TASK(TaskIncrement, "increment")
 
 	/**
-	 * [Copy] Given an array and a pointer to the destination, copy all elements from the array to
+	 * [Copy] 
+	 * Given an array and a pointer to the destination, copy all elements from the array to
    * the given location. Input is given as p, A[0], ..., A[n−1] where p points to one element after
    * A[n−1]. The expected output is A[0], ..., A[n−1] at positions p, ..., p+n−1 respectively.
 	 */
@@ -110,15 +114,15 @@ namespace NRam
 			Matrix in_mem(m_batch_size, m_max_int);
 			in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int)); });
 			in_mem.block(0, offset, in_mem.rows(), in_mem.cols() - offset) = Matrix::Zero(m_batch_size, in_mem.cols() - offset);
-			in_mem.col(0) = ColVector::Ones(in_mem.rows()) * offset;
+			in_mem.col(0) = ColVector::Constant(in_mem.rows(), offset);
 
 			// Create the desired mem
 			Matrix out_mem = in_mem;
 			out_mem.block(0, offset, in_mem.rows(), in_mem.cols() - offset - 1) = in_mem.block(0, 1, in_mem.rows(), offset - 1);
 
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
-			out_mem.block(0, 0, in_mem.rows(), offset) = Matrix::Ones(out_mem.rows(), offset) * -1;
-			out_mem.col(out_mem.cols() - 1) = ColVector::Ones(out_mem.rows()) * -1;
+			out_mem.block(0, 0, in_mem.rows(), offset) = Matrix::Constant(out_mem.rows(), offset, -1);
+			out_mem.col(out_mem.cols() - 1) = ColVector::Constant(out_mem.rows(), -1);
 
 			return std::make_tuple(in_mem, out_mem, Task::init_regs());
 		}
@@ -160,8 +164,8 @@ namespace NRam
 				= out_mem.block(0, 1, in_mem.rows(), offset - 1).rowwise().reverse();
 
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
-			out_mem.block(0, 0, in_mem.rows(), offset) = Matrix::Ones(out_mem.rows(), offset) * -1;
-			out_mem.col(out_mem.cols() - 1) = ColVector::Ones(out_mem.rows()) * -1;
+			out_mem.block(0, 0, in_mem.rows(), offset) = Matrix::Constant(out_mem.rows(), offset, -1);
+			out_mem.col(out_mem.cols() - 1) = ColVector::Constant(out_mem.rows(), -1);
 
 			return std::make_tuple(in_mem, out_mem, Task::init_regs());
 		}
@@ -169,7 +173,8 @@ namespace NRam
 	REGISTERED_TASK(TaskReverse, "reverse")
 
   /**
-	 * [Swap] Given two pointers p, q and an array A, swap elements A[p] and A[q]. Input is
+	 * [Swap] 
+	 * Given two pointers p, q and an array A, swap elements A[p] and A[q]. Input is
    * given as p, q, A[0], .., A[p], ..., A[q], ..., A[n − 1], 0. The expected modified array A is:
    * A[0], ..., A[q], ..., A[p], ..., A[n − 1].
 	 */
@@ -192,9 +197,6 @@ namespace NRam
 			// Initialize starting memory
 			Matrix in_mem(m_batch_size, m_max_int);
 			in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int)); });
-			
-			//in_mem.col(0) = ColVector::Ones(in_mem.rows()) * 4;
-			//in_mem.col(1) = ColVector::Ones(in_mem.rows()) * 8;
 
 			// Set pointers of elements to swap
 			for (Matrix::Index r = 0; r < in_mem.rows(); ++r)
@@ -220,8 +222,8 @@ namespace NRam
 			}
 
 			// Cut out the the memory parts that does not make part of the expected output
-			out_mem.block(0, 0, out_mem.rows(), 2) = Matrix::Ones(out_mem.rows(), 2) * -1;
-			out_mem.col(in_mem.cols() - 1) = ColVector::Ones(in_mem.rows()) * -1;
+			out_mem.block(0, 0, out_mem.rows(), 2) = Matrix::Constant(out_mem.rows(), 2, -1);
+			out_mem.col(in_mem.cols() - 1) = ColVector::Constant(in_mem.rows(), -1);
 
 			//test
 			//MESSAGE("in mem:" << Dump::json_matrix(in_mem));
@@ -233,7 +235,8 @@ namespace NRam
 	REGISTERED_TASK(TaskSwap, "swap")
 
 	/**
-	 * [Permutation] Given two arrays of n elements: P (contains a permutation of numbers
+	 * [Permutation] 
+	 * Given two arrays of n elements: P (contains a permutation of numbers
 	 * 0, . . . , n − 1) and A (contains random elements), permutate A according to P. Input is
    * given as a, P[0], ..., P[n − 1], A[0], ..., A[n − 1], where a is a pointer to the array A. The
    * expected output is A[P[0]], ..., A[P[n − 1]], which should override the array P.
@@ -279,7 +282,7 @@ namespace NRam
 						.transpose()
 						.row(0);
 				}
-				in_mem.col(0) = ColVector::Ones(in_mem.rows()) * offset; // Set pointer to vector A position in memory
+				in_mem.col(0) = ColVector::Constant(in_mem.rows(), offset); // Set pointer to vector A position in memory
 				in_mem.col(in_mem.cols() - 1) = ColVector::Zero(in_mem.rows()); // Set NULL value in memory
 
 				//init out mem
@@ -308,12 +311,13 @@ namespace NRam
 	REGISTERED_TASK(TaskPermutation, "permutation")
 
   /**
-	 * [ListK] Given a pointer to the head of a linked list and a number k, find the value of the
-   * k-th element on the list. List nodes are represented as two adjacent memory cells: a pointer
-   * to the next node and a value. Elements are in random locations in the memory, so that
-   * the network needs to follow the pointers to find the correct element. Input is given as:
-   * head, k, out, ... where head is a pointer to the first node on the list, k indicates how many
-   * hops are needed and out is a cell where the output should be put.
+	 * [ListK] 
+	 * Given a pointer to the head of a linked list and a number k, find the value of the 
+	 * k-th element on the list. List nodes are represented as two adjacent memory cells: a pointer
+	 * to the next node and a value. Elements are in random locations in the memory, so that
+	 * the network needs to follow the pointers to find the correct element. Input is given as:
+	 * head, k, out, ... where head is a pointer to the first node on the list, k indicates how many
+	 * hops are needed and out is a cell where the output should be put.
 	 */
 	class TaskListK : public Task
 	{
@@ -377,14 +381,14 @@ namespace NRam
 					if (pointer_to_the_next != m_permutation.size())
 						in_mem(r, 3 + (2 * e)) = 3 + (2 * pointer_to_the_next);
 					else
-						in_mem(r, 3 + (2 * e)) = Scalar(-1);
+						in_mem(r, 3 + (2 * e)) = Scalar(0);
 
 					// Set the value of the node of the current list element
 					in_mem(r, 3 + (2 * e) + 1) = list_elements(r, e);
 				}
 			}
 			in_mem.col(2) = ColVector::Ones(in_mem.rows()) * 2; // Set pointer to vector memory position where the searched element will be writed
-			in_mem.col(1) = in_mem.col(1).unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, list_size - 1)); }); // Set the position in the list to read to read
+			in_mem.col(1) = in_mem.col(1).unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, list_size - 1)); }); // Set the position in the list to read
 			in_mem.col(in_mem.cols() - 1) = ColVector::Zero(in_mem.rows()); // Set NULL value in memory
 
 			// Create the desired memory
@@ -409,7 +413,8 @@ namespace NRam
 	REGISTERED_TASK(TaskListK, "listk")
 
 	/**
-	 * [ListSearch] Given a pointer to the head of a linked list and a value `v` to find return a pointer
+	 * [ListSearch] 
+	 * Given a pointer to the head of a linked list and a value `v` to find return a pointer
 	 * to the first node on the list with the value `v`. The list is placed in memory in the same way
 	 * as in the task ListK. We fill empty memory with “trash” values to prevent the network from
    * “cheating” and just iterating over the whole memory. 
@@ -476,7 +481,7 @@ namespace NRam
 					if (pointer_to_the_next != m_permutation.size())
 						in_mem(r, 2 + (2 * e)) = 2 + (2 * pointer_to_the_next);
 					else
-						in_mem(r, 2 + (2 * e)) = -1;
+						in_mem(r, 2 + (2 * e)) = 0;
 
 					// Set the value of the node of the current list element
 					in_mem(r, 2 + (2 * e) + 1) = list_elements(r, e);
@@ -492,9 +497,10 @@ namespace NRam
 				// Search the element to read and substitute to the memory section indicated at the 2^nd position of the memory itself
 				bool found = false;
 				Matrix::Index pointer = Matrix::Index(out_mem(r, 0));
-				while (!found && pointer != -1) // i.e. the searched element is found or the search has not produced results
+				while (!found && pointer != 0) // i.e. the searched element is found or the search has not produced results
 				{
-					if (Matrix::Index(out_mem(r, Matrix::Index(pointer) + 1)) == Matrix::Index(out_mem(r, 1))) // Value if found, Stop the search
+					// If the values is found stop the search
+					if (Matrix::Index(out_mem(r, Matrix::Index(pointer) + 1)) == Matrix::Index(out_mem(r, 1))) 
 					{
 						out_mem(r, 0) = pointer;
 						found = true;
@@ -511,7 +517,12 @@ namespace NRam
 	REGISTERED_TASK(TaskListSearch, "listsearch")
 
 	/**
-	 * 
+	 * [Merge]
+	 * Given pointers to 2 sorted arrays A and B, and the pointer to the output o,
+	 * merge the two arrays into one sorted array. The input is given as: a, b, o, A[0], .., A[n −
+	 * 1], G, B[0], ..., B[m − 1], G, where G is a special guardian value, a and b point to the first
+	 * elements of arrays A and B respectively, and o points to the address after the second G.
+	 * The n + m element should be written in correct order starting from position o
 	 */ 
 	class TaskMerge : public Task
 	{
@@ -537,8 +548,8 @@ namespace NRam
 			Matrix::Index list_size_a = remaining_size / 4, 
 										list_size_b = (odd_subvector_space ? list_size_a + 1 : list_size_a);
 			
-			Matrix::Index list_size_a_plus_b = Matrix::Index(std::ceil(remaining_size / 2));
-			Matrix in_mem(m_batch_size, m_max_int);
+			Matrix::Index list_size_a_plus_b = list_size_a + list_size_b;
+			Matrix in_mem = Matrix::Zero(m_batch_size, m_max_int);
 			Matrix list_elements_a(m_batch_size, list_size_a);
 			Matrix list_elements_b(m_batch_size, list_size_b);
 			Matrix list_elements_a_plus_b = Matrix::Zero(m_batch_size, list_size_a_plus_b);
@@ -563,15 +574,7 @@ namespace NRam
 			in_mem.col(1) = ColVector::Ones(in_mem.rows()) * (3 + list_size_a + 1); // Starting point of list B
 			in_mem.col(2) = ColVector::Ones(in_mem.rows()) * (3 + (2 * list_size_a) + (odd_subvector_space ? 3 : 2)); // Starting point of list A + B
 			in_mem.block(0, 3, in_mem.rows(), list_size_a) = list_elements_a; // Copy of A
-			in_mem.col(3 + list_size_a) = ColVector::Constant(in_mem.rows(), -1); // Setting divider
 			in_mem.block(0, 3 + list_size_a + 1, in_mem.rows(), list_size_b) = list_elements_b; // Copy B
-			in_mem.col(3 + (list_size_a_plus_b) + 1) = ColVector::Constant(in_mem.rows(), -1); // Setting divider
-			in_mem.block(0, 3 + (list_size_a_plus_b) + 2, in_mem.rows(), in_mem.cols() - (3 + (list_size_a_plus_b) + 1) - 2) =
-				Matrix::Zero(in_mem.rows(), in_mem.cols() - (3 + (list_size_a_plus_b) + 1) - 2); // Nullify A + B memory section
-			if (odd_space)
-				in_mem.block(0, in_mem.cols() - 2, in_mem.rows(), 2) = Matrix::Constant(in_mem.rows(), 2, -1);
-			else
-				in_mem.col(in_mem.cols() - 1) = ColVector::Constant(in_mem.rows(), -1);
 			MESSAGE("MEM: " << Dump::json_matrix(in_mem))
 
 			// Create and initialize desired memory
@@ -584,5 +587,146 @@ namespace NRam
 	};
 	REGISTERED_TASK(TaskMerge, "merge")
 
+	/**
+	 * TODO
+	 * [WalkBST]
+   * Given a pointer to the root of a Binary Search Tree, and a path to be traversed,
+   * return the element at the end of the path. The BST nodes are represented as triples (v, l,
+   * r), where v is the value, and l, r are pointers to the left/right child. The triples are placed
+   * randomly in the memory. Input is given as root, out, d1, d2, ..., dk, NULL, ..., where root
+   * points to the root node and out is a slot for the output. The sequence d1...dk, di ∈ {0, 1}
+   * represents the path to be traversed: di = 0 means that the network should go to the left
+   * child, di = 1 represents going to the right child.
+	 */
+	class TaskWalkBST : public Task
+	{
+	public:
+		TaskWalkBST
+				(
+						size_t batch_size
+						, size_t max_int
+						, size_t n_regs
+						, Random& random
+				)
+				: Task(batch_size, max_int, n_regs, random)
+		{
+		}
+
+		MemoryTuple operator()() override
+		{
+			return {};
+		}
+	};
+	REGISTERED_TASK(TaskWalkBST, "walkbst")
+
+	/**
+	 * [Sum] 
+	 * Given pointers to 2 arrays A and B, and the pointer to the output o,
+	 * sum the two arrays into one array. The input is given as: a, b, o, A[0], .., A[n −
+	 * 1], G, B[0], ..., B[m − 1], G, where G is a special guardian value, a and b point to the first
+	 * elements of arrays A and B respectively, and o points to the address after the second G.
+	 * The A + B array should be written starting from position o.
+	 */
+	class TaskSum : public Task
+	{
+	public:
+		TaskSum
+				(
+						size_t batch_size
+						, size_t max_int
+						, size_t n_regs
+						, Random& random
+				)
+				: Task(batch_size, max_int, n_regs, random)
+		{
+		}
+
+		MemoryTuple operator()() override
+		{
+			// Initialize some parameters and create the memory
+			Matrix::Index remaining_size = m_max_int - 6;
+			Matrix::Index arrays_memory_size = remaining_size / 3;
+			bool arrays_memory_space_is_not_sufficient = !(remaining_size % 3 == 0);
+			if (arrays_memory_space_is_not_sufficient)
+				throw 49;
+
+			Matrix in_mem = Matrix::Zero(m_batch_size, m_max_int);
+			Matrix list_elements_a(m_batch_size, arrays_memory_size);
+			Matrix list_elements_b(m_batch_size, arrays_memory_size);
+			Matrix list_elements_a_plus_b = Matrix::Zero(m_batch_size, arrays_memory_size);
+
+			// Initialize arrays
+			list_elements_a = list_elements_a.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int - 1)); });
+			list_elements_b = list_elements_b.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int - 1)); });
+			list_elements_a_plus_b = list_elements_a + list_elements_b;
+			for (Matrix::Index r = 0; r < list_elements_a_plus_b.rows(); ++r)
+				for (Matrix::Index c = 0; c < list_elements_a_plus_b.cols(); ++c)
+					list_elements_a_plus_b(r, c) = Scalar(positive_mod((unsigned long)list_elements_a_plus_b(r, c), m_max_int));
+
+			// Add data to starting NRAM memory
+			in_mem.col(0) = ColVector::Constant(in_mem.rows(), 3); // Starting point of list A
+			in_mem.col(1) = ColVector::Constant(in_mem.rows(), 3 + arrays_memory_size + 1); // Starting point of list B
+			in_mem.col(2) = ColVector::Constant(in_mem.rows(), 3 + (2 * arrays_memory_size) +  2); // Starting point of list A + B
+			in_mem.block(0, 3, in_mem.rows(), arrays_memory_size) = list_elements_a; // Copy of A
+			in_mem.block(0, 3 + arrays_memory_size + 1, in_mem.rows(), arrays_memory_size) = list_elements_b; // Copy B
+			
+			// Create and initialize desired memory
+			Matrix out_mem = in_mem;
+			out_mem.block(0, 3 + (2 * arrays_memory_size) + 2, out_mem.rows(), arrays_memory_size) = list_elements_a_plus_b;
+
+			return std::make_tuple(in_mem, out_mem, Task::init_regs());
+		}
+	};
+	REGISTERED_TASK(TaskSum, "sum")
+
+	/**
+	 * [Product] 
+	 * Given pointers to 2 arrays A and B, and the pointer to the output o,
+	 * sum the two arrays into one array. The input is given as: a, b, o, A[0], .., A[n −
+	 * 1], G, B[0], ..., B[m − 1], G, where G is a special guardian value, a and b point to the first
+	 * elements of arrays A and B respectively, and o is a slot for the output.
+	 */
+	class TaskProduct : public Task
+	{
+	public:
+		TaskProduct
+				(
+						size_t batch_size
+						, size_t max_int
+						, size_t n_regs
+						, Random& random
+				)
+				: Task(batch_size, max_int, n_regs, random)
+		{
+		}
+
+		MemoryTuple operator()() override
+		{
+			// Initialize some parameters and create the memory
+			Matrix::Index remaining_size = m_max_int - 5;
+			Matrix::Index arrays_memory_size = remaining_size / 2;
+
+			// Create and initialize the starting memory
+			Matrix in_mem = Matrix::Zero(m_batch_size, m_max_int);
+			in_mem.col(0) = ColVector::Constant(in_mem.rows(), 3); // Starting point of list A
+			in_mem.col(1) = ColVector::Constant(in_mem.rows(), 3 + arrays_memory_size + 1); // Starting point of list B
+			in_mem.col(2) = ColVector::Zero(in_mem.rows()); // Starting point of list A + B
+			in_mem.block(0, 3, in_mem.rows(), arrays_memory_size) = in_mem.block(0, 3, in_mem.rows(), arrays_memory_size)
+				.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int - 1)); }); // Inizialize A
+			in_mem.block(0, 3 + arrays_memory_size + 1, in_mem.rows(), arrays_memory_size) = in_mem
+				.block(0, 3 + arrays_memory_size + 1, in_mem.rows(), arrays_memory_size)
+					.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int - 1)); }); // Initialize B
+
+			// Create and initialize desired memory
+			Matrix out_mem = in_mem;
+			out_mem.col(2) = in_mem.block(0, 3, in_mem.rows(), arrays_memory_size) * 
+				in_mem.block(0, 3 + arrays_memory_size + 1, in_mem.rows(), arrays_memory_size).transpose();
+			for (Matrix::Index r = 0; r < out_mem.rows(); ++r)
+				out_mem(r, 2) = Scalar(positive_mod((unsigned long)out_mem(r, 2), m_max_int));
+
+			return std::make_tuple(in_mem, out_mem, Task::init_regs());
+		}
+	};
+	REGISTERED_TASK(TaskProduct, "product")
 }
 }
