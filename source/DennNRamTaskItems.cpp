@@ -617,7 +617,102 @@ namespace NRam
 
 		MemoryTuple operator()() override
 		{
-			return {};
+			using namespace Eigen;
+
+			// Create memory and initialize others data
+			Matrix::Index remaining_size = m_max_int - 3;
+			Matrix in_mem = Matrix::Zero(m_batch_size, m_max_int);
+			Matrix out_mem = in_mem;
+			Matrix::Index num_elements = remaining_size / 4;
+			Matrix::Index offset = 2;
+			Matrix::Index divider = num_elements + 1;
+
+			// Create and initialize elements of bsts
+			Matrix list_elements(m_batch_size, num_elements);
+			list_elements = list_elements.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int - 1)); });
+
+			//Create and initialize the walk of bst
+			Matrix walks_bst(m_batch_size, num_elements);
+			walks_bst = walks_bst.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(0, 2)); });
+
+			// Initialize the permutation for all the examples and the memories
+			for (size_t r = 0; r < in_mem.rows(); ++r)
+			{
+				// Create the elements order in memory
+				PermutationMatrix< Dynamic, Dynamic > perm(num_elements);
+				perm.setIdentity();
+				std::random_device rd;
+				std::mt19937 g(rd());
+				std::shuffle(perm.indices().data(), perm.indices().data() + perm.indices().size(), g);
+				Matrix m_permutation = perm
+						.indices()
+						.cast<Scalar>()
+						.transpose();
+				Matrix permutated_bst_example_elements = list_elements.block(r, 0, 1, list_elements.cols()) * perm;
+
+				// Create temporary matrix that contain BST for an example
+				RowVector example_bst = RowVector::Zero(list_elements.cols() * 3);
+				Matrix::Index root_pointer = -1;
+				for (Matrix::Index elidx = 0; elidx < list_elements.cols(); ++elidx)
+				{
+					Matrix::Index pointer = get_element_index(m_permutation, elidx);
+					example_bst(pointer * 3) = list_elements(r, elidx);
+					if (elidx == 0) root_pointer = pointer * 3;
+				}
+
+				// Initialize BST
+				for (Matrix::Index elidx = 1; elidx < list_elements.cols(); ++elidx)
+					insert_in_bst(example_bst, r, root_pointer, list_elements(r, elidx), get_element_index(m_permutation, elidx) * 3);
+
+				in_mem(r, 0) = Scalar(offset + num_elements + 1 + root_pointer);
+				in_mem.block(r, offset, 1, num_elements) = walks_bst.block(r, 0, 1, walks_bst.cols());
+				
+				// Walk the bst before the normalization
+				Scalar value_found = walk_bst(example_bst, walks_bst.block(r, 0, 1, walks_bst.cols()), -1, root_pointer);
+
+				// Normalize bst pointers for the memory and then save it
+				for (Matrix::Index c = 0; c < example_bst.cols(); ++c)
+					if (c % 3 != 0 && example_bst(c) != Scalar(0)) 
+						example_bst(c) += offset + num_elements + 1;
+				in_mem.block(r, offset + num_elements + 1, 1, num_elements * 3) = example_bst;
+
+				// Initialize out mem example
+				out_mem.block(r, 0, 1, out_mem.cols()) = in_mem.block(r, 0, 1, in_mem.cols());
+				out_mem(r, 1) = value_found;
+			}
+
+			return std::make_tuple(in_mem, out_mem, Task::init_mask(), Task::init_regs());
+		}
+	private:
+		void insert_in_bst(RowVector& bst, const Matrix::Index& example, Matrix::Index pointer, const Scalar& element, const Matrix::Index& element_pointer_in_memory)
+		{
+			if (bst(example, pointer) > element)
+			{
+				if (bst(example, pointer + 1) == 0) bst(example, pointer + 1) = element_pointer_in_memory;
+				else insert_in_bst(bst, example, bst(example, pointer + 1), element, element_pointer_in_memory);
+			}
+			else
+			{
+				if (bst(example, pointer + 2) == 0) bst(example, pointer + 2) = element_pointer_in_memory;
+				else insert_in_bst(bst, example, bst(example, pointer + 2), element, element_pointer_in_memory);
+			}
+		}
+
+		Scalar walk_bst(const RowVector& bst, const RowVector& walk, Matrix::Index previous_pointer, Matrix::Index pointer)
+		{
+			if (pointer == 0 && previous_pointer != -1) return bst(previous_pointer);
+			else if (walk.size() == 0) return bst(pointer);
+			else {
+				if (walk(0) == 0) return walk_bst(bst, walk.block(0, 1, 1, walk.size() - 1), pointer, bst(pointer + 1));
+				else return walk_bst(bst, walk.block(0, 1, 1, walk.size() - 1), pointer, bst(pointer + 2));
+			}
+		}
+
+		Matrix::Index get_element_index(const Matrix& permutation, const Matrix::Index idx)
+		{
+			for (Matrix::Index i = 0; i < permutation.cols(); ++i)
+				if (Matrix::Index(permutation(0, i)) == idx) return i;
+			return Matrix::Index(-1);
 		}
 	};
 	REGISTERED_TASK(TaskWalkBST, "walkbst")
@@ -677,7 +772,7 @@ namespace NRam
 			Matrix out_mem = in_mem;
 			out_mem.block(0, 3 + (2 * arrays_memory_size) + 2, out_mem.rows(), arrays_memory_size) = list_elements_a_plus_b;
 
-			return std::make_tuple(in_mem, out_mem, Task::init_regs());
+			return std::make_tuple(in_mem, out_mem, Task::init_mask(), Task::init_regs());
 		}
 	};
 	REGISTERED_TASK(TaskSum, "sum")
@@ -727,7 +822,7 @@ namespace NRam
 			for (Matrix::Index r = 0; r < out_mem.rows(); ++r)
 				out_mem(r, 2) = Scalar(positive_mod((unsigned long)out_mem(r, 2), m_max_int));
 
-			return std::make_tuple(in_mem, out_mem, Task::init_regs());
+			return std::make_tuple(in_mem, out_mem, Task::init_mask(), Task::init_regs());
 		}
 	};
 	REGISTERED_TASK(TaskProduct, "product")
