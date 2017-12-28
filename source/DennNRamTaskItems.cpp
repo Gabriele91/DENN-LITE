@@ -631,7 +631,7 @@ namespace NRam
 			list_elements = list_elements.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int - 1)); });
 
 			//Create and initialize the walk of bst
-			Matrix walks_bst(m_batch_size, num_elements);
+			Matrix walks_bst(m_batch_size, num_elements - 1);
 			walks_bst = walks_bst.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(0, 2)); });
 
 			// Initialize the permutation for all the examples and the memories
@@ -663,8 +663,8 @@ namespace NRam
 				for (Matrix::Index elidx = 1; elidx < list_elements.cols(); ++elidx)
 					insert_in_bst(example_bst, r, root_pointer, list_elements(r, elidx), get_element_index(m_permutation, elidx) * 3);
 
-				in_mem(r, 0) = Scalar(offset + num_elements + 1 + root_pointer);
-				in_mem.block(r, offset, 1, num_elements) = walks_bst.block(r, 0, 1, walks_bst.cols());
+				in_mem(r, 0) = Scalar(offset + num_elements + root_pointer);
+				in_mem.block(r, offset, 1, num_elements - 1) = walks_bst.block(r, 0, 1, walks_bst.cols());
 				
 				// Walk the bst before the normalization
 				Scalar value_found = walk_bst(example_bst, walks_bst.block(r, 0, 1, walks_bst.cols()), -1, root_pointer);
@@ -672,8 +672,8 @@ namespace NRam
 				// Normalize bst pointers for the memory and then save it
 				for (Matrix::Index c = 0; c < example_bst.cols(); ++c)
 					if (c % 3 != 0 && example_bst(c) != Scalar(0)) 
-						example_bst(c) += offset + num_elements + 1;
-				in_mem.block(r, offset + num_elements + 1, 1, num_elements * 3) = example_bst;
+						example_bst(c) += offset + num_elements;
+				in_mem.block(r, offset + num_elements, 1, num_elements * 3) = example_bst;
 
 				// Initialize out mem example
 				out_mem.block(r, 0, 1, out_mem.cols()) = in_mem.block(r, 0, 1, in_mem.cols());
