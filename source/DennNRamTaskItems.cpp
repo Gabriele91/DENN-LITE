@@ -591,7 +591,6 @@ namespace NRam
 	REGISTERED_TASK(TaskMerge, "merge")
 
 	/**
-	 * TODO
 	 * [WalkBST]
    * Given a pointer to the root of a Binary Search Tree, and a path to be traversed,
    * return the element at the end of the path. The BST nodes are represented as triples (v, l,
