@@ -544,6 +544,7 @@ namespace NRam
 		MemoryTuple operator()() override
 		{
 			// Initialize some parameters and create the memory
+			Matrix::Index offset = 3;
 			Matrix::Index remaining_size = m_max_int - 6;
 			bool odd_space = !(remaining_size % 2 == 0);
 			bool odd_subvector_space = !(remaining_size % 4 == 0);
@@ -564,26 +565,20 @@ namespace NRam
 			sort_rows_ascending(list_elements_b);
 
 			// Initialize the output memory and sort it
-			MESSAGE("A: " << Dump::json_matrix(list_elements_a))
-			MESSAGE("B: " << Dump::json_matrix(list_elements_b))
 			list_elements_a_plus_b.block(0, 0, list_elements_a_plus_b.rows(), list_size_a) = list_elements_a;
 			list_elements_a_plus_b.block(0, list_size_a, list_elements_a_plus_b.rows(), list_size_b) = list_elements_b;
-			MESSAGE("A + B: " << Dump::json_matrix(list_elements_a_plus_b))
 			sort_rows_ascending(list_elements_a_plus_b);
-			MESSAGE("A + B Sorted: " << Dump::json_matrix(list_elements_a_plus_b))
 
 			// Add data to starting NRAM memory
-			in_mem.col(0) = ColVector::Ones(in_mem.rows()) * 3; // Starting point of list A
-			in_mem.col(1) = ColVector::Ones(in_mem.rows()) * (3 + list_size_a + 1); // Starting point of list B
-			in_mem.col(2) = ColVector::Ones(in_mem.rows()) * (3 + (2 * list_size_a) + (odd_subvector_space ? 3 : 2)); // Starting point of list A + B
-			in_mem.block(0, 3, in_mem.rows(), list_size_a) = list_elements_a; // Copy of A
-			in_mem.block(0, 3 + list_size_a + 1, in_mem.rows(), list_size_b) = list_elements_b; // Copy B
-			MESSAGE("MEM: " << Dump::json_matrix(in_mem))
+			in_mem.col(0) = ColVector::Constant(in_mem.rows(), offset); // Starting point of list A
+			in_mem.col(1) = ColVector::Constant(in_mem.rows(), offset + list_size_a + 1); // Starting point of list B
+			in_mem.col(2) = ColVector::Constant(in_mem.rows(), offset + (2 * list_size_a) + (odd_subvector_space ? 3 : 2)); // Starting point of list A + B
+			in_mem.block(0, offset, in_mem.rows(), list_size_a) = list_elements_a; // Copy of A
+			in_mem.block(0, offset + list_size_a + 1, in_mem.rows(), list_size_b) = list_elements_b; // Copy B
 
 			// Create and initialize desired memory
 			Matrix out_mem = in_mem;
-			out_mem.block(0, 3 + (list_size_a_plus_b) + 2, out_mem.rows(), out_mem.cols() - (3 + list_size_a_plus_b + 2) - (odd_space ? 2 : 1)) =
-				list_elements_a_plus_b;
+			out_mem.block(0, offset + list_size_a_plus_b + 2, out_mem.rows(), list_size_a_plus_b) = list_elements_a_plus_b;
 
 			return std::make_tuple(in_mem, out_mem, Task::init_mask(), Task::init_regs());
 		}
@@ -661,7 +656,7 @@ namespace NRam
 
 				// Initialize BST
 				for (Matrix::Index elidx = 1; elidx < list_elements.cols(); ++elidx)
-					insert_in_bst(example_bst, r, root_pointer, list_elements(r, elidx), get_element_index(m_permutation, elidx) * 3);
+					insert_in_bst(example_bst, root_pointer, list_elements(r, elidx), get_element_index(m_permutation, elidx) * 3);
 
 				in_mem(r, 0) = Scalar(offset + num_elements + root_pointer);
 				in_mem.block(r, offset, 1, num_elements - 1) = walks_bst.block(r, 0, 1, walks_bst.cols());
@@ -683,17 +678,17 @@ namespace NRam
 			return std::make_tuple(in_mem, out_mem, Task::init_mask(), Task::init_regs());
 		}
 	private:
-		void insert_in_bst(RowVector& bst, const Matrix::Index& example, Matrix::Index pointer, const Scalar& element, const Matrix::Index& element_pointer_in_memory)
+		void insert_in_bst(RowVector& bst, Matrix::Index pointer, const Scalar& element, const Matrix::Index& element_pointer_in_memory)
 		{
-			if (bst(example, pointer) > element)
+			if (bst(pointer) > element)
 			{
-				if (bst(example, pointer + 1) == 0) bst(example, pointer + 1) = element_pointer_in_memory;
-				else insert_in_bst(bst, example, bst(example, pointer + 1), element, element_pointer_in_memory);
+				if (bst(pointer + 1) == 0) bst(pointer + 1) = element_pointer_in_memory;
+				else insert_in_bst(bst, bst(pointer + 1), element, element_pointer_in_memory);
 			}
 			else
 			{
-				if (bst(example, pointer + 2) == 0) bst(example, pointer + 2) = element_pointer_in_memory;
-				else insert_in_bst(bst, example, bst(example, pointer + 2), element, element_pointer_in_memory);
+				if (bst(pointer + 2) == 0) bst(pointer + 2) = element_pointer_in_memory;
+				else insert_in_bst(bst, bst(pointer + 2), element, element_pointer_in_memory);
 			}
 		}
 

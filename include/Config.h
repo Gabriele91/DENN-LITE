@@ -284,7 +284,8 @@ namespace Denn
 	void sort_rows_ascending(Matrix& m)
 	{
 		m.transposeInPlace();
-		std::sort(m.derived().data(), m.derived().data() + m.derived().size());
+		for (size_t r = 0; r < m.cols(); ++r)
+			std::sort(m.col(r).data(), m.col(r).data() + m.col(r).size());
 		m.transposeInPlace();
 	}
 
@@ -299,8 +300,11 @@ namespace Denn
 	void sort_rows_descending(Matrix& m)
 	{
 		m.transposeInPlace();
-		std::sort(m.derived().data(), m.derived().data() + m.derived().size());
-		std::reverse(m.derived().data(), m.derived().data() + m.derived().size());
+		for (size_t r = 0; r < m.cols(); ++r)
+		{
+			std::sort(m.col(r).data(), m.col(r).data() + m.col(r).size());
+			std::reverse(m.col(r).data(), m.col(r).data() + m.col(r).size());
+		}
 		m.transposeInPlace();
 	}
 }
