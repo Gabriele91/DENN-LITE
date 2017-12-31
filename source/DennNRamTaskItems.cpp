@@ -234,7 +234,6 @@ namespace NRam
 			// Cut out the the memory parts that does not make part of the expected output
 			Matrix mask = Task::init_mask(); //[1, max_int]
 			mask.leftCols(2)  = RowVector::Zero(2);
-			mask.rightCols(1) = RowVector::Zero(1);
 
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
@@ -593,8 +592,6 @@ namespace NRam
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
 			Matrix mask = Task::init_mask(); //[3, max_int - 1]
 			mask.leftCols(3)  = RowVector::Zero(3);
-			mask.rightCols(out_mem.cols() - (offset + (2 * list_size_a_plus_b) + 2)) 
-				= RowVector::Zero(out_mem.cols() - (offset + (2 * list_size_a_plus_b) + 2));
 
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
@@ -696,10 +693,8 @@ namespace NRam
 			}
 
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
-			Matrix mask = Task::init_mask(); //[3, max_int - 1]
+			Matrix mask = Task::init_mask();
 			mask.leftCols(1)  = RowVector::Zero(1);
-			mask.rightCols(out_mem.cols() - ((offset + 1) + num_elements + (3 * num_elements))) 
-				= RowVector::Zero(out_mem.cols() - ((offset + 1) + num_elements + (3 * num_elements)));
 
 			return std::make_tuple(in_mem, out_mem, Task::init_mask(), Task::init_regs());
 		}
@@ -792,8 +787,6 @@ namespace NRam
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
 			Matrix mask = Task::init_mask(); //[3, max_int - 1]
 			mask.leftCols(3)  = RowVector::Zero(3);
-			mask.rightCols(out_mem.cols() - (3 + (3 * arrays_memory_size) + 2)) 
-				= RowVector::Zero(out_mem.cols() - (3 + (3 * arrays_memory_size) + 2));
 
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
@@ -847,9 +840,7 @@ namespace NRam
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
 			Matrix mask = Task::init_mask(); //[3, max_int - 1]
 			mask.leftCols(3)  = RowVector::Zero(3);
-			mask.rightCols(out_mem.cols() - (3 + (2 * arrays_memory_size) + 1)) 
-				= RowVector::Zero(out_mem.cols() - (3 + (2 * arrays_memory_size) + 1));
-
+			
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
 	};
