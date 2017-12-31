@@ -180,7 +180,6 @@ namespace NRam
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
 			Matrix mask = Task::init_mask(); //[1, max_int]
 			mask.leftCols(offset) = RowVector::Zero(offset);
-			mask.rightCols(1)     = RowVector::Zero(1);
 
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
