@@ -205,18 +205,18 @@ namespace Denn
             ++m_n_restart;
         }
 
-        virtual void start_a_sub_pass() override 
-        { 
-            ++m_n_sub_pass;
-            //compute pass time
-            double pass_per_sec = (double(m_n_sub_pass) / (Denn::Time::get_time() - m_sub_pass_time));
-            //clean line
-            clean_line();
-            //write output
-            write_output();
-            output() << " ...\t" << double(long(pass_per_sec*10.))/10.0 << " [it/s] ";
-            output() << "\r";
-        }
+        // virtual void start_a_sub_pass() override 
+        // { 
+        //     ++m_n_sub_pass;
+        //     //compute pass time
+        //     double pass_per_sec = (double(m_n_sub_pass) / (Denn::Time::get_time() - m_sub_pass_time));
+        //     //clean line
+        //     clean_line();
+        //     //write output
+        //     write_output();
+        //     output() << " ...\t" << double(long(pass_per_sec*10.))/10.0 << " [it/s] ";
+        //     output() << "\r";
+        // }
 
         virtual void end() override
         { 
