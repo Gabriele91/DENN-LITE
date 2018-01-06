@@ -11,16 +11,16 @@ def main():
 
     # tot_gen, batch_size, batch_step, population_size, clamp, dataset_name, dataset
     DATASETS = [
-        (2000, 10, 20, 123, (-150, 150), "QSAR", "../../DENN-dataset-samples/DATASET/d_06_01_2017/qsar.gz"),
-        (2000, 10, 20, 123, (-1, 1), "QSAR_norm", "../../DENN-dataset-samples/DATASET/d_06_01_2017/qsar_normalized.gz"),
-        (2000, 20, 40, 33, (-600, 600), "MAGIC", "../../DENN-dataset-samples/DATASET/d_06_01_2017/magic.gz"),
-        (2000, 20, 40, 33, (-1, 1), "MAGIC_norm", "../../DENN-dataset-samples/DATASET/d_06_01_2017/magic_normalized.gz"),
-        (2000, 20, 40, 384, (-70000, 70000), "GASS", "../../DENN-dataset-samples/DATASET/d_06_01_2017/gass.gz"),
-        (2000, 20, 40, 384, (-1, 1), "GASS_norm", "../../DENN-dataset-samples/DATASET/d_06_01_2017/gass_normalized.gz"),
-        (4000, 100, 100, 400, (-255, 255), "MNIST", "../../DENN-dataset-samples/DATASET/d_06_01_2017/mnist.gz"),
-        (4000, 100, 100, 400, (-1, 1), "MNIST_norm", "../../DENN-dataset-samples/DATASET/d_06_01_2017/mnist_normalized.gz"),
-        (4000, 100, 100, 400, (-255, 255), "FASHION_MNIST", "../../DENN-dataset-samples/DATASET/d_06_01_2017/fashion-mnist.gz"),
-        (4000, 100, 100, 400, (-1, 1), "FASHION_MNIST_norm", "../../DENN-dataset-samples/DATASET/d_06_01_2017/fashion-mnist_normalized.gz"),
+        (2000, 10, 20, 123, (-150, 150), "QSAR", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/qsar.gz"),
+        (2000, 10, 20, 123, (-1, 1), "QSAR_norm", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/qsar_normalized.gz"),
+        (2000, 20, 40, 33, (-600, 600), "MAGIC", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/magic.gz"),
+        (2000, 20, 40, 33, (-1, 1), "MAGIC_norm", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/magic_normalized.gz"),
+        (2000, 20, 40, 384, (-70000, 70000), "GASS", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/gass.gz"),
+        (2000, 20, 40, 384, (-1, 1), "GASS_norm", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/gass_normalized.gz"),
+        (4000, 100, 100, 400, (-255, 255), "MNIST", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/mnist.gz"),
+        (4000, 100, 100, 400, (-1, 1), "MNIST_norm", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/mnist_normalized.gz"),
+        (4000, 100, 100, 400, (-255, 255), "FASHION_MNIST", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/fashion-mnist.gz"),
+        (4000, 100, 100, 400, (-1, 1), "FASHION_MNIST_norm", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/fashion-mnist_normalized.gz"),
     ]
 
     METHODS = [
