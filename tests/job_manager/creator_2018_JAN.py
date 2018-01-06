@@ -44,7 +44,7 @@ def main():
             ##### -> methods
             for method in METHODS:
                 cur_method = None
-                if method.find("L-SHADE"):
+                if method.find("L-SHADE") != -1:
                     cur_method = method.format(
                         batch_size=batch_size,
                         half_pop_x_tot_gen=int(population_size / 2) * tot_gen
