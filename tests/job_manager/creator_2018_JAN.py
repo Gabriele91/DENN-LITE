@@ -7,7 +7,7 @@ def main():
 
     CMD = "{exe} -t {tot_gen} -s {batch_step} -b {batch_size} -bo {batch_offset} -np {population_size} -f 0.5 -cr 0.9 -cmax {cmax} -cmin {cmin} -rmax {rmax} -rmin {rmin} -rc -1 -rd 0.001 -tp {num_threads} -i {dataset} -em {method} -m {mutation} -co {crossover} -ro bench -o results/{outname}"
 
-    OUTNAME = "{dataset_name}_{tot_gen}_{batch_step}_{population_size}_{method}_{mutation}_{crossover}_run{run}.json"
+    OUTNAME = "{dataset_name}_{tot_gen}_{batch_step}_{batch_offset}_{population_size}_{method}_{mutation}_{crossover}_run{run}.json"
 
     # tot_gen, batch_size, batch_step, population_size, clamp, dataset_name, dataset
     DATASETS = [
@@ -34,7 +34,7 @@ def main():
 
     CROSSOVERS = ["bin", "interm"]
 
-    OFFSETS = [0.5]
+    OFFSETS = [1.0, 0.5]
 
     out_names = []
 
@@ -64,6 +64,7 @@ def main():
                                     dataset_name=dataset_name,
                                     tot_gen=tot_gen,
                                     batch_step=batch_step,
+                                    batch_offset=str(offset_ratio).replace(".", ""),
                                     population_size=population_size,
                                     method=cur_method.split(" ")[0],
                                     mutation=mutation.split(" ")[0].replace("/", "-"),
