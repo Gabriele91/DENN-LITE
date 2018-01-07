@@ -418,7 +418,7 @@ namespace Denn
             [this](Arguments& args) -> bool { std::cout << ActivationFunctionFactory::names_of_activation_functions() << std::endl; return true; } 
         },
         ParameterInfo{
-            "Print list of nram's taks", { "--nram-task-list", "--task-list", "-nrtlist"  },
+            "Print list of nram's tasks", { "--nram-task-list", "--task-list", "-nrtlist"  },
             [this](Arguments& args) -> bool { std::cout << NRam::TaskFactory::names_of_tasks() << std::endl; return true; }
         },
         ParameterInfo{
