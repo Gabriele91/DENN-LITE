@@ -168,7 +168,7 @@ namespace Denn
 		ParameterInfo{
 			  m_f_cr_adapt
 			, { m_evolution_type,{ Variant("JADE") } }
-		    , "Auto adaptation factor of f and c parameters (JADE)"
+		    , "Auto adaptation factor of f and cr parameters (JADE)"
 		    , { "-afcr" }
 		},
 
