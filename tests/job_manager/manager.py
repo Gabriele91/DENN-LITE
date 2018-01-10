@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env python
 import csv
 from subprocess import Popen
 from os.path import exists
@@ -13,6 +13,7 @@ import sys
 
 
 def pretty_cmd(cmd):
+    """Print task command in a pretty way."""
     string = cmd[0]
     for elm in cmd[1:]:
         if elm[0] == "-" and elm[1].isalpha():
@@ -25,9 +26,12 @@ def pretty_cmd(cmd):
 
 
 def main():
+    """Manager main function."""
+
     if not exists("results") or not isdir("results"):
         mkdir("results")
-    logging.basicConfig(filename='./results/job-{}.log'.format(int(time())),level=logging.DEBUG)
+    logging.basicConfig(
+        filename='./results/job-{}.log'.format(int(time())), level=logging.DEBUG)
 
     logging.info("Open Job file")
     job_file = path.join(pardir, "jobs", 'job.csv')
@@ -53,8 +57,11 @@ def main():
                 end = time()
                 tot_time = end - start
                 time_sum += tot_time
-                logging.info("Job exited with code {} in {} sec.".format(return_code, end-start))
-                logging.info("Estimated time to complete jobs: {} sec.".format((time_sum / idx) * (len(jobs) - idx)))
+                logging.info("Job exited with code {} in {} sec.".format(
+                    return_code, end - start))
+                logging.info("Estimated time to complete jobs: {} sec.".format(
+                    (time_sum / idx) * (len(jobs) - idx)))
+
 
 if __name__ == '__main__':
     main()

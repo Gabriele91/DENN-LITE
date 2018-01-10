@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 CUR_TIME=$(python -c "from time import time;print(int(time()))")
 mv results results_$CUR_TIME 2>/dev/null ;

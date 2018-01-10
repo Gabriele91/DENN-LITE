@@ -144,7 +144,7 @@
     <ClCompile Include="source\DennPopulation.cpp" />
     <ClCompile Include="source\DennRuntimeOutputFactory.cpp" />
     <ClCompile Include="source\DennRuntimeOutputItems.cpp" />
-    <ClCompile Include="source\DennSerializaOutputFactory.cpp" />
+    <ClCompile Include="source\DennSerializeOutputFactory.cpp" />
     <ClCompile Include="source\DennSerializeOutputItems.cpp" />
     <ClCompile Include="source\DennTestSetStream.cpp" />
     <ClCompile Include="source\main.cpp" />
