@@ -337,31 +337,113 @@ namespace Denn
 	};
 	REGISTERED_EVOLUTION_METHOD(L_SHADEMethod, "L-SHADE")
 
-	#if 0
-	class SaDEMethod : public EvolutionMethod
+	template < typename T >
+	class MultiArmedBanditsBAIO
 	{
 	public:
+		using Action = T;
+		using ActionPtr = typename T::SPtr;
 
-		SaDEMethod(const DennAlgorithm& algorithm) : EvolutionMethod(algorithm)
+		MultiArmedBanditsBAIO()
+			: m_T(1)
+			, m_j(0)
+		{}
+
+		MultiArmedBanditsBAIO(const std::vector < ActionPtr >& actions)
+			: m_T(1)
+			, m_j(0)
+			, m_actions(actions)
+			, m_s(actions.size(), Scalar(1.0))
+			, m_n(actions.size(), size_t(1.0))
+			, m_cost(actions.size(), Scalar(std::numeric_limits<Scalar>::max()))
+		{}
+
+		void init(const std::vector < ActionPtr >& actions)
 		{
-			//m_epoct = parameters().m_epoct;
+			m_T = 1;
+			m_j = 0;
+			m_actions = actions;
+			m_s = std::vector < Scalar >(actions.size(), Scalar(1.0));
+			m_n = std::vector < size_t >(actions.size(), size_t(1.0));
+			m_cost = std::vector < Scalar >(actions.size(), Scalar(std::numeric_limits<Scalar>::max()));
+		}
+
+		ActionPtr get()
+		{
+			return m_actions[m_j];
+		}
+
+		Scalar& s()
+		{
+			return m_s[m_j];
+		}
+
+		Scalar& n()
+		{
+			return m_n[m_j];
+		}
+
+		void update(Scalar rewards = 0, size_t nT = 1)
+		{
+			//update
+			m_s[m_j] += rewards;
+			//update cost
+			m_cost[m_j] = (m_s[m_j] / m_n[m_j]) * std::sqrt(Scalar(2) * std::log(m_T + 1) / m_n[m_j]);
+			//update count
+			m_n[m_j] += 1;
+			m_T += nT;
+			//argmin
+			//MESSAGE("")
+			//MESSAGE("-----------------------------")
+			//MESSAGE("J = " << m_j)
+			//MESSAGE("rewards: " << rewards)
+			//MESSAGE("factor: " << std::sqrt( Scalar(2) * std::log(m_T) / m_n[m_j] ))
+			for (size_t j = 0; j != m_actions.size(); ++j)
+			{
+				if (m_cost[m_j] < m_cost[j]) m_j = j;
+				//MESSAGE("[" << j << "] =" << m_cost[j] << ", " << m_s[j] << ", " << m_n[j] )
+			}
+			//MESSAGE("J -> " << m_j)
+		}
+
+	protected:
+
+		size_t					  m_j;
+		size_t					  m_T;
+		std::vector < ActionPtr > m_actions;
+		std::vector < Scalar > 	  m_s;
+		std::vector < size_t > 	  m_n;
+		std::vector < Scalar > 	  m_cost;
+	};
+
+	class MAB_SHADEMethod : public EvolutionMethod
+	{
+
+	public:
+
+		MAB_SHADEMethod(const DennAlgorithm& algorithm) : EvolutionMethod(algorithm)
+		{
+			//init
+			m_archive_max_size = parameters().m_archive_size;
+			m_h = parameters().m_shade_h;
 		}
 
 		virtual void start() override
 		{
-			//reinit
-			for (size_t i = 0; i != 2; ++i)
-			{
-				m_nfalse[i] = 0;
-				m_ntesut[i] = 0;
-				m_p[i]	    = Scalar(0.5);
-			}
-			//restart counter
-			m_curr_epoct = m_epoct;
+			//H size
+			m_mu_f = std::vector<Scalar>(m_h, Scalar(0.5));
+			m_mu_cr = std::vector<Scalar>(m_h, Scalar(0.5));
+			m_k = 0;
+			m_pmin = Scalar(2) / Scalar(current_np());
+			//clear
+			m_archive.clear();
 			//create mutation/crossover
-			m_mutation[0] = MutationFactory::create("rand/1", m_algorithm);
-			m_mutation[1] = MutationFactory::create("current_to_best/1", m_algorithm);
-			m_crossover   = CrossoverFactory::create(m_algorithm.parameters().m_crossover_type, m_algorithm);
+			m_mutations.init
+			({
+			  MutationFactory::create("degl", m_algorithm)
+			, MutationFactory::create("curr_p_best", m_algorithm)
+			});
+			m_crossover = CrossoverFactory::create(parameters().m_crossover_type, m_algorithm);
 		}
 
 		virtual void start_a_gen_pass(DoubleBufferPopulation& dpopulation) override
@@ -371,55 +453,121 @@ namespace Denn
 
 		virtual void start_a_subgen_pass(DoubleBufferPopulation& dpopulation) override
 		{
-			//none
+			//sort parents
+			if (m_mutations.get()->required_sort()) dpopulation.parents().sort();
 		}
 
 		virtual void create_a_individual
 		(
-			  DoubleBufferPopulation& dpopulation
-			, size_t target
+			DoubleBufferPopulation& dpopulation
+			, size_t i_target
 			, Individual& i_output
 		)
-		override
+			override
 		{
-			//todo
+			//take tou
+			size_t tou_i = random(i_target).index_rand(m_mu_f.size());
+			//Compute F
+			Scalar v;
+			do v = random(i_target).cauchy(m_mu_f[tou_i], 0.1); while (v <= 0);
+			i_output.m_f = Denn::sature(v);
+			//Cr
+			i_output.m_cr = Denn::sature(random(i_target).normal(m_mu_cr[tou_i], 0.1));
+			//P
+			i_output.m_p = random(i_target).uniform(m_pmin, 0.2);
+			//call muation
+			(*m_mutations.get()) (dpopulation.parents(), i_target, i_output);
+			//call crossover
+			(*m_crossover)(dpopulation.parents(), i_target, i_output);
 		}
 
 		virtual	void selection(DoubleBufferPopulation& dpopulation) override
 		{
-			//todo
-			for (size_t i = 0; i != dpopulation.sons().size(); ++i)
+			//F
+			Scalar sum_f = 0;
+			Scalar sum_f2 = 0;
+			//CR
+			std::vector<Scalar> s_cr;
+			std::vector<Scalar> s_delta_f;
+			Scalar delta_f = 0;
+			Scalar sum_delta_f = 0;
+			size_t n_discarded = 0;
+			//pop
+			size_t np = current_np();
+			Scalar rewards = 0.0;
+			//
+			for (size_t i = 0; i != np; ++i)
 			{
 				Individual::SPtr father = dpopulation.parents()[i];
 				Individual::SPtr son = dpopulation.sons()[i];
-				if (father->m_eval >= son->m_eval)
+				if (loss_function_compare(son->m_eval, father->m_eval))
 				{
-					//todo
+					if (m_archive_max_size) m_archive.push_back(father->copy());
+					//max
+					rewards += std::abs(std::abs(son->m_eval) - std::abs(father->m_eval)) / std::abs(father->m_eval);
+					//F
+					sum_f += son->m_f;
+					sum_f2 += son->m_f * son->m_f;
+					//w_k (for mean of Scr)
+					delta_f = std::abs(std::abs(son->m_eval) - std::abs(father->m_eval));
+					s_delta_f.push_back(delta_f);
+					sum_delta_f += delta_f;
+					//Scr
+					s_cr.push_back(son->m_cr);
+					++n_discarded;
+					//SWAP
 					dpopulation.swap(i);
 				}
 			}
-			//todo
+			//safe compute muF and muCR 
+			if (n_discarded)
+			{
+				Scalar mean_w_scr = 0;
+				for (size_t k = 0; k != n_discarded; ++k)
+				{
+					//mean_ca(Scr) = sum_0-k( Scr_k   * w_k )
+					mean_w_scr += s_cr[k] * (s_delta_f[k] / sum_delta_f);
+				}
+				m_mu_cr[m_k] = mean_w_scr;
+				m_mu_f[m_k] = sum_f2 / sum_f;
+				m_k = (m_k + 1) % m_mu_f.size();
+			}
+			//reduce A
+			while (m_archive_max_size < m_archive.size())
+			{
+				m_archive[main_random().index_rand(m_archive.size())] = m_archive.last();
+				m_archive.pop_back();
+			}
+			//update MAB
+			m_mutations.s() += (n_discarded ? rewards / n_discarded : 0.0);
+		}
+
+		virtual void end_a_gen_pass(DoubleBufferPopulation& dpopulation) override
+		{
+			//update MAB, chose next
+			m_mutations.update();
 		}
 
 		virtual const VariantRef get_context_data() const override
 		{
-			//todo
-			return VariantRef();
+			return VariantRef(m_archive);
 		}
 
 	protected:
 
-		size_t			   m_epoct     { 50   };
-		size_t			   m_curr_epoct{ 50   };
-		size_t             m_nfalse[2] { 0, 0 };
-		size_t             m_ntesut[2] { 0, 0 };
-		Scalar			   m_p[2]      { Scalar(0.5), Scalar(0.5) };
-		Population	       m_archive;
-		Mutation::SPtr     m_mutation[2];
-		Crossover::SPtr    m_crossover;
+		size_t				m_h{ 0 };
+		size_t				m_k{ 0 };
+		size_t              m_archive_max_size{ false };
+		Scalar				m_pmin{ Scalar(0.0) };
+		std::vector<Scalar> m_mu_f;
+		std::vector<Scalar> m_mu_cr;
+		Population	        m_archive;
+		//Mutation::SPtr      m_mutation;
+		MultiArmedBanditsBAIO<Mutation>  m_mutations;
+		Crossover::SPtr                  m_crossover;
 
 	};
-	REGISTERED_EVOLUTION_METHOD(SaDEMethod, "SADE")
-	#endif 
+	REGISTERED_EVOLUTION_METHOD(MAB_SHADEMethod, "MAB-SHADE")
+
 
 }

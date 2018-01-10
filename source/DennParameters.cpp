@@ -162,8 +162,8 @@ namespace Denn
 				
 		ParameterInfo{
 			 m_archive_size
-			, { m_evolution_type,{ Variant("JADE"), Variant("SHADE"), Variant("L-SHADE") } }
-			, "Archive size (JADE/SHADE/L-SHADE)",{ "-as" }
+			, { m_evolution_type,{ Variant("JADE"), Variant("SHADE"), Variant("L-SHADE"), Variant("MAB-SHADE") } }
+			, "Archive size (JADE/SHADE/L-SHADE/MAB-SHADE)",{ "-as" }
 		},				
 		ParameterInfo{
 			  m_f_cr_adapt
@@ -174,8 +174,8 @@ namespace Denn
 
 		ParameterInfo{
 			  m_shade_h
-			, { m_evolution_type,{ Variant("SHADE"), Variant("L-SHADE") } }
-		    , "Size of archive of mu_f and mu_cr (SHADE/L-SHADE)",{ "-shah" }
+			, { m_evolution_type,{ Variant("SHADE"), Variant("L-SHADE"), Variant("MAB-SHADE") } }
+		    , "Size of archive of mu_f and mu_cr (SHADE/L-SHADE/MAB-SHADE)",{ "-shah" }
 		}, 
 
 		ParameterInfo{
