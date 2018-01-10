@@ -132,7 +132,7 @@ namespace CostFunction
 	}
 	
 	template < typename Matrix >
-	inline Matrix& softmax_col_samples(Matrix& inout_matrix)
+	inline Matrix& implace_softmax_col_samples(Matrix& inout_matrix)
 	{
 		const auto N = inout_matrix.cols();
 		// for each examples
@@ -151,7 +151,7 @@ namespace CostFunction
 	}
 
 	template < typename Matrix >
-	inline Matrix& softmax_row_samples(Matrix& inout_matrix)
+	inline Matrix& implace_softmax_row_samples(Matrix& inout_matrix)
 	{
 		const auto N = inout_matrix.rows();
 		// for each examples
@@ -167,8 +167,24 @@ namespace CostFunction
 		}
 		//return
 		return inout_matrix;
+	}	
+
+	template < typename Matrix >
+	inline Matrix softmax_col_samples(const Matrix& in)
+	{
+		Matrix in_softmax = in;
+		in_softmax = implace_softmax_col_samples(in_softmax);
+		return in_softmax;
 	}
-	
+
+	template < typename Matrix >
+	inline Matrix softmax_row_samples(const Matrix& in)
+	{
+		Matrix in_softmax = in;
+		in_softmax = implace_softmax_row_samples(in_softmax);
+		return in_softmax;
+	}
+
 	template < typename Matrix >
 	typename Matrix::Scalar softmax_cross_entropy(const Matrix& x, const Matrix& y)
 	{

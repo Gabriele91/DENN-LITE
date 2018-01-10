@@ -5,6 +5,7 @@
 #include "Denn.h"
 #include "DennNRam.h"
 #include "DennNRamTask.h"
+#include "DennDump.h"
 #include  <cctype>
 #include  <sstream>
 
@@ -290,8 +291,9 @@ namespace NRam
 		//Dataset
 		auto& in_mem = ds.features();
 		auto& out_mem = ds.labels();
+		auto& cost_mask = ds.mask();
 		//execute
-		return NRam::train(*m_context, nn, in_mem, out_mem);
+		return NRam::train(*m_context, nn, in_mem, out_mem, cost_mask);
 	}
 	//set context
 	Evaluation::SPtr NRamEval::set_context(const NRamLayout& context)
@@ -367,12 +369,12 @@ namespace NRam
         }
     }
 
-    Scalar calculate_sample_cost(Matrix &M, const RowVector &desired_mem)
+    Scalar calculate_sample_cost(Matrix &M, const RowVector &desired_mem, const Matrix& linear_mask)
     {
         Scalar s_cost = 0;
         for (size_t idx = 0; idx < M.rows(); ++idx)
         {
-            s_cost += Denn::CostFunction::safe_log(M(idx, Matrix::Index(desired_mem(idx))));
+            s_cost += Denn::CostFunction::safe_log(M(idx, Matrix::Index(desired_mem(idx)))) * linear_mask(0, idx);
         }
         return s_cost;
     }
@@ -390,6 +392,7 @@ namespace NRam
     , const NeuralNetwork& network
     , const Matrix& linear_in_mem
     , const Matrix& linear_out_mem
+    , const Matrix& linear_mask
     )
     {
 		//init by threads
@@ -430,7 +433,7 @@ namespace NRam
                 cum_prob_complete += p_t;
                 prob_incomplete *= 1 - fi;
                 //compute cost
-                sample_cost -= p_t * calculate_sample_cost(in_mem, linear_out_mem.row(s));
+                sample_cost -= p_t * calculate_sample_cost(in_mem, linear_out_mem.row(s), linear_mask);
 
             }
             //add to full "cost"

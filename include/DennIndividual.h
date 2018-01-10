@@ -9,7 +9,8 @@ namespace Denn
 	{
 	public:
 		//ref to individual
-		using SPtr = std::shared_ptr<Individual>;
+		using Scalar = Denn::Scalar;
+		using SPtr   = std::shared_ptr<Individual>;
 		//return ptr
 		SPtr get_ptr();
 		//shared copy
@@ -34,4 +35,11 @@ namespace Denn
 		const Layer& operator[](size_t i) const;
 		size_t size() const;
 	};
+
+	template <>
+	inline Individual::Scalar distance_pow2<Individual>(const Individual& a, const Individual& b)
+	{
+		return distance_pow2(a.m_network, b.m_network);
+	} 
+
 }

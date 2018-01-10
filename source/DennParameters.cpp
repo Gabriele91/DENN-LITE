@@ -47,7 +47,16 @@ namespace Denn
             m_seed, "Random generator seed", { "-sd"  }
         },
         ParameterInfo {
-            m_batch_size, "Batch size", { "--" + m_batch_size.name(), "-b" }
+            m_batch_size, "Batch size", { "-b" },
+            [this](Arguments& args) -> bool  
+            { 
+                //int value
+                m_batch_size = args.get_int();
+                //if m_batch_offset == 0 then offset = size
+                if(!(*m_batch_offset)) m_batch_offset = *m_batch_size;
+                //ok 
+                return true;
+            }
         },
         ParameterInfo {
             m_batch_offset, "Batch offset, how many records will be replaced in the next batch [<= batch size]", { "-bo" }
@@ -159,7 +168,7 @@ namespace Denn
 		ParameterInfo{
 			  m_f_cr_adapt
 			, { m_evolution_type,{ Variant("JADE") } }
-		    , "Auto adaptation factor of f and c parameters (JADE)"
+		    , "Auto adaptation factor of f and cr parameters (JADE)"
 		    , { "-afcr" }
 		},
 
@@ -346,22 +355,17 @@ namespace Denn
 			m_n_test, "Number of test of nram", { "-nrnt" }
 		},
 		ParameterInfo{
-			m_registers_values_extraction_type, "Type of extraction to apply to NRAM registers", { "-nrrvet" },
+			m_registers_values_extraction_type, "Type of extraction to apply to NRAM registers [\"zero\", \"defuzzyed\"]", { "-nrrvet" },
             [this](Arguments& args) -> bool
             {
                 std::string type = args.get_string();
-                if (type == "zero")
-                {
-                    m_registers_values_extraction_type = NRam::NRamLayout::RegisterExtaction::P_ZERO;
-                }
-                else if (type == "defuzzyed")
-                {
-                    m_registers_values_extraction_type = NRam::NRamLayout::RegisterExtaction::P_DEFUZZYED;
-                }
-                else
-                {
-                    return false;
-                }
+                //all lower case
+                std::transform(type.begin(),type.end(), type.begin(), ::tolower);
+                //testk
+                if (type != "zero" && type != "defuzzyed") return false;
+                //write
+                m_registers_values_extraction_type = type;
+                //Ok
                 return true;
             },
             { "string", std::vector<std::string> {"zero", "defuzzyed"} }
@@ -526,7 +530,7 @@ namespace Denn
 			//show choises
 			if (param.m_domain.m_type == ParameterDomain::CHOISE)
 			{
-				s_out << Dump::json_array<std::string>(param.m_domain.m_choises) << "\n";
+				s_out << " " << Dump::json_array<std::string>(param.m_domain.m_choises) << "\n";
 			}
 			else
 			{

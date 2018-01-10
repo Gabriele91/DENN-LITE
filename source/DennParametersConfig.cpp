@@ -396,6 +396,8 @@ namespace Denn
                 , ParameterInfo ower = ParameterInfo()
             )
             {
+                //it's close
+                if((*ptr) == '}') return true;
                 //command
                 std::string command = conf_name(ptr);
                 //test
@@ -503,6 +505,8 @@ namespace Denn
                 , const char*& ptr
             )
             {
+                //it's close
+                if((*ptr) == '}') return true;
                 //layer type
                 std::string layer_type = conf_name(ptr);
                 //type
@@ -558,7 +562,7 @@ namespace Denn
                 }
                 //jump spaces
                 conf_skip_space_and_comments(line, ptr);
-
+                return true;
             }
     };
     //////////////////////////////////////////////////////////////////////////////////

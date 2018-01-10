@@ -5,6 +5,7 @@
 #include "DennEvolutionMethod.h"
 #include "DennMutation.h"
 #include "DennCrossover.h"
+#include "DennCostFunction.h"
 namespace Denn
 {
 	class BACKPROPAGATIONMethod : public EvolutionMethod
@@ -26,13 +27,9 @@ namespace Denn
 		override
 		{
 			//apply on parent
-			dpopulation.parents()[i_target]->m_network.backpropagation_with_sgd
+			dpopulation.parents()[i_target]->m_network.backpropagation_gradient_descent
 			(
-				[](const Matrix& predict, const Matrix& y)
-				{
-					return predict - y;
-				}
-				, m_algorithm.current_batch().m_features
+				  m_algorithm.current_batch().m_features
 				, m_algorithm.current_batch().m_labels
 				, m_learning_rate
 				, m_regularize

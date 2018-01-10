@@ -386,6 +386,9 @@
     <ClCompile Include="source\DennParametersJson.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="source\DennInstance\DennDBTestInstance.cpp">
+      <Filter>Source\DennInstance</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="tests\run_bench.sh">

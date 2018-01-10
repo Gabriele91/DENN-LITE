@@ -8,6 +8,7 @@ class NeuralNetwork
 {
 public:
 	////////////////////////////////////////////////////////////////
+	using Scalar			 = Denn::Scalar;
 	using LayerList			 = std::vector < Layer::SPtr >;
 	using LayerIterator		 = typename LayerList::iterator;
 	using LayerConstIterator = typename LayerList::const_iterator;
@@ -37,22 +38,20 @@ public:
 	}
 	/////////////////////////////////////////////////////////////////////////
 	Matrix apply(const Matrix& input) const;
-	//backpropagation context
-    struct BackpropagationContext
-    {
-        virtual void clear() = 0;
-    };
     //pointer to context
-    using BackpropagationContext_sptr = std::shared_ptr<NeuralNetwork::BackpropagationContext>;
+	using BackpropagationDelta    = std::vector< Matrix >;
+	using BackpropagationGradient = std::vector< std::vector< Matrix > >;
+	using BackpropagationContext  = std::tuple< BackpropagationDelta, BackpropagationGradient >;
     //backpropagation
-	BackpropagationContext_sptr backpropagation_with_sgd
+	BackpropagationContext compute_gradient(const Matrix& input, const Matrix& labels, Scalar regular_param = Scalar(0.0)) const;
+	void gradient_descent(BackpropagationContext&& bpcontext, Scalar learn_rate = Scalar(0.5));
+	//compute_gradient + gradient_descent
+	void backpropagation_gradient_descent
     (
-		  std::function<Matrix(const Matrix& x, const Matrix& y)> loss_function
-		, const Matrix& input
-        , const Matrix& y
-		, const Scalar learn_rate              = Scalar(0.5)
-	    , const Scalar regular_param           = Scalar(1.0)
-        , BackpropagationContext_sptr context  = nullptr
+		  const Matrix& input
+        , const Matrix& labels
+		, const Scalar learn_rate    		 = Scalar(0.5)
+	    , const Scalar regular_param 		 = Scalar(1.0)
 	);
 	/////////////////////////////////////////////////////////////////////////
 	size_t size() const;
@@ -74,5 +73,27 @@ protected:
 	LayerList m_layers;
 
 };
+
+template <>
+inline NeuralNetwork::Scalar distance_pow2<NeuralNetwork>(const NeuralNetwork& a, const NeuralNetwork& b)
+{
+	//bad case
+	if(a.size()!=b.size()) return std::numeric_limits<Scalar>::infinity();
+	//value
+	Scalar dpow2 = 0.0;
+	//sum
+	for(size_t i = 0; i!=a.size() ; ++i) dpow2 += distance_pow2(a[i],b[i]);
+	//return 
+	return dpow2;
+} 
+
+NeuralNetwork::BackpropagationDelta operator + (  const NeuralNetwork::BackpropagationDelta& left
+											    , const NeuralNetwork::BackpropagationDelta& right);
+
+NeuralNetwork::BackpropagationGradient operator + (  const NeuralNetwork::BackpropagationGradient& left
+											       , const NeuralNetwork::BackpropagationGradient& right);
+
+NeuralNetwork::BackpropagationContext operator + (  const NeuralNetwork::BackpropagationContext& left
+											      , const NeuralNetwork::BackpropagationContext& right);
 
 }

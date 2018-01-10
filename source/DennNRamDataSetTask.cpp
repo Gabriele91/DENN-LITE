@@ -22,13 +22,17 @@ namespace NRam
 		auto test = task();
 
 		m_train.m_features = std::get<0>(train);
-		m_train.m_labels = std::get<1>(train);
+		m_train.m_labels   = std::get<1>(train);
+		m_train.m_mask     = std::get<2>(train);
 
 		m_validation.m_features = std::get<0>(validation);
-		m_validation.m_labels = std::get<1>(validation);
+		m_validation.m_labels   = std::get<1>(validation);
+		m_validation.m_mask     = std::get<2>(validation);
 
 		m_test.m_features = std::get<0>(test);
-		m_test.m_labels = std::get<1>(test);
+		m_test.m_labels   = std::get<1>(test);
+		m_test.m_mask     = std::get<2>(test);
+		
 		return true;
 	}
 	///////////////////////////////////////////////////////////////////
@@ -82,6 +86,16 @@ namespace NRam
 		auto& d_out = (*((DataSetScalar*)& t_out));
 		d_out = m_train;
 		return true;
+	}
+
+	size_t DataSetTask::number_of_batch_read() const 
+	{
+		return 1;
+	}
+
+	void DataSetTask::clear_batch_counter()
+	{
+		//none
 	}
 } 
 }

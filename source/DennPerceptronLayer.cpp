@@ -45,55 +45,60 @@ namespace Denn
 		if (m_activation_function) return m_activation_function(layer_output);
 		else                   return layer_output;
 	}
-	Matrix PerceptronLayer::feedforward(const Matrix& input, Matrix& ff_out)
-	{		
+	//////////////////////////////////////////////////
+	Matrix PerceptronLayer::feedforward(const Matrix& input, Matrix& l_out)
+	{
 		//get output
-		ff_out = (input * m_weights).rowwise() + Eigen::Map<RowVector>(m_baias.data(), m_baias.cols()*m_baias.rows());
+		l_out = (input * m_weights).rowwise() + Eigen::Map<RowVector>(m_baias.data(), m_baias.cols()*m_baias.rows());
 		//activation function?
 		if (m_activation_function)
 		{
-			Matrix out_matrix(ff_out);
+			Matrix out_matrix(l_out);
             m_activation_function(out_matrix);
 			return out_matrix;
 		} 
-		else
-		{ 
-			return ff_out; 
-		}
+		//return the same
+		return l_out; 
 	}
-    Matrix PerceptronLayer::backpropagate_delta(const Matrix& bp_delta, const Matrix& ff_out)
+	Matrix PerceptronLayer::backpropagate_delta(const Matrix& loss)
     {
+		Matrix delta = m_weights * loss;
+		return delta;
+    }
+    Matrix PerceptronLayer::backpropagate_derive(const Matrix& delta, const Matrix& l_out)
+    {
+		#define CP(x,y) (x).cwiseProduct(y)
+		#define CAN_DERIVE (m_activation_function && m_activation_function.exists_function_derivate())
         //////////////////////////////////////////////////////////////////////
-        if (m_activation_function.exists_function_derivate())
+        if (CAN_DERIVE)
         {
-            //derivate of active function
-            Matrix d_f(ff_out);
-            d_f = m_activation_function.derive(d_f); // g := D_f(x))
-            return d_f.transpose().cwiseProduct(m_weights * bp_delta);
+			//copy x
+            Matrix x_(l_out); 
+            //derivate of active function x':= D_f(x)
+			x_ = m_activation_function.derive(x_); //inplace
+			// x' * delta
+            return CP(x_.transpose(), delta);
         }
-        else
-        {
-            //f(x) = x, g := D_f(x) => 1.0
-            return m_weights * bp_delta;
-        } 
+		return delta;
         //////////////////////////////////////////////////////////////////////
     }
-    std::vector<Matrix> PerceptronLayer::backpropagate_gradient(
-          const Matrix& delta
-        , const Matrix& lout
-        , size_t input_samples
-        , Scalar regular_param
-    )
+    std::vector<Matrix> PerceptronLayer::backpropagate_gradient(const Matrix& delta, const Matrix& l_in, Scalar regular)
     {
-        Scalar inv_input_samples = Scalar(1.0) / Scalar(input_samples);
-        // add regularization to weights, bias weights are not regularized
-        Matrix dEdW = ((delta * lout).transpose()) * inv_input_samples;
-        Matrix dEdb = (delta.transpose().colwise().sum()) * inv_input_samples;
         //add regular factor
-        if (regular_param != Scalar(0.0)) dEdW += (regular_param * inv_input_samples)*m_weights;
+        if (regular != Scalar(0.0))
+		{
+			return std::vector<Matrix>
+			{
+				(delta * l_in).transpose() + regular * m_weights,
+				delta.transpose().colwise().sum()
+			};
+		} 
         //return
-        return std::vector<Matrix>{dEdW /* this[0] = w */, dEdb /* this[1] = b */};
-        //J = Scalar(0.5) * lambda * m_weights.array().square().sum() / Scalar(input_samples);
+        return std::vector<Matrix>
+		{
+			(delta * l_in).transpose(),
+			delta.transpose().colwise().sum()
+		};
     }
 	//////////////////////////////////////////////////
 	ActivationFunction PerceptronLayer::get_activation_function() 

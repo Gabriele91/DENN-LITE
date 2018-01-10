@@ -76,12 +76,12 @@ namespace Denn
 		ReadOnly<Scalar>					   m_regularize			   { "regularize", Scalar(0.0) };
 		ReadOnly< std::vector<unsigned int> > m_hidden_layers         { "hidden_layers"         /* , none */ };
 		ReadOnly< std::vector<std::string> >  m_activation_functions      { "activation_functions"      /* , none */ };
-		ReadOnly< std::string >               m_output_activation_function{ "output_activation_function" ,  "softmax" };
+		ReadOnly< std::string >               m_output_activation_function{ "output_activation_function" ,  "linear" };
 		//nram attribute
-		ReadOnly< size_t >					   m_max_int			   { "max_int"                  , size_t(10) };
-		ReadOnly< size_t >					   m_n_registers		   { "n_registers"              , size_t(4) };
-		ReadOnly< size_t >					   m_time_steps			   { "time_steps"               , size_t(1) };
-		ReadOnly< size_t >					   m_registers_values_extraction_type   { "registers_values_extraction_type", "zero" };
+		ReadOnly< size_t >					  m_max_int			       { "max_int"                  , size_t(10) };
+		ReadOnly< size_t >					  m_n_registers		       { "n_registers"              , size_t(4) };
+		ReadOnly< size_t >					  m_time_steps			   { "time_steps"               , size_t(1) };
+		ReadOnly< std::string >				  m_registers_values_extraction_type { "registers_values_extraction_type", "zero" };
 		ReadOnly< std::string >               m_task				   { "task"                  /* , none */ };
 		ReadOnly< std::vector<std::string> >  m_gates				   { "gates"                 /* , none */ };
 		//nram test 

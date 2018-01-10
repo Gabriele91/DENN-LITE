@@ -29,11 +29,21 @@ namespace Denn
 		std::uniform_int_distribution<int> distribution(0, max-1);
 		return distribution(m_generator);
 	}
+	int Random::irand(int min, int max)
+	{
+		std::uniform_int_distribution<int> distribution(min, max-1);
+		return distribution(m_generator);
+	}
 
 	//random unsigned integer in [0,size)
 	unsigned int Random::uirand(unsigned int max)
 	{
 		std::uniform_int_distribution<unsigned int> distribution(0, max-1);
+		return distribution(m_generator);
+	}
+	unsigned int Random::uirand(unsigned int min,unsigned int max)
+	{
+		std::uniform_int_distribution<unsigned int> distribution(min, max-1);
 		return distribution(m_generator);
 	}
 

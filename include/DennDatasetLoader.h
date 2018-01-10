@@ -76,6 +76,10 @@ namespace Denn
 
 		virtual bool read_batch(DataSet& t_out, bool loop = true) = 0;
 
+		virtual size_t number_of_batch_read() const = 0;
+
+		virtual void clear_batch_counter() = 0;
+
 	};
 
 
@@ -93,34 +97,38 @@ namespace Denn
 			open(path_file);
 		}
 
-		bool open(const std::string& path_file)
+		bool open(const std::string& path_file) override
 		{
 			if (m_file.open(path_file, "rb"))
 			{
+				//read header
 				m_file.read(&m_header, sizeof(DataSetHeader), 1);
+				//start to read batch
+				m_n_batch_read = 0;
+				//ok
 				return true;
 			}
 			return false;
 		}
 
-		bool is_open() const
+		bool is_open() const override
 		{
 			return m_file.is_open();
 		}
 
-		const DataSetHeader& get_main_header_info() const
+		const DataSetHeader& get_main_header_info() const override
 		{
 			return m_header;
 		}
 
-		const DataSetTrainHeader& get_last_batch_info() const
+		const DataSetTrainHeader& get_last_batch_info() const override
 		{
 			return m_train_header;
 		}
 
 		///////////////////////////////////////////////////////////////////
 		// READ TEST SET
-		bool read_test(DataSet& t_out)
+		bool read_test(DataSet& t_out) override
 		{
 			if (is_open())
 			{
@@ -142,7 +150,7 @@ namespace Denn
 
 		///////////////////////////////////////////////////////////////////
 		// READ VALIDATION SET
-		bool read_validation(DataSet& t_out)
+		bool read_validation(DataSet& t_out) override
 		{
 			if (is_open())
 			{
@@ -164,7 +172,7 @@ namespace Denn
 
 		///////////////////////////////////////////////////////////////////
 		// READ TRAINING SET
-		bool start_read_batch()
+		bool start_read_batch() override
 		{
 			if (is_open())
 			{
@@ -176,7 +184,7 @@ namespace Denn
 			return false;
 		}
 
-		bool read_batch(DataSet& t_out, bool loop = true)
+		bool read_batch(DataSet& t_out, bool loop = true) override
 		{
 			if (is_open())
 			{
@@ -184,6 +192,8 @@ namespace Denn
 				m_file.read(&m_train_header, sizeof(DataSetTrainHeader), 1);
 				//read data
 				bool status = read(t_out, m_train_header.m_n_row);
+				//inc count 
+				++m_n_batch_read;
 				//if loop enable and batch is the last
 				if (loop
 					&& int(m_train_header.m_batch_id + 1) == m_header.m_n_batch)
@@ -194,6 +204,16 @@ namespace Denn
 				return status;
 			}
 			return false;
+		}
+		//number of batch read
+		size_t number_of_batch_read() const override
+		{
+			return m_n_batch_read;
+		}
+
+		void clear_batch_counter() override
+		{
+			m_n_batch_read = 0;
 		}
 		///////////////////////////////////////////////////////////////////
 
@@ -323,6 +343,7 @@ namespace Denn
 		}
 
 		IO m_file;
+		size_t 					m_n_batch_read;
 		DataSetHeader           m_header;
 		DataSetTestHeader       m_test_header;
 		DataSetValidationHeader m_val_header;
