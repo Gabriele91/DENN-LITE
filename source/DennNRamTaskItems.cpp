@@ -81,7 +81,7 @@ namespace NRam
 			Matrix out_mem = in_mem;
 			out_mem.block(0, 0, out_mem.rows(), out_mem.cols() - 1) \
 				= out_mem.block(0, 0, out_mem.rows(), out_mem.cols() - 1)
-						.unaryExpr([&](Scalar x) -> Scalar { return Scalar(positive_mod((unsigned long)x + 1, m_max_int)); });
+						.unaryExpr([&](Scalar x) -> Scalar { return Scalar(positive_mod<size_t>((unsigned long)x + 1, m_max_int)); });
 			
 			return std::make_tuple(in_mem, out_mem, Task::init_mask(), Task::init_regs());
 		}
@@ -771,7 +771,7 @@ namespace NRam
 			list_elements_a_plus_b = list_elements_a + list_elements_b;
 			for (Matrix::Index r = 0; r < list_elements_a_plus_b.rows(); ++r)
 				for (Matrix::Index c = 0; c < list_elements_a_plus_b.cols(); ++c)
-					list_elements_a_plus_b(r, c) = Scalar(positive_mod((unsigned long)list_elements_a_plus_b(r, c), m_max_int));
+					list_elements_a_plus_b(r, c) = Scalar(positive_mod<size_t>((size_t)list_elements_a_plus_b(r, c), m_max_int));
 
 			// Add data to starting NRAM memory
 			in_mem.col(0) = ColVector::Constant(in_mem.rows(), 3); // Starting point of list A
@@ -835,7 +835,7 @@ namespace NRam
 			out_mem.col(2) = in_mem.block(0, 3, in_mem.rows(), arrays_memory_size) * 
 				in_mem.block(0, 3 + arrays_memory_size + 1, in_mem.rows(), arrays_memory_size).transpose();
 			for (Matrix::Index r = 0; r < out_mem.rows(); ++r)
-				out_mem(r, 2) = Scalar(positive_mod((unsigned long)out_mem(r, 2), m_max_int));
+				out_mem(r, 2) = Scalar(positive_mod<size_t>((size_t)out_mem(r, 2), m_max_int));
 
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
 			Matrix mask = Task::init_mask(); //[3, max_int - 1]
