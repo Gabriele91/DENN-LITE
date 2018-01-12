@@ -426,6 +426,11 @@ namespace Denn
 			//init
 			m_archive_max_size = parameters().m_archive_size;
 			m_h = parameters().m_shade_h;
+			//get mutations
+			for(const std::string& mut_name : parameters().m_mutations_list_type.get()) 
+			{
+				m_mutations_list.push_back(MutationFactory::create(mut_name, m_algorithm));
+			}
 		}
 
 		virtual void start() override
@@ -438,11 +443,7 @@ namespace Denn
 			//clear
 			m_archive.clear();
 			//create mutation/crossover
-			m_mutations.init
-			({
-			  MutationFactory::create("degl", m_algorithm)
-			, MutationFactory::create("curr_p_best", m_algorithm)
-			});
+			m_mutations.init(m_mutations_list);
 			m_crossover = CrossoverFactory::create(parameters().m_crossover_type, m_algorithm);
 		}
 
@@ -562,7 +563,7 @@ namespace Denn
 		std::vector<Scalar> m_mu_f;
 		std::vector<Scalar> m_mu_cr;
 		Population	        m_archive;
-		//Mutation::SPtr      m_mutation;
+		std::vector<Mutation::SPtr>      m_mutations_list;
 		MultiArmedBanditsBAIO<Mutation>  m_mutations;
 		Crossover::SPtr                  m_crossover;
 

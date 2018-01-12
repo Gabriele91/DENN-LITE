@@ -116,6 +116,31 @@ namespace Denn
             , { "string", MutationFactory::list_of_mutations() }
         },
         ParameterInfo {
+              m_mutations_list_type
+		    , { m_evolution_type, { Variant("MAB-SHADE") } }
+            , "List of MAB-SHADE mutations"
+            , { "-ml"  }
+            , [this](Arguments& args) -> bool
+              {
+                  //success flag
+                  bool success = true;
+                  //for all values
+                  while(!args.end_vals() && success)
+                  {
+                     std::string str_m_type = args.get_string();
+                     //all lower case
+                     std::transform(str_m_type.begin(),str_m_type.end(), str_m_type.begin(), ::tolower);
+                     //add
+                     m_mutations_list_type.get().push_back(str_m_type);
+                     //ok
+                     success &= MutationFactory::exists(m_mutations_list_type.get().back());
+                  }
+                  //status
+                  return success;
+              }
+            , { "list(string)", MutationFactory::list_of_mutations() }
+        },
+        ParameterInfo {
               m_crossover_type
 			, { m_evolution_type }
             , "Type of DE crossover"
