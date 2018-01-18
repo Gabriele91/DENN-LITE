@@ -10,6 +10,9 @@
 #remove caffe2 
 [lib]caffe2.a
 caffe2/**
+dips/include/caffe2/**
+dips/lib/macOS/libcaffe2.a
+dips/lib/linux/libcaffe2.a
 
 #remove cmake files
 cmake-build**/**
