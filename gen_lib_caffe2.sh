@@ -102,9 +102,6 @@ fi
 #back
 cd ../
 #build dips dir
-mkdir -p $TOP/dips/
-mkdir -p $TOP/dips/lib/
-mkdir -p $TOP/dips/include/
 mkdir -p $TOP/dips/lib/linux/
 mkdir -p $TOP/dips/lib/macOS/
 mkdir -p $TOP/dips/include/caffe2/
