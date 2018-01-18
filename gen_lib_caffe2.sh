@@ -99,14 +99,18 @@ else
   make "-j$(nproc)"
 fi
 
-#back
-cd ../
+# #back
+cd ../../
+
 #build dips dir
 mkdir -p $TOP/dips/lib/linux/
 mkdir -p $TOP/dips/lib/macOS/
-mkdir -p $TOP/dips/include/caffe2/
-mkdir -p $TOP/dips/include/caffe2/core/
-
+#build include dir
+SUBDIRS=$(find $TOP/caffe2/caffe2 -type d)
+for dir in $SUBDIRS
+do
+	mkdir -p $(echo $dir | sed -e 's/caffe2\/caffe2/dips\/include\/caffe2/g')
+done
 #copy
 #make
 if [ "$(uname)" == 'Darwin' ]; then
@@ -114,8 +118,13 @@ if [ "$(uname)" == 'Darwin' ]; then
 else
   find $TOP/caffe2/build/lib/ -name \*.a -exec cp {} $TOP/dips/lib/linux/ \;
 fi
+#copy headers
+SUBFILES=$(find $TOP/caffe2/caffe2 -type f -name \*.h)
+for header in $SUBFILES
+do
+	cp $header $(echo $header | sed -e 's/caffe2\/caffe2/dips\/include\/caffe2/g')
+done
 #copy
-find $TOP/caffe2/caffe2/core/ -name \*.h -exec cp {} $TOP/dips/include/caffe2/core \;
 
 #delete caffe
 yes | rm -R caffe2
