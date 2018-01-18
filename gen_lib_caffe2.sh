@@ -103,9 +103,13 @@ fi
 cd ../
 #build dips dir
 mkdir -p $TOP/dips/
-mkdir -p $TOP/dips/include
+mkdir -p $TOP/dips/lib/
+mkdir -p $TOP/dips/include/
 mkdir -p $TOP/dips/lib/linux/
 mkdir -p $TOP/dips/lib/macOS/
+mkdir -p $TOP/dips/include/caffe2/
+mkdir -p $TOP/dips/include/caffe2/core/
+
 #copy
 #make
 if [ "$(uname)" == 'Darwin' ]; then
@@ -114,7 +118,7 @@ else
   find $TOP/caffe2/build/lib/ -name \*.a -exec cp {} $TOP/dips/lib/linux/ \;
 fi
 #copy
-find $TOP/caffe2/caffe2/core/ -name \*.h -exec cp {} $TOP/dips/include/ \;
+find $TOP/caffe2/caffe2/core/ -name \*.h -exec cp {} $TOP/dips/include/caffe2/core \;
 
 #delete caffe
 yes | rm -R caffe2
