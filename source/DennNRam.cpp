@@ -379,6 +379,7 @@ namespace NRam
         return s_cost;
     }
 
+
     static Matrix avg(const Matrix& regs, const Matrix& in)
     {
         return regs.transpose() * in;
@@ -411,30 +412,32 @@ namespace NRam
             //In mem fuzzy
 			in_mem = fuzzy_encode(linear_in_mem.row(s));
             //Cost helper
-            Scalar p_t = Scalar(1.0);
+            Scalar p_t = Scalar(0.0);
             Scalar prob_incomplete = Scalar(1.0);
             Scalar cum_prob_complete = Scalar(0.0);
             Scalar sample_cost = Scalar(0.0);
-
+            bool   stop = false;
             //for all timestep, run on s
-            for (size_t timestep = 0; timestep < context.m_timesteps; timestep++)
+            for (size_t timestep = 0; !stop && timestep < context.m_timesteps; timestep++)
             {
 				//NN
 				out = network.apply(get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
                 //execute circuit
                 Scalar fi = run_circuit(context, out, regs, in_mem);
-
-                //compute exit state
-                if (timestep == context.m_timesteps - 1)
-                    p_t = 1 - cum_prob_complete;
-                else
-                    p_t = fi * prob_incomplete;
-                //
+                //up info
+                prob_incomplete *= Scalar(1.0) - fi;
+                //exit case
+                if(prob_incomplete < (Scalar(1.0) / context.m_max_int) / 2
+                || timestep == context.m_timesteps - 1)
+                {
+                    stop = true;
+                }
+                //compute cum_prob_complete & p_t
+                if (stop)  p_t = 1 - cum_prob_complete;
+                else       p_t = fi * prob_incomplete;
                 cum_prob_complete += p_t;
-                prob_incomplete *= 1 - fi;
                 //compute cost
                 sample_cost -= p_t * calculate_sample_cost(in_mem, linear_out_mem.row(s), linear_mask);
-
             }
             //add to full "cost"
             full_cost += sample_cost;
@@ -543,12 +546,15 @@ namespace NRam
             regs.col(0).fill(1);
             //In mem fazzy
             Matrix in_mem = fuzzy_encode(linear_in_mem.row(s));
-            //Cost helper
-            Scalar p_t = Scalar(1.0);
             //debugger
             ExecutionDebug execution_debug(context);
+            //determinate end of execution
+            Scalar p_t = Scalar(0.0);
+            Scalar prob_incomplete = Scalar(1.0);
+            Scalar cum_prob_complete = Scalar(0.0);
+            bool   stop = true;
             //for all timestep, run on s
-            for (size_t timestep = 0; timestep < context.m_timesteps; timestep++)
+            for (size_t timestep = 0; !stop && timestep < context.m_timesteps; timestep++)
             {
                 //new step
                 execution_debug.push_step();
@@ -556,6 +562,18 @@ namespace NRam
                 Matrix out = network.apply(get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
                 //execute circuit
                 Scalar fi = run_circuit(context, out, regs, in_mem, execution_debug);
+                //up info
+                prob_incomplete *= Scalar(1.0) - fi;
+                //exit case
+                if(prob_incomplete < ((Scalar(1.0) / context.m_max_int) / 2)
+                || timestep == context.m_timesteps - 1)
+                {
+                    stop = true;
+                }
+                //compute cum_prob_complete 
+                if (stop)  p_t = 1 - cum_prob_complete;
+                else       p_t = fi * prob_incomplete;
+                cum_prob_complete += p_t;
             }
             // Add to connections sample history
             samples_debug.push_back(execution_debug);
