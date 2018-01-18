@@ -104,14 +104,14 @@ cd ../
 #build dips dir
 mkdir -p $TOP/dips/
 mkdir -p $TOP/dips/include
-mkdir -p $TOP/dips/linux/
-mkdir -p $TOP/dips/macOS/
+mkdir -p $TOP/dips/lib/linux/
+mkdir -p $TOP/dips/lib/macOS/
 #copy
 #make
 if [ "$(uname)" == 'Darwin' ]; then
-  find $TOP/caffe2/build/lib/ -name \*.a -exec cp {} $TOP/dips/macOS/ \;
+  find $TOP/caffe2/build/lib/ -name \*.a -exec cp {} $TOP/dips/lib/macOS/ \;
 else
-  find $TOP/caffe2/build/lib/ -name \*.a -exec cp {} $TOP/dips/linux/ \;
+  find $TOP/caffe2/build/lib/ -name \*.a -exec cp {} $TOP/dips/lib/linux/ \;
 fi
 #copy
 find $TOP/caffe2/caffe2/core/ -name \*.h -exec cp {} $TOP/dips/include/ \;
