@@ -122,7 +122,13 @@ fi
 SUBFILES=$(find $TOP/caffe2/caffe2 -type f -name \*.h)
 for header in $SUBFILES
 do
-	cp $header $(echo $header | sed -e 's/caffe2\/caffe2/dips\/include\/caffe2/g')
+  cp $header $(echo $header | sed -e 's/caffe2\/caffe2/dips\/include\/caffe2/g')
+done
+#copy proto headers
+SUBFILES=$(find $TOP/caffe2/caffe2 -type f -name \*.proto)
+for header in $SUBFILES
+do
+  cp $header $(echo $header | sed -e 's/caffe2\/caffe2/dips\/include\/caffe2/g')
 done
 #copy
 
