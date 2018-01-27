@@ -209,13 +209,17 @@ namespace NRam
 		{
 			// Initialize starting memory
 			Matrix in_mem(m_batch_size, m_max_int);
-			in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int)); });
+			in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int - 1)); });
 
 			// Set pointers of elements to swap
 			for (Matrix::Index r = 0; r < in_mem.rows(); ++r)
 			{
 				in_mem(r, 0) = m_random.uirand(2, m_max_int - 2); 
 				in_mem(r, 1) = m_random.uirand(in_mem(r, 0) + 1, m_max_int - 1); 
+
+				if (Matrix::Index(in_mem(r, Matrix::Index(in_mem(r, 0)))) == 
+					Matrix::Index(in_mem(r, Matrix::Index(in_mem(r, 1)))))
+					in_mem(r, Matrix::Index(in_mem(r, 1))) += Scalar(1.0);
 			}
 			
 			// Set NULL values to the last column as terminator
