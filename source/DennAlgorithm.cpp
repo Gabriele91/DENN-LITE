@@ -19,6 +19,8 @@ namespace Denn
 	, m_dataset_loader(&instance.dataset_loader())
 	, m_dataset_batch(*this, &instance.dataset_loader())
 	, m_params(params)
+	, m_current_global_gen(0)
+	, m_current_sub_gen(0)
 	{
 	}
 
@@ -38,6 +40,9 @@ namespace Denn
 		m_clamp_function = gen_clamp_func();
 		//clear random engines
 		m_population_random.clear();
+		//init gen info
+		m_current_global_gen = 0;
+		m_current_sub_gen = 0;
 		//true
 		return success;
 	}
@@ -81,6 +86,9 @@ namespace Denn
 		//global info
 		const size_t n_global_pass = ((size_t)m_params.m_generations / (size_t)m_params.m_sub_gens);
 		const size_t n_sub_pass = m_params.m_sub_gens;
+		//init cunter
+		m_current_global_gen = 0;
+		m_current_sub_gen = 0;
 		//restart init
 		m_restart_ctx = RestartContext();
 		//best
@@ -95,6 +103,9 @@ namespace Denn
 		//main loop
 		for (size_t pass = 0; pass != n_global_pass; ++pass)
 		{
+			//save global pass
+			m_current_global_gen = pass;
+			//sub pass
 			execute_a_pass(pass, n_sub_pass);
 			//next
 			next_batch();
@@ -232,6 +243,9 @@ namespace Denn
 		//sub pass
 		for (size_t sub_pass = 0; sub_pass != n_sub_pass; ++sub_pass)
 		{
+			//save
+			m_current_sub_gen = sub_pass;
+			//execute
 			execute_a_sub_pass(pass, sub_pass);
 		}
 		//end pass

@@ -215,6 +215,21 @@ public:
 			;
 	}
 
+	size_t current_generation() const 
+	{  
+		return (*parameters().m_sub_gens) * current_global_generation() + current_sub_generation();
+	}
+
+	size_t current_global_generation() const
+	{
+		return m_current_global_gen;
+	}
+	
+	size_t current_sub_generation() const
+	{
+		return m_current_sub_gen;
+	}
+
 protected:
 	//init
 	bool init();
@@ -273,6 +288,9 @@ protected:
 	//params of DE
 	Parameters 		      m_params;
 	EvolutionMethod::SPtr m_e_method;
+	//generation info
+	size_t m_current_sub_gen;
+	size_t m_current_global_gen;
 	//function for DE
 	ClampFunction		  m_clamp_function;
 };
