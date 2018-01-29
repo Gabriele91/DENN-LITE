@@ -230,6 +230,11 @@ public:
 		return m_current_sub_gen;
 	}
 
+	void stop_execution() const 
+	{
+		m_execution = false;
+	}
+
 protected:
 	//init
 	bool init();
@@ -291,6 +296,8 @@ protected:
 	//generation info
 	size_t m_current_sub_gen;
 	size_t m_current_global_gen;
+	//execution info
+	mutable std::atomic< bool > m_execution;
 	//function for DE
 	ClampFunction		  m_clamp_function;
 };

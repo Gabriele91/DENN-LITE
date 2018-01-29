@@ -21,6 +21,7 @@ namespace Denn
 	, m_params(params)
 	, m_current_global_gen(0)
 	, m_current_sub_gen(0)
+    , m_execution(true)
 	{
 	}
 
@@ -43,6 +44,7 @@ namespace Denn
 		//init gen info
 		m_current_global_gen = 0;
 		m_current_sub_gen = 0;
+		m_execution = true;
 		//true
 		return success;
 	}
@@ -89,6 +91,7 @@ namespace Denn
 		//init cunter
 		m_current_global_gen = 0;
 		m_current_sub_gen = 0;
+		m_execution = true;
 		//restart init
 		m_restart_ctx = RestartContext();
 		//best
@@ -101,7 +104,7 @@ namespace Denn
 		//start output
 		if (m_output) m_output->start();
 		//main loop
-		for (size_t pass = 0; pass != n_global_pass; ++pass)
+		for (size_t pass = 0; pass != n_global_pass && m_execution; ++pass)
 		{
 			//save global pass
 			m_current_global_gen = pass;
@@ -241,7 +244,7 @@ namespace Denn
 		//start pass
 		m_e_method->start_a_gen_pass(m_population);
 		//sub pass
-		for (size_t sub_pass = 0; sub_pass != n_sub_pass; ++sub_pass)
+		for (size_t sub_pass = 0; sub_pass != n_sub_pass && m_execution; ++sub_pass)
 		{
 			//save
 			m_current_sub_gen = sub_pass;
