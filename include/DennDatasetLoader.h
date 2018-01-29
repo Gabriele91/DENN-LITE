@@ -46,8 +46,9 @@ namespace Denn
 		unsigned int m_batch_id;
 		unsigned int m_n_row;
 	});
-
-
+	//Denn
+	class DennAlgorithm;
+	//Abstract loader
 	class DataSetLoader
 	{
 	public:
@@ -64,17 +65,17 @@ namespace Denn
 
 		///////////////////////////////////////////////////////////////////
 		// READ TEST SET
-		virtual bool read_test(DataSet& t_out) = 0;
+		virtual bool read_test(const DennAlgorithm& algorithm, DataSet& t_out) = 0;
 
 		///////////////////////////////////////////////////////////////////
 		// READ VALIDATION SET
-		virtual bool read_validation(DataSet& t_out) = 0;
+		virtual bool read_validation(const DennAlgorithm& algorithm, DataSet& t_out) = 0;
 
 		///////////////////////////////////////////////////////////////////
 		// READ TRAINING SET
 		virtual bool start_read_batch() = 0;
 
-		virtual bool read_batch(DataSet& t_out, bool loop = true) = 0;
+		virtual bool read_batch(const DennAlgorithm& algorithm, DataSet& t_out, bool loop = true) = 0;
 
 		virtual size_t number_of_batch_read() const = 0;
 
@@ -128,7 +129,7 @@ namespace Denn
 
 		///////////////////////////////////////////////////////////////////
 		// READ TEST SET
-		bool read_test(DataSet& t_out) override
+		bool read_test(const DennAlgorithm& algorithm, DataSet& t_out) override
 		{
 			if (is_open())
 			{
@@ -150,7 +151,7 @@ namespace Denn
 
 		///////////////////////////////////////////////////////////////////
 		// READ VALIDATION SET
-		bool read_validation(DataSet& t_out) override
+		bool read_validation(const DennAlgorithm& algorithm, DataSet& t_out) override
 		{
 			if (is_open())
 			{
@@ -184,7 +185,7 @@ namespace Denn
 			return false;
 		}
 
-		bool read_batch(DataSet& t_out, bool loop = true) override
+		bool read_batch(const DennAlgorithm& algorithm, DataSet& t_out, bool loop = true) override
 		{
 			if (is_open())
 			{

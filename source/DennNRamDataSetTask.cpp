@@ -1,4 +1,5 @@
 #include "DennNRamDatasetTask.h"
+#include "DennAlgorithm.h"
 
 namespace Denn
 {
@@ -58,7 +59,7 @@ namespace NRam
 
 	///////////////////////////////////////////////////////////////////
 	// READ TEST SET
-	bool DataSetTask::read_test(DataSet& t_out) 
+	bool DataSetTask::read_test(const DennAlgorithm& algorithm, DataSet& t_out)
 	{
 		auto& d_out = (*((DataSetScalar*)& t_out));
 		d_out = m_test;
@@ -67,7 +68,7 @@ namespace NRam
 
 	///////////////////////////////////////////////////////////////////
 	// READ VALIDATION SET
-	bool DataSetTask::read_validation(DataSet& t_out) 
+	bool DataSetTask::read_validation(const DennAlgorithm& algorithm, DataSet& t_out)
 	{
 		auto& d_out = (*((DataSetScalar*)& t_out));
 		d_out = m_validation;
@@ -81,7 +82,7 @@ namespace NRam
 		return true;
 	}
 
-	bool DataSetTask::read_batch(DataSet& t_out, bool loop) 
+	bool DataSetTask::read_batch(const DennAlgorithm& algorithm, DataSet& t_out, bool loop)
 	{
 		auto& d_out = (*((DataSetScalar*)& t_out));
 		d_out = m_train;

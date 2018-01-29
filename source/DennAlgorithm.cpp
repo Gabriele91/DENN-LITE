@@ -17,7 +17,7 @@ namespace Denn
 		, instance.neural_network()
 		))
 	, m_dataset_loader(&instance.dataset_loader())
-	, m_dataset_batch(&instance.dataset_loader())
+	, m_dataset_batch(*this, &instance.dataset_loader())
 	, m_params(params)
 	{
 	}
@@ -110,7 +110,7 @@ namespace Denn
 	{
 		//validation
 		DataSetScalar test;
-		m_dataset_loader->read_test(test);
+		m_dataset_loader->read_test(*this, test);
 		//compute test
 		Scalar eval = (*m_test_function)(*m_best_ctx.m_best, test);
 		//return
@@ -120,7 +120,7 @@ namespace Denn
 	{
 		//validation
 		DataSetScalar test;
-		m_dataset_loader->read_test(test);
+		m_dataset_loader->read_test(*this, test);
 		//compute		
 		Scalar eval = (*m_test_function)(individual, test);
 		//return
@@ -148,7 +148,7 @@ namespace Denn
 		auto& population = m_population.parents();
 		//validation
 		DataSetScalar validation;
-		m_dataset_loader->read_validation(validation);
+		m_dataset_loader->read_validation(*this, validation);
 		//best
 		Scalar best_eval =  validation_function_worst();
 		size_t	   best_i= 0;
@@ -181,7 +181,7 @@ namespace Denn
 		size_t np = current_np();
 		//validation
 		DataSetScalar validation;
-		m_dataset_loader->read_validation(validation);
+		m_dataset_loader->read_validation(*this, validation);
 		//list eval
 		std::vector<Scalar> validation_evals(population.size(), validation_function_worst());
 		//alloc promises

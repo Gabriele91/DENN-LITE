@@ -97,7 +97,7 @@ namespace Denn
 			size_t read_remaning = n_rows - n_read;
 			//read
 			m_cache_rows_read = 0;
-			m_dataset->read_batch(m_cache_batch);
+			m_dataset->read_batch(algorithm(),m_cache_batch);
 			//copy mask
 			if(is_first_read)
 			{

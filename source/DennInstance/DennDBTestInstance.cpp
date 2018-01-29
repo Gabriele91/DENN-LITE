@@ -7,6 +7,7 @@
 #include "DennDataset.h"
 #include "DennDatasetLoader.h"
 #include "DennTestSetStream.h"
+#include "DennAlgorithm.h"
 #include <fstream>
 
 namespace Denn
@@ -106,8 +107,10 @@ namespace Denn
 			////////////////////////////////////////////////////////////////////////////////////////////////
 			if (!m_success_init) return false;
 			////////////////////////////////////////////////////////////////////////////////////////////////
+			//Fake DennAlgorithm
+			DennAlgorithm denn(*this, Parameters());
 			//Test
-            TestSetStream dbstream(m_dataset.get());
+            TestSetStream dbstream(denn, m_dataset.get());
             //print values
             dbstream.start_read_batch(*m_parameters.m_batch_size, m_parameters.m_batch_offset);
             //start id
@@ -154,7 +157,7 @@ namespace Denn
             {
                 //get
                 DataSetScalar batch;
-				m_dataset->read_batch(batch);
+				m_dataset->read_batch(denn, batch);
                 //print batch id
                 output_stream() << "-----------------" << std::endl;
                 output_stream() << "BATCH ID[" << m_dataset->get_last_batch_info().m_batch_id << "]" << std::endl;
