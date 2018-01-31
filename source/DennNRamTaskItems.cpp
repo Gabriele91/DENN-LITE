@@ -21,10 +21,22 @@ namespace NRam
 		(
 		  size_t batch_size
 		, size_t max_int
-		, size_t n_regs, Random& random
+		, size_t n_regs
+		, size_t timesteps
+		, size_t min_difficulty
+		, size_t max_difficulty
+		, size_t step_gen_change_difficulty
+		, Random& random
 		)
-		: Task(batch_size, max_int, n_regs, random)
+		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
+			m_difficulty_grades = {
+				std::make_tuple(4, 3),
+				std::make_tuple(6, 3),
+				std::make_tuple(8, 3),
+				std::make_tuple(10, 3),
+				std::make_tuple(12, 3)
+			};
 		}
 
 		MemoryTuple operator()() override
@@ -45,7 +57,7 @@ namespace NRam
 			Matrix out_mem = in_mem;
 			for (Matrix::Index r = 0; r < out_mem.rows(); ++r)  
 				out_mem(r, 0) = out_mem(r, Matrix::Index(out_mem(r, 0)));
-
+			
 			return std::make_tuple(in_mem, out_mem, Task::init_mask(), Task::init_regs());
 		};
 	}; 
@@ -64,10 +76,21 @@ namespace NRam
 		  size_t batch_size
 		, size_t max_int
 		, size_t n_regs
+		, size_t timesteps
+		, size_t min_difficulty
+		, size_t max_difficulty
+		, size_t step_gen_change_difficulty
 		, Random& random
 		)
-		: Task(batch_size, max_int, n_regs, random)
+		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
+			m_difficulty_grades = {
+				std::make_tuple(4, 2),
+				std::make_tuple(6, 3),
+				std::make_tuple(8, 4),
+				std::make_tuple(10, 5),
+				std::make_tuple(12, 6)
+			};
 		}
 
 		MemoryTuple operator()() override
@@ -102,10 +125,21 @@ namespace NRam
 		  size_t batch_size
 		, size_t max_int
 		, size_t n_regs
+		, size_t timesteps
+		, size_t min_difficulty
+		, size_t max_difficulty
+		, size_t step_gen_change_difficulty
 		, Random& random
 		)
-		: Task(batch_size, max_int, n_regs, random)
+		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
+			m_difficulty_grades = {
+				std::make_tuple(4, 3),
+				std::make_tuple(6, 5),
+				std::make_tuple(8, 7),
+				std::make_tuple(10, 9),
+				std::make_tuple(12, 11)
+			};
 		}
 
 		MemoryTuple operator()() override
@@ -150,10 +184,21 @@ namespace NRam
 		  size_t batch_size
 		, size_t max_int
 		, size_t n_regs
+		, size_t timesteps
+		, size_t min_difficulty
+		, size_t max_difficulty
+		, size_t step_gen_change_difficulty
 		, Random& random
 		)
-		: Task(batch_size, max_int, n_regs, random)
+		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
+			m_difficulty_grades = {
+				std::make_tuple(4, 3),
+				std::make_tuple(6, 5),
+				std::make_tuple(8, 7),
+				std::make_tuple(10, 9),
+				std::make_tuple(12, 11)
+			};
 		}
 
 		MemoryTuple operator()() override
@@ -199,10 +244,21 @@ namespace NRam
 		  size_t batch_size
 		, size_t max_int
 		, size_t n_regs
+		, size_t timesteps
+		, size_t min_difficulty
+		, size_t max_difficulty
+		, size_t step_gen_change_difficulty
 		, Random& random
 		)
-		: Task(batch_size, max_int, n_regs, random)
+		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
+			m_difficulty_grades = {
+				std::make_tuple(4, 3),
+				std::make_tuple(6, 5),
+				std::make_tuple(8, 7),
+				std::make_tuple(10, 9),
+				std::make_tuple(12, 11),
+			};
 		}
 
 		MemoryTuple operator()() override
@@ -255,15 +311,26 @@ namespace NRam
 	{
 	public:
 			TaskPermutation
-			(
-				size_t batch_size
-				, size_t max_int
-				, size_t n_regs
-				, Random& random
-			)
-			: Task(batch_size, max_int, n_regs, random)
-			{
-			}
+		(
+		  size_t batch_size
+		, size_t max_int
+		, size_t n_regs
+		, size_t timesteps
+		, size_t min_difficulty
+		, size_t max_difficulty
+		, size_t step_gen_change_difficulty
+		, Random& random
+		)
+		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		{
+			m_difficulty_grades = {
+				std::make_tuple(4, 3),
+				std::make_tuple(6, 6),
+				std::make_tuple(8, 9),
+				std::make_tuple(10, 12),
+				std::make_tuple(12, 18)
+			}; 
+		}
 
 			MemoryTuple operator()() override
 			{
@@ -337,13 +404,24 @@ namespace NRam
 	public:
 		TaskListK
 		(
-			  size_t batch_size
-			, size_t max_int
-			, size_t n_regs
-			, Random& random
+		  size_t batch_size
+		, size_t max_int
+		, size_t n_regs
+		, size_t timesteps
+		, size_t min_difficulty
+		, size_t max_difficulty
+		, size_t step_gen_change_difficulty
+		, Random& random
 		)
-		: Task(batch_size, max_int, n_regs, random)
+		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
+			m_difficulty_grades = {
+				std::make_tuple(5, 5),
+				std::make_tuple(7, 5),
+				std::make_tuple(9, 7),
+				std::make_tuple(11, 5),
+				std::make_tuple(13, 7)
+			}; 
 		}
 
 		MemoryTuple operator()() override
@@ -438,13 +516,24 @@ namespace NRam
 	public:
 		TaskListSearch
 		(
-			  size_t batch_size
-			, size_t max_int
-			, size_t n_regs
-			, Random& random
+		  size_t batch_size
+		, size_t max_int
+		, size_t n_regs
+		, size_t timesteps
+		, size_t min_difficulty
+		, size_t max_difficulty
+		, size_t step_gen_change_difficulty
+		, Random& random
 		)
-		: Task(batch_size, max_int, n_regs, random)
+		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
+			m_difficulty_grades = {
+				std::make_tuple(5, 5),
+				std::make_tuple(7, 7),
+				std::make_tuple(9, 9),
+				std::make_tuple(11, 11),
+				std::make_tuple(13, 13)
+			};
 		}
 
 		MemoryTuple operator()() override
@@ -544,14 +633,25 @@ namespace NRam
 	{
 	public:
 		TaskMerge
-        (
-            size_t batch_size
-            , size_t max_int
-            , size_t n_regs
-            , Random& random
-        )
-        : Task(batch_size, max_int, n_regs, random)
+		(
+		  size_t batch_size
+		, size_t max_int
+		, size_t n_regs
+		, size_t timesteps
+		, size_t min_difficulty
+		, size_t max_difficulty
+		, size_t step_gen_change_difficulty
+		, Random& random
+		)
+		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
+			m_difficulty_grades = {
+				std::make_tuple(9, 6),
+				std::make_tuple(12, 9),
+				std::make_tuple(15, 12),
+				std::make_tuple(18, 15),
+				std::make_tuple(21, 18)
+			};
 		}
 
 		MemoryTuple operator()() override
@@ -616,14 +716,25 @@ namespace NRam
 	{
 	public:
 		TaskWalkBST
-				(
-						size_t batch_size
-						, size_t max_int
-						, size_t n_regs
-						, Random& random
-				)
-				: Task(batch_size, max_int, n_regs, random)
+		(
+		  size_t batch_size
+		, size_t max_int
+		, size_t n_regs
+		, size_t timesteps
+		, size_t min_difficulty
+		, size_t max_difficulty
+		, size_t step_gen_change_difficulty
+		, Random& random
+		)
+		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
+			m_difficulty_grades = {
+				std::make_tuple(7, 5),
+				std::make_tuple(11, 7),
+				std::make_tuple(15, 9),
+				std::make_tuple(19, 11),
+				std::make_tuple(23, 13)
+			};
 		}
 
 		MemoryTuple operator()() override
@@ -748,14 +859,25 @@ namespace NRam
 	{
 	public:
 		TaskSum
-				(
-						size_t batch_size
-						, size_t max_int
-						, size_t n_regs
-						, Random& random
-				)
-				: Task(batch_size, max_int, n_regs, random)
+		(
+		  size_t batch_size
+		, size_t max_int
+		, size_t n_regs
+		, size_t timesteps
+		, size_t min_difficulty
+		, size_t max_difficulty
+		, size_t step_gen_change_difficulty
+		, Random& random
+		)
+		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
+			m_difficulty_grades = {
+				std::make_tuple(9, 5),
+				std::make_tuple(12, 7),
+				std::make_tuple(15, 9),
+				std::make_tuple(18, 11),
+				std::make_tuple(21, 12)
+			};
 		}
 
 		MemoryTuple operator()() override
@@ -800,7 +922,7 @@ namespace NRam
 	/**
 	 * [Product] 
 	 * Given pointers to 2 arrays A and B, and the pointer to the output o,
-	 * sum the two arrays into one array. The input is given as: a, b, o, A[0], .., A[n −
+	 * make the product of A and B. The input is given as: a, b, o, A[0], .., A[n −
 	 * 1], G, B[0], ..., B[m − 1], G, where G is a special guardian value, a and b point to the first
 	 * elements of arrays A and B respectively, and o is a slot for the output.
 	 */
@@ -808,14 +930,25 @@ namespace NRam
 	{
 	public:
 		TaskProduct
-				(
-						size_t batch_size
-						, size_t max_int
-						, size_t n_regs
-						, Random& random
-				)
-				: Task(batch_size, max_int, n_regs, random)
+		(
+		  size_t batch_size
+		, size_t max_int
+		, size_t n_regs
+		, size_t timesteps
+		, size_t min_difficulty
+		, size_t max_difficulty
+		, size_t step_gen_change_difficulty
+		, Random& random
+		)
+		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
+			m_difficulty_grades = {
+				std::make_tuple(7, 5),
+				std::make_tuple(9, 7),
+				std::make_tuple(11, 9),
+				std::make_tuple(13, 11),
+				std::make_tuple(15, 13)
+			};
 		}
 
 		MemoryTuple operator()() override

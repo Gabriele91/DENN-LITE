@@ -84,6 +84,9 @@ namespace Denn
 		ReadOnly< std::string >				  m_registers_values_extraction_type { "registers_values_extraction_type", "zero" };
 		ReadOnly< std::string >               m_task				   { "task"                  /* , none */ };
 		ReadOnly< std::vector<std::string> >  m_gates				   { "gates"                 /* , none */ };
+		ReadOnly< size_t >  					m_min_difficulty 				 { "min_difficulty"       , size_t(1)};
+		ReadOnly< size_t >  					m_max_difficulty 				 { "max_difficulty"       , size_t(5)};
+		ReadOnly< size_t >  					m_step_gen_change_difficulty { "step_gen_change_difficulty", size_t(100)};
 		//nram test 
 		ReadOnly< size_t >					   m_n_test				   { "n_test", size_t(1) };
 		//params info

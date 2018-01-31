@@ -116,7 +116,7 @@ namespace NRam
 
     Scalar run_circuit(const NRamLayout &context, const Matrix& nn_out_decision, Matrix& regs, Matrix& in_mem, ExecutionDebug& debug);
 
-    Scalar train(const NRamLayout &context, const NeuralNetwork &nn,  const Matrix& in_mem, const Matrix &out_mem, const Matrix& mask);
+    Scalar train(const NRamLayout &context, const NeuralNetwork &nn,  const Matrix& in_mem, const Matrix &out_mem, const Matrix& mask, const size_t& max_int, const size_t& timesteps);
 
     ResultAndExecutionDebug execute(const NRamLayout &context, const NeuralNetwork& network, const Matrix& linear_in_mem);
 

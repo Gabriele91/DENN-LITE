@@ -1,7 +1,6 @@
 //
 // Created by Valerio Belli on 20/11/17.
 //
-
 #include "Denn.h"
 #include "DennNRam.h"
 #include "DennNRamTask.h"
@@ -286,14 +285,19 @@ namespace NRam
 	Scalar NRamEval::operator () (const Individual& individual, const DataSet& ds)
 	{
 		denn_assert(m_context);
+
+        auto& dataset = (*((DataSetScalar*)& ds));
+
 		//network
 		auto& nn = individual.m_network;
 		//Dataset
-		auto& in_mem = ds.features();
-		auto& out_mem = ds.labels();
-		auto& cost_mask = ds.mask();
+		auto& in_mem = dataset.features();
+		auto& out_mem = dataset.labels();
+		auto& cost_mask = dataset.mask();
+        auto& max_int = dataset.m_meta["max_int"].get()->get<int>();
+        auto& timesteps = dataset.m_meta["timesteps"].get()->get<int>();
 		//execute
-		return NRam::train(*m_context, nn, in_mem, out_mem, cost_mask);
+        return NRam::train(*m_context, nn, in_mem, out_mem, cost_mask, max_int, timesteps);
 	}
 	//set context
 	Evaluation::SPtr NRamEval::set_context(const NRamLayout& context)
@@ -374,7 +378,7 @@ namespace NRam
         Scalar s_cost = 0;
         for (size_t idx = 0; idx < M.rows(); ++idx)
         {
-            s_cost += Denn::CostFunction::safe_log(std::max(M(idx, Matrix::Index(desired_mem(idx))) + 1e-100, 1e-100)) * linear_mask(0, idx);
+            s_cost += Denn::CostFunction::safe_log(std::max<Scalar>(M(idx, Matrix::Index(desired_mem(idx))), 1e-8)) * linear_mask(0, idx);
         }
         return s_cost;
     }
@@ -393,6 +397,8 @@ namespace NRam
     , const Matrix& linear_in_mem
     , const Matrix& linear_out_mem
     , const Matrix& linear_mask
+    , const size_t& max_int
+    , const size_t& timesteps
     )
     {
 		//init by threads
@@ -408,7 +414,7 @@ namespace NRam
         for (Matrix::Index s = 0; s < linear_in_mem.rows(); ++s)
         {
             //Alloc regs
-            regs = Matrix::Zero(context.m_n_regs,context.m_max_int);
+            regs = Matrix::Zero(context.m_n_regs,max_int);
             //P(X=0)
             regs.col(0).fill(1);
             //In mem fuzzy
@@ -420,7 +426,7 @@ namespace NRam
             Scalar sample_cost = Scalar(0.0);
 
             //for all timestep, run on s
-            for (size_t timestep = 0; timestep < context.m_timesteps; timestep++)
+            for (size_t timestep = 0; timestep < timesteps; timestep++)
             {
                 Scalar entropy_weight = Scalar(entropy * pow(entropy_decay, timestep)); 
 
@@ -430,7 +436,7 @@ namespace NRam
                 Scalar fi = run_circuit(context, out, regs, in_mem);
 
                 //compute exit state
-                if (timestep == context.m_timesteps - 1)
+                if (timestep == timesteps - 1)
                     p_t = 1 - cum_prob_complete;
                 else
                     p_t = fi * prob_incomplete;
@@ -438,12 +444,13 @@ namespace NRam
                 cum_prob_complete += p_t;
                 prob_incomplete *= 1 - fi;
 
-                Scalar entropy_cost = entropy_weight * in_mem.unaryExpr(
-                    [&] (Scalar v) -> Scalar { return v * Denn::CostFunction::safe_log(std::max(v + 1e-100, 1e-100));})
-                    .sum();
+                Matrix entropy_mem = in_mem;
+                Scalar entropy_cost = entropy_weight * entropy_mem.unaryExpr(
+                    [&] (Scalar v) -> Scalar { return v * Denn::CostFunction::safe_log(std::max<Scalar>(v, 1e-8));}
+                ).sum();
 
                 //compute cost
-                sample_cost -= p_t * calculate_sample_cost(in_mem, linear_out_mem.row(s), linear_mask);
+                sample_cost -= p_t * calculate_sample_cost(in_mem, linear_out_mem.row(s), linear_mask) - entropy_cost;
 
             }
             //add to full "cost"
@@ -483,7 +490,7 @@ namespace NRam
                 case Gate::UNARY:
                 {
                     a = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
-                    coeff_a = CostFunction::softmax_col(a) / CostFunction::softmax_col(a).sum();
+                    coeff_a = CostFunction::softmax_col(a);
                     ptr_col += coefficient_size;
 
                     C = gate(avg(regs, coeff_a), in_mem);
@@ -494,11 +501,11 @@ namespace NRam
                 case Gate::BINARY:
                 {
                     a = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
-                    coeff_a = CostFunction::softmax_col(a) / CostFunction::softmax_col(a).sum();
+                    coeff_a = CostFunction::softmax_col(a);
                     ptr_col += coefficient_size;
 
                     b = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
-                    coeff_b = CostFunction::softmax_col(b) / CostFunction::softmax_col(b).sum();
+                    coeff_b = CostFunction::softmax_col(b);
                     ptr_col += coefficient_size;
 
                     C = gate(avg(regs, coeff_a), avg(regs, coeff_b), in_mem);
@@ -518,7 +525,7 @@ namespace NRam
 			// get row
             c = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
 			// softmax
-            coeff_c = CostFunction::softmax_col(c) / CostFunction::softmax_col(c).sum();
+            coeff_c = CostFunction::softmax_col(c);
 			// update
 			regs.row(r) = avg(regs, coeff_c).transpose();
 			// next

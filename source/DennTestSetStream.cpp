@@ -50,8 +50,8 @@ namespace Denn
 		//test
 		denn_assert(n_rows <= m_batch.m_features.size());
 		//olready read
-		const size_t c_features = m_dataset->get_main_header_info().m_n_features;
-		const size_t c_labels = m_dataset->get_main_header_info().m_n_classes;
+		size_t c_features = m_dataset->get_main_header_info().m_n_features;
+		size_t c_labels = m_dataset->get_main_header_info().m_n_classes;
 		size_t offset = 0;
 		size_t n_read = 0;
 		#if 0
@@ -98,11 +98,25 @@ namespace Denn
 			//read
 			m_cache_rows_read = 0;
 			m_dataset->read_batch(algorithm(),m_cache_batch);
-			//copy mask
-			if(is_first_read)
+			m_batch.m_meta = m_cache_batch.m_meta;
+
+			// Resize the feature matrix if the dimension changes
+			if (m_batch.m_features.cols() != m_cache_batch.m_features.cols())
 			{
-				m_batch.m_mask = m_cache_batch.m_mask;
+				c_features = m_cache_batch.m_features.cols();
+				m_batch.m_features.conservativeResize(m_batch.m_features.rows(), c_features);
 			}
+
+			// Resize the labels matrix if the dimension changes
+			if (m_batch.m_labels.cols() != m_cache_batch.m_labels.cols())
+			{
+				c_labels = m_cache_batch.m_labels.cols();
+				m_batch.m_labels.conservativeResize(m_batch.m_labels.rows(), c_features);
+			}
+
+			// Copy mask
+			m_batch.m_mask = m_cache_batch.m_mask;
+			
 			//compute n rows to read
 			size_t to_read = std::min<size_t>(m_cache_batch.m_features.rows(), read_remaning);
 			//read

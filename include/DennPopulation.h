@@ -3,7 +3,6 @@
 #include "DennDataset.h"
 #include "DennNeuralNetwork.h"
 #include "DennIndividual.h"
-#include "DennIndividual.h"
 #include "DennEvaluation.h"
 #include "ThreadPool.h"
 

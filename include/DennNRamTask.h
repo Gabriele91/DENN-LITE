@@ -10,55 +10,75 @@ namespace Denn
 namespace NRam 
 {
 	//memory struct
+	using TaskTuple = std::tuple<Matrix, Matrix, Matrix, Matrix, size_t, size_t>;
 	using MemoryTuple = std::tuple<Matrix, Matrix, Matrix, Matrix>;
-	
+
 	//Task
-    class Task : public std::enable_shared_from_this< Task >
+  class Task : public std::enable_shared_from_this< Task >
 	{
     public:
 
-		//ref to Crossover
-		using SPtr = std::shared_ptr<Task>;
+			//ref to Crossover
+			using SPtr = std::shared_ptr<Task>;
 
-		//return ptr
-		SPtr get_ptr() { return this->shared_from_this(); }
+			//return ptr
+			SPtr get_ptr() { return this->shared_from_this(); }
 
-		//init
-		Task(size_t batch_size, size_t max_int, size_t n_regs, Random& random);
+			//init
+			Task(size_t batch_size, size_t max_int, size_t n_regs, size_t timesteps, size_t min_difficulty, size_t max_difficulty, size_t step_gen_change_difficulty, Random& random);
 
-		//delete
-		virtual ~Task();
+			//delete
+			virtual ~Task();
 
-		//build dataset
-		virtual MemoryTuple operator()();
+			//build dataset
+			TaskTuple create_batch(const size_t current_generation);
 
-        /**
-         * Initialize R registers to zero (i.e. set P(x = 0) = 1.0).
-         *
-         * @param R Registers number
-         * @return MatrixList
-         */
-		Matrix init_regs() const;
+			/**
+			 * Initialize R registers to zero (i.e. set P(x = 0) = 1.0).
+			 *
+			 * @param R Registers number
+			 * @return MatrixList
+			 */
+			Matrix init_regs() const;
 
-		/**
-		 *  Initialize mask of nram evalauation
-		 * @param Memory size
-		 * @return Matrix of ones
-		 */
-		Matrix init_mask() const;
+			/**
+			 * Initialize mask of nram evalauation
+			 * 
+			 * @param Memory size
+			 * @return Matrix of ones
+			 */
+			Matrix init_mask() const;
 
-		//info
-		size_t  get_batch_size()    const;
-		size_t  get_max_int()       const;
-		size_t  get_num_regs()      const;
-		Random& get_random_engine() const;
+			//info
+			size_t  get_batch_size()    const;
+			size_t  get_max_int()       const;
+			size_t  get_num_regs()      const;
+			size_t  get_timestemps()    const;
+			size_t  get_min_difficulty() const;
+			size_t  get_max_difficulty() const;
+			size_t  get_current_difficulty() const;
+			size_t  get_step_gen_change_difficulty() const;
+
+			std::tuple<size_t, size_t> get_difficulty_grade();
+
+			Random& get_random_engine() const;
 
     protected:
+				virtual MemoryTuple operator()();
 
         size_t  m_batch_size;
         size_t  m_max_int;
         size_t  m_n_regs;
-		Random& m_random;
+				size_t  m_timesteps;
+
+				size_t  m_min_difficulty;
+				size_t  m_max_difficulty;
+				size_t  m_current_difficulty;
+				size_t 	m_step_gen_change_difficulty;
+
+				std::vector<std::tuple<size_t, size_t>> m_difficulty_grades;
+
+				Random& m_random;
     };
 
 	//class factory of tasks
@@ -67,7 +87,7 @@ namespace NRam
 
 	public:
 		//Gate classes map
-		typedef Task::SPtr(*CreateObject)(size_t batch_size, size_t max_int, size_t n_regs, Random& random);
+		typedef Task::SPtr(*CreateObject)(size_t batch_size, size_t max_int, size_t n_regs, size_t timesteps, size_t min_difficulty, size_t max_difficulty, size_t step_gen_change_difficulty, Random& random);
 
 		//public
 		static Task::SPtr create
@@ -76,6 +96,10 @@ namespace NRam
 			, size_t batch_size
 			, size_t max_int
 			, size_t n_regs
+			, size_t timesteps
+			, size_t min_difficulty
+			, size_t max_difficulty
+			, size_t step_gen_change_difficulty
 			, Random& random
 		);
 		static void append(const std::string& name, CreateObject fun, size_t size);
@@ -99,10 +123,14 @@ namespace NRam
 		  size_t batch_size
 		, size_t max_int
 		, size_t n_regs
+		, size_t timesteps
+		, size_t min_difficulty
+		, size_t max_difficulty
+		, size_t step_gen_change_difficulty
 		, Random& random
 		)
 		{
-			return (std::make_shared< T >(batch_size, max_int, n_regs, random))->get_ptr();
+			return (std::make_shared< T >(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random))->get_ptr();
 		}
 
 		TaskItem(const std::string& name, size_t size)

@@ -373,6 +373,15 @@ namespace Denn
         ParameterInfo{
             m_dataset_filename, "Path of dataset file (gz) or network file input (json)", { "-d", "-i" }
         },
+        ParameterInfo{
+            m_min_difficulty, "Min curriculum difficulty to use when NRAM is trained", { "-nrmind" }
+        },
+        ParameterInfo{
+            m_max_difficulty, "Max curriculum difficulty to use when NRAM is trained", { "-nrmaxd" }
+        },
+        ParameterInfo{
+            m_step_gen_change_difficulty, "How often the curriculum difficulty is forced changed during the training", { "-nrsgcd" }
+        },
         ParameterInfo{ 
             m_output_filename, "Path of output file (json)", { "-o" } 
         },

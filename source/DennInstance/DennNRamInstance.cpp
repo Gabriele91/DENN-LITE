@@ -76,7 +76,10 @@ namespace NRam
 			//get eval & set context
 			m_eval = EvaluationFactory::get<NRamEval>("nram")->set_context(m_nram);
 			//task
-			m_task = TaskFactory::create(*parameters.m_task, m_nram.m_batch_size, m_nram.m_max_int, m_nram.m_n_regs, m_random_engine);
+			m_task = TaskFactory::create(*parameters.m_task, m_nram.m_batch_size, m_nram.m_max_int, m_nram.m_n_regs, 
+				*parameters.m_time_steps, *parameters.m_min_difficulty, *parameters.m_max_difficulty, 
+				*parameters.m_step_gen_change_difficulty, m_random_engine
+			);
 			//Dataset
 			m_dataset = *m_task;
 			//network

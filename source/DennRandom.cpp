@@ -81,6 +81,13 @@ namespace Denn
 		return distribution(m_generator);
 	}
 
+	//random value generated bt a geometric distribution given the probability of success
+	int Random::geometric(Scalar probability_of_success)
+	{
+		std::geometric_distribution<int> distribution(probability_of_success);
+		return distribution(m_generator);
+	}
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////////
 	Random::RandomDeck::RandomDeck(Random& random, const RandomDeck& deck)
 	:m_random(random)
