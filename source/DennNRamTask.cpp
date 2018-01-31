@@ -40,7 +40,8 @@ namespace NRam
 	Matrix Task::init_mask() const { return Matrix::Ones(1, m_max_int); }
 
 	TaskTuple Task::create_batch(const size_t current_generation) {
-		if (current_generation != 0 && (current_generation + 1) % m_step_gen_change_difficulty == 0)
+		if (m_max_int == 0 && m_timesteps == 0 &&
+            current_generation != 0 && (current_generation + 1) % m_step_gen_change_difficulty == 0)
 		{
 			size_t number_e = m_random.geometric(0.5);
 
@@ -63,8 +64,8 @@ namespace NRam
 
 		// Set task difficulty parameters
 		auto& difficulty_params = m_difficulty_grades[m_current_difficulty - 1];
-		m_max_int = std::get<0>(difficulty_params);
-		m_timesteps = std::get<1>(difficulty_params);
+		m_max_int = m_max_int == 0 ? std::get<0>(difficulty_params) : m_max_int;
+		m_timesteps = m_timesteps == 0 ? std::get<1>(difficulty_params) : m_timesteps;
 
 		const auto& mems = (*this)();
 		Matrix in_mem = std::get<0>(mems);
