@@ -49,7 +49,7 @@ namespace NRam
 			Scalar random_number = m_random.uniform(0, 1);
 			if (random_number <= 0.1)
 			{
-				m_current_difficulty = m_random.index_rand(max_difficulty);
+				m_current_difficulty = m_random.irand(m_min_difficulty, max_difficulty);
 			}
 			else if (0.1 < random_number && random_number <= 0.35)
 			{

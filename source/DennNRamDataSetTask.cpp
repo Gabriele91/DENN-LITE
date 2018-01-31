@@ -73,8 +73,8 @@ namespace NRam
 		m_test.m_features 		 = std::get<0>(test);
 		m_test.m_labels   		 = std::get<1>(test);
 		m_test.m_mask     		 = std::get<2>(test);
-		m_test.m_meta["max_int"] = int(Variant(std::get<4>(test)));
-		m_test.m_meta["timesteps"] = int(Variant(std::get<5>(test)));
+		m_test.m_meta["max_int"] = int(std::get<4>(test));
+		m_test.m_meta["timesteps"] = int(std::get<5>(test));
 
 		m_fake_header.m_n_classes = std::get<4>(test);
 		m_fake_header.m_n_features = std::get<4>(test);
@@ -92,8 +92,8 @@ namespace NRam
 		m_validation.m_features 		= std::get<0>(validation);
 		m_validation.m_labels   		= std::get<1>(validation);
 		m_validation.m_mask 			  = std::get<2>(validation);
-		m_validation.m_meta["max_int"] = int(Variant(std::get<4>(validation)));
-		m_validation.m_meta["timesteps"] = int(Variant(std::get<5>(validation)));
+		m_validation.m_meta["max_int"] = int(std::get<4>(validation));
+		m_validation.m_meta["timesteps"] = int(std::get<5>(validation));
 
 		m_fake_header.m_n_classes = std::get<4>(validation);
 		m_fake_header.m_n_features = std::get<4>(validation);
@@ -116,8 +116,8 @@ namespace NRam
 		m_train.m_features 			= std::get<0>(train);
 		m_train.m_labels   			= std::get<1>(train);
 		m_train.m_mask     			= std::get<2>(train);
-		m_train.m_meta["max_int"] = int(Variant(std::get<4>(train)));
-		m_train.m_meta["timesteps"] = int(Variant(std::get<5>(train)));
+		m_train.m_meta["max_int"] = int(std::get<4>(train));
+		m_train.m_meta["timesteps"] = int(std::get<5>(train));
 
 		m_fake_header.m_n_classes = std::get<4>(train);
 		m_fake_header.m_n_features = std::get<4>(train);
