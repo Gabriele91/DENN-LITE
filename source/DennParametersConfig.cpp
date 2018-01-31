@@ -1,4 +1,5 @@
 #include "DennParameters.h"
+#include "DennActivationFunction.h"
 #include <cctype>
 
 namespace Denn
