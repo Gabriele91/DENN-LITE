@@ -53,7 +53,7 @@ namespace NRam
 			}
 			else if (0.1 < random_number && random_number <= 0.35)
 			{
-				m_current_difficulty = m_random.uniform(m_min_difficulty, D_plus_e_difficulty);
+				m_current_difficulty = m_random.irand(m_min_difficulty, D_plus_e_difficulty);
 			}
 			else
 			{
