@@ -1,9 +1,10 @@
 #pragma once
 #include "Config.h"
+#include "DennVariant.h"
 
 namespace Denn
 {
-	class Variant;
+	//Abstract Dataset
 	class DataSet
 	{
     public:
@@ -63,7 +64,9 @@ namespace Denn
 			return *((Denn::MatrixT< ScalarType >*)(ptr_labels()));
 		}
 	};
-
+	//Metadata
+	using MetaData = std::map< std::string, Variant >;
+	//Dataset
 	template < typename ScalarType >
 	class DataSetX : public DataSet
 	{
@@ -72,7 +75,7 @@ namespace Denn
 		Eigen::Matrix< ScalarType, Eigen::Dynamic, Eigen::Dynamic > m_mask;
 		Eigen::Matrix< ScalarType, Eigen::Dynamic, Eigen::Dynamic > m_labels;
 
-		std::map< std::string, std::shared_ptr<Variant> > m_meta; 
+		MetaData m_meta; 
 
 		virtual void* ptr_features() const { return (void*)&m_features;       }
 		virtual void* ptr_mask()     const { return (void*)&m_mask;           }

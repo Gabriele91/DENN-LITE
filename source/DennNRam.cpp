@@ -294,8 +294,8 @@ namespace NRam
 		auto& in_mem = dataset.features();
 		auto& out_mem = dataset.labels();
 		auto& cost_mask = dataset.mask();
-        auto& max_int = dataset.m_meta["max_int"].get()->get<int>();
-        auto& timesteps = dataset.m_meta["timesteps"].get()->get<int>();
+        auto& max_int = dataset.m_meta["max_int"].get<int>();
+        auto& timesteps = dataset.m_meta["timesteps"].get<int>();
 		//execute
         return NRam::train(*m_context, nn, in_mem, out_mem, cost_mask, max_int, timesteps);
 	}
