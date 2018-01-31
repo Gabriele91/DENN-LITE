@@ -23,12 +23,14 @@ done
 if [ "$(uname)" == 'Darwin' ]; then
   brew install cmake \
   		       protobuf \
-  		       gflags
+  		       gflags \
+			   eigen
 else
   sudo apt install build-essential \
                    cmake \
                    libgoogle-glog-dev \
                    libprotobuf-dev \
+				   libeigen3-dev\
                    protobuf-compiler
 fi
 
@@ -103,35 +105,39 @@ fi
 cd ../../
 
 #build dips dir
-mkdir -p $TOP/dips/lib/linux/
-mkdir -p $TOP/dips/lib/macOS/
+mkdir -p $TOP/../dips/lib/linux/
+mkdir -p $TOP/../dips/lib/macOS/
 #build include dir
 SUBDIRS=$(find $TOP/caffe2/caffe2 -type d)
 for dir in $SUBDIRS
 do
-	mkdir -p $(echo $dir | sed -e 's/caffe2\/caffe2/dips\/include\/caffe2/g')
+	mkdir -p $(echo $dir | sed -e 's/caffe2\/caffe2/..\/dips\/include\/caffe2/g')
 done
 #copy
 #make
 if [ "$(uname)" == 'Darwin' ]; then
-  find $TOP/caffe2/build/lib/ -name \*.a -exec cp {} $TOP/dips/lib/macOS/ \;
+  find $TOP/caffe2/build/lib/ -name \*.a -exec cp {} $TOP/../dips/lib/macOS/ \;
 else
-  find $TOP/caffe2/build/lib/ -name \*.a -exec cp {} $TOP/dips/lib/linux/ \;
+  find $TOP/caffe2/build/lib/ -name \*.a -exec cp {} $TOP/../dips/lib/linux/ \;
 fi
 #copy headers
 SUBFILES=$(find $TOP/caffe2/caffe2 -type f -name \*.h)
-for header in $SUBFILES
+for files in $SUBFILES
 do
-  cp $header $(echo $header | sed -e 's/caffe2\/caffe2/dips\/include\/caffe2/g')
+  cp $files $(echo $files | sed -e 's/caffe2\/caffe2/..\/dips\/include\/caffe2/g')
 done
 #copy proto headers
 SUBFILES=$(find $TOP/caffe2/caffe2 -type f -name \*.proto)
-for header in $SUBFILES
+for files in $SUBFILES
 do
-  cp $header $(echo $header | sed -e 's/caffe2\/caffe2/dips\/include\/caffe2/g')
+  cp $files $(echo $files | sed -e 's/caffe2\/caffe2/..\/dips\/include\/caffe2/g')
 done
-#copy
-
+#copy pb.h headers (linux)
+SUBFILES=$(find $TOP/caffe2/caffe2 -type f -name \*.pb.h)
+for files in $SUBFILES
+do
+  cp $files $(echo $files | sed -e 's/caffe2\/caffe2/..\/dips\/include\/caffe2/g')
+done
 #delete caffe
 yes | rm -R caffe2
 
