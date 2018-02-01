@@ -4,6 +4,8 @@
 
 namespace Denn
 {
+	//Metadata
+	using MetaData = std::map< std::string, Variant >;
 	//Abstract Dataset
 	class DataSet
 	{
@@ -26,6 +28,11 @@ namespace Denn
 		virtual size_t labels_cols() const   = 0;
         
 		virtual DataType get_data_type() const { return DataType::DT_UNKNOWN;  }
+
+		//get metadata
+		virtual const MetaData& get_metadata() const = 0;
+		//get metadata
+		virtual VariantRef get_metadata(const std::string& key) const = 0;
 
 		//auto cast
 		const Matrix&  features() const
@@ -64,19 +71,18 @@ namespace Denn
 			return *((Denn::MatrixT< ScalarType >*)(ptr_labels()));
 		}
 	};
-	//Metadata
-	using MetaData = std::map< std::string, Variant >;
 	//Dataset
 	template < typename ScalarType >
 	class DataSetX : public DataSet
 	{
     public:
+		//values
 		Eigen::Matrix< ScalarType, Eigen::Dynamic, Eigen::Dynamic > m_features;
 		Eigen::Matrix< ScalarType, Eigen::Dynamic, Eigen::Dynamic > m_mask;
 		Eigen::Matrix< ScalarType, Eigen::Dynamic, Eigen::Dynamic > m_labels;
-
-		MetaData m_meta; 
-
+		//metadata
+		MetaData m_metadata; 
+		//pure virtual methods
 		virtual void* ptr_features() const { return (void*)&m_features;       }
 		virtual void* ptr_mask()     const { return (void*)&m_mask;           }
 		virtual void* ptr_labels()	 const { return (void*)&m_labels;         }
@@ -112,6 +118,20 @@ namespace Denn
         {
             return m_labels.cols();
         }
+
+		//get metadata
+		virtual const MetaData& get_metadata() const
+		{
+			return m_metadata;
+		}
+		//get metadata
+		virtual VariantRef get_metadata(const std::string& key) const
+		{
+			//find (const)
+			auto it = m_metadata.find(key);
+			//return ref
+			return it == m_metadata.end() ? VariantRef(/*none*/) : VariantRef( it->second );
+		}
 
 		virtual DataType get_data_type() const { return Denn::get_data_type<ScalarType>();  }
 	};

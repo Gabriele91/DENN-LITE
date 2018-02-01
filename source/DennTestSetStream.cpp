@@ -98,7 +98,7 @@ namespace Denn
 			//read
 			m_cache_rows_read = 0;
 			m_dataset->read_batch(algorithm(),m_cache_batch);
-			m_batch.m_meta = m_cache_batch.m_meta;
+			m_batch.m_metadata = m_cache_batch.m_metadata;
 
 			// Resize the feature matrix if the dimension changes
 			if (m_batch.m_features.cols() != m_cache_batch.m_features.cols())
