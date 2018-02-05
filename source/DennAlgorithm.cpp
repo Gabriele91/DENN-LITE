@@ -237,7 +237,7 @@ namespace Denn
 	{
 		///////////////////////////////////////////////////////////////////
 		if (*m_params.m_reval_pop_on_batch || pass == 0) 
-			execute_loss_function_on_all_population(m_population.parents());
+			execute_fitness_on(m_population.parents());
 		///////////////////////////////////////////////////////////////////
 		//output
 		if(m_output) m_output->start_a_pass();
@@ -288,6 +288,15 @@ namespace Denn
 			m_best_ctx.m_best = curr->copy();
 			//save eval (on validation) of best
 			m_best_ctx.m_eval = curr_eval;
+			//save metadata
+			m_best_ctx.m_metadata = current_batch().m_metadata;
+			//or ??
+			#if 0
+			//validation
+			DataSetScalar validation;
+			m_dataset_loader->read_validation(*this, validation);
+			m_best_ctx.m_metadata = validation.m_metadata;
+			#endif 
 		}
 	}
 	void DennAlgorithm::execute_update_best_on_loss_function()
@@ -303,6 +312,8 @@ namespace Denn
 			m_best_ctx.m_best = curr->copy();
 			//save eval (on test set) of best
 			m_best_ctx.m_eval = curr->m_eval;
+			//save metadata
+			m_best_ctx.m_metadata = current_batch().m_metadata;
 		}
 	}
 	void DennAlgorithm::execute_update_restart(size_t pass)

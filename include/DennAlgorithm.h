@@ -55,11 +55,13 @@ public:
 	{
 		Individual::SPtr m_best;
 		Scalar           m_eval;
+		MetaData		 m_metadata;
         //
-		BestContext(Individual::SPtr best = nullptr, Scalar eval = 0)
+		BestContext(Individual::SPtr best = nullptr, Scalar eval = 0,const MetaData& metadata = MetaData())
 		{
 			m_best = best;
 			m_eval = eval;
+			m_metadata = metadata;
 		}
 	};
 	////////////////////////////////////////////////////////////////////////

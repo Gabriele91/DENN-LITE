@@ -70,6 +70,9 @@ namespace Denn
 		{
 			return *((Denn::MatrixT< ScalarType >*)(ptr_labels()));
 		}
+
+		//delete metadata
+		virtual ~DataSet(){}
 	};
 	//Dataset
 	template < typename ScalarType >
@@ -133,6 +136,10 @@ namespace Denn
 			return it == m_metadata.end() ? VariantRef(/*none*/) : VariantRef( it->second );
 		}
 
+		//delete metadata
+		virtual ~DataSetX(){}
+		
+		//data type
 		virtual DataType get_data_type() const { return Denn::get_data_type<ScalarType>();  }
 	};
 

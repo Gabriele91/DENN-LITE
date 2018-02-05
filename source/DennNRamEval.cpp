@@ -19,9 +19,9 @@ namespace NRam
 		auto& out_mem = dataset.labels();
 		auto& cost_mask = dataset.mask();
         auto& max_int = dataset.get_metadata("max_int").get<int>();
-        auto& timesteps = dataset.get_metadata("timesteps").get<int>();
+        auto& timesteps = dataset.get_metadata("time_steps").get<int>();
 		//execute
-        return NRam::train(*m_context, nn, in_mem, out_mem, cost_mask, max_int, timesteps);
+        return std::abs(NRam::train(*m_context, nn, in_mem, out_mem, cost_mask, max_int, timesteps));
 	}
 	//set context
 	Evaluation::SPtr NRamEval::set_context(const NRamLayout& context)

@@ -123,14 +123,40 @@ namespace NRam
 				//end
 				return; //exit
 			}
+			//nram context info
+			size_t nram_max_int = jarguments["max_int"].number();
+			size_t nram_n_registers = jarguments["n_registers"].number();
+			size_t nram_time_steps = jarguments["time_steps"].number();
+			size_t nram_registers_values_extract = jarguments["registers_values_extract"].number();
+			//if nram_time_steps == 0 try to find value in metadata
+			if(!nram_time_steps  )
+			{
+				//document
+				auto& document = m_jdata.document().object();
+				//find metadata
+				auto it_metadata = document.find("metadata");
+				//test
+				if(it_metadata != document.end() && it_metadata->second.is_object())
+				{
+					//get metadata
+					auto& metadata = it_metadata->second.object();
+					//get time_steps
+					auto it_time_steps = metadata.find("time_steps");
+					//test
+					if(it_time_steps != metadata.end() && it_time_steps->second.is_number())
+					{
+						nram_time_steps = it_time_steps->second.number();
+					}
+				}
+			}
 			//init nram context
 			m_nram.init
 			(
 				  1 //1 test
-				, jarguments["max_int"].number()
-				, jarguments["n_registers"].number()
-				, jarguments["time_steps"].number()
-				, jarguments["registers_values_extract"].number()
+				, nram_max_int
+				, nram_n_registers
+				, nram_time_steps
+				, nram_registers_values_extract
 				, gates
 			);
 			//test
