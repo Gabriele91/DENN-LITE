@@ -1,2 +1,7 @@
 #include "DennVariant.h"
-#include "DennDataset.h"
+#include "DennDataSet.h"
+
+namespace Denn
+{
+//none
+}
