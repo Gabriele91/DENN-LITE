@@ -4,7 +4,7 @@
 #include "DennRuntimeOutput.h"
 #include "DennSerializeOutput.h"
 #include "DennInstanceUtils.h"
-#include "DennDataset.h"
+#include "DennDataSet.h"
 #include "DennDatasetLoader.h"
 #include "DennTestSetStream.h"
 #include "DennAlgorithm.h"
