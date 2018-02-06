@@ -7,7 +7,9 @@
 #include "DennDump.h"
 #include  <cctype>
 #include  <sstream>
-
+//Enable entropy
+//#define ENABLE_ENTROPY
+//...
 namespace Denn
 {
 namespace NRam
@@ -415,12 +417,15 @@ namespace NRam
                 //
                 cum_prob_complete += p_t;
                 prob_incomplete *= 1 - fi;
-
+                //Entropy
+                #ifdef ENABLE_ENTROPY
                 Matrix entropy_mem = in_mem;
                 Scalar entropy_cost = entropy_weight * entropy_mem.unaryExpr(
                     [&] (Scalar v) -> Scalar { return v * Denn::CostFunction::safe_log(std::max<Scalar>(v, 1e-8));}
                 ).sum();
-
+                #else 
+                const Scalar entropy_cost = 0;
+                #endif 
                 //compute cost
                 sample_cost -= p_t * calculate_sample_cost(in_mem, linear_out_mem.row(s), linear_mask) - entropy_cost;
 
