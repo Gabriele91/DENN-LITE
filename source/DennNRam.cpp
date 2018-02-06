@@ -7,9 +7,7 @@
 #include "DennDump.h"
 #include  <cctype>
 #include  <sstream>
-//Enable entropy
-//#define ENABLE_ENTROPY
-//...
+
 namespace Denn
 {
 namespace NRam

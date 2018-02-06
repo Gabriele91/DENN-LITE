@@ -3,6 +3,7 @@ MKDIR_P         ?=mkdir -p
 COMPILER        ?=g++
 TOP             ?=$(shell pwd)
 SCALAR	        ?= FLOAT
+FLAGS	        ?= 
 HAVE_TERM       := $(shell echo $$TERM)
 VERION_COMPILER := `$(COMPILER) --version`
 ENABLE_BLAS     := false
@@ -28,7 +29,7 @@ SOURCE_DEBUG_OBJS = $(addprefix $(O_DEBUG_DIR)/,$(notdir $(SOURCE_FILES:.cpp=.o)
 SOURCE_RELEASE_OBJS = $(addprefix $(O_RELEASE_DIR)/,$(notdir $(SOURCE_FILES:.cpp=.o)))
 
 # C FLAGS
-C_FLAGS = -fPIC -D_FORCE_INLINES
+C_FLAGS = -fPIC -D_FORCE_INLINES $(FLAGS)
 # CPP FLAGS
 CC_FLAGS = -std=c++14 -I $(DIPS_INCLUDE) -I $(S_INC)
 # RELEASE_FLAGS
