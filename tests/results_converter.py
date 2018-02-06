@@ -52,30 +52,36 @@ def main():
     ]
     # Load results
     for file_ in tqdm(files_from_output(args.source_folder), desc="Extract data from json files"):
-        with open(path.join(args.source_folder, file_)) as res_file:
-            tmp = json.load(res_file)
-            new_data = [
-                tmp['arguments']['dataset'].split("/")[-1].replace(".gz", ""),
-                tmp['arguments']['evolution_method'],
-                tmp['arguments']['mutation'],
-                tmp['arguments']['crossover'],
-                tmp['arguments']['generations'],
-                tmp['arguments']['sub_gens'],
-                tmp['arguments']['batch_size'],
-                tmp['arguments']['batch_offset'],
-                tmp['arguments']['number_parents'],
-                tmp['arguments']['clamp_min'],
-                tmp['arguments']['clamp_max'],
-                tmp['accuracy']
-            ]
+        try:
+            with open(path.join(args.source_folder, file_)) as res_file:
+                tmp = json.load(res_file)
+                new_data = [
+                    tmp['arguments']['dataset'].split("/")[-1].replace(".gz", ""),
+                    tmp['arguments']['evolution_method'],
+                    tmp['arguments']['mutation'],
+                    tmp['arguments']['crossover'],
+                    tmp['arguments']['generations'],
+                    tmp['arguments']['sub_gens'],
+                    tmp['arguments']['batch_size'],
+                    tmp['arguments']['batch_offset'],
+                    tmp['arguments']['number_parents'],
+                    tmp['arguments']['clamp_min'],
+                    tmp['arguments']['clamp_max'],
+                    tmp['accuracy']
+                ]
 
-            if tmp['arguments']['output'].find("run") != -1:
-                new_data.append(
-                    int(tmp['arguments']['output'].split("run")[1].split(".")[0]))
-                if "run" not in labels:
-                    labels.append("run")
+                if tmp['arguments']['output'].find("run") != -1:
+                    new_data.append(
+                        int(tmp['arguments']['output'].split("run")[1].split(".")[0]))
+                    if "run" not in labels:
+                        labels.append("run")
 
-            data.append(new_data)
+                data.append(new_data)
+        except IOError as err:
+            if err.errno == 2:
+                print("[Warning]: file '{}' not found".format(file_))
+            else:
+                raise
 
     # Load results with pandas
     print("==> Convert to pandas")
