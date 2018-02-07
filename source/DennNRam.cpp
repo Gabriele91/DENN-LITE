@@ -403,8 +403,9 @@ namespace NRam
             Scalar cum_prob_complete = Scalar(0.0);
             Scalar sample_cost = Scalar(0.0);
             bool   stop = false;
+			size_t timestep = 0;
             //for all timestep, run on s
-            for (size_t timestep = 0; !stop && timestep < loop_timesteps; timestep++)
+            for (; !stop && timestep < loop_timesteps; timestep++)
             {
 				//NN
 				out = network.apply(get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
@@ -436,7 +437,7 @@ namespace NRam
                 sample_cost -= p_t * calculate_sample_cost(in_mem, linear_out_mem.row(s), linear_mask) - entropy_cost;
             }
             //add to full "cost"
-            full_cost += sample_cost;
+            full_cost += sample_cost /*/ timestep */;
         }
 
         return full_cost;
@@ -548,7 +549,7 @@ namespace NRam
             Scalar p_t = Scalar(0.0);
             Scalar prob_incomplete = Scalar(1.0);
             Scalar cum_prob_complete = Scalar(0.0);
-            bool   stop = true;
+            bool   stop = false;
             //for all timestep, run on s
             for (size_t timestep = 0; !stop && timestep < context.m_timesteps; timestep++)
             {
@@ -560,9 +561,10 @@ namespace NRam
                 Scalar fi = run_circuit(context, out, regs, in_mem, execution_debug);
                 //up info
                 prob_incomplete *= Scalar(1.0) - fi;
+				//min prob complate
+				const Scalar prob_complate_limit = (Scalar(1.0) / context.m_max_int) / 2;
                 //exit case
-                if(prob_incomplete < ((Scalar(1.0) / context.m_max_int) / 2)
-                || timestep == context.m_timesteps - 1)
+                if(prob_incomplete < prob_complate_limit || context.m_timesteps <= (timestep + 1))
                 {
                     stop = true;
                 }

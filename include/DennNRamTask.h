@@ -78,6 +78,7 @@ namespace NRam
         size_t  m_n_regs;
 		size_t  m_timesteps;
 
+		bool    m_use_difficulty;
 		size_t  m_min_difficulty;
 		size_t  m_max_difficulty;
 		size_t  m_current_difficulty;

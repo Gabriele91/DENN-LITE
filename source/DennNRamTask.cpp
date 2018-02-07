@@ -14,6 +14,7 @@ namespace NRam
 	, m_n_regs(0)
 	, m_timesteps(0)
 	, m_random(nullptr)
+	, m_use_difficulty(false)
 	, m_max_difficulty(0)
 	, m_min_difficulty(0)
 	, m_current_difficulty(0)
@@ -25,6 +26,7 @@ namespace NRam
 	, m_n_regs(n_regs)
 	, m_timesteps(timesteps)
 	, m_random(&random)
+	, m_use_difficulty(max_int == 0 && timesteps == 0 && min_difficulty > 0)
 	, m_max_difficulty(max_difficulty)
 	, m_min_difficulty(min_difficulty)
 	, m_current_difficulty(min_difficulty)
@@ -51,16 +53,14 @@ namespace NRam
 
 	TaskTuple Task::create_batch(const size_t current_generation) 
 	{
-		if (m_max_int == 0 
-		&&  m_timesteps == 0 
+		if ( m_use_difficulty
 		&&  current_generation != 0 
 		&&  (current_generation + 1) % m_step_gen_change_difficulty == 0
 		)
 		{
 			size_t number_e = m_random->geometric(0.5);
-
-			size_t max_difficulty = m_max_difficulty <= m_difficulty_grades.size() ? m_max_difficulty : m_difficulty_grades.size();
-			size_t D_plus_e_difficulty = (m_current_difficulty + number_e) < max_difficulty ? m_current_difficulty + number_e : max_difficulty;
+			size_t max_difficulty = std::min(m_max_difficulty, m_difficulty_grades.size());
+			size_t D_plus_e_difficulty = std::min((m_current_difficulty + number_e), max_difficulty);
 			Scalar random_number = m_random->uniform(0, 1);
 			if (random_number <= 0.1)
 			{
@@ -74,13 +74,19 @@ namespace NRam
 			{
 				m_current_difficulty = D_plus_e_difficulty;
 			}
+			// Set task difficulty parameters
+			DifficultyGrade difficulty_params = m_difficulty_grades[m_current_difficulty - 1];
+			m_max_int = std::get<0>(difficulty_params);
+			m_timesteps = std::get<1>(difficulty_params);
 		}
-
-		// Set task difficulty parameters
-		auto& difficulty_params = m_difficulty_grades[m_current_difficulty - 1];
-		m_max_int = m_max_int == 0 ? std::get<0>(difficulty_params) : m_max_int;
-		m_timesteps = m_timesteps == 0 ? std::get<1>(difficulty_params) : m_timesteps;
-
+		else if (m_use_difficulty)
+		{
+			size_t difficulty = std::min(m_current_difficulty, m_difficulty_grades.size());
+			DifficultyGrade difficulty_params = m_difficulty_grades[difficulty - 1];
+			m_max_int = std::get<0>(difficulty_params);
+			m_timesteps = std::get<1>(difficulty_params);
+		}
+		//mems
 		const auto& mems = (*this)();
 		Matrix in_mem = std::get<0>(mems);
 		Matrix out_mem = std::get<1>(mems);

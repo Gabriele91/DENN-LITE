@@ -128,8 +128,8 @@ namespace NRam
 			size_t nram_n_registers = jarguments["n_registers"].number();
 			size_t nram_time_steps = jarguments["time_steps"].number();
 			size_t nram_registers_values_extract = jarguments["registers_values_extract"].number();
-			//if nram_time_steps == 0 try to find value in metadata
-			if(!nram_time_steps  )
+			//if nram_time_steps == 0 || nram_max_int==0 try to find value in metadata
+			if(!nram_time_steps || !nram_max_int)
 			{
 				//document
 				auto& document = m_jdata.document().object();
@@ -140,12 +140,27 @@ namespace NRam
 				{
 					//get metadata
 					auto& metadata = it_metadata->second.object();
-					//get time_steps
-					auto it_time_steps = metadata.find("time_steps");
-					//test
-					if(it_time_steps != metadata.end() && it_time_steps->second.is_number())
+					//time_steps
+					if (!nram_time_steps)
 					{
-						nram_time_steps = it_time_steps->second.number();
+						//get time_steps
+						auto it_time_steps = metadata.find("time_steps");
+						//test
+						if (it_time_steps != metadata.end() && it_time_steps->second.is_number())
+						{
+							nram_time_steps = it_time_steps->second.number();
+						}
+					}
+					//max int
+					if (!nram_max_int)
+					{
+						//get max_int
+						auto it_max_int = metadata.find("max_int");
+						//test
+						if (it_max_int != metadata.end() && it_max_int->second.is_number())
+						{
+							nram_max_int = it_max_int->second.number();
+						}
 					}
 				}
 			}
