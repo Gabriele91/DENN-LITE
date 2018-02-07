@@ -1,6 +1,6 @@
 #pragma once
 #include "Config.h"
-#include "DennDataSet.h"
+#include "DennDataset.h"
 #include "DennDatasetLoader.h"
 
 namespace Denn

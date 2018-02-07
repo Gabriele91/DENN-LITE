@@ -19,7 +19,7 @@
 
 //Dataset includes
 #include  "DennDatasetLoader.h"
-#include  "DennDataSet.h"
+#include  "DennDataset.h"
 #include  "DennNRamDatasetTask.h"
 
 //Denn

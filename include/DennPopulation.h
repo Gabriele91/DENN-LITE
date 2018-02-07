@@ -1,6 +1,6 @@
 #pragma once
 #include "Config.h"
-#include "DennDataSet.h"
+#include "DennDataset.h"
 #include "DennNeuralNetwork.h"
 #include "DennIndividual.h"
 #include "DennEvaluation.h"

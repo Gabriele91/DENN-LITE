@@ -1,7 +1,7 @@
 #pragma once
 #include "Config.h"
 #include "IOFileWrapper.h"
-#include "DennDataSet.h"
+#include "DennDataset.h"
 #include "DennFilesystem.h"
 
 namespace Denn
