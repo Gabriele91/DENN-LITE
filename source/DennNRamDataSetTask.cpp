@@ -11,7 +11,7 @@ namespace NRam
 	///////////////////////////////////////////////////////////////////
 	bool DataSetTask::init(NRam::Task& task)
 	{
-		m_task = (Task::SPtr) &task;
+		m_task = task.clone();
 		
 		auto train = m_task->create_batch(0);
 		auto validation = m_task->create_batch(0);
@@ -69,7 +69,7 @@ namespace NRam
 	// READ TEST SET
 	bool DataSetTask::read_test(const DennAlgorithm& algorithm, DataSet& t_out) 
 	{
-		const auto& test 		   = m_task->create_batch(algorithm.current_generation());
+		const auto& test 		 = m_task->create_batch(algorithm.current_generation());
 		m_test.m_features 		 = std::get<0>(test);
 		m_test.m_labels   		 = std::get<1>(test);
 		m_test.m_mask     		 = std::get<2>(test);
@@ -91,7 +91,7 @@ namespace NRam
 		const auto& validation 			= m_task->create_batch(algorithm.current_generation());
 		m_validation.m_features 		= std::get<0>(validation);
 		m_validation.m_labels   		= std::get<1>(validation);
-		m_validation.m_mask 			  = std::get<2>(validation);
+		m_validation.m_mask 			= std::get<2>(validation);
 		m_validation.m_metadata["max_int"] = int(std::get<4>(validation));
 		m_validation.m_metadata["time_steps"] = int(std::get<5>(validation));
 

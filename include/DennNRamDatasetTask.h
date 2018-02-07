@@ -47,8 +47,8 @@ namespace NRam
 		void clear_batch_counter() override;
 
 	protected:
-		Task::SPtr 			 m_task;
 
+		Task::SPtr 		 m_task;
 		DataSetScalar    m_train;
 		DataSetScalar    m_validation;
 		DataSetScalar    m_test;

@@ -8,18 +8,28 @@ namespace Denn
 namespace NRam
 {
 
+	Task::Task()
+	: m_batch_size(0)
+	, m_max_int(0)
+	, m_n_regs(0)
+	, m_timesteps(0)
+	, m_random(nullptr)
+	, m_max_difficulty(0)
+	, m_min_difficulty(0)
+	, m_current_difficulty(0)
+	, m_step_gen_change_difficulty(0)
+	{}
 	Task::Task(size_t batch_size, size_t max_int, size_t n_regs, size_t timesteps, size_t min_difficulty, size_t max_difficulty, size_t step_gen_change_difficulty, Random& random)
 	: m_batch_size(batch_size)
 	, m_max_int(max_int)
 	, m_n_regs(n_regs)
 	, m_timesteps(timesteps)
-	, m_random(random)
+	, m_random(&random)
 	, m_max_difficulty(max_difficulty)
 	, m_min_difficulty(min_difficulty)
 	, m_current_difficulty(min_difficulty)
 	, m_step_gen_change_difficulty(step_gen_change_difficulty)
 	{
-		m_difficulty_grades = {};
 	}
 
 	//delete
@@ -39,22 +49,26 @@ namespace NRam
 	//init mask
 	Matrix Task::init_mask() const { return Matrix::Ones(1, m_max_int); }
 
-	TaskTuple Task::create_batch(const size_t current_generation) {
-		if (m_max_int == 0 && m_timesteps == 0 &&
-            current_generation != 0 && (current_generation + 1) % m_step_gen_change_difficulty == 0)
+	TaskTuple Task::create_batch(const size_t current_generation) 
+	{
+		if (m_max_int == 0 
+		&&  m_timesteps == 0 
+		&&  current_generation != 0 
+		&&  (current_generation + 1) % m_step_gen_change_difficulty == 0
+		)
 		{
-			size_t number_e = m_random.geometric(0.5);
+			size_t number_e = m_random->geometric(0.5);
 
 			size_t max_difficulty = m_max_difficulty <= m_difficulty_grades.size() ? m_max_difficulty : m_difficulty_grades.size();
 			size_t D_plus_e_difficulty = (m_current_difficulty + number_e) < max_difficulty ? m_current_difficulty + number_e : max_difficulty;
-			Scalar random_number = m_random.uniform(0, 1);
+			Scalar random_number = m_random->uniform(0, 1);
 			if (random_number <= 0.1)
 			{
-				m_current_difficulty = m_random.irand(m_min_difficulty, max_difficulty);
+				m_current_difficulty = m_random->irand(m_min_difficulty, max_difficulty);
 			}
 			else if (0.1 < random_number && random_number <= 0.35)
 			{
-				m_current_difficulty = m_random.irand(m_min_difficulty, D_plus_e_difficulty);
+				m_current_difficulty = m_random->irand(m_min_difficulty, D_plus_e_difficulty);
 			}
 			else
 			{
@@ -81,12 +95,17 @@ namespace NRam
 	size_t  Task::get_num_regs()      const { return m_n_regs; }
 	size_t  Task::get_min_difficulty()  const { return m_min_difficulty; }
 	size_t  Task::get_max_difficulty()  const { return m_max_difficulty; }
+	size_t  Task::get_timestemps()  const { return m_timesteps; }
 	size_t  Task::get_current_difficulty()  const { return m_current_difficulty; }
 	size_t  Task::get_step_gen_change_difficulty()  const { return m_step_gen_change_difficulty; }
+	Task::DifficultyGrade Task::get_difficulty_grade() { return {}; }
+	Random* Task::get_random_engine() const { return m_random; }
 
-	std::tuple<size_t, size_t> get_difficulty_grade() { return {}; }
-
-	Random& Task::get_random_engine() const { return m_random; }
+	// Clone a this task
+	Task::SPtr Task::clone() const
+	{
+		std::make_shared<Task>(*this);
+	}
 
 	//map
 	static std::map< std::string, NRam::TaskFactory::CreateObject >& t_map()

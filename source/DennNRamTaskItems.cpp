@@ -44,13 +44,13 @@ namespace NRam
 			// Create and initialize the starting memory
 			Matrix in_mem(m_batch_size, m_max_int);
 			in_mem = in_mem.unaryExpr(
-				[&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int)); }
+				[&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int)); }
 			);
 			in_mem.col(in_mem.cols() - 1) = ColVector::Zero(in_mem.rows());
 			
 			// Initialize the pointers to the elements to be accessed
 			in_mem.col(0) = in_mem.col(0).unaryExpr(
-				[&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int - 1)); }
+				[&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int - 1)); }
 			);
 
 			// Initialize the desired memory
@@ -60,6 +60,16 @@ namespace NRam
 			
 			return std::make_tuple(in_mem, out_mem, Task::init_mask(), Task::init_regs());
 		};
+
+
+		// Clone a this task
+		virtual Task::SPtr clone() const
+		{
+			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskAccess>(*this));
+		}
+
+		//Delete this task
+		virtual ~TaskAccess() {}
 	}; 
 	REGISTERED_TASK(TaskAccess, "access")
 
@@ -97,7 +107,7 @@ namespace NRam
 		{
 			// Create and initialize the starting memory
 			Matrix in_mem(m_batch_size, m_max_int);
-			in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int)); });
+			in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int)); });
 			in_mem.col(in_mem.cols() - 1) = ColVector::Zero(m_batch_size);
 
 			// Initialize desired memory
@@ -108,6 +118,14 @@ namespace NRam
 			
 			return std::make_tuple(in_mem, out_mem, Task::init_mask(), Task::init_regs());
 		}
+
+		// Clone a this task
+		virtual Task::SPtr clone() const
+		{
+			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskIncrement>(*this));
+		}
+		//Delete TaskIncrement
+		virtual ~TaskIncrement() {}
 	};
 	REGISTERED_TASK(TaskIncrement, "increment")
 
@@ -154,7 +172,7 @@ namespace NRam
 			in_mem.block(0, 1, in_mem.rows(), vector_a_size) \
 				= in_mem
 						.block(0, 1, in_mem.rows(), vector_a_size)
-							.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int)); });
+							.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int)); });
 
 			// Create the desired mem
 			Matrix out_mem = in_mem;
@@ -167,6 +185,14 @@ namespace NRam
 
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
+
+		// Clone a this task
+		virtual Task::SPtr clone() const
+		{
+			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskCopy>(*this));
+		}
+		//Delete TaskCopy
+		virtual ~TaskCopy() {}
 	};
 	REGISTERED_TASK(TaskCopy, "copy")
 
@@ -213,7 +239,7 @@ namespace NRam
 			in_mem.block(0, 1, in_mem.rows(), vector_a_size) \
 				= in_mem
 						.block(0, 1, in_mem.rows(), vector_a_size)
-						.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int)); });
+						.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int)); });
 			in_mem.col(0) = ColVector::Constant(in_mem.rows(), offset);
 
 			// Create the desired memory
@@ -227,6 +253,14 @@ namespace NRam
 
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
+
+		// Clone a this task
+		virtual Task::SPtr clone() const
+		{
+			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskReverse>(*this));
+		}
+		//Delete TaskReverse
+		virtual ~TaskReverse() {}
 	};
 	REGISTERED_TASK(TaskReverse, "reverse")
 
@@ -265,13 +299,13 @@ namespace NRam
 		{
 			// Initialize starting memory
 			Matrix in_mem(m_batch_size, m_max_int);
-			in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int - 1)); });
+			in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int - 1)); });
 
 			// Set pointers of elements to swap
 			for (Matrix::Index r = 0; r < in_mem.rows(); ++r)
 			{
-				in_mem(r, 0) = m_random.uirand(2, m_max_int - 2); 
-				in_mem(r, 1) = m_random.uirand(in_mem(r, 0) + 1, m_max_int - 1); 
+				in_mem(r, 0) = m_random->uirand(2, m_max_int - 2); 
+				in_mem(r, 1) = m_random->uirand(in_mem(r, 0) + 1, m_max_int - 1); 
 
 				if (Matrix::Index(in_mem(r, Matrix::Index(in_mem(r, 0)))) == 
 					Matrix::Index(in_mem(r, Matrix::Index(in_mem(r, 1)))))
@@ -297,6 +331,14 @@ namespace NRam
 
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
+
+		// Clone a this task
+		virtual Task::SPtr clone() const
+		{
+			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskSwap>(*this));
+		}
+		//Delete TaskSwap
+		virtual ~TaskSwap() {}
 	};
 	REGISTERED_TASK(TaskSwap, "swap")
 
@@ -310,7 +352,7 @@ namespace NRam
 	class TaskPermutation : public Task
 	{
 	public:
-			TaskPermutation
+		TaskPermutation
 		(
 		  size_t batch_size
 		, size_t max_int
@@ -332,61 +374,69 @@ namespace NRam
 			}; 
 		}
 
-			MemoryTuple operator()() override
-			{
-				using namespace Eigen;
+		MemoryTuple operator()() override
+		{
+			using namespace Eigen;
 
-				//alloc
-				bool remaining_space_is_odd = (m_max_int - 2) % 2 != 0;
-				Matrix::Index offset(m_max_int / 2);
-				Matrix in_mem(m_batch_size, m_max_int);
+			//alloc
+			bool remaining_space_is_odd = (m_max_int - 2) % 2 != 0;
+			Matrix::Index offset(m_max_int / 2);
+			Matrix in_mem(m_batch_size, m_max_int);
 
-				//init in mem
-				in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int - 1)); });
+			//init in mem
+			in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int - 1)); });
 
-				// Initialize the permutation for all the examples
-				for (size_t r = 0; r < in_mem.rows(); ++r)
-				{ 
-					PermutationMatrix< Dynamic, Dynamic > perm(offset - 1);
-					perm.setIdentity();
-					std::random_device rd;
-					std::mt19937 g(rd());
-					std::shuffle(perm.indices().data(), perm.indices().data() + perm.indices().size(), g);
-					in_mem.block(r, 1, 1, offset - 1) = perm
-						.indices()
-						.cast<Scalar>()
-						.transpose();
-				}
-				in_mem.col(0) = ColVector::Constant(in_mem.rows(), offset); // Set pointer to vector A position in memory
-				
-				// Set NULL value in memory
-				if (remaining_space_is_odd)
-					in_mem.block(0, in_mem.cols() - 2, in_mem.rows(), 2) = Matrix::Zero(in_mem.rows(), 2);
-				else
-					in_mem.col(in_mem.cols() - 1) = ColVector::Zero(in_mem.rows()); 
-
-				// Create and initialize the desired memory
-				Matrix out_mem = in_mem;
-				for (Matrix::Index r = 0; r < out_mem.rows(); ++r)
-				{
-					// Select the permutation P
-					Matrix perm = fuzzy_encode(out_mem.block(r, 1, 1, offset - 1));
-
-					// Select the not already permutated A
-					Matrix A = out_mem.block(r, offset, 1, out_mem.cols() - offset - 1);
-
-					// Permutate the elements of A according to the permutation P
-					out_mem.block(r, 1, 1, offset - 1) = A * perm.transpose();
-				}
-
-				// Cut out from the cost calculation the memory part that does not make part of the expected output
-				Matrix mask = Task::init_mask(); //[1, max_int]
-				mask.leftCols(1)       = RowVector::Zero(1);
-				mask.rightCols(offset) = RowVector::Zero(offset);
-
-				//return
-				return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
+			// Initialize the permutation for all the examples
+			for (size_t r = 0; r < in_mem.rows(); ++r)
+			{ 
+				PermutationMatrix< Dynamic, Dynamic > perm(offset - 1);
+				perm.setIdentity();
+				std::random_device rd;
+				std::mt19937 g(rd());
+				std::shuffle(perm.indices().data(), perm.indices().data() + perm.indices().size(), g);
+				in_mem.block(r, 1, 1, offset - 1) = perm
+					.indices()
+					.cast<Scalar>()
+					.transpose();
 			}
+			in_mem.col(0) = ColVector::Constant(in_mem.rows(), offset); // Set pointer to vector A position in memory
+				
+			// Set NULL value in memory
+			if (remaining_space_is_odd)
+				in_mem.block(0, in_mem.cols() - 2, in_mem.rows(), 2) = Matrix::Zero(in_mem.rows(), 2);
+			else
+				in_mem.col(in_mem.cols() - 1) = ColVector::Zero(in_mem.rows()); 
+
+			// Create and initialize the desired memory
+			Matrix out_mem = in_mem;
+			for (Matrix::Index r = 0; r < out_mem.rows(); ++r)
+			{
+				// Select the permutation P
+				Matrix perm = fuzzy_encode(out_mem.block(r, 1, 1, offset - 1));
+
+				// Select the not already permutated A
+				Matrix A = out_mem.block(r, offset, 1, out_mem.cols() - offset - 1);
+
+				// Permutate the elements of A according to the permutation P
+				out_mem.block(r, 1, 1, offset - 1) = A * perm.transpose();
+			}
+
+			// Cut out from the cost calculation the memory part that does not make part of the expected output
+			Matrix mask = Task::init_mask(); //[1, max_int]
+			mask.leftCols(1)       = RowVector::Zero(1);
+			mask.rightCols(offset) = RowVector::Zero(offset);
+
+			//return
+			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
+		}
+
+		// Clone a this task
+		virtual Task::SPtr clone() const
+		{
+			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskPermutation>(*this));
+		}
+		//Delete TaskPermutation
+		virtual ~TaskPermutation() {}
 	};
 	REGISTERED_TASK(TaskPermutation, "permutation")
 
@@ -434,7 +484,7 @@ namespace NRam
 			Matrix list_elements(m_batch_size, list_size);
 
 			//init in mem
-			list_elements = list_elements.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int - 1)); });
+			list_elements = list_elements.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int - 1)); });
 
 			// Initialize the permutation for all the examples
 			for (size_t r = 0; r < in_mem.rows(); ++r)
@@ -477,7 +527,7 @@ namespace NRam
 				}
 			}
 			in_mem.col(2) = ColVector::Constant(in_mem.rows(), 2); // Set pointer to vector memory position where the searched element will be writed
-			in_mem.col(1) = in_mem.col(1).unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, list_size - 1)); }); // Set the position in the list to read
+			in_mem.col(1) = in_mem.col(1).unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, list_size - 1)); }); // Set the position in the list to read
 
 			// Create the desired memory
 			Matrix out_mem = in_mem;
@@ -501,6 +551,14 @@ namespace NRam
 			//return
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
+
+		// Clone a this task
+		virtual Task::SPtr clone() const
+		{
+			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskListK>(*this));
+		}
+		//Delete TaskListK
+		virtual ~TaskListK() {}
 	};
 	REGISTERED_TASK(TaskListK, "listk")
 
@@ -546,7 +604,7 @@ namespace NRam
 			Matrix list_elements(m_batch_size, list_size);
 
 			//init in mem
-			list_elements = list_elements.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int - 1)); });
+			list_elements = list_elements.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int - 1)); });
 
 			// Initialize the permutation for all the examples
 			for (size_t r = 0; r < in_mem.rows(); ++r)
@@ -618,6 +676,14 @@ namespace NRam
 			//return
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
+
+		// Clone a this task
+		virtual Task::SPtr clone() const
+		{
+			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskListSearch>(*this));
+		}
+		//Delete TaskListSearch
+		virtual ~TaskListSearch() {}
 	};
 	REGISTERED_TASK(TaskListSearch, "listsearch")
 
@@ -672,8 +738,8 @@ namespace NRam
 			Matrix list_elements_a_plus_b = Matrix::Zero(m_batch_size, list_size_a_plus_b);
 
 			// Initilize memories and sort them
-			list_elements_a = list_elements_a.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int - 1)); });
-			list_elements_b = list_elements_b.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int - 1)); });
+			list_elements_a = list_elements_a.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int - 1)); });
+			list_elements_b = list_elements_b.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int - 1)); });
 			sort_rows_ascending(list_elements_a);
 			sort_rows_ascending(list_elements_b);
 
@@ -699,6 +765,14 @@ namespace NRam
 
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
+		
+		// Clone a this task
+		virtual Task::SPtr clone() const
+		{
+			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskMerge>(*this));
+		}
+		//Delete TaskListSearch
+		virtual ~TaskMerge() {}
 	};
 	REGISTERED_TASK(TaskMerge, "merge")
 
@@ -751,11 +825,11 @@ namespace NRam
 
 			// Create and initialize elements of bsts
 			Matrix list_elements(m_batch_size, num_elements);
-			list_elements = list_elements.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int - 1)); });
+			list_elements = list_elements.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int - 1)); });
 
 			//Create and initialize the walk of bst
 			Matrix walks_bst(m_batch_size, num_elements - 1);
-			walks_bst = walks_bst.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(0, 2)); });
+			walks_bst = walks_bst.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(0, 2)); });
 
 			// Initialize the permutation for all the examples and the memories
 			for (size_t r = 0; r < in_mem.rows(); ++r)
@@ -813,6 +887,15 @@ namespace NRam
 
 			return std::make_tuple(in_mem, out_mem, Task::init_mask(), Task::init_regs());
 		}
+
+		// Clone a this task
+		virtual Task::SPtr clone() const
+		{
+			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskWalkBST>(*this));
+		}
+		//Delete TaskWalkBST
+		virtual ~TaskWalkBST() {}
+
 	private:
 		void insert_in_bst(RowVector& bst, Matrix::Index pointer, const Scalar& element, const Matrix::Index& element_pointer_in_memory)
 		{
@@ -892,8 +975,8 @@ namespace NRam
 			Matrix list_elements_a_plus_b = Matrix::Zero(m_batch_size, arrays_memory_size);
 
 			// Initialize arrays
-			list_elements_a = list_elements_a.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int - 1)); });
-			list_elements_b = list_elements_b.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int - 1)); });
+			list_elements_a = list_elements_a.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int - 1)); });
+			list_elements_b = list_elements_b.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int - 1)); });
 			list_elements_a_plus_b = list_elements_a + list_elements_b;
 			for (Matrix::Index r = 0; r < list_elements_a_plus_b.rows(); ++r)
 				for (Matrix::Index c = 0; c < list_elements_a_plus_b.cols(); ++c)
@@ -916,6 +999,14 @@ namespace NRam
 
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
+
+		// Clone a this task
+		virtual Task::SPtr clone() const
+		{
+			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskSum>(*this));
+		}
+		//Delete 
+		virtual ~TaskSum() {}
 	};
 	REGISTERED_TASK(TaskSum, "sum")
 
@@ -962,10 +1053,10 @@ namespace NRam
 			in_mem.col(0) = ColVector::Constant(in_mem.rows(), 3); // Starting point of list A
 			in_mem.col(1) = ColVector::Constant(in_mem.rows(), 3 + arrays_memory_size + 1); // Starting point of list B
 			in_mem.block(0, 3, in_mem.rows(), arrays_memory_size) = in_mem.block(0, 3, in_mem.rows(), arrays_memory_size)
-				.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int - 1)); }); // Inizialize A
+				.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int - 1)); }); // Inizialize A
 			in_mem.block(0, 3 + arrays_memory_size + 1, in_mem.rows(), arrays_memory_size) = in_mem
 				.block(0, 3 + arrays_memory_size + 1, in_mem.rows(), arrays_memory_size)
-					.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random.uniform(1, m_max_int - 1)); }); // Initialize B
+					.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int - 1)); }); // Initialize B
 
 			// Create and initialize desired memory
 			Matrix out_mem = in_mem;
@@ -980,6 +1071,14 @@ namespace NRam
 			
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
+
+		// Clone a this task
+		virtual Task::SPtr clone() const
+		{
+			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskProduct>(*this));
+		}
+		//Delete TaskProduct
+		virtual ~TaskProduct() {}
 	};
 	REGISTERED_TASK(TaskProduct, "product")
 }
