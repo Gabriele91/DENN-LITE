@@ -1,6 +1,7 @@
 #include "DennSerializeOutput.h"
 #include "DennParameters.h"
 #include "DennIndividual.h"
+#include "DennAlgorithm.h"
 #include "DennDump.h"
 
 namespace Denn
@@ -31,8 +32,8 @@ namespace Denn
 			for (size_t i = 0; i != params_serializable.size(); ++i)
 			{
 				auto* variable = params_serializable[i]->m_associated_variable;
-				output() << "\t\t\""
-					<< variable->name() << "\" : "
+				output() << "\t\t"
+					<< Dump::json_string( variable->name() ) << " : "
 					<< Dump::json_variant(variable->variant())
 					<< ((i + 1) != params_serializable.size() ? "," : "")
 					<< std::endl;
@@ -41,12 +42,51 @@ namespace Denn
 			output() << "\t}," << std::endl;
 		}
 
-		virtual void serialize_best(double time, Denn::Scalar accuracy, Denn::Scalar f, Denn::Scalar cr, const Denn::NeuralNetwork& network) override
+	    virtual void serialize_metadata(const Denn::MetaData& metadata)
 		{
+			output() << "\t\"metadata\" :" << std::endl;
+			output() << "\t{" << std::endl;
+			//get only serializables
+			//serialize
+			for(auto it = metadata.begin(); it != metadata.end();)
+			{
+				//draw output
+				output()
+				<< "\t\t"
+			    << Dump::json_string( it->first ) << " : "
+				<< Dump::json_variant( it->second );
+				//next
+				++it;
+				//at end of row
+				if(it != metadata.end()) output() << ',' ; 
+				//end metadata
+				output() << std::endl; 
+			}
+
+			output() << "\t}," << std::endl;
+		}
+
+		virtual void serialize_best(double time, const DennAlgorithm& algorithm) override
+		{
+			//get values
+		    Denn::Scalar accuracy = algorithm.execute_test( *algorithm.best_context().m_best );
+			//eval
+	        Denn::Scalar eval = algorithm.best_context().m_eval;		    
+			const MetaData& metadata = algorithm.best_context().m_metadata;
+			//individual
+	        Denn::Scalar f = algorithm.best_context().m_best->m_f;
+		    Denn::Scalar cr = algorithm.best_context().m_best->m_cr;
+		    Denn::Scalar p = algorithm.best_context().m_best->m_p;
+		    const Denn::NeuralNetwork& network = algorithm.best_context().m_best->m_network;
+			//
 			output() << "\t\"time\" : " << Dump::json_number(time) << "," << std::endl;
+			output() << "\t\"eval\" : " << Dump::json_number(eval) << "," << std::endl;
 			output() << "\t\"accuracy\" : " << Dump::json_number(accuracy) << "," << std::endl;
 			output() << "\t\"f\" : " << Dump::json_number(f) << "," << std::endl;
 			output() << "\t\"cr\" : " << Dump::json_number(cr) << "," << std::endl;
+			output() << "\t\"p\" : " << Dump::json_number(p) << "," << std::endl;
+			//metadata
+			serialize_metadata(metadata);
 			//...
 			if (!*parameters().m_serialize_neural_network) return;
 			//serialize net
@@ -94,16 +134,23 @@ namespace Denn
 			//print header
 			for (size_t i = 0; i != params_serializable.size(); ++i)
 				output() << params_serializable[i]->m_associated_variable->name() << "; ";
-			output() << "time; accuracy; f; cr" << (*parameters().m_serialize_neural_network ? "; neutal network" : "");
+			output() << "time; accuracy; f; cr; p" << (*parameters().m_serialize_neural_network ? "; neutal network" : "");
 			output() << std::endl;
 			//serialize
 			for (size_t i = 0; i != params_serializable.size(); ++i)
 				output() << variant_to_str(params_serializable[i]->m_associated_variable->variant()) << "; ";
 		}
 
-		virtual void serialize_best(double time, Denn::Scalar accuracy, Denn::Scalar f, Denn::Scalar cr, const Denn::NeuralNetwork& network) override
+		virtual void serialize_best(double time, const DennAlgorithm& algorithm) override
 		{
-			output() << time << "; " << accuracy << "; " << f << "; " << cr;
+			//get values
+		    Denn::Scalar accuracy = algorithm.execute_test( *algorithm.best_context().m_best );
+	        Denn::Scalar f = algorithm.best_context().m_best->m_f;
+		    Denn::Scalar cr = algorithm.best_context().m_best->m_cr;
+		    Denn::Scalar p = algorithm.best_context().m_best->m_p;
+		    const Denn::NeuralNetwork& network = algorithm.best_context().m_best->m_network;
+			//values
+			output() << time << "; " << accuracy << "; " << f << "; " << cr << "; " << p;
 			//no full?
 			if (!*parameters().m_serialize_neural_network)
 			{

@@ -148,6 +148,7 @@
     <ClCompile Include="source\DennSerializeOutputFactory.cpp" />
     <ClCompile Include="source\DennSerializeOutputItems.cpp" />
     <ClCompile Include="source\DennTestSetStream.cpp" />
+    <ClCompile Include="source\DennVariant.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\DennRandom.cpp" />
     <ClCompile Include="source\TicksTime.cpp" />

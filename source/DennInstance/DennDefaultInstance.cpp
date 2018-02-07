@@ -4,7 +4,7 @@
 #include "DennRuntimeOutput.h"
 #include "DennSerializeOutput.h"
 #include "DennInstanceUtils.h"
-#include "DennDataset.h"
+#include "DennDataSet.h"
 #include "DennDatasetLoader.h"
 #include <fstream>
 
@@ -126,14 +126,7 @@ namespace Denn
 			execute_time = Time::get_time() - execute_time;
 			//output
 			m_serialize->serialize_parameters(m_parameters);
-			m_serialize->serialize_best
-			(
-				  execute_time
-				, denn.execute_test(*result)
-				, result->m_f
-				, result->m_cr
-				, result->m_network
-			);
+			m_serialize->serialize_best(execute_time, denn);
 			//save best
 			m_network = result->m_network;
 			//success

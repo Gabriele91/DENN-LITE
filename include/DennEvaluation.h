@@ -1,7 +1,7 @@
 #pragma once
 #include "Config.h"
 #include "DennIndividual.h"
-#include "DennDataset.h"
+#include "DennDataSet.h"
 
 namespace Denn
 {

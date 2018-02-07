@@ -79,12 +79,15 @@ namespace Denn
 		ReadOnly< std::vector<std::string> >  m_activation_functions      { "activation_functions"      /* , none */ };
 		ReadOnly< std::string >               m_output_activation_function{ "output_activation_function" ,  "linear" };
 		//nram attribute
-		ReadOnly< size_t >					  m_max_int			       { "max_int"                  , size_t(10) };
+		ReadOnly< size_t >					  m_max_int			       { "max_int"                  , size_t(0) };
 		ReadOnly< size_t >					  m_n_registers		       { "n_registers"              , size_t(4) };
-		ReadOnly< size_t >					  m_time_steps			   { "time_steps"               , size_t(1) };
+		ReadOnly< size_t >					  m_time_steps			   { "time_steps"               , size_t(0) };
 		ReadOnly< std::string >				  m_registers_values_extraction_type { "registers_values_extraction_type", "zero" };
 		ReadOnly< std::string >               m_task				   { "task"                  /* , none */ };
 		ReadOnly< std::vector<std::string> >  m_gates				   { "gates"                 /* , none */ };
+		ReadOnly< size_t >  					m_min_difficulty 				 { "min_difficulty"       , size_t(1)};
+		ReadOnly< size_t >  					m_max_difficulty 				 { "max_difficulty"       , size_t(5)};
+		ReadOnly< size_t >  					m_step_gen_change_difficulty { "step_gen_change_difficulty", size_t(100)};
 		//nram test 
 		ReadOnly< size_t >					   m_n_test				   { "n_test", size_t(1) };
 		//params info

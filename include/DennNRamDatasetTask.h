@@ -10,7 +10,7 @@ namespace Denn
 {
 namespace NRam 
 {
-
+	//Task
 	class DataSetTask : public DataSetLoader
 	{
 	public:
@@ -30,23 +30,24 @@ namespace NRam
 
 		///////////////////////////////////////////////////////////////////
 		// READ TEST SET
-		bool read_test(DataSet& t_out) override;
+		bool read_test(const DennAlgorithm& algorithm, DataSet& t_out) override;
 
 		///////////////////////////////////////////////////////////////////
 		// READ VALIDATION SET
-		bool read_validation(DataSet& t_out) override;
+		bool read_validation(const DennAlgorithm& algorithm, DataSet& t_out) override;
 
 		///////////////////////////////////////////////////////////////////
 		// READ TRAINING SET
 		bool start_read_batch() override;
 
-		bool read_batch(DataSet& t_out, bool loop = true) override;
+		bool read_batch(const DennAlgorithm& algorithm, DataSet& t_out, bool loop = true) override;
 
 		size_t number_of_batch_read() const override;
 
 		void clear_batch_counter() override;
 
 	protected:
+		Task::SPtr 			 m_task;
 
 		DataSetScalar    m_train;
 		DataSetScalar    m_validation;

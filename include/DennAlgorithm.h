@@ -55,11 +55,13 @@ public:
 	{
 		Individual::SPtr m_best;
 		Scalar           m_eval;
+		MetaData		 m_metadata;
         //
-		BestContext(Individual::SPtr best = nullptr, Scalar eval = 0)
+		BestContext(Individual::SPtr best = nullptr, Scalar eval = 0,const MetaData& metadata = MetaData())
 		{
 			m_best = best;
 			m_eval = eval;
+			m_metadata = metadata;
 		}
 	};
 	////////////////////////////////////////////////////////////////////////
@@ -215,6 +217,26 @@ public:
 			;
 	}
 
+	size_t current_generation() const 
+	{  
+		return (*parameters().m_sub_gens) * current_global_generation() + current_sub_generation();
+	}
+
+	size_t current_global_generation() const
+	{
+		return m_current_global_gen;
+	}
+	
+	size_t current_sub_generation() const
+	{
+		return m_current_sub_gen;
+	}
+
+	void stop_execution() const 
+	{
+		m_execution = false;
+	}
+
 protected:
 	//init
 	bool init();
@@ -273,6 +295,11 @@ protected:
 	//params of DE
 	Parameters 		      m_params;
 	EvolutionMethod::SPtr m_e_method;
+	//generation info
+	size_t m_current_sub_gen;
+	size_t m_current_global_gen;
+	//execution info
+	mutable std::atomic< bool > m_execution;
 	//function for DE
 	ClampFunction		  m_clamp_function;
 };

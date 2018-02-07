@@ -17,8 +17,11 @@ namespace Denn
 		, instance.neural_network()
 		))
 	, m_dataset_loader(&instance.dataset_loader())
-	, m_dataset_batch(&instance.dataset_loader())
+	, m_dataset_batch(*this, &instance.dataset_loader())
 	, m_params(params)
+	, m_current_global_gen(0)
+	, m_current_sub_gen(0)
+    , m_execution(true)
 	{
 	}
 
@@ -38,6 +41,10 @@ namespace Denn
 		m_clamp_function = gen_clamp_func();
 		//clear random engines
 		m_population_random.clear();
+		//init gen info
+		m_current_global_gen = 0;
+		m_current_sub_gen = 0;
+		m_execution = true;
 		//true
 		return success;
 	}
@@ -81,6 +88,10 @@ namespace Denn
 		//global info
 		const size_t n_global_pass = ((size_t)m_params.m_generations / (size_t)m_params.m_sub_gens);
 		const size_t n_sub_pass = m_params.m_sub_gens;
+		//init cunter
+		m_current_global_gen = 0;
+		m_current_sub_gen = 0;
+		m_execution = true;
 		//restart init
 		m_restart_ctx = RestartContext();
 		//best
@@ -93,8 +104,11 @@ namespace Denn
 		//start output
 		if (m_output) m_output->start();
 		//main loop
-		for (size_t pass = 0; pass != n_global_pass; ++pass)
+		for (size_t pass = 0; pass != n_global_pass && m_execution; ++pass)
 		{
+			//save global pass
+			m_current_global_gen = pass;
+			//sub pass
 			execute_a_pass(pass, n_sub_pass);
 			//next
 			next_batch();
@@ -110,7 +124,7 @@ namespace Denn
 	{
 		//validation
 		DataSetScalar test;
-		m_dataset_loader->read_test(test);
+		m_dataset_loader->read_test(*this, test);
 		//compute test
 		Scalar eval = (*m_test_function)(*m_best_ctx.m_best, test);
 		//return
@@ -120,7 +134,7 @@ namespace Denn
 	{
 		//validation
 		DataSetScalar test;
-		m_dataset_loader->read_test(test);
+		m_dataset_loader->read_test(*this, test);
 		//compute		
 		Scalar eval = (*m_test_function)(individual, test);
 		//return
@@ -148,7 +162,7 @@ namespace Denn
 		auto& population = m_population.parents();
 		//validation
 		DataSetScalar validation;
-		m_dataset_loader->read_validation(validation);
+		m_dataset_loader->read_validation(*this, validation);
 		//best
 		Scalar best_eval =  validation_function_worst();
 		size_t	   best_i= 0;
@@ -181,7 +195,7 @@ namespace Denn
 		size_t np = current_np();
 		//validation
 		DataSetScalar validation;
-		m_dataset_loader->read_validation(validation);
+		m_dataset_loader->read_validation(*this, validation);
 		//list eval
 		std::vector<Scalar> validation_evals(population.size(), validation_function_worst());
 		//alloc promises
@@ -223,15 +237,18 @@ namespace Denn
 	{
 		///////////////////////////////////////////////////////////////////
 		if (*m_params.m_reval_pop_on_batch || pass == 0) 
-			execute_loss_function_on_all_population(m_population.parents());
+			execute_fitness_on(m_population.parents());
 		///////////////////////////////////////////////////////////////////
 		//output
 		if(m_output) m_output->start_a_pass();
 		//start pass
 		m_e_method->start_a_gen_pass(m_population);
 		//sub pass
-		for (size_t sub_pass = 0; sub_pass != n_sub_pass; ++sub_pass)
+		for (size_t sub_pass = 0; sub_pass != n_sub_pass && m_execution; ++sub_pass)
 		{
+			//save
+			m_current_sub_gen = sub_pass;
+			//execute
 			execute_a_sub_pass(pass, sub_pass);
 		}
 		//end pass
@@ -271,6 +288,15 @@ namespace Denn
 			m_best_ctx.m_best = curr->copy();
 			//save eval (on validation) of best
 			m_best_ctx.m_eval = curr_eval;
+			//save metadata
+			m_best_ctx.m_metadata = current_batch().m_metadata;
+			//or ??
+			#if 0
+			//validation
+			DataSetScalar validation;
+			m_dataset_loader->read_validation(*this, validation);
+			m_best_ctx.m_metadata = validation.m_metadata;
+			#endif 
 		}
 	}
 	void DennAlgorithm::execute_update_best_on_loss_function()
@@ -286,6 +312,8 @@ namespace Denn
 			m_best_ctx.m_best = curr->copy();
 			//save eval (on test set) of best
 			m_best_ctx.m_eval = curr->m_eval;
+			//save metadata
+			m_best_ctx.m_metadata = current_batch().m_metadata;
 		}
 	}
 	void DennAlgorithm::execute_update_restart(size_t pass)

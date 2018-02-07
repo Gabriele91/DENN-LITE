@@ -1,7 +1,6 @@
 //
 // Created by Valerio Belli on 20/11/17.
 //
-
 #include "Denn.h"
 #include "DennNRam.h"
 #include "DennNRamTask.h"
@@ -279,29 +278,6 @@ namespace NRam
         return Json(jsteps);
     }
 	////////////////////////////////////////////////////////////////////////////////////////
-	//Evaluetor of nram
-	REGISTERED_EVALUATION(NRamEval, "nram")
-	//methods
-	bool NRamEval::minimize() const { return true; }
-	Scalar NRamEval::operator () (const Individual& individual, const DataSet& ds)
-	{
-		denn_assert(m_context);
-		//network
-		auto& nn = individual.m_network;
-		//Dataset
-		auto& in_mem = ds.features();
-		auto& out_mem = ds.labels();
-		auto& cost_mask = ds.mask();
-		//execute
-		return NRam::train(*m_context, nn, in_mem, out_mem, cost_mask);
-	}
-	//set context
-	Evaluation::SPtr NRamEval::set_context(const NRamLayout& context)
-	{
-		m_context = &context;
-		return this->get_ptr();
-	}
-	////////////////////////////////////////////////////////////////////////////////////////
 	// NRam
 	Matrix fuzzy_encode(const Matrix& M)
     {
@@ -394,6 +370,8 @@ namespace NRam
     , const Matrix& linear_in_mem
     , const Matrix& linear_out_mem
     , const Matrix& linear_mask
+    , const size_t& max_int
+    , const size_t& timesteps
     )
     {
 		//init by threads
@@ -410,7 +388,7 @@ namespace NRam
         for (Matrix::Index s = 0; s < linear_in_mem.rows(); ++s)
         {
             //Alloc regs
-            regs = Matrix::Zero(context.m_n_regs,context.m_max_int);
+            regs = Matrix::Zero(context.m_n_regs,max_int);
             //P(X=0)
             regs.col(0).fill(1);
             //In mem fuzzy
@@ -424,7 +402,6 @@ namespace NRam
             //for all timestep, run on s
             for (size_t timestep = 0; !stop && timestep < context.m_timesteps; timestep++)
             {
-
 				//NN
 				out = network.apply(get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
                 //execute circuit
