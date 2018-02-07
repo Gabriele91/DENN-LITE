@@ -1,10 +1,0 @@
-=== START ===
-                                                                                                              |-[0]->[ACC_VAL:1758.94][N_RESET:0][TIME:4.48346e-05]
-                                                                                                              |-[5]->[ACC_VAL:1446.74][N_RESET:0][TIME:7.7224]
-                                                                                                              |-[10]->[ACC_VAL:1137.27][N_RESET:0][TIME:15.4604]
-                                                                                                              |-[15]->[ACC_VAL:1125.81][N_RESET:0][TIME:23.0778]
-                                                                                                              |-[20]->[ACC_VAL:938.631][N_RESET:0][TIME:30.9737]
-                                                                                                              |-[25]->[ACC_VAL:869.847][N_RESET:0][TIME:39.2398]
-                                                                                                              |-[30]->[ACC_VAL:383.116][N_RESET:0][TIME:49.3421]
-                                                                                                              |-[35]->[ACC_VAL:382.008][N_RESET:0][TIME:59.2003]
-                                                                                                              |-[40]->[ACC_VAL:371.687][N_RESET:0][TIME:67.4253]
