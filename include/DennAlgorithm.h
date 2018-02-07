@@ -83,6 +83,10 @@ public:
 	Scalar execute_test() const;
 	Scalar execute_test(Individual& individual) const;
 
+	//using the validation set on a individual
+	Scalar execute_validation() const;
+	Scalar execute_validation(Individual& individual) const;
+	
 	//info
 	const Parameters& parameters() const
 	{
@@ -238,6 +242,9 @@ public:
 	}
 
 protected:
+	//using the last batch on a individual
+	Scalar execute_train() const;
+	Scalar execute_train(Individual& individual) const;
 	//init
 	bool init();
 	bool init_population();

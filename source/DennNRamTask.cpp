@@ -58,21 +58,22 @@ namespace NRam
 		&&  (current_generation + 1) % m_step_gen_change_difficulty == 0
 		)
 		{
-			size_t number_e = m_random->geometric(0.5);
+			volatile size_t number_e = m_random->geometric(0.5);
 			size_t max_difficulty = std::min(m_max_difficulty, m_difficulty_grades.size());
-			size_t D_plus_e_difficulty = std::min((m_current_difficulty + number_e), max_difficulty);
+			volatile size_t d_plus_e_difficulty = std::min((m_current_difficulty + number_e), max_difficulty);
+			//cases
 			Scalar random_number = m_random->uniform(0, 1);
 			if (random_number <= 0.1)
 			{
 				m_current_difficulty = m_random->irand(m_min_difficulty, max_difficulty);
 			}
-			else if (0.1 < random_number && random_number <= 0.35)
+			else if (random_number <= 0.35)
 			{
-				m_current_difficulty = m_random->irand(m_min_difficulty, D_plus_e_difficulty);
+				m_current_difficulty = m_random->irand(m_min_difficulty, d_plus_e_difficulty);
 			}
 			else
 			{
-				m_current_difficulty = D_plus_e_difficulty;
+				m_current_difficulty = d_plus_e_difficulty;
 			}
 			// Set task difficulty parameters
 			DifficultyGrade difficulty_params = m_difficulty_grades[m_current_difficulty - 1];

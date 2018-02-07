@@ -122,7 +122,7 @@ namespace Denn
 	//using the test set on a individual
 	Scalar DennAlgorithm::execute_test() const 
 	{
-		//validation
+		//test
 		DataSetScalar test;
 		m_dataset_loader->read_test(*this, test);
 		//compute test
@@ -132,11 +132,45 @@ namespace Denn
 	}
 	Scalar DennAlgorithm::execute_test(Individual& individual) const 
 	{
-		//validation
+		//test
 		DataSetScalar test;
 		m_dataset_loader->read_test(*this, test);
 		//compute		
 		Scalar eval = (*m_test_function)(individual, test);
+		//return
+		return eval;
+	}
+	Scalar DennAlgorithm::execute_validation() const
+	{
+		//validation
+		DataSetScalar validation;
+		m_dataset_loader->read_validation(*this, validation);
+		//compute		
+		Scalar eval = (*m_validation_function)(*m_best_ctx.m_best, validation);
+		//return
+		return eval;
+	}
+	Scalar DennAlgorithm::execute_validation(Individual& individual) const
+	{
+		//validation
+		DataSetScalar validation;
+		m_dataset_loader->read_validation(*this, validation);
+		//compute		
+		Scalar eval = (*m_validation_function)(individual, validation);
+		//return
+		return eval;
+	}
+	Scalar DennAlgorithm::execute_train() const
+	{
+		//compute		
+		Scalar eval = (*m_loss_function)(*m_best_ctx.m_best, current_batch());
+		//return
+		return eval;
+	}
+	Scalar DennAlgorithm::execute_train(Individual& individual) const
+	{
+		//compute		
+		Scalar eval = (*m_loss_function)(*m_best_ctx.m_best, current_batch());
 		//return
 		return eval;
 	}
@@ -236,8 +270,16 @@ namespace Denn
 	void DennAlgorithm::execute_a_pass(size_t pass, size_t n_sub_pass)
 	{
 		///////////////////////////////////////////////////////////////////
-		if (*m_params.m_reval_pop_on_batch || pass == 0) 
+		if (*m_params.m_reval_pop_on_batch || pass == 0)
+		{
+			//re-eval all pop
 			execute_fitness_on(m_population.parents());
+			//re-eval best on traning set (if validation is disable)
+			if (!m_e_method->best_from_validation())
+			{
+				m_best_ctx.m_eval = execute_train();
+			}
+		}
 		///////////////////////////////////////////////////////////////////
 		//output
 		if(m_output) m_output->start_a_pass();
