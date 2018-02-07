@@ -374,7 +374,7 @@ namespace NRam
         Scalar s_cost = 0;
         for (size_t idx = 0; idx < M.rows(); ++idx)
         {
-            s_cost += Denn::CostFunction::safe_log(M(idx, Matrix::Index(desired_mem(idx)))) * linear_mask(0, idx);
+            s_cost += Denn::CostFunction::safe_log(std::max(M(idx, Matrix::Index(desired_mem(idx))), std::numeric_limits<Scalar>::max())) * linear_mask(0, idx);
         }
         return s_cost;
     }
@@ -402,6 +402,10 @@ namespace NRam
 		Matrix out;
 		//time step
         Scalar full_cost = Scalar(0.0);
+        #ifdef ENABLE_ENTROPY
+        const Scalar entropy = Scalar(0.1);
+        const Scalar entropy_decay = Scalar(0.999);
+        #endif 
         // Run the circuit
         for (Matrix::Index s = 0; s < linear_in_mem.rows(); ++s)
         {
@@ -420,6 +424,7 @@ namespace NRam
             //for all timestep, run on s
             for (size_t timestep = 0; !stop && timestep < context.m_timesteps; timestep++)
             {
+
 				//NN
 				out = network.apply(get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
                 //execute circuit
@@ -436,8 +441,18 @@ namespace NRam
                 if (stop)  p_t = 1 - cum_prob_complete;
                 else       p_t = fi * prob_incomplete;
                 cum_prob_complete += p_t;
+                //Entropy
+                #ifdef ENABLE_ENTROPY
+                Scalar entropy_weight = Scalar(entropy * pow(entropy_decay, timestep)); 
+                Matrix entropy_mem = in_mem;
+                Scalar entropy_cost = entropy_weight * entropy_mem.unaryExpr
+                ([] (Scalar v) -> Scalar { return v * Denn::CostFunction::safe_log(std::max<Scalar>(v, 1e-8));}).sum();
+                #else 
+                const Scalar entropy_cost = 0;
+                #endif 
                 //compute cost
-                sample_cost -= p_t * calculate_sample_cost(in_mem, linear_out_mem.row(s), linear_mask);
+                sample_cost -= p_t * calculate_sample_cost(in_mem, linear_out_mem.row(s), linear_mask) - entropy_cost;
+
             }
             //add to full "cost"
             full_cost += sample_cost;
@@ -476,7 +491,7 @@ namespace NRam
                 case Gate::UNARY:
                 {
                     a = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
-                    coeff_a = CostFunction::softmax_col(a);
+                    coeff_a = CostFunction::softmax_col(a) /* / CostFunction::softmax_col(a).sum() */;
                     ptr_col += coefficient_size;
 
                     C = gate(avg(regs, coeff_a), in_mem);
@@ -487,11 +502,11 @@ namespace NRam
                 case Gate::BINARY:
                 {
                     a = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
-                    coeff_a = CostFunction::softmax_col(a);
+                    coeff_a = CostFunction::softmax_col(a) /* / CostFunction::softmax_col(a).sum() */;
                     ptr_col += coefficient_size;
 
                     b = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
-                    coeff_b = CostFunction::softmax_col(b);
+                    coeff_b = CostFunction::softmax_col(b) /* / CostFunction::softmax_col(b).sum() */;
                     ptr_col += coefficient_size;
 
                     C = gate(avg(regs, coeff_a), avg(regs, coeff_b), in_mem);
@@ -511,7 +526,7 @@ namespace NRam
 			// get row
             c = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
 			// softmax
-            coeff_c = CostFunction::softmax_col(c);
+            coeff_c = CostFunction::softmax_col(c) /* / CostFunction::softmax_col(c).sum() */;
 			// update
 			regs.row(r) = avg(regs, coeff_c).transpose();
 			// next
@@ -614,7 +629,7 @@ namespace NRam
                 case Gate::UNARY:
                 {
                     ColVector a    = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
-                    Matrix coeff_a = CostFunction::softmax_col(a);
+                    Matrix coeff_a = CostFunction::softmax_col(a) /* / CostFunction::softmax_col(a).sum() */;
                     ptr_col += coefficient_size;
 
                     ColVector selected_value_a = avg(regs, coeff_a);
@@ -635,11 +650,11 @@ namespace NRam
                 case Gate::BINARY:
                 {
                     ColVector a    = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
-                    Matrix coeff_a = CostFunction::softmax_col(a);
+                    Matrix coeff_a = CostFunction::softmax_col(a)  /* / CostFunction::softmax_col(a).sum() */;
                     ptr_col += coefficient_size;
 
                     ColVector b    = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
-                    Matrix coeff_b = CostFunction::softmax_col(b);
+                    Matrix coeff_b = CostFunction::softmax_col(b)  /* / CostFunction::softmax_col(b).sum() */;
                     ptr_col += coefficient_size;
 
                     Matrix selected_value_a = avg(regs, coeff_a);
@@ -671,7 +686,7 @@ namespace NRam
 			// get row
             ColVector c = nn_out_decision.block(ptr_col, 0, coefficient_size, 1);
 			// softmax
-            Matrix coeff_c = CostFunction::softmax_col(c);
+            Matrix coeff_c = CostFunction::softmax_col(c) /* / CostFunction::softmax_col(c).sum() */;
 			// update
 			regs.row(r) = avg(regs, coeff_c).transpose();
 			// next
