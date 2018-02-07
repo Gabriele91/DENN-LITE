@@ -104,7 +104,7 @@ namespace NRam
 	// Clone a this task
 	Task::SPtr Task::clone() const
 	{
-		std::make_shared<Task>(*this);
+		return std::make_shared<Task>(*this);
 	}
 
 	//map
