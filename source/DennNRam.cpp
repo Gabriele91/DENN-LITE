@@ -350,7 +350,7 @@ namespace NRam
         Scalar s_cost = 0;
         for (size_t idx = 0; idx < M.rows(); ++idx)
         {
-            s_cost += Denn::CostFunction::safe_log(std::max(M(idx, Matrix::Index(desired_mem(idx))), std::numeric_limits<Scalar>::max())) * linear_mask(0, idx);
+            s_cost += Denn::CostFunction::safe_log(std::max(M(idx, Matrix::Index(desired_mem(idx))), std::numeric_limits<Scalar>::min())) * linear_mask(0, idx);
         }
         return s_cost;
     }
@@ -370,8 +370,8 @@ namespace NRam
     , const Matrix& linear_in_mem
     , const Matrix& linear_out_mem
     , const Matrix& linear_mask
-    , const size_t& max_int
-    , const size_t& timesteps
+    , const size_t& dataset_max_int
+    , const size_t& dataset_timesteps
     )
     {
 		//init by threads
@@ -380,6 +380,10 @@ namespace NRam
 		Matrix out;
 		//time step
         Scalar full_cost = Scalar(0.0);
+		//max int and steps
+		size_t max_int = std::max(context.m_max_int, dataset_max_int);
+		size_t loop_timesteps = std::max(context.m_timesteps, dataset_timesteps);
+		//entropy
         #ifdef ENABLE_ENTROPY
         const Scalar entropy = Scalar(0.1);
         const Scalar entropy_decay = Scalar(0.999);
@@ -400,7 +404,7 @@ namespace NRam
             Scalar sample_cost = Scalar(0.0);
             bool   stop = false;
             //for all timestep, run on s
-            for (size_t timestep = 0; !stop && timestep < context.m_timesteps; timestep++)
+            for (size_t timestep = 0; !stop && timestep < loop_timesteps; timestep++)
             {
 				//NN
 				out = network.apply(get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
@@ -408,9 +412,10 @@ namespace NRam
                 Scalar fi = run_circuit(context, out, regs, in_mem);
                 //up info
                 prob_incomplete *= Scalar(1.0) - fi;
+				//min prob complate
+				const Scalar prob_complate_limit = (Scalar(1.0) / max_int) / 2;
                 //exit case
-                if(prob_incomplete < (Scalar(1.0) / context.m_max_int) / 2
-                || timestep == context.m_timesteps - 1)
+                if(prob_incomplete < prob_complate_limit || loop_timesteps <= (timestep+1))
                 {
                     stop = true;
                 }
@@ -429,7 +434,6 @@ namespace NRam
                 #endif 
                 //compute cost
                 sample_cost -= p_t * calculate_sample_cost(in_mem, linear_out_mem.row(s), linear_mask) - entropy_cost;
-
             }
             //add to full "cost"
             full_cost += sample_cost;
