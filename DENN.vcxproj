@@ -85,6 +85,7 @@
     <ClCompile Include="source\DennCrossover\DennCrossoverExp.cpp" />
     <ClCompile Include="source\DennCrossover\DennCrossoverInterm.cpp" />
     <ClCompile Include="source\DennCrossover\DennCrossoverNone.cpp" />
+    <ClCompile Include="source\DennDataset.cpp" />
     <ClCompile Include="source\DennDump.cpp" />
     <ClCompile Include="source\DennEvaluationFactory.cpp" />
     <ClCompile Include="source\DennEvaluation\DennAccuracy.cpp" />
@@ -133,6 +134,7 @@
     <ClCompile Include="source\DennNeuralNetwork.cpp" />
     <ClCompile Include="source\DennNRam.cpp" />
     <ClCompile Include="source\DennNRamDatasetTask.cpp" />
+    <ClCompile Include="source\DennNRamEval.cpp" />
     <ClCompile Include="source\DennNRamGate.cpp" />
     <ClCompile Include="source\DennNRamTask.cpp" />
     <ClCompile Include="source\DennNRamTaskItems.cpp" />

@@ -1,5 +1,5 @@
 #include "DennVariant.h"
-#include "DennDataSet.h"
+#include "DennDataset.h"
 
 namespace Denn
 {
