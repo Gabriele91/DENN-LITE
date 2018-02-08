@@ -68,9 +68,11 @@ class StringArguments : public Arguments
 public:
 	using SkipSpace = std::function< void(StringArguments& self,const char*& ptr) >;
 	using BackSkipSpace = std::function< void(StringArguments& self, const char* start_ptr, const char*& ptr) >;
+	using InputPreProcessing = std::function< void (std::string& buffer) >;
 
 	StringArguments(const char* values, const std::vector<char>& end_vals);
 	StringArguments(SkipSpace skip_space, BackSkipSpace back_skip_space, const char* values, const std::vector<char>& end_vals);
+	StringArguments(SkipSpace skip_space, BackSkipSpace back_skip_space, InputPreProcessing preprocess, const char* values, const std::vector<char>& end_vals);
 
 	const char* get_string() override;
 	int get_int() override;
@@ -85,12 +87,13 @@ public:
 
 protected:
 
-	SkipSpace		  m_skip_space;
-	BackSkipSpace     m_back_skip_space;
-	std::vector<char> m_end_vals;
-	std::string		  m_buffer;
-	const char*       m_values;
-	const char*       m_values_start;
+	SkipSpace		   m_skip_space;
+	BackSkipSpace      m_back_skip_space;
+	InputPreProcessing m_preprocess;
+	std::vector<char>  m_end_vals;
+	std::string		   m_buffer;
+	const char*        m_values;
+	const char*        m_values_start;
 
 };
 //CPP type argument

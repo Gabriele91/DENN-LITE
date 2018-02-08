@@ -499,7 +499,7 @@ namespace Denn
 		//config
         if (Denn::Filesystem::get_extension(vargs[jump_first]) == ".config")
         {
-            return from_config(Denn::Filesystem::text_file_read_all(vargs[jump_first]));
+            return from_config(Denn::Filesystem::text_file_read_all(vargs[jump_first]), nargs - 1 - jump_first, &vargs[jump_first+1]);
         }
         else if (Denn::Filesystem::get_extension(vargs[jump_first]) == ".json")
         {
