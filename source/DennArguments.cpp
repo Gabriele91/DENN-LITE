@@ -74,12 +74,22 @@ namespace Denn
 	StringArguments::StringArguments(SkipSpace skip_space, BackSkipSpace back_skip_space, const char* values, const std::vector<char>& end_vals)
 	: m_skip_space(skip_space)
 	, m_back_skip_space(back_skip_space)
+	, m_preprocess(nullptr)
 	, m_end_vals(end_vals)
 	, m_values(values)
 	, m_values_start(values)
 	{
 	}
 
+	StringArguments::StringArguments(SkipSpace skip_space, BackSkipSpace back_skip_space, InputPreProcessing preprocess, const char* values, const std::vector<char>& end_vals)
+	: m_skip_space(skip_space)
+	, m_back_skip_space(back_skip_space)
+	, m_preprocess(preprocess)
+	, m_end_vals(end_vals)
+	, m_values(values)
+	, m_values_start(values)
+	{
+	}
 
 	const char* StringArguments::get_string()
 	{
@@ -93,6 +103,8 @@ namespace Denn
 		}
 		//skip space
 		m_skip_space(*this,m_values);
+		//pre process
+		if(m_preprocess) m_preprocess(m_buffer);
 		//get
 		return m_buffer.c_str();
 	}
