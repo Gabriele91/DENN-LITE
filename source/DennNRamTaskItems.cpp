@@ -9,12 +9,64 @@ namespace Denn
 namespace NRam
 {
 
+
+	template < class T >
+	class TaskImplement : public Task
+	{
+	protected:
+
+		TaskImplement() : Task()
+		{
+			//none
+		}
+
+		TaskImplement
+		(
+		  size_t batch_size
+		, size_t max_int
+		, size_t n_regs
+		, size_t timesteps
+		, size_t min_difficulty
+		, size_t max_difficulty
+		, size_t step_gen_change_difficulty
+		, Random& random
+		)
+		:
+		Task
+		(
+		  batch_size
+		, max_int
+		, n_regs
+		, timesteps
+		, min_difficulty
+		, max_difficulty
+		, step_gen_change_difficulty
+		, random
+		)
+		{
+			//none
+		}
+
+		// Clone a this task
+		virtual Task::SPtr clone() const override
+		{
+			return std::dynamic_pointer_cast<Task>(std::make_shared< T >(*((T*)this)));
+		} 
+
+		//destructor
+		virtual ~TaskImplement()
+		{
+			//none
+		}
+	};
+
+
 	/**
 	 * [Access] 
 	 * Given a value k and an array A, return A[k]. Input is given as k, A[0], .., A[n −
    * 1], NULL and the network should replace the first memory cell with A[k].
 	 */
-	class TaskAccess : public Task
+	class TaskAccess : public TaskImplement < TaskAccess >
 	{
 	public:
 		TaskAccess
@@ -28,7 +80,7 @@ namespace NRam
 		, size_t step_gen_change_difficulty
 		, Random& random
 		)
-		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
 			m_difficulty_grades = {
 				std::make_tuple(4, 3),
@@ -60,16 +112,6 @@ namespace NRam
 			
 			return std::make_tuple(in_mem, out_mem, Task::init_mask(), Task::init_regs());
 		};
-
-
-		// Clone a this task
-		virtual Task::SPtr clone() const
-		{
-			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskAccess>(*this));
-		}
-
-		//Delete this task
-		virtual ~TaskAccess() {}
 	}; 
 	REGISTERED_TASK(TaskAccess, "access")
 
@@ -78,7 +120,7 @@ namespace NRam
 	 * Given an array A, increment all its elements by 1. Input is given as
    * A[0], ..., A[n − 1], NULL and the expected output is A[0] + 1, ..., A[n − 1] + 1.
 	 */
-	class TaskIncrement : public Task
+	class TaskIncrement : public TaskImplement < TaskIncrement >
 	{
 	public:
 		TaskIncrement
@@ -92,7 +134,7 @@ namespace NRam
 		, size_t step_gen_change_difficulty
 		, Random& random
 		)
-		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
 			m_difficulty_grades = {
 				std::make_tuple(4, 2),
@@ -118,14 +160,6 @@ namespace NRam
 			
 			return std::make_tuple(in_mem, out_mem, Task::init_mask(), Task::init_regs());
 		}
-
-		// Clone a this task
-		virtual Task::SPtr clone() const
-		{
-			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskIncrement>(*this));
-		}
-		//Delete TaskIncrement
-		virtual ~TaskIncrement() {}
 	};
 	REGISTERED_TASK(TaskIncrement, "increment")
 
@@ -135,7 +169,7 @@ namespace NRam
    * the given location. Input is given as p, A[0], ..., A[n−1] where p points to one element after
    * A[n−1]. The expected output is A[0], ..., A[n−1] at positions p, ..., p+n−1 respectively.
 	 */
-	class TaskCopy : public Task
+	class TaskCopy : public TaskImplement < TaskCopy >
 	{
 	public:
 		TaskCopy
@@ -149,7 +183,7 @@ namespace NRam
 		, size_t step_gen_change_difficulty
 		, Random& random
 		)
-		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
 			m_difficulty_grades = {
 				std::make_tuple(4, 3),
@@ -185,14 +219,6 @@ namespace NRam
 
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
-
-		// Clone a this task
-		virtual Task::SPtr clone() const
-		{
-			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskCopy>(*this));
-		}
-		//Delete TaskCopy
-		virtual ~TaskCopy() {}
 	};
 	REGISTERED_TASK(TaskCopy, "copy")
 
@@ -202,7 +228,7 @@ namespace NRam
 	 * in reversed order. Input is given as p, A[0], ..., A[n − 1] where p points one element after
    * A[n−1]. The expected output is A[n−1], ..., A[0] at positions p, ..., p+n−1 respectively.
 	 */
-	class TaskReverse : public Task
+	class TaskReverse : public TaskImplement < TaskReverse >
 	{
 	public:
 		TaskReverse
@@ -216,7 +242,7 @@ namespace NRam
 		, size_t step_gen_change_difficulty
 		, Random& random
 		)
-		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
 			m_difficulty_grades = {
 				std::make_tuple(4, 3),
@@ -253,14 +279,6 @@ namespace NRam
 
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
-
-		// Clone a this task
-		virtual Task::SPtr clone() const
-		{
-			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskReverse>(*this));
-		}
-		//Delete TaskReverse
-		virtual ~TaskReverse() {}
 	};
 	REGISTERED_TASK(TaskReverse, "reverse")
 
@@ -270,7 +288,7 @@ namespace NRam
    * given as p, q, A[0], .., A[p], ..., A[q], ..., A[n − 1], 0. The expected modified array A is:
    * A[0], ..., A[q], ..., A[p], ..., A[n − 1].
 	 */
-	class TaskSwap : public Task
+	class TaskSwap : public TaskImplement< TaskSwap >
 	{
 	public:
 		TaskSwap
@@ -284,7 +302,7 @@ namespace NRam
 		, size_t step_gen_change_difficulty
 		, Random& random
 		)
-		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
 			m_difficulty_grades = {
 				std::make_tuple(5, 4),
@@ -331,14 +349,6 @@ namespace NRam
 
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
-
-		// Clone a this task
-		virtual Task::SPtr clone() const
-		{
-			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskSwap>(*this));
-		}
-		//Delete TaskSwap
-		virtual ~TaskSwap() {}
 	};
 	REGISTERED_TASK(TaskSwap, "swap")
 
@@ -349,7 +359,7 @@ namespace NRam
    * given as a, P[0], ..., P[n − 1], A[0], ..., A[n − 1], where a is a pointer to the array A. The
    * expected output is A[P[0]], ..., A[P[n − 1]], which should override the array P.
 	 */
-	class TaskPermutation : public Task
+	class TaskPermutation : public TaskImplement< TaskPermutation >
 	{
 	public:
 		TaskPermutation
@@ -363,7 +373,7 @@ namespace NRam
 		, size_t step_gen_change_difficulty
 		, Random& random
 		)
-		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
 			m_difficulty_grades = {
 				std::make_tuple(4, 3),
@@ -429,14 +439,6 @@ namespace NRam
 			//return
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
-
-		// Clone a this task
-		virtual Task::SPtr clone() const
-		{
-			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskPermutation>(*this));
-		}
-		//Delete TaskPermutation
-		virtual ~TaskPermutation() {}
 	};
 	REGISTERED_TASK(TaskPermutation, "permutation")
 
@@ -449,7 +451,7 @@ namespace NRam
 	 * head, k, out, ... where head is a pointer to the first node on the list, k indicates how many
 	 * hops are needed and out is a cell where the output should be put.
 	 */
-	class TaskListK : public Task
+	class TaskListK : public TaskImplement< TaskListK >
 	{
 	public:
 		TaskListK
@@ -463,7 +465,7 @@ namespace NRam
 		, size_t step_gen_change_difficulty
 		, Random& random
 		)
-		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
 			m_difficulty_grades = {
 				std::make_tuple(5, 5),
@@ -551,14 +553,6 @@ namespace NRam
 			//return
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
-
-		// Clone a this task
-		virtual Task::SPtr clone() const
-		{
-			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskListK>(*this));
-		}
-		//Delete TaskListK
-		virtual ~TaskListK() {}
 	};
 	REGISTERED_TASK(TaskListK, "listk")
 
@@ -569,7 +563,7 @@ namespace NRam
 	 * as in the task ListK. We fill empty memory with “trash” values to prevent the network from
    * “cheating” and just iterating over the whole memory. 
 	 */
-	class TaskListSearch : public Task
+	class TaskListSearch : public TaskImplement< TaskListSearch >
 	{
 	public:
 		TaskListSearch
@@ -583,7 +577,7 @@ namespace NRam
 		, size_t step_gen_change_difficulty
 		, Random& random
 		)
-		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
 			m_difficulty_grades = {
 				std::make_tuple(5, 5),
@@ -676,14 +670,6 @@ namespace NRam
 			//return
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
-
-		// Clone a this task
-		virtual Task::SPtr clone() const
-		{
-			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskListSearch>(*this));
-		}
-		//Delete TaskListSearch
-		virtual ~TaskListSearch() {}
 	};
 	REGISTERED_TASK(TaskListSearch, "listsearch")
 
@@ -695,7 +681,7 @@ namespace NRam
 	 * elements of arrays A and B respectively, and o points to the address after the second G.
 	 * The n + m element should be written in correct order starting from position o
 	 */ 
-	class TaskMerge : public Task
+	class TaskMerge : public TaskImplement< TaskMerge >
 	{
 	public:
 		TaskMerge
@@ -709,7 +695,7 @@ namespace NRam
 		, size_t step_gen_change_difficulty
 		, Random& random
 		)
-		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
 			m_difficulty_grades = {
 				std::make_tuple(9, 6),
@@ -765,14 +751,6 @@ namespace NRam
 
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
-		
-		// Clone a this task
-		virtual Task::SPtr clone() const
-		{
-			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskMerge>(*this));
-		}
-		//Delete TaskListSearch
-		virtual ~TaskMerge() {}
 	};
 	REGISTERED_TASK(TaskMerge, "merge")
 
@@ -786,7 +764,7 @@ namespace NRam
    * represents the path to be traversed: di = 0 means that the network should go to the left
    * child, di = 1 represents going to the right child.
 	 */
-	class TaskWalkBST : public Task
+	class TaskWalkBST : public TaskImplement< TaskWalkBST >
 	{
 	public:
 		TaskWalkBST
@@ -800,7 +778,7 @@ namespace NRam
 		, size_t step_gen_change_difficulty
 		, Random& random
 		)
-		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
 			m_difficulty_grades = {
 				std::make_tuple(7, 5),
@@ -888,14 +866,6 @@ namespace NRam
 			return std::make_tuple(in_mem, out_mem, Task::init_mask(), Task::init_regs());
 		}
 
-		// Clone a this task
-		virtual Task::SPtr clone() const
-		{
-			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskWalkBST>(*this));
-		}
-		//Delete TaskWalkBST
-		virtual ~TaskWalkBST() {}
-
 	private:
 		void insert_in_bst(RowVector& bst, Matrix::Index pointer, const Scalar& element, const Matrix::Index& element_pointer_in_memory)
 		{
@@ -938,7 +908,7 @@ namespace NRam
 	 * elements of arrays A and B respectively, and o points to the address after the second G.
 	 * The A + B array should be written starting from position o.
 	 */
-	class TaskSum : public Task
+	class TaskSum : public TaskImplement< TaskSum >
 	{
 	public:
 		TaskSum
@@ -952,7 +922,7 @@ namespace NRam
 		, size_t step_gen_change_difficulty
 		, Random& random
 		)
-		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
 			m_difficulty_grades = {
 				std::make_tuple(9, 5),
@@ -999,14 +969,6 @@ namespace NRam
 
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
-
-		// Clone a this task
-		virtual Task::SPtr clone() const
-		{
-			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskSum>(*this));
-		}
-		//Delete 
-		virtual ~TaskSum() {}
 	};
 	REGISTERED_TASK(TaskSum, "sum")
 
@@ -1017,7 +979,7 @@ namespace NRam
 	 * 1], G, B[0], ..., B[m − 1], G, where G is a special guardian value, a and b point to the first
 	 * elements of arrays A and B respectively, and o is a slot for the output.
 	 */
-	class TaskProduct : public Task
+	class TaskProduct : public TaskImplement< TaskProduct >
 	{
 	public:
 		TaskProduct
@@ -1031,7 +993,7 @@ namespace NRam
 		, size_t step_gen_change_difficulty
 		, Random& random
 		)
-		: Task(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
 			m_difficulty_grades = {
 				std::make_tuple(7, 5),
@@ -1071,14 +1033,6 @@ namespace NRam
 			
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
-
-		// Clone a this task
-		virtual Task::SPtr clone() const
-		{
-			return std::dynamic_pointer_cast<Task>(std::make_shared<TaskProduct>(*this));
-		}
-		//Delete TaskProduct
-		virtual ~TaskProduct() {}
 	};
 	REGISTERED_TASK(TaskProduct, "product")
 }

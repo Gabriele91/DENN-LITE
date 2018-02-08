@@ -29,7 +29,16 @@ namespace NRam
 		Task();
 
 		//init
-		Task(size_t batch_size, size_t max_int, size_t n_regs, size_t timesteps, size_t min_difficulty, size_t max_difficulty, size_t step_gen_change_difficulty, Random& random);
+		Task(
+		  size_t batch_size
+		, size_t max_int
+		, size_t n_regs
+		, size_t timesteps
+		, size_t min_difficulty
+		, size_t max_difficulty
+		, size_t step_gen_change_difficulty
+		, Random& random
+		);
 
 		//delete
 		virtual ~Task();
