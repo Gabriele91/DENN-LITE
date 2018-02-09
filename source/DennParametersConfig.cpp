@@ -746,6 +746,82 @@ namespace Denn
                 conf_skip_space_and_comments(line, ptr);
                 return true;
             }
+			//////////////////////////////////////////////////////////////////////////////////
+			static bool conf_parse_args
+			(
+				  VariableTable& context
+				, int nargs
+				, const char **vargs
+			)
+			{
+				enum State
+				{
+				  START
+				, NAME
+				, EQUAL
+				, VALUE
+				};
+				//Parse state
+				State state{ START };
+				//values
+				std::string name;
+				std::string value;
+				//parsing
+				for (int i = 0; i < nargs; ++i)
+				{
+					//ptr
+					const char* ptr = vargs[i];
+					//parse
+					while (*ptr)
+					{
+						switch (state)
+						{
+						case START:
+							//begin
+							conf_skip_line_space(ptr);
+							name.clear();
+							value.clear();
+							state = NAME;
+						break;
+						case NAME:
+							name = conf_name(ptr);
+							if (!name.size())
+							{
+								std::cerr << "Name argument is not valid" << std::endl;
+								return false;
+							}
+							state = EQUAL;
+						break;
+						case EQUAL:
+							if (*ptr != '=')
+							{
+								std::cerr << "\'=\' is not found" << std::endl;
+								return false;
+							}
+							++ptr;
+							state = VALUE;
+						break;
+						case VALUE:
+							while(*ptr) value += (*ptr++);
+							if (!value.size())
+							{
+								std::cerr << "Value argument is not valid" << std::endl;
+								return false;
+							}
+							state = START;
+							//add value
+							context.add_vairable(name, value);
+						break;
+						default:
+							return false;
+						break;
+						}
+					}
+
+				}
+				//parsing end state
+				return state == START;
+			}
     };
     //////////////////////////////////////////////////////////////////////////////////
     bool Parameters::from_config(const std::string& source, int nargs, const char **vargs)
@@ -757,18 +833,9 @@ namespace Denn
         conf_skip_space_and_comments(line, ptr);
         //Var table
         VariableTable context;
-        //parse variable from comand line
-        for(int var = 0; (var+2) < nargs ; var+=3)
-        {
-            //name
-            std::string name = vargs[var];
-            //=
-            if(vargs[var+1][0] != '=') break;
-            //value
-            std::string value = vargs[var+2];
-            //add var
-            context.add_vairable(name, value);
-        }
+        //parse variables from comand line
+		if (!ParametersParseHelp::conf_parse_args(context, nargs, vargs))
+			return false;
         //parsing
         while (*ptr)
         {
