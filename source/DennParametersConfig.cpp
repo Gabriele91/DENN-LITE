@@ -682,7 +682,7 @@ namespace Denn
         //////////////////////////////////////////////////////////////////////////////////
         static bool conf_parse_net
         (
-                Parameters& params
+              Parameters& params
             , const VariableTable& context
             , size_t& line
             , const char*& ptr
