@@ -4,7 +4,7 @@
 
 #define DENN_VER_MAJOR   1
 #define DENN_VER_MINOR   3
-#define DENN_VER_PATCH   4
+#define DENN_VER_PATCH   5
 
 #define DENN_VER_STR \
 		DEFINE_TO_STR(DENN_VER_MAJOR) "." \
