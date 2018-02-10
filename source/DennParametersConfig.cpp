@@ -3,6 +3,8 @@
 #include <string>
 #include <cctype>
 #include <unordered_map>
+#include <iterator>
+#include <sstream>
 
 namespace Denn
 {
@@ -43,6 +45,7 @@ namespace Denn
         //result
         return ch == '-' ? -result : result;
     }
+
     static long conf_string_to_int_no_skip(const char* source)
     {
         //+/-
@@ -443,386 +446,474 @@ namespace Denn
 
     class ParametersParseHelp
     {
-        public:
-            //////////////////////////////////////////////////////////////////////////////////
-            static bool conf_parse_arg
-            (
-                  const std::vector< ParameterInfo >& info
-                , const VariableTable& context
-                , size_t& line
-                , const char*& ptr
-                , ParameterInfo ower = ParameterInfo()
-            )
+	protected:
+
+		class ConfArguments : public Arguments
+		{
+		public:
+			//alias
+			using ListChar = std::vector < char >;
+			using ListString = std::vector < std::string >;
+			//class methods
+			ConfArguments(const VariableTable& table, size_t& line, const char* ptr,const ListChar& end_line)
+			{
+				//init 
+				m_ptr = ptr;
+				m_index = 0;
+				//parsing
+				while (*m_ptr && std::find(end_line.begin(), end_line.end(), *m_ptr) == end_line.end())
+				{
+					//value
+					std::string value;
+					//remove space
+					conf_skip_line_space_and_comments(line, m_ptr);
+					//get value
+					while (!std::isspace(*m_ptr)) value += *(m_ptr++);
+					//push in list
+					variable_processing(table,line,value);
+				}
+			}
+
+			const char* get_string() override
+			{
+				denn_assert(!eof());
+				//get
+				return m_values[m_index++].c_str();
+			}
+
+			bool get_bool() override
+			{
+				std::string arg = get_string();
+				std::transform(arg.begin(), arg.end(), arg.begin(), ::tolower);
+				return arg == std::string("true")
+					|| arg == std::string("yes")
+					|| arg == std::string("t")
+					|| arg == std::string("y");
+			}
+
+			int get_int() override
+			{
+				return atoi(get_string());
+			}
+
+			double get_double() override
+			{
+				return atof(get_string());
+			}
+
+			bool eof() const override
+			{
+				return m_values.size() <= m_index;
+			}
+
+			bool back() override
+			{
+				//index is 0? It can't go back
+				if (!m_index) return false;
+				//else go back
+				--m_index;
+				//ok
+				return true;
+			}
+
+			bool end_vals() const override
+			{
+				return eof();
+			}
+
+			const ListString& errors() const
+			{
+				return m_errors;
+			}
+
+			const char* get_ptr() const
+			{
+				return m_ptr;
+			}
+
+		protected:
+
+			//ptr
+			const char* m_ptr;
+			//info buffer
+			size_t m_index;
+			ListString m_values;
+			//errors
+			ListString m_errors;
+			//variable processing
+			bool variable_processing(const VariableTable& context, const size_t& line, const std::string& input) 
+			{
+				if (input.size() && conf_is_variable(input[0]))
+				{
+					//varname
+					std::string varname = &input[1];
+					//find
+					if (!context.exists(varname))
+					{
+						m_errors.push_back(line + ": \'" + varname + "\' is not valid variable");
+						return false;
+					}
+					//get value
+					std::stringstream end_value ( context.get(varname) );
+					//split by space
+					std::istream_iterator<std::string> it(end_value);
+					std::istream_iterator<std::string> end;
+					//add all tokens
+					for (; it != end; ++it) m_values.push_back(*it);
+				}
+				else
+				{
+					//add input
+					m_values.push_back(input);
+				}
+			}
+		};
+
+    public:
+        //////////////////////////////////////////////////////////////////////////////////
+        static bool conf_parse_arg
+        (
+              const std::vector< ParameterInfo >& info
+            , const VariableTable& context
+            , size_t& line
+            , const char*& ptr
+            , ParameterInfo ower = ParameterInfo()
+        )
+        {
+            //it's close
+            if((*ptr) == '}') return true;
+            //command
+            std::string command = conf_name(ptr);
+            //test
+            if (!command.size())
             {
-                //it's close
-                if((*ptr) == '}') return true;
-                //command
-                std::string command = conf_name(ptr);
-                //test
-                if (!command.size())
-                {
-                    std::cerr << line << ": command not valid" << std::endl;
-                    return false;
-                }
-                //jump
-                conf_skip_space_and_comments(line, ptr);
-                //action
-                bool is_a_valid_arg = false;
-                //vals            
-                for (auto& action : info)
-                {
-                    //test
-                    if (!action.m_associated_variable) continue;
-                    if (!action.m_oweners.test(ower)) continue;
-                    //search param 
-                    bool found = false;
-                    //as shell arg or command
-                    if (command[0] == '-')
-                    {
-                        for (const std::string& key : action.m_arg_key)
-                        {
-                            if (key == command)
-                            {
-                                found = true;
-                                break;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        found = command == action.m_associated_variable->name();
-                    }
-                    //parse a line 
-                    if (found)
-                    {
-                        //preprocess info
-                        struct 
-                        {
-                            bool        m_success { true };
-                            std::string m_name    { ""   };
-                        }
-                        preprocess_error;
-                        //parse argument
-                        StringArguments args
-                        (
-                              [&line](StringArguments& self, const char*& skip_ptr)
-                              {
-                                  //jump space
-                                  conf_skip_line_space_and_comments(line, skip_ptr);
-                              }
-                            , [&line](StringArguments& self, const char* start,const char*& skip_ptr)
-                              {
-                                  conf_rev_skip_line_space_and_comments(line, start, skip_ptr);
-                              }
-                            , [&context, &preprocess_error](std::string& buffer)
-                              {
-                                  if(buffer.size() && conf_is_variable(buffer[0]))
-                                  {
-                                      //varname
-                                      std::string varname = &buffer[1];
-                                      //find
-                                      if(!context.exists(varname))
-                                      {
-                                          preprocess_error.m_success = false;
-                                          preprocess_error.m_name = varname;
-                                          return;
-                                      }
-                                      buffer = context.get(varname);
-                                  }
-                              }
-                            , ptr
-                            , { '\n', '{', '}' }
-                        );
-                        //test action
-                        if (!action.m_action(args))
-                        {
-                            //preprocess & fail arg parse?
-                            if (!preprocess_error.m_success)
-                                std::cerr << line << ": \'" << preprocess_error.m_name << "\' is not valid variable" << std::endl;
-                            else
-                                std::cerr << line << ": not valid arguments for command \'" << command << "\'" << std::endl;
-                            return false;
-                        }
-                        //preprocess error
-                        if (!preprocess_error.m_success)
-                        {
-                            std::cerr << line << ": \'" << preprocess_error.m_name << "\' is not valid variable" << std::endl;
-                            return false;
-                        }
-                        //update
-                        ptr = args.get_ptr();
-                        conf_skip_space_and_comments(line, ptr);
-                        //sub args?
-                        if (*ptr == '{')
-                        {
-                            //jump {
-                            ++ptr;
-                            conf_skip_space_and_comments(line, ptr);
-                            //sub args
-                            do
-                            {
-                                if (!conf_parse_arg(info, context, line, ptr, action)) return false;
-                            } 
-                            while (*ptr && (*ptr) != '}');
-                            //test
-                            if (*ptr != '}')
-                            {
-                                std::cerr << line << ": } not found" << std::endl;
-                                return false;
-                            }
-                            //jump }
-                            ++ptr;
-                            conf_skip_space_and_comments(line, ptr);
-                        }
-                        //ok
-                        is_a_valid_arg = true;
-                        break;
-                    }
-                }
-                //fail
-                if (!is_a_valid_arg)
-                {
-                    std::cerr << line << ": command \'" << command << "\' not found" << std::endl;
-                    return false;
-                }
-                //jump
-                conf_skip_space_and_comments(line, ptr);
-                return true;
+                std::cerr << line << ": command not valid" << std::endl;
+                return false;
             }
-            //////////////////////////////////////////////////////////////////////////////////
-            static bool conf_parse_net
-            (
-                  Parameters& params
-                , const VariableTable& context
-                , size_t& line
-                , const char*& ptr
-            )
+            //jump
+            conf_skip_space_and_comments(line, ptr);
+            //action
+            bool is_a_valid_arg = false;
+            //vals            
+            for (auto& action : info)
             {
-                //it's close
-                if((*ptr) == '}') return true;
-                //layer type
-                std::string layer_type = conf_name(ptr);
-                //type
-                if (layer_type == "lp" || layer_type == "layer_perceptron")
+                //test
+                if (!action.m_associated_variable) continue;
+                if (!action.m_oweners.test(ower)) continue;
+                //search param 
+                bool found = false;
+                //as shell arg or command
+                if (command[0] == '-')
                 {
-                    //jump space
-                    conf_skip_line_space_and_comments(line, ptr);
-                    //get int
-                    long layer_size;
-                    //is not a variable?
-                    if(!conf_is_variable(*ptr))
+                    for (const std::string& key : action.m_arg_key)
                     {
-                        layer_size = conf_string_to_int(ptr);
-                    }
-                    else
-                    {
-                        //next
-                        ++ptr;
-                        //varname
-                        std::string varname = conf_name(ptr);
-                        //find
-                        if(!context.exists(varname))
+                        if (key == command)
                         {
-                            std::cerr << line << ": \'" << varname << "\' is not valid variable" << std::endl;
-                            return false;
+                            found = true;
+                            break;
                         }
-                        //value
-                        std::string value = context.get(varname);
-                        //parse
-                        layer_size = conf_string_to_int_no_skip(value.c_str());
                     }
-                    //more than 0
-                    if (layer_size <= 0)
-                    {
-                        std::cerr << line << ": layer size (" << layer_size << ") not valid " << std::endl;
-                        return false;
-                    }
-                    //jump space
-                    conf_skip_line_space_and_comments(line, ptr);
-                    //activation function (default linear)
-                    std::string layer_af;
-                    //is not a variable?
-                    if(!conf_is_variable(*ptr))
-                    {
-                        layer_af = conf_name(ptr);
-                    }
-                    else
-                    {
-                        //next
-                        ++ptr;
-                        //varname
-                        std::string varname = conf_name(ptr);
-                        //find
-                        if(!context.exists(varname))
-                        {
-                            std::cerr << line << ": \'" << varname << "\' is not valid variable" << std::endl;
-                            return false;
-                        }
-                        //parse
-                        layer_af = context.get(varname);
-                    }
-                    //test
-                    if (!layer_af.size()) layer_af = "linear";
-                    //test
-                    if (!ActivationFunctionFactory::exists(layer_af))
-                    {
-                        std::cerr << line << ": activation function (" << layer_af << ") not exists " << std::endl;
-                        return false;
-                    }
-                    //add
-                    params.m_hidden_layers.get().push_back(layer_size);
-                    params.m_activation_functions.get().push_back(layer_af);
-                }
-                else if (layer_type == "out" || layer_type == "output")
-                {
-                    //jump space
-                    conf_skip_line_space_and_comments(line, ptr);
-                    //activation function (default linear)
-                    std::string layer_af;
-                    //is not a variable?
-                    if(!conf_is_variable(*ptr))
-                    {
-                        layer_af = conf_name(ptr);
-                    }
-                    else
-                    {
-                        //next
-                        ++ptr;
-                        //varname
-                        std::string varname = conf_name(ptr);
-                        //find
-                        if(!context.exists(varname))
-                        {
-                            std::cerr << line << ": \'" << varname << "\' is not valid variable" << std::endl;
-                            return false;
-                        }
-                        //parse
-                        layer_af = context.get(varname);
-                    }
-                    //test
-                    if (!layer_af.size()) layer_af = "linear";
-                    //test
-                    if (!ActivationFunctionFactory::exists(layer_af))
-                    {
-                        std::cerr << line << ": activation function (" << layer_af << ") not exists " << std::endl;
-                        return false;
-                    }
-                    //add
-                    params.m_output_activation_function = layer_af;
                 }
                 else
                 {
-                    std::cerr << line << ": layer " << layer_type << " is unsupported" << std::endl;
+                    found = command == action.m_associated_variable->name();
+                }
+                //parse a line 
+                if (found)
+                {
+					//line parser
+					ConfArguments args(context, line, ptr, { '\n', '}', '{' });
+                    //test action
+                    if (!action.m_action(args))
+                    {
+                        //preprocess & fail arg parse?
+                        if (args.errors().size())
+							for (const auto& error : args.errors()) std::cerr << error << std::endl;
+                        else
+                            std::cerr << line << ": not valid arguments for command \'" << command << "\'" << std::endl;
+                        return false;
+                    }
+                    //preprocess error
+                    if (args.errors().size())
+                    {
+						for(const auto& error : args.errors()) std::cerr << error << std::endl;
+                        return false;
+                    }
+                    //update
+                    ptr = args.get_ptr();
+					//next value
+                    conf_skip_space_and_comments(line, ptr);
+                    //sub args?
+                    if (*ptr == '{')
+                    {
+                        //jump {
+                        ++ptr;
+                        conf_skip_space_and_comments(line, ptr);
+                        //sub args
+                        do
+                        {
+                            if (!conf_parse_arg(info, context, line, ptr, action)) return false;
+                        } 
+                        while (*ptr && (*ptr) != '}');
+                        //test
+                        if (*ptr != '}')
+                        {
+                            std::cerr << line << ": } not found" << std::endl;
+                            return false;
+                        }
+                        //jump }
+                        ++ptr;
+                        conf_skip_space_and_comments(line, ptr);
+                    }
+                    //ok
+                    is_a_valid_arg = true;
+                    break;
+                }
+            }
+            //fail
+            if (!is_a_valid_arg)
+            {
+                std::cerr << line << ": command \'" << command << "\' not found" << std::endl;
+                return false;
+            }
+            //jump
+            conf_skip_space_and_comments(line, ptr);
+            return true;
+        }
+        //////////////////////////////////////////////////////////////////////////////////
+        static bool conf_parse_net
+        (
+              Parameters& params
+            , const VariableTable& context
+            , size_t& line
+            , const char*& ptr
+        )
+        {
+            //it's close
+            if((*ptr) == '}') return true;
+            //layer type
+            std::string layer_type = conf_name(ptr);
+            //type
+            if (layer_type == "lp" || layer_type == "layer_perceptron")
+            {
+                //jump space
+                conf_skip_line_space_and_comments(line, ptr);
+                //get int
+                long layer_size;
+                //is not a variable?
+                if(!conf_is_variable(*ptr))
+                {
+                    layer_size = conf_string_to_int(ptr);
+                }
+                else
+                {
+                    //next
+                    ++ptr;
+                    //varname
+                    std::string varname = conf_name(ptr);
+                    //find
+                    if(!context.exists(varname))
+                    {
+                        std::cerr << line << ": \'" << varname << "\' is not valid variable" << std::endl;
+                        return false;
+                    }
+                    //value
+                    std::string value = context.get(varname);
+                    //parse
+                    layer_size = conf_string_to_int_no_skip(value.c_str());
+                }
+                //more than 0
+                if (layer_size <= 0)
+                {
+                    std::cerr << line << ": layer size (" << layer_size << ") not valid " << std::endl;
                     return false;
                 }
-                //jump spaces
-                conf_skip_space_and_comments(line, ptr);
-                return true;
-            }
-            //////////////////////////////////////////////////////////////////////////////////
-            static bool conf_parse_variable
-            (
-                  const Parameters& params
-                , VariableTable& context
-                , size_t& line
-                , const char*& ptr
-            )
-            {
-                //it's close
-                if((*ptr) == '}') return true;
-                //variable type
-                std::string variable_name = conf_name(ptr);
-                //jump spaces
-                conf_skip_space_and_comments(line, ptr);
-                //value
-                std::string value;
-                //endline?
-                while(*ptr && (*ptr)!='\n') value += *(ptr++);
-                //set
-                if(!context.exists(variable_name))
+                //jump space
+                conf_skip_line_space_and_comments(line, ptr);
+                //activation function (default linear)
+                std::string layer_af;
+                //is not a variable?
+                if(!conf_is_variable(*ptr))
                 {
-                    context.add_vairable(variable_name, value);
+                    layer_af = conf_name(ptr);
                 }
-                //jump spaces
-                conf_skip_space_and_comments(line, ptr);
-                return true;
+                else
+                {
+                    //next
+                    ++ptr;
+                    //varname
+                    std::string varname = conf_name(ptr);
+                    //find
+                    if(!context.exists(varname))
+                    {
+                        std::cerr << line << ": \'" << varname << "\' is not valid variable" << std::endl;
+                        return false;
+                    }
+                    //parse
+                    layer_af = context.get(varname);
+                }
+                //test
+                if (!layer_af.size()) layer_af = "linear";
+                //test
+                if (!ActivationFunctionFactory::exists(layer_af))
+                {
+                    std::cerr << line << ": activation function (" << layer_af << ") not exists " << std::endl;
+                    return false;
+                }
+                //add
+                params.m_hidden_layers.get().push_back(layer_size);
+                params.m_activation_functions.get().push_back(layer_af);
             }
-			//////////////////////////////////////////////////////////////////////////////////
-			static bool conf_parse_args
-			(
-				  VariableTable& context
-				, int nargs
-				, const char **vargs
-			)
+            else if (layer_type == "out" || layer_type == "output")
+            {
+                //jump space
+                conf_skip_line_space_and_comments(line, ptr);
+                //activation function (default linear)
+                std::string layer_af;
+                //is not a variable?
+                if(!conf_is_variable(*ptr))
+                {
+                    layer_af = conf_name(ptr);
+                }
+                else
+                {
+                    //next
+                    ++ptr;
+                    //varname
+                    std::string varname = conf_name(ptr);
+                    //find
+                    if(!context.exists(varname))
+                    {
+                        std::cerr << line << ": \'" << varname << "\' is not valid variable" << std::endl;
+                        return false;
+                    }
+                    //parse
+                    layer_af = context.get(varname);
+                }
+                //test
+                if (!layer_af.size()) layer_af = "linear";
+                //test
+                if (!ActivationFunctionFactory::exists(layer_af))
+                {
+                    std::cerr << line << ": activation function (" << layer_af << ") not exists " << std::endl;
+                    return false;
+                }
+                //add
+                params.m_output_activation_function = layer_af;
+            }
+            else
+            {
+                std::cerr << line << ": layer " << layer_type << " is unsupported" << std::endl;
+                return false;
+            }
+            //jump spaces
+            conf_skip_space_and_comments(line, ptr);
+            return true;
+        }
+        //////////////////////////////////////////////////////////////////////////////////
+        static bool conf_parse_variable
+        (
+                const Parameters& params
+            , VariableTable& context
+            , size_t& line
+            , const char*& ptr
+        )
+        {
+            //it's close
+            if((*ptr) == '}') return true;
+            //variable type
+            std::string variable_name = conf_name(ptr);
+            //jump spaces
+            conf_skip_space_and_comments(line, ptr);
+            //value
+            std::string value;
+            //endline?
+            while(*ptr && (*ptr)!='\n') value += *(ptr++);
+            //set
+            if(!context.exists(variable_name))
+            {
+                context.add_vairable(variable_name, value);
+            }
+            //jump spaces
+            conf_skip_space_and_comments(line, ptr);
+            return true;
+        }
+		//////////////////////////////////////////////////////////////////////////////////
+		static bool conf_parse_cline_args
+		(
+			  VariableTable& context
+			, int nargs
+			, const char **vargs
+		)
+		{
+			enum State
 			{
-				enum State
+			  START
+			, NAME
+			, EQUAL
+			, VALUE
+			};
+			//Parse state
+			State state{ START };
+			//values
+			std::string name;
+			std::string value;
+			//parsing
+			for (int i = 0; i < nargs; ++i)
+			{
+				//ptr
+				const char* ptr = vargs[i];
+				//parse
+				while (*ptr)
 				{
-				  START
-				, NAME
-				, EQUAL
-				, VALUE
-				};
-				//Parse state
-				State state{ START };
-				//values
-				std::string name;
-				std::string value;
-				//parsing
-				for (int i = 0; i < nargs; ++i)
-				{
-					//ptr
-					const char* ptr = vargs[i];
-					//parse
-					while (*ptr)
+					switch (state)
 					{
-						switch (state)
+					case START:
+						//begin
+						conf_skip_line_space(ptr);
+						name.clear();
+						value.clear();
+						state = NAME;
+					break;
+					case NAME:
+						name = conf_name(ptr);
+						if (!name.size())
 						{
-						case START:
-							//begin
-							conf_skip_line_space(ptr);
-							name.clear();
-							value.clear();
-							state = NAME;
-						break;
-						case NAME:
-							name = conf_name(ptr);
-							if (!name.size())
-							{
-								std::cerr << "Name argument is not valid" << std::endl;
-								return false;
-							}
-							state = EQUAL;
-						break;
-						case EQUAL:
-							if (*ptr != '=')
-							{
-								std::cerr << "\'=\' is not found" << std::endl;
-								return false;
-							}
-							++ptr;
-							state = VALUE;
-						break;
-						case VALUE:
-							while(*ptr) value += (*ptr++);
-							if (!value.size())
-							{
-								std::cerr << "Value argument is not valid" << std::endl;
-								return false;
-							}
-							state = START;
-							//add value
-							context.add_vairable(name, value);
-						break;
-						default:
+							std::cerr << "Name argument is not valid" << std::endl;
 							return false;
-						break;
 						}
+						state = EQUAL;
+					break;
+					case EQUAL:
+						if (*ptr != '=')
+						{
+							std::cerr << "\'=\' is not found" << std::endl;
+							return false;
+						}
+						++ptr;
+						state = VALUE;
+					break;
+					case VALUE:
+						while(*ptr) value += (*ptr++);
+						if (!value.size())
+						{
+							std::cerr << "Value argument is not valid" << std::endl;
+							return false;
+						}
+						state = START;
+						//add value
+						context.add_vairable(name, value);
+					break;
+					default:
+						return false;
+					break;
 					}
-
 				}
-				//parsing end state
-				return state == START;
+
 			}
+			//parsing end state
+			return state == START;
+		}
     };
     //////////////////////////////////////////////////////////////////////////////////
     bool Parameters::from_config(const std::string& source, int nargs, const char **vargs)
@@ -835,7 +926,7 @@ namespace Denn
         //Var table
         VariableTable context;
         //parse variables from comand line
-		if (!ParametersParseHelp::conf_parse_args(context, nargs, vargs))
+		if (!ParametersParseHelp::conf_parse_cline_args(context, nargs, vargs))
 			return false;
         //parsing
         while (*ptr)
