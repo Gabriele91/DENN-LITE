@@ -178,18 +178,18 @@ namespace Denn
 	{
 		return a * ( T(1.0) - alpha ) + b * alpha;
 	}
-
+	
 	template < typename T >
 	inline constexpr T positive_mod(const T& value,const T& base)
 	{
-		#if 0
-		T value_mod = value % base;
-		while  (value_mod < T(0)) value_mod += base;
-		return value_mod;
-		#else 
-		//from JS
 		return (((value % base) + base) % base);
-		#endif
+	}
+	
+	template < typename T >
+	inline constexpr T positive_fmod(const T& value,const T& base)
+	{
+		//from JS
+		return std::fmod((std::fmod(value, base) + base), base);
 	}
 
 	inline std::string str_replace(std::string str, const std::string& old_str, const std::string& new_str)
