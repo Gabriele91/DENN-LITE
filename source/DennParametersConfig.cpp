@@ -1,4 +1,5 @@
 #include "DennParameters.h"
+#include "DennConstants.h"
 #include <string>
 #include <cctype>
 #include <unordered_map>
@@ -444,25 +445,14 @@ namespace Denn
 	{
 		//init
 		std::string out;
-		//parse name
-		while (
-			std::isalpha(*source)
-			|| *source == '_'
-			|| *source == '-'
-			)
+		//first
+		if (std::isalpha(*source) || *source == '_' || *source == '-' )
 		{
 			out += (*source);
 			++source;
 		}
-		//end
-		return out;
-	}
-	static std::string conf_varname(const char*& source)
-	{
-		//init
-		std::string out;
 		//parse name
-		while (std::isalpha(*source) || *source == '_')
+		while ( std::isalnum(*source) || *source == '_' || *source == '-' || *source == '.')
 		{
 			out += (*source);
 			++source;
@@ -512,9 +502,7 @@ namespace Denn
 	class ConfExpParser
 	{
 	public:
-		//alias
-		using ListString = std::vector < std::string >;
-		//sub-class
+		//value
 		struct ExpValue
 		{
 			//values
@@ -540,7 +528,12 @@ namespace Denn
 					: std::to_string(m_number);
 			}
 		};
-
+		//alias
+		using ListString = std::vector < std::string >;
+		using FunctionArgs = std::vector< ExpValue >;
+		using FunctionMath = std::function< ExpValue(FunctionArgs&&) >;
+		using MapConstants = std::unordered_map < std::string, ExpValue >;
+		using MapFunctions = std::unordered_map < std::string, FunctionMath >;
 		//init
 		ConfExpParser(const VariableTable& table, size_t& line, const char* ptr)
 		: m_table(table)
@@ -577,12 +570,106 @@ namespace Denn
 			return value.m_number;
 		}
 
+		std::string& string(ExpValue& value, const std::string& opname)
+		{
+			if (value.is_string())
+				m_errors.push_back(std::to_string(line()) + ": \'" + opname + "\' is a unsupported number operation");
+			return value.m_str;
+		}
+
 		ExpValue smart_cast(const std::string& value)
 		{
 			const char* ptr = value.c_str();
 			double result = conf_string_to_double(ptr);
 			if (*ptr == '\0') return result;
 			return value;
+		}
+		
+		ExpValue name_eval()
+		{
+			//eat space
+			skip();
+			//name
+			auto name = conf_name(ptr());
+			//consts
+			MapConstants consts
+			{
+				  { "false", 0 }
+				, { "true", 1 }
+				, { "e",  Constants::e()  }
+				, { "pi", Constants::pi() }
+			};
+			//test
+			auto const_it = consts.find(name);
+			if (const_it != consts.end()) return const_it->second;
+			//function?
+			auto test = [this](const FunctionArgs& args, size_t n, const std::string& name) -> bool
+			{
+				if (args.size() == n) return true;
+				m_errors.push_back(std::to_string(line()) + ": function \'" + name + "\' get " + std::to_string(n) + " argument[s]");
+				return false;
+			};
+			MapFunctions funs
+			{
+				  { "sin"  , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "sin"))   return std::sin(number(args[0],"sin")); else 0; } }
+				, { "cos"  , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "cos"))   return std::cos(number(args[0],"cos")); else 0; } }
+				, { "log"  , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "log"))   return std::log(number(args[0],"log")); else 0; } }
+				, { "log10", [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "log10")) return std::log10(number(args[0],"log10")); else 0; } }	
+				, { "exp"  , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "exp"))   return std::exp(number(args[0],"exp")); else 0; } }
+				, { "str",   [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "str"))   return std::to_string(number(args[0],"str")); else ""; } }			
+				, { "float", [&](FunctionArgs&& args) -> ExpValue
+							 {
+								if (!test(args, 1, "float")) return 0;
+								auto ptr = string(args[0], "float").c_str();
+								return conf_string_to_double(ptr);
+							 }
+				  }				
+				, { "radian", [&](FunctionArgs&& args) -> ExpValue  { if (test(args, 1, "radian")) return number(args[0],"str") * (Constants::pi() / Scalar(180.0)); else ""; } }
+				, { "tan",    [&](FunctionArgs&& args) -> ExpValue  { if (!test(args, 1, "tan"))  return std::tan(number(args[0], "tan")); else return 0; } }
+				, { "atan",   [&](FunctionArgs&& args) -> ExpValue  { if (!test(args, 1, "atan")) return std::tan(number(args[0], "atan")); else return 0; } }
+				, { "atan2",  [&](FunctionArgs&& args) -> ExpValue
+							  {
+							     if (!test(args, 2, "atan2")) return std::atan2(number(args[0], "atan2"),number(args[1], "atan2")); else return 0;
+							  }
+				  }
+			};
+			//test
+			auto fun_it = funs.find(name);
+			if (fun_it != funs.end())
+			{
+				//get function
+				FunctionMath fun = fun_it->second;
+				//eat space
+				skip();
+				//args
+				FunctionArgs args;
+				//open args // '('
+				if (get() != '(')
+				{
+					m_errors.push_back(std::to_string(line()) + ": '(' of function \'" + name + "\' not found");
+					return name;
+				}
+				//parsing
+				while(true)
+				{
+					//arg
+					args.push_back(expression());
+					//next
+					skip();
+					if (peek() != ','){ break; }
+					get();
+				}
+				//close args // ')'
+				if (get() != ')')
+				{
+					m_errors.push_back(std::to_string(line()) + ": ')' of function \'" + name + "\' not found");
+					return name;
+				}
+				//ok
+				return fun(std::move(args));
+			}
+			//or is a string
+			return name;
 		}
 
 		ExpValue value()
@@ -606,7 +693,7 @@ namespace Denn
 			else if (conf_is_variable(peek()))
 			{
 				get(); //jmp '$'
-				std::string varname = conf_varname(ptr());				
+				std::string varname = conf_name(ptr());
 				//find
 				if (!m_table.exists(varname))
 				{
@@ -618,10 +705,7 @@ namespace Denn
 			}
 			else if (conf_is_varname(peek()))
 			{
-				auto name = conf_varname(ptr());
-					 if (name == "false") return 0;
-				else if (name == "true") return 1;
-				else return name;
+				return name_eval();
 			}
 			else
 			{
@@ -637,7 +721,13 @@ namespace Denn
 			if (peek() == '-')
 			{
 				get();
-				return -number(value(), "-");
+				//get result
+				ExpValue result = value();
+				//name can start with -
+				if (result.is_string())
+					return '-' + result.m_str;
+				else 
+					return -result.m_number;
 			}
 			else if (peek() == '!')
 			{
@@ -779,12 +869,13 @@ namespace Denn
 		{
 			return conf_skip_line_space_and_comments(line(), ptr());
 		}
+
 		//values
-		size_t&       m_line;
-		const char*   m_ptr;
-		ListString    m_errors;
+		size_t&              m_line;
+		const char*          m_ptr;
+		ListString           m_errors;
 		const VariableTable& m_table;
-		ExpValue	  m_result;
+		ExpValue	         m_result;
 	};
 
 	class ConfArguments : public Arguments

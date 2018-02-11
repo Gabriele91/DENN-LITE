@@ -329,4 +329,5 @@ namespace Denn
 	inline DataType get_data_type<double>(){ return DataType::DT_DOUBLE; }
 	template <>
 	inline DataType get_data_type<long double>(){ return DataType::DT_LONG_DOUBLE; }
+
 }
