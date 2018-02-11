@@ -5,6 +5,8 @@
 #include <unordered_map>
 #include <iterator>
 #include <sstream>
+#include <iomanip>
+#include <ctime>
 
 namespace Denn
 {
@@ -663,6 +665,20 @@ namespace Denn
 							     if (!test(args, 2, "atan2")) return std::atan2(number(args[0], "atan2"),number(args[1], "atan2")); else return 0;
 							 }
 				  }
+				//Time
+				,{ "date",  [&](FunctionArgs&& args) -> ExpValue 
+							{ 
+								 if (test(args, 1, "date"))
+								 {
+									 std::stringstream stream_data;
+									 auto current_time = std::time(nullptr);
+									 auto local_time   = *std::localtime(&current_time);
+									 stream_data << std::put_time(&local_time, string(args[0],"date").c_str());
+									 return stream_data.str();
+								 }
+								 return ""; 
+							} 
+				}
 			};
 			//test
 			auto fun_it = funs.find(name);
