@@ -611,26 +611,57 @@ namespace Denn
 			};
 			MapFunctions funs
 			{
-				  { "sin"  , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "sin"))   return std::sin(number(args[0],"sin")); else 0; } }
-				, { "cos"  , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "cos"))   return std::cos(number(args[0],"cos")); else 0; } }
-				, { "log"  , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "log"))   return std::log(number(args[0],"log")); else 0; } }
+				//Maths
+				  { "log"  , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "log"))   return std::log(number(args[0],"log")); else 0; } }
 				, { "log10", [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "log10")) return std::log10(number(args[0],"log10")); else 0; } }	
 				, { "exp"  , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "exp"))   return std::exp(number(args[0],"exp")); else 0; } }
-				, { "str",   [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "str"))   return std::to_string(number(args[0],"str")); else ""; } }			
+				//Cast
+				, { "floor", [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "floor"))  return std::floor(number(args[0],"floor")); else 0; } }
+				, { "ceil" , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "ceil"))   return std::ceil(number(args[0],"ceil")); else 0; } }
+				, { "str",   [&](FunctionArgs&& args) -> ExpValue 
+							 {
+									if (!test(args, 1, "str")) return "";
+									if (args[0].is_number())
+									{
+										return std::to_string(args[0].m_number);
+									}
+									//return string
+									return args[0];
+							 } 
+				  }			
 				, { "float", [&](FunctionArgs&& args) -> ExpValue
 							 {
 								if (!test(args, 1, "float")) return 0;
-								auto ptr = string(args[0], "float").c_str();
-								return conf_string_to_double(ptr);
+								if (args[0].is_string())
+								{
+									auto ptr = args[0].m_str.c_str();
+									return conf_string_to_double(ptr);
+								}
+								//return num
+								return args[0];
 							 }
-				  }				
-				, { "radian", [&](FunctionArgs&& args) -> ExpValue  { if (test(args, 1, "radian")) return number(args[0],"str") * (Constants::pi() / Scalar(180.0)); else ""; } }
-				, { "tan",    [&](FunctionArgs&& args) -> ExpValue  { if (!test(args, 1, "tan"))  return std::tan(number(args[0], "tan")); else return 0; } }
-				, { "atan",   [&](FunctionArgs&& args) -> ExpValue  { if (!test(args, 1, "atan")) return std::tan(number(args[0], "atan")); else return 0; } }
-				, { "atan2",  [&](FunctionArgs&& args) -> ExpValue
-							  {
+				  }
+				, { "int",   [&](FunctionArgs&& args) -> ExpValue
+							 {
+								if (!test(args, 1, "int")) return 0;
+								if (args[0].is_number())
+								{
+									return double(int(args[0].m_number));
+								}
+								auto ptr = args[0].m_str.c_str();
+								return double(int(conf_string_to_double(ptr)));
+							 }
+				  }			
+				//Trigonometry 
+				, { "radian",[&](FunctionArgs&& args) -> ExpValue  { if (test(args, 1, "radian")) return number(args[0],"str") * (Constants::pi() / Scalar(180.0)); else ""; } }
+				, { "sin"  , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "sin"))   return std::sin(number(args[0],"sin")); else 0; } }
+				, { "cos"  , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "cos"))   return std::cos(number(args[0],"cos")); else 0; } }
+				, { "tan",   [&](FunctionArgs&& args) -> ExpValue  { if (!test(args, 1, "tan"))  return std::tan(number(args[0], "tan")); else return 0; } }
+				, { "atan",  [&](FunctionArgs&& args) -> ExpValue  { if (!test(args, 1, "atan")) return std::tan(number(args[0], "atan")); else return 0; } }
+				, { "atan2", [&](FunctionArgs&& args) -> ExpValue
+							 {
 							     if (!test(args, 2, "atan2")) return std::atan2(number(args[0], "atan2"),number(args[1], "atan2")); else return 0;
-							  }
+							 }
 				  }
 			};
 			//test
