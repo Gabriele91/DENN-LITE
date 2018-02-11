@@ -566,14 +566,14 @@ namespace Denn
 		double& number(ExpValue& value, const std::string& opname)
 		{
 			if (value.is_string()) 
-				m_errors.push_back(std::to_string(line()) + ": \'" + opname + "\' is a unsupported string operation");
+				m_errors.push_back(std::to_string(line()) + ": \'" + opname + "\' not support a string operation");
 			return value.m_number;
 		}
 
 		std::string& string(ExpValue& value, const std::string& opname)
 		{
-			if (value.is_string())
-				m_errors.push_back(std::to_string(line()) + ": \'" + opname + "\' is a unsupported number operation");
+			if (value.is_number())
+				m_errors.push_back(std::to_string(line()) + ": \'" + opname + "\' requires a string as argument");
 			return value.m_str;
 		}
 
