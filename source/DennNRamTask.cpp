@@ -85,14 +85,14 @@ namespace NRam
 				}
 			}
 			// Set task difficulty parameters
-			int current_difficulty = clamp<int>(m_current_difficulty - 1,0, m_difficulty_grades.size());
+			int current_difficulty = clamp<int>(m_current_difficulty - 1,0, m_difficulty_grades.size() - 1);
 			DifficultyGrade difficulty_params =  m_difficulty_grades[current_difficulty];
 			m_max_int = std::get<0>(difficulty_params);
 			m_timesteps = std::get<1>(difficulty_params);
 		}
 		else if (m_use_difficulty)
 		{
-			int current_difficulty = clamp<int>(m_current_difficulty - 1, 0, m_difficulty_grades.size());
+			int current_difficulty = clamp<int>(m_current_difficulty - 1, 0, m_difficulty_grades.size() - 1);
 			DifficultyGrade difficulty_params = m_difficulty_grades[current_difficulty];
 			m_max_int = std::get<0>(difficulty_params);
 			m_timesteps = std::get<1>(difficulty_params);
