@@ -82,6 +82,8 @@ def main():
                 print("[Warning]: file '{}' not found".format(file_))
             else:
                 raise
+        except json.decoder.JSONDecodeError as err:
+            print("Error deconding file '{}' => {}".format(file_, err))
 
     # Load results with pandas
     print("==> Convert to pandas")
@@ -114,7 +116,7 @@ def main():
         if "sort" in args.filter:
             df_to_csv = df_to_csv.sort_values(["dataset", "accuracy"], ascending=False)
         
-        df_to_csv.to_csv("results.csv", index=False)
+        df_to_csv.to_csv("results.csv", index=False, float_format='%.9f')
 
 
 if __name__ == '__main__':
