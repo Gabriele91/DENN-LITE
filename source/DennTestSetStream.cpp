@@ -117,10 +117,11 @@ namespace Denn
 			//read
 			m_cache_rows_read = 0;
 			m_dataset->read_batch(algorithm(),m_cache_batch);
-
-			//from task
+			#if 0
+			//metadata, it's not use in Vanilla DENN
 			m_batch.m_metadata = m_cache_batch.m_metadata;
 			m_batch.m_mask = m_cache_batch.m_mask; //todo, same of features and labels
+			#endif 
 
 			// Resize the feature matrix if the dimension changes
 			if (m_batch.m_features.cols() != m_cache_batch.m_features.cols())
