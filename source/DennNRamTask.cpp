@@ -27,8 +27,8 @@ namespace NRam
 	, m_timesteps(timesteps)
 	, m_random(&random)
 	, m_use_difficulty(max_int == 0 && timesteps == 0 && min_difficulty > 0)
-	, m_max_difficulty(max_difficulty)
-	, m_min_difficulty(min_difficulty)
+	, m_max_difficulty(std::max(min_difficulty,max_difficulty))
+	, m_min_difficulty(std::min(min_difficulty, max_difficulty))
 	, m_current_difficulty(min_difficulty)
 	, m_step_gen_change_difficulty(step_gen_change_difficulty)
 	{
@@ -59,24 +59,30 @@ namespace NRam
 		)
 		{
 			//index
-			int number_e = m_random->geometric(0.5);
-			int max_difficulty = std::min<int>(m_max_difficulty, m_difficulty_grades.size());
-			int next_difficulty = m_current_difficulty + number_e;
-			int d_plus_e_difficulty = std::min<int>(next_difficulty, max_difficulty);
-			//cases
+			int min_difficulty = clamp<int>(1, m_difficulty_grades.size(), m_min_difficulty);
+			int max_difficulty = clamp<int>(min_difficulty, m_difficulty_grades.size(), m_max_difficulty);
+			//select a type of update
 			volatile Scalar random_number = m_random->uniform(0, 1);
 			//cases
 			if (random_number <= 0.1)
 			{
-				m_current_difficulty = m_random->irand(m_min_difficulty, max_difficulty);
-			}
-			else if (random_number <= 0.35)
-			{
-				m_current_difficulty = m_random->irand(m_min_difficulty, d_plus_e_difficulty);
+				m_current_difficulty = m_random->irand(min_difficulty, max_difficulty + 1);
 			}
 			else
 			{
-				m_current_difficulty = d_plus_e_difficulty;
+				//next vale
+				int number_e = m_random->geometric(0.5);
+				//next
+				int c_plus_e_difficulty = clamp<int>(m_current_difficulty + number_e, min_difficulty, max_difficulty);
+				//cases
+				if (random_number <= 0.35)
+				{
+					m_current_difficulty = m_random->irand(min_difficulty, c_plus_e_difficulty + 1);
+				}
+				else
+				{
+					m_current_difficulty = c_plus_e_difficulty;
+				}
 			}
 			// Set task difficulty parameters
 			int current_difficulty = clamp<int>(m_current_difficulty - 1,0, m_difficulty_grades.size());
