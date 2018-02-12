@@ -59,10 +59,10 @@ namespace NRam
 		)
 		{
 			//index
-			size_t number_e = m_random->geometric(0.5);
-			size_t max_difficulty = std::min(m_max_difficulty, m_difficulty_grades.size());
-			size_t next_difficulty = m_current_difficulty + number_e;
-			size_t d_plus_e_difficulty = std::min<size_t>(next_difficulty, max_difficulty);
+			int number_e = m_random->geometric(0.5);
+			int max_difficulty = std::min<int>(m_max_difficulty, m_difficulty_grades.size());
+			int next_difficulty = m_current_difficulty + number_e;
+			int d_plus_e_difficulty = std::min<int>(next_difficulty, max_difficulty);
 			//cases
 			volatile Scalar random_number = m_random->uniform(0, 1);
 			//cases
@@ -79,14 +79,15 @@ namespace NRam
 				m_current_difficulty = d_plus_e_difficulty;
 			}
 			// Set task difficulty parameters
-			DifficultyGrade difficulty_params = m_difficulty_grades[std::max(size_t(0), m_current_difficulty-1)];
+			int current_difficulty = clamp<int>(m_current_difficulty - 1,0, m_difficulty_grades.size());
+			DifficultyGrade difficulty_params =  m_difficulty_grades[current_difficulty];
 			m_max_int = std::get<0>(difficulty_params);
 			m_timesteps = std::get<1>(difficulty_params);
 		}
 		else if (m_use_difficulty)
 		{
-			m_current_difficulty = std::min(m_current_difficulty, m_difficulty_grades.size());
-			DifficultyGrade difficulty_params = m_difficulty_grades[std::max(size_t(0), m_current_difficulty-1)];
+			int current_difficulty = clamp<int>(m_current_difficulty - 1, 0, m_difficulty_grades.size());
+			DifficultyGrade difficulty_params = m_difficulty_grades[current_difficulty];
 			m_max_int = std::get<0>(difficulty_params);
 			m_timesteps = std::get<1>(difficulty_params);
 		}
