@@ -28,6 +28,8 @@ namespace NRam
 
 		const DataSetTrainHeader& get_last_batch_info() const override;
 
+		bool can_stream() const override;
+
 		///////////////////////////////////////////////////////////////////
 		// READ TEST SET
 		bool read_test(const DennAlgorithm& algorithm, DataSet& t_out) override;

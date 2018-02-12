@@ -11,38 +11,57 @@ namespace Denn
 		m_batch_offset = rows_offset;
 		m_dataset->start_read_batch();
 		//init batch
-		//int features
-		m_batch.m_features.conservativeResize
-		(
-			m_batch_size
-			, m_dataset->get_main_header_info().m_n_features
-		);
-		//mask
-		m_batch.m_mask.conservativeResize
-		(
-			  1
-			, m_dataset->get_main_header_info().m_n_features
-		);
-		//init labels
-		m_batch.m_labels.conservativeResize
-		(
-			m_batch_size
-			, m_dataset->get_main_header_info().m_n_classes
-		);
-		//read
-		read_batch(m_batch_size);
+		if (m_dataset->can_stream())
+		{
+			//int features
+			m_batch.m_features.conservativeResize
+			(
+				m_batch_size
+				, m_dataset->get_main_header_info().m_n_features
+			);
+			//mask
+			m_batch.m_mask.conservativeResize
+			(
+				1
+				, m_dataset->get_main_header_info().m_n_features
+			);
+			//init labels
+			m_batch.m_labels.conservativeResize
+			(
+				m_batch_size
+				, m_dataset->get_main_header_info().m_n_classes
+			);
+			//read
+			read_batch(m_batch_size);
+		}
+		else
+		{
+			//no stream
+			m_dataset->read_batch(algorithm(), m_cache_batch);
+		}
 	}
 
 	//read
 	DataSetScalar& TestSetStream::read_batch()
 	{
-		return read_batch(m_batch_offset);
+		if (m_dataset->can_stream())
+		{
+			return read_batch(m_batch_offset);
+		}
+		else
+		{
+			m_dataset->read_batch(algorithm(), m_cache_batch);
+			return m_cache_batch;
+		}
 	}
 
 	//get last
 	const DataSetScalar& TestSetStream::last_batch() const
 	{
-		return m_batch;
+		if (m_dataset->can_stream())
+			return m_batch;
+		else
+			return m_cache_batch;
 	}
 	//read
 	DataSetScalar& TestSetStream::read_batch(size_t n_rows)
@@ -98,7 +117,10 @@ namespace Denn
 			//read
 			m_cache_rows_read = 0;
 			m_dataset->read_batch(algorithm(),m_cache_batch);
+
+			//from task
 			m_batch.m_metadata = m_cache_batch.m_metadata;
+			m_batch.m_mask = m_cache_batch.m_mask; //todo, same of features and labels
 
 			// Resize the feature matrix if the dimension changes
 			if (m_batch.m_features.cols() != m_cache_batch.m_features.cols())
@@ -113,10 +135,7 @@ namespace Denn
 				c_labels = m_cache_batch.m_labels.cols();
 				m_batch.m_labels.conservativeResize(m_batch.m_labels.rows(), c_features);
 			}
-
-			// Copy mask
-			m_batch.m_mask = m_cache_batch.m_mask;
-			
+				
 			//compute n rows to read
 			size_t to_read = std::min<size_t>(m_cache_batch.m_features.rows(), read_remaning);
 			//read

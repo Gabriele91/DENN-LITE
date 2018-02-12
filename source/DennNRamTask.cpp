@@ -54,15 +54,18 @@ namespace NRam
 	TaskTuple Task::create_batch(const size_t current_generation) 
 	{
 		if ( m_use_difficulty
-		&&  current_generation != 0 
-		&&  (current_generation + 1) % m_step_gen_change_difficulty == 0
+		&&   current_generation != 0 
+		&&   !((current_generation + 1) % m_step_gen_change_difficulty)
 		)
 		{
-			volatile size_t number_e = m_random->geometric(0.5);
+			//index
+			size_t number_e = m_random->geometric(0.5);
 			size_t max_difficulty = std::min(m_max_difficulty, m_difficulty_grades.size());
-			volatile size_t d_plus_e_difficulty = std::min((m_current_difficulty + number_e), max_difficulty);
+			size_t next_difficulty = m_current_difficulty + number_e;
+			size_t d_plus_e_difficulty = std::min<size_t>(next_difficulty, max_difficulty);
 			//cases
-			Scalar random_number = m_random->uniform(0, 1);
+			volatile Scalar random_number = m_random->uniform(0, 1);
+			//cases
 			if (random_number <= 0.1)
 			{
 				m_current_difficulty = m_random->irand(m_min_difficulty, max_difficulty);
@@ -76,24 +79,29 @@ namespace NRam
 				m_current_difficulty = d_plus_e_difficulty;
 			}
 			// Set task difficulty parameters
-			DifficultyGrade difficulty_params = m_difficulty_grades[m_current_difficulty - 1];
+			DifficultyGrade difficulty_params = m_difficulty_grades[std::max(size_t(0), m_current_difficulty-1)];
 			m_max_int = std::get<0>(difficulty_params);
 			m_timesteps = std::get<1>(difficulty_params);
 		}
 		else if (m_use_difficulty)
 		{
-			size_t difficulty = std::min(m_current_difficulty, m_difficulty_grades.size());
-			DifficultyGrade difficulty_params = m_difficulty_grades[difficulty - 1];
+			m_current_difficulty = std::min(m_current_difficulty, m_difficulty_grades.size());
+			DifficultyGrade difficulty_params = m_difficulty_grades[std::max(size_t(0), m_current_difficulty-1)];
 			m_max_int = std::get<0>(difficulty_params);
 			m_timesteps = std::get<1>(difficulty_params);
 		}
-		//mems
-		const auto& mems = (*this)();
-		Matrix in_mem = std::get<0>(mems);
-		Matrix out_mem = std::get<1>(mems);
-		Matrix mask = std::get<2>(mems);
-		Matrix regs = std::get<3>(mems);
-		return std::make_tuple(in_mem, out_mem, mask, regs, m_max_int, m_timesteps);
+		//compute
+		auto mems = (*this)();
+		//ret
+		return std::make_tuple
+		(
+		  std::get<0>(mems) //in mem
+		, std::get<1>(mems) //out mem
+		, std::get<2>(mems) //mask
+		, std::get<3>(mems) //regs
+		, m_max_int
+		, m_timesteps
+		);
 	}
 
 	//info

@@ -65,6 +65,10 @@ namespace NRam
 		return m_fake_train_header;
 	}
 
+	bool DataSetTask::can_stream() const
+	{ 
+		return false; 
+	}
 	///////////////////////////////////////////////////////////////////
 	// READ TEST SET
 	bool DataSetTask::read_test(const DennAlgorithm& algorithm, DataSet& t_out) 

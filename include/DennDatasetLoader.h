@@ -63,6 +63,9 @@ namespace Denn
 
 		virtual const DataSetTrainHeader& get_last_batch_info() const  = 0;
 
+		//can stream
+		virtual bool can_stream() const { return true; }
+
 		///////////////////////////////////////////////////////////////////
 		// READ TEST SET
 		virtual bool read_test(const DennAlgorithm& algorithm, DataSet& t_out) = 0;
