@@ -349,9 +349,7 @@ namespace NRam
     {
         Scalar s_cost = 0;
         for (size_t idx = 0; idx < M.rows(); ++idx)
-        {
-            s_cost += Denn::CostFunction::safe_log(std::max(M(idx, Matrix::Index(desired_mem(idx))), std::numeric_limits<Scalar>::min())) * linear_mask(0, idx);
-        }
+            s_cost += Denn::CostFunction::safe_log(M(idx, Matrix::Index(desired_mem(idx)))) * linear_mask(0, idx);
         return s_cost;
     }
 
@@ -378,66 +376,66 @@ namespace NRam
 		Matrix regs;
 		Matrix in_mem;
 		Matrix out;
-		//time step
         Scalar full_cost = Scalar(0.0);
+
 		//max int and steps
 		size_t max_int = std::max(context.m_max_int, dataset_max_int);
 		size_t loop_timesteps = std::max(context.m_timesteps, dataset_timesteps);
-		//entropy
-        #ifdef ENABLE_ENTROPY
-        const Scalar entropy = Scalar(0.1);
-        const Scalar entropy_decay = Scalar(0.999);
-        #endif 
+
         // Run the circuit
         for (Matrix::Index s = 0; s < linear_in_mem.rows(); ++s)
         {
-            //Alloc regs
+            // Alloc regs and initialize
             regs = Matrix::Zero(context.m_n_regs,max_int);
-            //P(X=0)
             regs.col(0).fill(1);
-            //In mem fuzzy
+
+            // In mem fuzzy
 			in_mem = fuzzy_encode(linear_in_mem.row(s));
-            //Cost helper
+
+            // Cost helper
             Scalar p_t = Scalar(0.0);
             Scalar prob_incomplete = Scalar(1.0);
             Scalar cum_prob_complete = Scalar(0.0);
             Scalar sample_cost = Scalar(0.0);
-            bool   stop = false;
-			size_t timestep = 0;
-            //for all timestep, run on s
-            for (; !stop && timestep < loop_timesteps; timestep++)
+            Scalar stop = false;
+
+            // Execute sa sample for all timestep
+            for (size_t timestep = 0; timestep < loop_timesteps && !stop; timestep++)
             {
-				//NN
+				// NN
 				out = network.apply(get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
-                //execute circuit
+
+                // Run circuit
                 Scalar fi = run_circuit(context, out, regs, in_mem);
-                //up info
+
+                // Calculate p_t
+                if (timestep == loop_timesteps - 1)  p_t = 1 - cum_prob_complete;
+                else                                 p_t = fi * prob_incomplete;
+
+                // Calculate the probability of not complete 
                 prob_incomplete *= Scalar(1.0) - fi;
-				//min prob complate
-				const Scalar prob_complate_limit = (Scalar(1.0) / max_int) / 2;
-                //exit case
-                if(prob_incomplete < prob_complate_limit || loop_timesteps <= (timestep+1))
-                {
-                    stop = true;
-                }
-                //compute cum_prob_complete & p_t
-                if (stop)  p_t = 1 - cum_prob_complete;
-                else       p_t = fi * prob_incomplete;
                 cum_prob_complete += p_t;
+
                 //Entropy
-                #ifdef ENABLE_ENTROPY
-                Scalar entropy_weight = Scalar(entropy * pow(entropy_decay, timestep)); 
-                Matrix entropy_mem = in_mem;
-                Scalar entropy_cost = entropy_weight * entropy_mem.unaryExpr
-                ([] (Scalar v) -> Scalar { return v * Denn::CostFunction::safe_log(std::max<Scalar>(v, 1e-8));}).sum();
-                #else 
-                const Scalar entropy_cost = 0;
-                #endif 
-                //compute cost
-                sample_cost -= p_t * calculate_sample_cost(in_mem, linear_out_mem.row(s), linear_mask) - entropy_cost;
+                Scalar entropy_cost(0.0);
+                const Scalar entropy = Scalar(0.05);
+                const Scalar entropy_decay = Scalar(0.999);
+                const Scalar entropy_weight = entropy * std::pow(entropy_decay, timestep);
+                const Matrix copy_mem = in_mem;
+                entropy_cost += copy_mem.unaryExpr([&] (Scalar v) -> Scalar {
+                    return v * Denn::CostFunction::safe_log(v);
+                }).sum() * entropy_weight;
+
+
+                // Compute the "sample" cost                
+                Scalar timestep_cost = p_t * calculate_sample_cost(in_mem, linear_out_mem.row(s), linear_mask);
+                sample_cost -= timestep_cost - (entropy_cost > timestep_cost ? 0 : entropy_cost);
+
+                // Stop the calculation if the NRAM have will to terminate
+                if (fi > 0.98) stop = true;
             }
-            //add to full "cost"
-            full_cost += sample_cost /*/ timestep */;
+            // Add to "batch" cost the "sample" cost
+            full_cost += sample_cost;
         }
 
         return full_cost;
@@ -517,6 +515,7 @@ namespace NRam
 		//resize regs
 		regs.conservativeResize(context.m_n_regs, regs.cols());
         //return fi
+
         return PointFunction::sigmoid(nn_out_decision.col(nn_out_decision.cols() - 1)(0));
     }
 	////////////////////////////////////////////////////////////////////////////////////////
@@ -561,8 +560,8 @@ namespace NRam
                 Scalar fi = run_circuit(context, out, regs, in_mem, execution_debug);
                 //up info
                 prob_incomplete *= Scalar(1.0) - fi;
-				//min prob complate
-				const Scalar prob_complate_limit = (Scalar(1.0) / context.m_max_int) / 2;
+                //min prob complate
+                const Scalar prob_complate_limit = (Scalar(1.0) / context.m_max_int) / 2;
                 //exit case
                 if(prob_incomplete < prob_complate_limit || context.m_timesteps <= (timestep + 1))
                 {

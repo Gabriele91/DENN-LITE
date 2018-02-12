@@ -82,9 +82,9 @@ namespace NRam
 
 		virtual MemoryTuple operator()();
 
-        size_t  m_batch_size;
-        size_t  m_max_int;
-        size_t  m_n_regs;
+		size_t  m_batch_size;
+		size_t  m_max_int;
+		size_t  m_n_regs;
 		size_t  m_timesteps;
 
 		bool    m_use_difficulty;
@@ -92,6 +92,11 @@ namespace NRam
 		size_t  m_max_difficulty;
 		size_t  m_current_difficulty;
 		size_t 	m_step_gen_change_difficulty;
+
+		Matrix  m_in_mem;
+		Matrix  m_out_mem;
+		Matrix  m_mask;
+		Matrix  m_regs;
 
 		std::vector<DifficultyGrade> m_difficulty_grades;
 

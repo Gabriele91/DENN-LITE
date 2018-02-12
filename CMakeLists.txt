@@ -9,12 +9,11 @@ set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 set(CMAKE_CXX_FLAGS_DEBUG "-g -D_DEBUG")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
-
 include_directories(include/)
 include_directories(dips/include/)
 
 file(GLOB denn_source source/*.cpp source/**/*.cpp source/**/**/*.cpp)
-SET(SOURCE_FILES ${denn_source})
+set(SOURCE_FILES ${denn_source})
 
 find_package(ZLIB)
 find_library(M_LIB m)
