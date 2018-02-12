@@ -1,7 +1,6 @@
 #include "Denn.h"
 #include "DennNRam.h"
 #include "DennNRamTask.h"
-#include "../include/DennNRamTask.h"
 #include <iterator>
 
 namespace Denn
