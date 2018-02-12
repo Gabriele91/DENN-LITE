@@ -579,6 +579,20 @@ namespace Denn
 				m_errors.push_back(std::to_string(line()) + ": \'" + opname + "\' requires a string as argument");
 			return value.m_str;
 		}
+		
+		const double& number(const ExpValue& value, const std::string& opname)
+		{
+			if (value.is_string())
+				m_errors.push_back(std::to_string(line()) + ": \'" + opname + "\' not support a string operation");
+			return value.m_number;
+		}
+
+		const std::string& string(const ExpValue& value, const std::string& opname)
+		{
+			if (value.is_number())
+				m_errors.push_back(std::to_string(line()) + ": \'" + opname + "\' requires a string as argument");
+			return value.m_str;
+		}
 
 		ExpValue smart_cast(const std::string& value)
 		{
@@ -623,7 +637,7 @@ namespace Denn
 				, { "ceil" , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "ceil"))   return std::ceil(number(args[0],"ceil")); else 0; } }
 				, { "str",   [&](FunctionArgs&& args) -> ExpValue 
 							 {
-									if (!test(args, 1, "str")) return "";
+									if (!test(args, 1, "str")) return ExpValue("");
 									if (args[0].is_number())
 									{
 										return std::to_string(args[0].m_number);
@@ -677,7 +691,7 @@ namespace Denn
 									 stream_data << std::put_time(&local_time, string(args[0],"date").c_str());
 									 return stream_data.str();
 								 }
-								 return ""; 
+								 return ExpValue("");
 							} 
 				}
 			};
@@ -734,7 +748,7 @@ namespace Denn
 			}
 			else if (peek() == '\"')
 			{
-				auto& value = conf_string(line(), ptr());
+				const auto& value = conf_string(line(), ptr());
 				if (!value.m_success) m_errors.push_back(line() + ": expression error, not valid string");
 				return value.m_str;
 			}
