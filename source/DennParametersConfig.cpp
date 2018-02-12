@@ -1,10 +1,13 @@
 #include "DennParameters.h"
 #include "DennActivationFunction.h"
+#include "DennConstants.h"
 #include <string>
 #include <cctype>
 #include <unordered_map>
 #include <iterator>
 #include <sstream>
+#include <iomanip>
+#include <ctime>
 
 namespace Denn
 {
@@ -13,11 +16,16 @@ namespace Denn
     {
         return (c >= '0' && c <= '9');
     }    
-    
-    static inline bool conf_is_variable(char c)
-    {
-        return c == '$';
-    }
+
+	static inline bool conf_is_variable(char c)
+	{
+		return c == '$';
+	}
+
+	static inline bool conf_is_varname(char c)
+	{
+		return std::isalpha(c) || c == '_';
+	}
 
     static inline bool conf_is_xdigit(char c)
     {
@@ -57,6 +65,54 @@ namespace Denn
         //result
         return ch == '-' ? -result : result;
     }
+	
+	static double conf_string_to_double(const char*& source)
+	{
+		//+/-
+		char ch = *source;
+		if (ch == '-') ++source;
+		//integer part
+		double result = 0;
+		while (conf_is_digit(*source)) result = (result * 10) + (*source++ - '0');
+		//fraction
+		if (*source == '.')
+		{
+			++source;
+			double fraction = 1;
+			while (conf_is_digit(*source))
+			{
+				fraction *= 0.1;
+				result += (*source++ - '0') * fraction;
+			}
+		}
+		//exponent
+		if (*source == 'e' || *source == 'E')
+		{
+			++source;
+			//base of exp
+			double base = 10;
+			//+/- exp
+			if (*source == '+')
+			{
+				++source;
+			}
+			else if (*source == '-')
+			{
+				++source;
+				base = 0.1;
+			}
+			//parsing exponent
+			unsigned int exponent = 0;
+			while (conf_is_digit(*source)) exponent = (exponent * 10) + (*source++ - '0');
+			//compute exponent
+			double power = 1;
+			for (; exponent; exponent >>= 1, base *= base) if (exponent & 1) power *= base;
+			//save result
+			result *= power;
+		}
+		//result
+		return ch == '-' ? -result : result;
+	}
     //////////////////////////////////////////////////////////////////////////////////        
     static bool conf_skip_line_comment(size_t& line, const char*& inout)
     {
@@ -387,24 +443,26 @@ namespace Denn
         }
         return { out, false };
     }
-    
-    static std::string conf_name(const char*& source)
-    {
-        //init
-        std::string out;
-        //parse name
-        while (
-               std::isalpha(*source) 
-            || *source == '_' 
-            || *source == '-'
-        )
-        {
-            out += (*source);
-            ++source;
-        }
-        //end
-        return out;
-    }
+    //name
+	static std::string conf_name(const char*& source)
+	{
+		//init
+		std::string out;
+		//first
+		if (std::isalpha(*source) || *source == '_' || *source == '-' )
+		{
+			out += (*source);
+			++source;
+		}
+		//parse name
+		while ( std::isalnum(*source) || *source == '_' || *source == '-' || *source == '.')
+		{
+			out += (*source);
+			++source;
+		}
+		//end
+		return out;
+	}
     ////////////////////////////////////////////////////////////////////////////////////////
     class VariableTable
     {
@@ -444,131 +502,546 @@ namespace Denn
         mutable std::unordered_map< std::string, std::string > m_map;
     };
 
-    class ParametersParseHelp
-    {
-	protected:
-
-		class ConfArguments : public Arguments
+	class ConfExpParser
+	{
+	public:
+		//value
+		struct ExpValue
 		{
-		public:
-			//alias
-			using ListChar = std::vector < char >;
-			using ListString = std::vector < std::string >;
-			//class methods
-			ConfArguments(const VariableTable& table, size_t& line, const char* ptr,const ListChar& end_line)
+			//values
+			std::string m_str;
+			double m_number;
+			//init
+			ExpValue() : m_number(0) {};
+			ExpValue(double value) : m_number(value) {};
+			ExpValue(const std::string& value) : m_str(value), m_number(0) {};
+			//info
+			bool is_string() const { return m_str.size() != 0; }
+			bool is_number() const { return m_str.size() == 0; }
+			//void
+			bool is_false() { return is_number() && !m_number; }
+			bool is_true() { return is_string() || m_number; }
+			//str
+			std::string str() const 
 			{
-				//init 
-				m_ptr = ptr;
-				m_index = 0;
-				//parsing
-				while (*m_ptr && std::find(end_line.begin(), end_line.end(), *m_ptr) == end_line.end())
-				{
-					//value
-					std::string value;
-					//remove space
-					conf_skip_line_space_and_comments(line, m_ptr);
-					//get value
-					while (!std::isspace(*m_ptr)) value += *(m_ptr++);
-					//push in list
-					variable_processing(table,line,value);
+				return is_string()
+					? m_str 
+					: m_number == double(long(m_number))
+					? std::to_string(long(m_number))
+					: std::to_string(m_number);
+			}
+		};
+		//alias
+		using ListString = std::vector < std::string >;
+		using FunctionArgs = std::vector< ExpValue >;
+		using FunctionMath = std::function< ExpValue(FunctionArgs&&) >;
+		using MapConstants = std::unordered_map < std::string, ExpValue >;
+		using MapFunctions = std::unordered_map < std::string, FunctionMath >;
+		//init
+		ConfExpParser(const VariableTable& table, size_t& line, const char* ptr)
+		: m_table(table)
+		, m_line(line)
+		, m_ptr(ptr)
+		{
+			m_result = expression();
+		}
+
+		//result
+		const ExpValue& result() const
+		{
+			return m_result;
+		}
+
+		//errors
+		const ListString& errors() const
+		{
+			return m_errors;
+		}
+
+		//new ptr
+		const char* get_ptr() const
+		{
+			return m_ptr;
+		}
+
+	protected:
+		
+		double& number(ExpValue& value, const std::string& opname)
+		{
+			if (value.is_string()) 
+				m_errors.push_back(std::to_string(line()) + ": \'" + opname + "\' not support a string operation");
+			return value.m_number;
+		}
+
+		std::string& string(ExpValue& value, const std::string& opname)
+		{
+			if (value.is_number())
+				m_errors.push_back(std::to_string(line()) + ": \'" + opname + "\' requires a string as argument");
+			return value.m_str;
+		}
+
+		ExpValue smart_cast(const std::string& value)
+		{
+			const char* ptr = value.c_str();
+			double result = conf_string_to_double(ptr);
+			if (*ptr == '\0') return result;
+			return value;
+		}
+		
+		ExpValue name_eval()
+		{
+			//eat space
+			skip();
+			//name
+			auto name = conf_name(ptr());
+			//consts
+			MapConstants consts
+			{
+				  { "false", 0 }
+				, { "true", 1 }
+				, { "e",  Constants::e()  }
+				, { "pi", Constants::pi() }
+			};
+			//test
+			auto const_it = consts.find(name);
+			if (const_it != consts.end()) return const_it->second;
+			//function?
+			auto test = [this](const FunctionArgs& args, size_t n, const std::string& name) -> bool
+			{
+				if (args.size() == n) return true;
+				m_errors.push_back(std::to_string(line()) + ": function \'" + name + "\' get " + std::to_string(n) + " argument[s]");
+				return false;
+			};
+			MapFunctions funs
+			{
+				//Maths
+				  { "log"  , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "log"))   return std::log(number(args[0],"log")); else 0; } }
+				, { "log10", [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "log10")) return std::log10(number(args[0],"log10")); else 0; } }	
+				, { "exp"  , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "exp"))   return std::exp(number(args[0],"exp")); else 0; } }
+				//Cast
+				, { "floor", [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "floor"))  return std::floor(number(args[0],"floor")); else 0; } }
+				, { "ceil" , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "ceil"))   return std::ceil(number(args[0],"ceil")); else 0; } }
+				, { "str",   [&](FunctionArgs&& args) -> ExpValue 
+							 {
+									if (!test(args, 1, "str")) return "";
+									if (args[0].is_number())
+									{
+										return std::to_string(args[0].m_number);
+									}
+									//return string
+									return args[0];
+							 } 
+				  }			
+				, { "float", [&](FunctionArgs&& args) -> ExpValue
+							 {
+								if (!test(args, 1, "float")) return 0;
+								if (args[0].is_string())
+								{
+									auto ptr = args[0].m_str.c_str();
+									return conf_string_to_double(ptr);
+								}
+								//return num
+								return args[0];
+							 }
+				  }
+				, { "int",   [&](FunctionArgs&& args) -> ExpValue
+							 {
+								if (!test(args, 1, "int")) return 0;
+								if (args[0].is_number())
+								{
+									return double(int(args[0].m_number));
+								}
+								auto ptr = args[0].m_str.c_str();
+								return double(int(conf_string_to_double(ptr)));
+							 }
+				  }			
+				//Trigonometry 
+				, { "radian",[&](FunctionArgs&& args) -> ExpValue  { if (test(args, 1, "radian")) return number(args[0],"str") * (Constants::pi() / Scalar(180.0)); else ""; } }
+				, { "sin"  , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "sin"))   return std::sin(number(args[0],"sin")); else 0; } }
+				, { "cos"  , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "cos"))   return std::cos(number(args[0],"cos")); else 0; } }
+				, { "tan",   [&](FunctionArgs&& args) -> ExpValue  { if (!test(args, 1, "tan"))  return std::tan(number(args[0], "tan")); else return 0; } }
+				, { "atan",  [&](FunctionArgs&& args) -> ExpValue  { if (!test(args, 1, "atan")) return std::tan(number(args[0], "atan")); else return 0; } }
+				, { "atan2", [&](FunctionArgs&& args) -> ExpValue
+							 {
+							     if (!test(args, 2, "atan2")) return std::atan2(number(args[0], "atan2"),number(args[1], "atan2")); else return 0;
+							 }
+				  }
+				//Time
+				,{ "date",  [&](FunctionArgs&& args) -> ExpValue 
+							{ 
+								 if (test(args, 1, "date"))
+								 {
+									 std::stringstream stream_data;
+									 auto current_time = std::time(nullptr);
+									 auto local_time   = *std::localtime(&current_time);
+									 stream_data << std::put_time(&local_time, string(args[0],"date").c_str());
+									 return stream_data.str();
+								 }
+								 return ""; 
+							} 
 				}
-			}
-
-			const char* get_string() override
+			};
+			//test
+			auto fun_it = funs.find(name);
+			if (fun_it != funs.end())
 			{
-				denn_assert(!eof());
-				//get
-				return m_values[m_index++].c_str();
-			}
-
-			bool get_bool() override
-			{
-				std::string arg = get_string();
-				std::transform(arg.begin(), arg.end(), arg.begin(), ::tolower);
-				return arg == std::string("true")
-					|| arg == std::string("yes")
-					|| arg == std::string("t")
-					|| arg == std::string("y");
-			}
-
-			int get_int() override
-			{
-				return atoi(get_string());
-			}
-
-			double get_double() override
-			{
-				return atof(get_string());
-			}
-
-			bool eof() const override
-			{
-				return m_values.size() <= m_index;
-			}
-
-			bool back() override
-			{
-				//index is 0? It can't go back
-				if (!m_index) return false;
-				//else go back
-				--m_index;
-				//ok
-				return true;
-			}
-
-			bool end_vals() const override
-			{
-				return eof();
-			}
-
-			const ListString& errors() const
-			{
-				return m_errors;
-			}
-
-			const char* get_ptr() const
-			{
-				return m_ptr;
-			}
-
-		protected:
-
-			//ptr
-			const char* m_ptr;
-			//info buffer
-			size_t m_index;
-			ListString m_values;
-			//errors
-			ListString m_errors;
-			//variable processing
-			bool variable_processing(const VariableTable& context, const size_t& line, const std::string& input) 
-			{
-				if (input.size() && conf_is_variable(input[0]))
+				//get function
+				FunctionMath fun = fun_it->second;
+				//eat space
+				skip();
+				//args
+				FunctionArgs args;
+				//open args // '('
+				if (get() != '(')
 				{
-					//varname
-					std::string varname = &input[1];
-					//find
-					if (!context.exists(varname))
-					{
-						m_errors.push_back(line + ": \'" + varname + "\' is not valid variable");
-						return false;
-					}
-					//get value
-					std::stringstream end_value ( context.get(varname) );
-					//split by space
-					std::istream_iterator<std::string> it(end_value);
-					std::istream_iterator<std::string> end;
-					//add all tokens
-					for (; it != end; ++it) m_values.push_back(*it);
+					m_errors.push_back(std::to_string(line()) + ": '(' of function \'" + name + "\' not found");
+					return name;
+				}
+				//parsing
+				while(true)
+				{
+					//arg
+					args.push_back(expression());
+					//next
+					skip();
+					if (peek() != ','){ break; }
+					get();
+				}
+				//close args // ')'
+				if (get() != ')')
+				{
+					m_errors.push_back(std::to_string(line()) + ": ')' of function \'" + name + "\' not found");
+					return name;
+				}
+				//ok
+				return fun(std::move(args));
+			}
+			//or is a string
+			return name;
+		}
+
+		ExpValue value()
+		{
+			//eat space
+			skip();
+			//parsing
+			if (peek() == '(')
+			{
+				get(); // '('
+				ExpValue result = expression();
+				get(); // ')'
+				return result;
+			}
+			else if (peek() == '\"')
+			{
+				auto& value = conf_string(line(), ptr());
+				if (!value.m_success) m_errors.push_back(line() + ": expression error, not valid string");
+				return value.m_str;
+			}
+			else if (conf_is_variable(peek()))
+			{
+				get(); //jmp '$'
+				std::string varname = conf_name(ptr());
+				//find
+				if (!m_table.exists(varname))
+				{
+					m_errors.push_back(line() + ": \'" + varname + "\' is not valid variable");
+					return 0.0;
+				}
+				//get value
+				return smart_cast(m_table.get(varname));
+			}
+			else if (conf_is_varname(peek()))
+			{
+				return name_eval();
+			}
+			else
+			{
+				return conf_string_to_double(ptr());
+			}
+		}
+
+		ExpValue one()
+		{
+			//eat space
+			skip();
+			//parsing
+			if (peek() == '-')
+			{
+				get();
+				//get result
+				ExpValue result = value();
+				//name can start with -
+				if (result.is_string())
+					return '-' + result.m_str;
+				else 
+					return -result.m_number;
+			}
+			else if (peek() == '!')
+			{
+				get();
+				return !number(value(), "!");
+			}
+			else
+			{
+				return value();
+			}
+		}
+
+		ExpValue pow()
+		{
+			//one
+			ExpValue result = one();
+			//eat space
+			skip();
+			//test
+			if (peek() == '^')
+			{
+				get();
+				return std::pow(number(result, "^"), number(one(), "^"));
+			}
+			return result;
+		}
+
+		ExpValue term()
+		{
+			//left
+			ExpValue result = pow();
+			//eat space
+			skip();
+			//right
+			while (peek() == '*' || peek() == '/' || peek() == '%')
+			{
+				     if (peek() == '*'){ get(); number(result, "*") *= number(pow(), "*"); }
+				else if (peek() == '/'){ get();  number(result, "/") /= number(pow(), "/");}
+				else 
+				{ 
+					get();
+					double left = number(result, "%");
+					double right = number(pow(), "%");
+					result.m_number = positive_fmod<double>(left, right);
+				}
+				//eat space
+				skip();
+			}
+			return result;
+		}
+
+		ExpValue mathexp()
+		{
+			//left
+			ExpValue result = term();
+			//eat space
+			skip();
+			//right
+			while (peek() == '+' || peek() == '-')
+			{
+				if (get() == '+')
+				{
+					//right term
+					auto right = term();
+					//sum & concatenation 
+					if (result.is_number() && right.is_number())
+						return result.m_number + right.m_number;
+					else if (result.is_number() && right.is_string()) 
+						return std::to_string(result.m_number) + right.m_str;
+					else if (result.is_string() && right.is_number()) 
+						return result.m_str + std::to_string(right.m_number);
+					else 
+						return result.m_str + right.m_str;
 				}
 				else
 				{
-					//add input
-					m_values.push_back(input);
+					number(result, "-") -= number(term(), "-");
 				}
+				//eat space
+				skip();
 			}
-		};
+			return result;
+		}
 
+		ExpValue logicexp()
+		{
+			//left
+			ExpValue result = mathexp();
+			//eat space
+			skip();
+			//right
+			while (peek() == '&' || peek() == '|')
+			{
+				if (get() == '&')
+				{ 
+					if (result.is_true() && (result = mathexp()).is_true()) break;
+				}
+				else
+				{
+					if (result.is_true() || (result = mathexp()).is_true()) break;
+				}
+				//eat space
+				skip();
+			}
+			return result;
+		}
+
+		ExpValue expression()
+		{
+			//eat space
+			skip();
+			//return
+			return logicexp();
+		}
+
+	private:
+
+		const char*& ptr()
+		{
+			return m_ptr;
+		}
+
+		size_t& line()
+		{
+			return m_line;
+		}
+
+		char peek() const
+		{
+			return *m_ptr;
+		}
+
+		char get()
+		{
+			return *m_ptr++;
+		}
+
+		bool skip()
+		{
+			return conf_skip_line_space_and_comments(line(), ptr());
+		}
+
+		//values
+		size_t&              m_line;
+		const char*          m_ptr;
+		ListString           m_errors;
+		const VariableTable& m_table;
+		ExpValue	         m_result;
+	};
+
+	class ConfArguments : public Arguments
+	{
+	public:
+		//alias
+		using ListChar = std::vector < char >;
+		using ListString = std::vector < std::string >;
+		//class methods
+		ConfArguments(const VariableTable& table, size_t& line, const char* ptr, const ListChar& end_line)
+		{
+			//init 
+			m_ptr = ptr;
+			m_index = 0;
+			//parsing
+			while (*m_ptr && std::find(end_line.begin(), end_line.end(), *m_ptr) == end_line.end())
+			{
+				//remove space
+				conf_skip_line_space_and_comments(line, m_ptr);
+				//push in list
+				variable_processing(table, line);
+			}
+		}
+
+		const char* get_string() override
+		{
+			denn_assert(!eof());
+			//get
+			return m_values[m_index++].c_str();
+		}
+
+		bool get_bool() override
+		{
+			std::string arg = get_string();
+			std::transform(arg.begin(), arg.end(), arg.begin(), ::tolower);
+			return arg == std::string("true")
+				|| arg == std::string("yes")
+				|| arg == std::string("t")
+				|| arg == std::string("y")
+				|| atoi(arg.c_str()) != 0;
+		}
+
+		int get_int() override
+		{
+			return atoi(get_string());
+		}
+
+		double get_double() override
+		{
+			return atof(get_string());
+		}
+
+		bool eof() const override
+		{
+			return m_values.size() <= m_index;
+		}
+
+		bool back() override
+		{
+			//index is 0? It can't go back
+			if (!m_index) return false;
+			//else go back
+			--m_index;
+			//ok
+			return true;
+		}
+
+		bool end_vals() const override
+		{
+			return eof();
+		}
+
+		const ListString& errors() const
+		{
+			return m_errors;
+		}
+
+		const char* get_ptr() const
+		{
+			return m_ptr;
+		}
+
+	protected:
+
+		//ptr
+		const char* m_ptr;
+		//info buffer
+		size_t m_index;
+		ListString m_values;
+		//errors
+		ListString m_errors;
+		//variable processing
+		bool variable_processing(const VariableTable& table, size_t& line)
+		{
+			//exp
+			ConfExpParser exp(table, line, m_ptr);
+			//exp error?
+			if (exp.errors().size())
+			{
+				for (auto&& error : exp.errors()) m_errors.push_back(error);
+				return false;
+			}
+			//get value
+			std::stringstream value(exp.result().str());
+			//split by space
+			std::istream_iterator<std::string> it(value);
+			std::istream_iterator<std::string> end;
+			//add all tokens
+			for (; it != end; ++it) m_values.push_back(*it);
+			//move ptr
+			m_ptr = exp.get_ptr();
+			//ok
+			return true;
+		}
+	};
+    
+	class ParametersParseHelp
+    {
     public:
         //////////////////////////////////////////////////////////////////////////////////
         static bool conf_parse_arg
