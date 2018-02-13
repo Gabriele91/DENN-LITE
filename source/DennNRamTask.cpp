@@ -29,7 +29,7 @@ namespace NRam
 	, m_use_difficulty(max_int == 0 && timesteps == 0 && min_difficulty > 0)
 	, m_max_difficulty(std::max(min_difficulty,max_difficulty))
 	, m_min_difficulty(std::min(min_difficulty, max_difficulty))
-	, m_current_difficulty(min_difficulty)
+	, m_current_difficulty(m_min_difficulty)
 	, m_step_gen_change_difficulty(step_gen_change_difficulty)
 	{
 	}
@@ -54,36 +54,37 @@ namespace NRam
 	TaskTuple Task::create_batch(const size_t current_generation) 
 	{
 		if (m_use_difficulty
-          && (current_generation == 0 || !((current_generation + 1) % m_step_gen_change_difficulty))
+        && (current_generation == 0 || !((current_generation + 1) % m_step_gen_change_difficulty))
 		)
 		{
 			// Min/Max index
 			int min_difficulty = clamp<int>(1, m_difficulty_grades.size(), m_min_difficulty);
 			int max_difficulty = clamp<int>(min_difficulty, m_difficulty_grades.size(), m_max_difficulty);
-
-			// Geometric value
-			int number_e = m_random->geometric(0.5);
-			
-			// Value D
-			int D_plus_e_difficulty = clamp<int>(m_current_difficulty + number_e, min_difficulty, max_difficulty);
-			
 			// Select update type
-			volatile Scalar random_number = m_random->uniform(0, 1);
-			
+			Scalar random_number = m_random->uniform(0, 1);
 			// cases
 			if (random_number <= 0.1)
 			{
 				m_current_difficulty = m_random->irand(m_min_difficulty, max_difficulty + 1);
 			}
-			else if (0.1 < random_number && random_number <= 0.35)
-			{
-				m_current_difficulty = m_random->irand(m_min_difficulty, D_plus_e_difficulty + 1);
-			}
 			else
 			{
-				m_current_difficulty = D_plus_e_difficulty;
-			}
+				// Geometric value
+				int number_e = m_random->geometric(0.5);
 
+				// Value D
+				int D_plus_e_difficulty = clamp<int>(m_current_difficulty + number_e, min_difficulty, max_difficulty);
+
+				//cases
+				if (random_number <= 0.35)
+				{
+					m_current_difficulty = m_random->irand(m_min_difficulty, D_plus_e_difficulty + 1);
+				}
+				else
+				{
+					m_current_difficulty = D_plus_e_difficulty;
+				}
+			}
 			// Set task difficulty parameters
 			int current_difficulty = clamp<int>(m_current_difficulty - 1,0, m_difficulty_grades.size() - 1);
 			DifficultyGrade difficulty_params =  m_difficulty_grades[current_difficulty];
@@ -99,12 +100,12 @@ namespace NRam
 		}
 		else if(!m_use_difficulty && current_generation == 0)
 		{
-				// Generate memories
-				const auto& mems = (*this)();
-				m_in_mem = std::get<0>(mems);
-				m_out_mem = std::get<1>(mems);
-				m_mask = std::get<2>(mems);
-				m_regs = std::get<3>(mems);
+			// Generate memories
+			const auto& mems = (*this)();
+			m_in_mem = std::get<0>(mems);
+			m_out_mem = std::get<1>(mems);
+			m_mask = std::get<2>(mems);
+			m_regs = std::get<3>(mems);
 		}
 
 		return std::make_tuple(

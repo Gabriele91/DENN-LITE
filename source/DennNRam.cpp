@@ -398,6 +398,7 @@ namespace NRam
             Scalar cum_prob_complete = Scalar(0.0);
             Scalar sample_cost = Scalar(0.0);
             Scalar stop = false;
+			Scalar prob_complate = 0.99;// 1. - (0.5 / Scalar(max_int));
 
             // Execute sa sample for all timestep
             for (size_t timestep = 0; timestep < loop_timesteps && !stop; timestep++)
@@ -408,31 +409,35 @@ namespace NRam
                 // Run circuit
                 Scalar fi = run_circuit(context, out, regs, in_mem);
 
+				// Stop the calculation if the NRAM have will to terminate
+				if (fi > prob_complate) stop = true;
+
                 // Calculate p_t
-                if (timestep == loop_timesteps - 1)  p_t = 1 - cum_prob_complete;
-                else                                 p_t = fi * prob_incomplete;
+                if (timestep == loop_timesteps - 1 || stop)  p_t = 1 - cum_prob_complete;
+                else                                         p_t = fi * prob_incomplete;
 
                 // Calculate the probability of not complete 
                 prob_incomplete *= Scalar(1.0) - fi;
                 cum_prob_complete += p_t;
 
+				//entropy
+				Scalar entropy_cost(0.0);
+				//Entropy
+				#ifdef ENABLE_ENTROPY
                 //Entropy
-                Scalar entropy_cost(0.0);
                 const Scalar entropy = Scalar(0.05);
                 const Scalar entropy_decay = Scalar(0.999);
                 const Scalar entropy_weight = entropy * std::pow(entropy_decay, timestep);
                 const Matrix copy_mem = in_mem;
                 entropy_cost += copy_mem.unaryExpr([&] (Scalar v) -> Scalar {
                     return v * Denn::CostFunction::safe_log(v);
-                }).sum() * entropy_weight;
-
-
-                // Compute the "sample" cost                
+                }).sum() * entropy_weight;				
+				#endif 
+                
+				// Compute the "sample" cost                
                 Scalar timestep_cost = p_t * calculate_sample_cost(in_mem, linear_out_mem.row(s), linear_mask);
                 sample_cost -= timestep_cost - (entropy_cost > timestep_cost ? 0 : entropy_cost);
 
-                // Stop the calculation if the NRAM have will to terminate
-                if (fi > 0.98) stop = true;
             }
             // Add to "batch" cost the "sample" cost
             full_cost += sample_cost;
@@ -545,10 +550,8 @@ namespace NRam
             //debugger
             ExecutionDebug execution_debug(context);
             //determinate end of execution
-            Scalar p_t = Scalar(0.0);
-            Scalar prob_incomplete = Scalar(1.0);
-            Scalar cum_prob_complete = Scalar(0.0);
             bool   stop = false;
+			Scalar prob_complate = 0.99;//1. - (0.5 / Scalar(context.m_max_int));
             //for all timestep, run on s
             for (size_t timestep = 0; !stop && timestep < context.m_timesteps; timestep++)
             {
@@ -558,19 +561,8 @@ namespace NRam
                 Matrix out = network.apply(get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
                 //execute circuit
                 Scalar fi = run_circuit(context, out, regs, in_mem, execution_debug);
-                //up info
-                prob_incomplete *= Scalar(1.0) - fi;
-                //min prob complate
-                const Scalar prob_complate_limit = (Scalar(1.0) / context.m_max_int) / 2;
-                //exit case
-                if(prob_incomplete < prob_complate_limit || context.m_timesteps <= (timestep + 1))
-                {
-                    stop = true;
-                }
-                //compute cum_prob_complete 
-                if (stop)  p_t = 1 - cum_prob_complete;
-                else       p_t = fi * prob_incomplete;
-                cum_prob_complete += p_t;
+				// Stop the calculation if the NRAM have will to terminate
+				if (fi > prob_complate) stop = true;
             }
             // Add to connections sample history
             samples_debug.push_back(execution_debug);
