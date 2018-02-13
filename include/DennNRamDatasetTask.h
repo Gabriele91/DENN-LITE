@@ -51,9 +51,9 @@ namespace NRam
 	protected:
 
 		Task::SPtr 		 m_task;
-		DataSetScalar    m_train;
-		DataSetScalar    m_validation;
-		DataSetScalar    m_test;
+		Task::SPtr     m_task_train;
+		Task::SPtr     m_task_validation;
+		Task::SPtr     m_task_test;
 
 		DataSetHeader       m_fake_header;
 		DataSetTrainHeader  m_fake_train_header;

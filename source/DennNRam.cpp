@@ -382,6 +382,12 @@ namespace NRam
 		size_t max_int = std::max(context.m_max_int, dataset_max_int);
 		size_t loop_timesteps = std::max(context.m_timesteps, dataset_timesteps);
 
+        #ifdef ENABLE_ENTROPY
+        //Entropy
+        const Scalar entropy = Scalar(0.05);
+        const Scalar entropy_decay = Scalar(0.999);
+        #endif
+
         // Run the circuit
         for (Matrix::Index s = 0; s < linear_in_mem.rows(); ++s)
         {
@@ -398,10 +404,9 @@ namespace NRam
             Scalar cum_prob_complete = Scalar(0.0);
             Scalar sample_cost = Scalar(0.0);
             Scalar stop = false;
-			Scalar prob_complate = 0.99;// 1. - (0.5 / Scalar(max_int));
 
             // Execute sa sample for all timestep
-            for (size_t timestep = 0; timestep < loop_timesteps && !stop; timestep++)
+            for (size_t timestep = 0; timestep < loop_timesteps; timestep++)
             {
 				// NN
 				out = network.apply(get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
@@ -409,12 +414,9 @@ namespace NRam
                 // Run circuit
                 Scalar fi = run_circuit(context, out, regs, in_mem);
 
-				// Stop the calculation if the NRAM have will to terminate
-				if (fi > prob_complate) stop = true;
-
                 // Calculate p_t
-                if (timestep == loop_timesteps - 1 || stop)  p_t = 1 - cum_prob_complete;
-                else                                         p_t = fi * prob_incomplete;
+                if (timestep == loop_timesteps - 1)  p_t = 1 - cum_prob_complete;
+                else                                 p_t = fi * prob_incomplete;
 
                 // Calculate the probability of not complete 
                 prob_incomplete *= Scalar(1.0) - fi;
@@ -424,12 +426,9 @@ namespace NRam
 				Scalar entropy_cost(0.0);
 				//Entropy
 				#ifdef ENABLE_ENTROPY
-                //Entropy
-                const Scalar entropy = Scalar(0.05);
-                const Scalar entropy_decay = Scalar(0.999);
                 const Scalar entropy_weight = entropy * std::pow(entropy_decay, timestep);
                 const Matrix copy_mem = in_mem;
-                entropy_cost += copy_mem.unaryExpr([&] (Scalar v) -> Scalar {
+                entropy_cost = copy_mem.unaryExpr([&] (Scalar v) -> Scalar {
                     return v * Denn::CostFunction::safe_log(v);
                 }).sum() * entropy_weight;				
 				#endif 
@@ -532,8 +531,6 @@ namespace NRam
     , const Matrix& linear_in_mem
     )
     {		
-        //time step
-        Scalar full_cost = Scalar(0.0);
         // Ouput
         Matrix output;
         //list of execution debugger
@@ -551,7 +548,6 @@ namespace NRam
             ExecutionDebug execution_debug(context);
             //determinate end of execution
             bool   stop = false;
-			Scalar prob_complate = 0.99;//1. - (0.5 / Scalar(context.m_max_int));
             //for all timestep, run on s
             for (size_t timestep = 0; !stop && timestep < context.m_timesteps; timestep++)
             {
@@ -559,10 +555,8 @@ namespace NRam
                 execution_debug.push_step();
                 //execute nn
                 Matrix out = network.apply(get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
-                //execute circuit
-                Scalar fi = run_circuit(context, out, regs, in_mem, execution_debug);
-				// Stop the calculation if the NRAM have will to terminate
-				if (fi > prob_complate) stop = true;
+                
+                run_circuit(context, out, regs, in_mem, execution_debug);
             }
             // Add to connections sample history
             samples_debug.push_back(execution_debug);
@@ -573,7 +567,7 @@ namespace NRam
         return ResultAndExecutionDebug( output, samples_debug );
     }
 
-    Scalar run_circuit
+    void run_circuit
     (
       const NRamLayout &context
     , const Matrix& nn_out_decision
@@ -670,8 +664,6 @@ namespace NRam
         }
 		//resize regs
 		regs.conservativeResize(context.m_n_regs, regs.cols());
-        //return fi
-        return PointFunction::sigmoid(nn_out_decision.col(nn_out_decision.cols() - 1)(0));
     }
 	////////////////////////////////////////////////////////////////////////////////////////
 }
