@@ -546,16 +546,14 @@ namespace NRam
             Matrix in_mem = fuzzy_encode(linear_in_mem.row(s));
             //debugger
             ExecutionDebug execution_debug(context);
-            //determinate end of execution
-            bool   stop = false;
-            //for all timestep, run on s
-            for (size_t timestep = 0; !stop && timestep < context.m_timesteps; timestep++)
+            //for all timestep
+            for (size_t timestep = 0; timestep < context.m_timesteps; timestep++)
             {
                 //new step
                 execution_debug.push_step();
                 //execute nn
                 Matrix out = network.apply(get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
-                
+                //run
                 run_circuit(context, out, regs, in_mem, execution_debug);
             }
             // Add to connections sample history
