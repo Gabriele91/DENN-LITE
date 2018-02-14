@@ -50,7 +50,6 @@ namespace NRam
 
 	protected:
 
-		Task::SPtr 		 m_task;
 		Task::SPtr     m_task_train;
 		Task::SPtr     m_task_validation;
 		Task::SPtr     m_task_test;
