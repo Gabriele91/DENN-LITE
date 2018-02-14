@@ -629,12 +629,12 @@ namespace Denn
 			MapFunctions funs
 			{
 				//Maths
-				  { "log"  , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "log"))   return std::log(number(args[0],"log")); else 0; } }
-				, { "log10", [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "log10")) return std::log10(number(args[0],"log10")); else 0; } }	
-				, { "exp"  , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "exp"))   return std::exp(number(args[0],"exp")); else 0; } }
+				  { "log"  , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "log"))   return std::log(number(args[0],"log")); else return {0}; } }
+				, { "log10", [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "log10")) return std::log10(number(args[0],"log10")); else return {0}; } }	
+				, { "exp"  , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "exp"))   return std::exp(number(args[0],"exp")); else return {0}; } }
 				//Cast
-				, { "floor", [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "floor"))  return std::floor(number(args[0],"floor")); else 0; } }
-				, { "ceil" , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "ceil"))   return std::ceil(number(args[0],"ceil")); else 0; } }
+				, { "floor", [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "floor"))  return std::floor(number(args[0],"floor")); else return {0}; } }
+				, { "ceil" , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "ceil"))   return std::ceil(number(args[0],"ceil")); else return {0}; } }
 				, { "str",   [&](FunctionArgs&& args) -> ExpValue 
 							 {
 									if (!test(args, 1, "str")) return ExpValue("");
@@ -670,14 +670,14 @@ namespace Denn
 							 }
 				  }			
 				//Trigonometry 
-				, { "radian",[&](FunctionArgs&& args) -> ExpValue  { if (test(args, 1, "radian")) return number(args[0],"str") * (Constants::pi() / Scalar(180.0)); else ""; } }
-				, { "sin"  , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "sin"))   return std::sin(number(args[0],"sin")); else 0; } }
-				, { "cos"  , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "cos"))   return std::cos(number(args[0],"cos")); else 0; } }
-				, { "tan",   [&](FunctionArgs&& args) -> ExpValue  { if (!test(args, 1, "tan"))  return std::tan(number(args[0], "tan")); else return 0; } }
-				, { "atan",  [&](FunctionArgs&& args) -> ExpValue  { if (!test(args, 1, "atan")) return std::tan(number(args[0], "atan")); else return 0; } }
+				, { "radian",[&](FunctionArgs&& args) -> ExpValue  { if (test(args, 1, "radian")) return number(args[0],"str") * (Constants::pi() / Scalar(180.0)); else return {""}; } }
+				, { "sin"  , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "sin"))   return std::sin(number(args[0],"sin")); else return {0}; } }
+				, { "cos"  , [&](FunctionArgs&& args) -> ExpValue { if (test(args, 1, "cos"))   return std::cos(number(args[0],"cos")); else return {0}; } }
+				, { "tan",   [&](FunctionArgs&& args) -> ExpValue  { if (!test(args, 1, "tan"))  return std::tan(number(args[0], "tan")); else return {0}; } }
+				, { "atan",  [&](FunctionArgs&& args) -> ExpValue  { if (!test(args, 1, "atan")) return std::tan(number(args[0], "atan")); else return {0}; } }
 				, { "atan2", [&](FunctionArgs&& args) -> ExpValue
 							 {
-							     if (!test(args, 2, "atan2")) return std::atan2(number(args[0], "atan2"),number(args[1], "atan2")); else return 0;
+							     if (!test(args, 2, "atan2")) return std::atan2(number(args[0], "atan2"),number(args[1], "atan2")); else return {0};
 							 }
 				  }
 				//Time
@@ -749,7 +749,7 @@ namespace Denn
 			else if (peek() == '\"')
 			{
 				const auto& value = conf_string(line(), ptr());
-				if (!value.m_success) m_errors.push_back(line() + ": expression error, not valid string");
+				if (!value.m_success) m_errors.push_back(std::to_string(line()) + ": expression error, not valid string");
 				return value.m_str;
 			}
 			else if (conf_is_variable(peek()))
@@ -759,7 +759,7 @@ namespace Denn
 				//find
 				if (!m_table.exists(varname))
 				{
-					m_errors.push_back(line() + ": \'" + varname + "\' is not valid variable");
+					m_errors.push_back(std::to_string(line()) + ": \'" + varname + "\' is not valid variable");
 					return 0.0;
 				}
 				//get value
