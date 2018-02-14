@@ -19,15 +19,16 @@ endif
 #program name
 S_DIR  = $(TOP)/source/
 S_INC  = $(TOP)/include/
+# Subdirs
+SUB_DIRS := $(wildcard $(S_DIR)/**/.)\
+            $(wildcard $(S_DIR)/**/**/.)
 
 #global include
 DIPS_INCLUDE = $(TOP)/dips/include/
-
-# C++ files
-SOURCE_FILES = $(wildcard $(S_DIR)/*.cpp) $(wildcard $(S_DIR)/*/*.cpp)
-SOURCE_DEBUG_OBJS = $(addprefix $(O_DEBUG_DIR)/,$(notdir $(SOURCE_FILES:.cpp=.o)))
-SOURCE_RELEASE_OBJS = $(addprefix $(O_RELEASE_DIR)/,$(notdir $(SOURCE_FILES:.cpp=.o)))
-
+# source files
+ALL_SOURCE_FILES := $(wildcard $(S_DIR)/*.cpp)\
+				    $(wildcard $(S_DIR)/**/*.cpp)\
+				    $(wildcard $(S_DIR)/**/**/*.cpp)	
 # C FLAGS
 C_FLAGS = -fPIC -D_FORCE_INLINES $(FLAGS)
 # CPP FLAGS
@@ -39,6 +40,16 @@ DEBUG_FLAGS = -g -D_DEBUG -Wall
 # Linker
 LDFLAGS += -lz -lm -lutil 
 
+####################################################
+# filter sub dirs
+SUB_DIRS := $(subst $(S_DIR)/,,$(SUB_DIRS))
+
+# Object files
+SOURCE_FILES = $(filter-out $(FILTER), $(ALL_SOURCE_FILES))
+SOURCE_DEBUG_OBJS = $(subst $(S_DIR),$(O_DEBUG_DIR),$(subst .cpp,.o,$(SOURCE_FILES)))
+SOURCE_RELEASE_OBJS = $(subst $(S_DIR),$(O_RELEASE_DIR),$(subst .cpp,.o,$(SOURCE_FILES)))
+
+# Type of release
 ifeq ($(SCALAR),FLOAT)
 O_DEBUG_DIR    = $(TOP)/Debug/obj-float
 O_RELEASE_DIR  = $(TOP)/Release/obj-float
@@ -61,7 +72,7 @@ else
 	$(error Set SCALAR=FLOAT|DOUBLE|LONG_DOUBLE)
 endif
 
-
+###############################
 # Linux flags
 ifeq ($(shell uname -s),Linux)
 # too slow -fopenmp 
@@ -77,20 +88,20 @@ C_FLAGS += -lpthread
 endif
 endif
 
-
+###############################
 # MacOS flags
 ifeq ($(shell uname -s),Darwin)
 #No OpenMP 
 RELEASE_FLAGS += -march=native
 endif
 
+###############################
 # BLAS
 ifeq ($(ENABLE_BLAS),true)
 #enable blas (eigen)
 RELEASE_FLAGS += -DEIGEN_USE_BLAS
 #MacOS/Linux
 ifeq ($(shell uname -s),Darwin)
-###############################
 #link blas macOS
 ifeq ($(USE_OPENBLAS),true)
 C_FLAGS += -I $(shell brew --prefix openblas)/include
@@ -100,7 +111,6 @@ else
 LDFLAGS += -framework Accelerate 
 endif #END OpenBLAS/BLAS
 else  #END MacOS
-###############################
 #link blas Linux
 ifeq ($(USE_OPENBLAS),true)
 LDFLAGS += -lopenblas
@@ -157,34 +167,33 @@ release: directories show_release_flags $(SOURCE_RELEASE_OBJS)
 # makedir
 ${O_DEBUG_DIR}:
 	$(call colorecho,$(COLOR_CYAN),"[ Create $(O_DEBUG_DIR) directory ]")
-	@${MKDIR_P} ${O_DEBUG_DIR}
-
+	@${MKDIR_P} $(O_DEBUG_DIR);
+	@for dir in $(SUB_DIRS); do \
+		${MKDIR_P} $(O_DEBUG_DIR)/$$dir; \
+	done
 # makedir
 ${O_RELEASE_DIR}:
 	$(call colorecho,$(COLOR_CYAN),"[ Create $(O_RELEASE_DIR) directory ]")
-	@${MKDIR_P} ${O_RELEASE_DIR}
+	@${MKDIR_P} $(O_RELEASE_DIR);
+	@for dir in $(SUB_DIRS); do \
+		${MKDIR_P} $(O_RELEASE_DIR)/$$dir; \
+	done
 
+# show flags
 show_debug_flags:
 	$(call colorecho,$(COLOR_YELLOW),"[ Debug flags: $(C_FLAGS) $(CC_FLAGS) $(DEBUG_FLAGS) ]")
 
 show_release_flags:
 	$(call colorecho,$(COLOR_YELLOW),"[ Release flags: $(C_FLAGS) $(CC_FLAGS) $(RELEASE_FLAGS) ]")
 
-$(O_DEBUG_DIR)/%.o: $(S_DIR)/%.cpp
-	$(call colorecho,$(COLOR_GREEN),"[ Make debug object: $(@) ]")
-	@$(COMPILER) $(C_FLAGS) $(CC_FLAGS) $(DEBUG_FLAGS) -c $< -o $@
+# Debug & Release
+$(SOURCE_DEBUG_OBJS):
+	$(call colorecho,$(COLOR_GREEN),"[ Make debug object: $(subst $(O_DEBUG_DIR),,$(@:.o=.cpp)) => $(subst $(TOP)/,,$(@)) ]")
+	@$(COMPILER) $(C_FLAGS) $(CC_FLAGS) $(DEBUG_FLAGS) -c $(subst $(O_DEBUG_DIR),$(S_DIR),$(@:.o=.cpp)) -o $@
 
-$(O_RELEASE_DIR)/%.o: $(S_DIR)/%.cpp
-	$(call colorecho,$(COLOR_GREEN),"[ Make release object: $(@) ]")
-	@$(COMPILER) $(C_FLAGS) $(CC_FLAGS) $(RELEASE_FLAGS) -c $< -o $@
-
-$(O_DEBUG_DIR)/%.o: $(S_DIR)/*/%.cpp
-	$(call colorecho,$(COLOR_GREEN),"[ Make debug object: $(@) ]")
-	@$(COMPILER) $(C_FLAGS) $(CC_FLAGS) $(DEBUG_FLAGS) -c $< -o $@
-
-$(O_RELEASE_DIR)/%.o: $(S_DIR)/*/%.cpp
-	$(call colorecho,$(COLOR_GREEN),"[ Make release object: $(@) ]")
-	@$(COMPILER) $(C_FLAGS) $(CC_FLAGS) $(RELEASE_FLAGS) -c $< -o $@
+$(SOURCE_RELEASE_OBJS):
+	$(call colorecho,$(COLOR_GREEN),"[ Make release object: $(subst $(O_RELEASE_DIR),,$(@:.o=.cpp)) => $(subst $(TOP)/,,$(@)) ]")
+	@$(COMPILER) $(C_FLAGS) $(CC_FLAGS) $(RELEASE_FLAGS) -c $(subst $(O_RELEASE_DIR),$(S_DIR),$(@:.o=.cpp)) -o $@
 
 # Clean
 clean: clean_debug clean_release
