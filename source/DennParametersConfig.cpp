@@ -1299,7 +1299,7 @@ namespace Denn
         //////////////////////////////////////////////////////////////////////////////////
         static bool conf_parse_variable
         (
-                const Parameters& params
+              const Parameters& params
             , VariableTable& context
             , size_t& line
             , const char*& ptr
@@ -1311,14 +1311,18 @@ namespace Denn
             std::string variable_name = conf_name(ptr);
             //jump spaces
             conf_skip_space_and_comments(line, ptr);
-            //value
-            std::string value;
-            //endline?
-            while(*ptr && (*ptr)!='\n') value += *(ptr++);
+            //exp parser
+			ConfExpParser exp(context, line, ptr);
+            //exp error
+            if (exp.errors().size())
+            {
+                for(const auto& error : exp.errors()) std::cerr << error << std::endl;
+                return false;
+            }
             //set
             if(!context.exists(variable_name))
             {
-                context.add_vairable(variable_name, value);
+                context.add_vairable(variable_name, exp.result().str());
             }
             //jump spaces
             conf_skip_space_and_comments(line, ptr);
