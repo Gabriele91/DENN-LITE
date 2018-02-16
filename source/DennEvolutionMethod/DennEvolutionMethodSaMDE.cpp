@@ -141,7 +141,7 @@ namespace Denn
 			auto& l_m_parent = metadata_son(i);
 			auto& l_m_son = metadata_son(i);
 			//metadata
-			Scalar f_prime = random(i).normal();
+			Scalar f_prime = random(i).uniform(0.7, 1.0);
 			//get deck
 			auto& deck = random(i).deck();
 			//reinit
@@ -160,8 +160,8 @@ namespace Denn
 			//chouse winner
 			size_t w = roulette_wheel(l_m_son, i);
 			//update f and cr
-			l_m_son[i].m_f = l_m_parent[r1].m_f + f_prime * ( l_m_parent[r2].m_f - l_m_parent[r3].m_f );
-			l_m_son[i].m_cr = l_m_parent[r1].m_cr + f_prime * ( l_m_parent[r2].m_cr - l_m_parent[r3].m_cr );
+			l_m_son[w].m_f = l_m_parent[r1].m_f + f_prime * ( l_m_parent[r2].m_f - l_m_parent[r3].m_f );
+			l_m_son[w].m_cr = l_m_parent[r1].m_cr + f_prime * ( l_m_parent[r2].m_cr - l_m_parent[r3].m_cr );
 			return w;
 		}
 		//son/parent
