@@ -80,6 +80,16 @@ namespace Denn
 		//return
 		return new_pop;
 	}
+
+	std::vector < Individual::SPtr >& Population::as_vector()
+	{
+		return m_individuals;
+	}
+
+	const std::vector < Individual::SPtr >& Population::as_vector() const
+	{
+		return m_individuals;
+	}
 	////////////////////////////////////////////////////////////////////////
 	//init population
 	void DoubleBufferPopulation::init(

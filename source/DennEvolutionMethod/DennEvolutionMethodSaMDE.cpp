@@ -33,13 +33,20 @@ namespace Denn
 		virtual void start_a_subgen_pass(DoubleBufferPopulation& dpopulation) override
 		{
 			//sort parents
-			#if 0
-			if(m_mutation->required_sort())
-			{ 
-				denn_assert(0);
-				//dpopulation.parents().sort();
+			for(auto mutation : m_mutations_list)
+			{
+				if(mutation->required_sort())
+				{ 		
+					//compare
+					auto comp =[&](const Individual::SPtr& li, const Individual::SPtr& ri) -> bool 
+							   { return loss_function_compare(li->m_eval,ri->m_eval); };
+					//sort
+					auto p = sort_permutation( dpopulation.parents().as_vector(), comp );
+					apply_permutation_in_place(dpopulation.parents().as_vector(), p);
+					apply_permutation_in_place(metadata_parents(), p);
+					break;
+				}
 			}
-			#endif 
 		}
 
 		virtual void create_a_individual
@@ -165,6 +172,14 @@ namespace Denn
 			return w;
 		}
 		//son/parent
+		ListListMetadata& metadata_parents()
+		{
+			return m_double_list_mdata[0];
+		}
+		ListListMetadata& metadata_sons()
+		{
+			return m_double_list_mdata[1];
+		}
 		ListMetadata& metadata_parent(size_t i)
 		{
 			return m_double_list_mdata[0][i];
