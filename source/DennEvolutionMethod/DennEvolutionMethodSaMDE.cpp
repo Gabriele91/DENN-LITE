@@ -117,7 +117,7 @@ namespace Denn
 					for(Metadata& mdata : list_mdata)
 					{
 						mdata.m_f = parameters().m_default_f;
-						mdata.m_cr = parameters().m_default_f;
+						mdata.m_cr = parameters().m_default_cr;
 						mdata.m_v = Scalar(1.0) / m_mutations_list.size();
 					}
 				}
