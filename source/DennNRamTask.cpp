@@ -57,15 +57,12 @@ namespace NRam
         && (current_generation == 0 || !((current_generation + 1) % m_step_gen_change_difficulty))
 		)
 		{
-			// Min/Max index
-			int min_difficulty = clamp<int>(1, m_difficulty_grades.size(), m_min_difficulty);
-			int max_difficulty = clamp<int>(min_difficulty, m_difficulty_grades.size(), m_max_difficulty);
 			// Select update type
 			Scalar random_number = m_random->uniform(0, 1);
 			// cases
 			if (random_number <= 0.1)
 			{
-				m_current_difficulty = m_random->irand(m_min_difficulty, max_difficulty + 1);
+				m_current_difficulty = m_random->irand(m_min_difficulty, m_max_difficulty + 1);
 			}
 			else
 			{
@@ -73,7 +70,7 @@ namespace NRam
 				int number_e = m_random->geometric(0.5);
 
 				// Value D
-				int D_plus_e_difficulty = clamp<int>(m_current_difficulty + number_e, min_difficulty, max_difficulty);
+				int D_plus_e_difficulty = clamp<int>(m_current_difficulty + number_e, m_min_difficulty, m_max_difficulty);
 
 				//cases
 				if (random_number <= 0.35)
@@ -85,6 +82,7 @@ namespace NRam
 					m_current_difficulty = D_plus_e_difficulty;
 				}
 			}
+			
 			// Set task difficulty parameters
 			int current_difficulty = clamp<int>(m_current_difficulty - 1,0, m_difficulty_grades.size() - 1);
 			DifficultyGrade difficulty_params =  m_difficulty_grades[current_difficulty];

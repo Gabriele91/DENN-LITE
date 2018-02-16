@@ -403,7 +403,6 @@ namespace NRam
             Scalar prob_incomplete = Scalar(1.0);
             Scalar cum_prob_complete = Scalar(0.0);
             Scalar sample_cost = Scalar(0.0);
-            Scalar stop = false;
 
             // Execute sa sample for all timestep
             for (size_t timestep = 0; timestep < loop_timesteps; timestep++)
