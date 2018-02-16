@@ -40,10 +40,13 @@ namespace Denn
 					//compare
 					auto comp =[&](const Individual::SPtr& li, const Individual::SPtr& ri) -> bool 
 							   { return loss_function_compare(li->m_eval,ri->m_eval); };
+					//pop
+					auto& pop  = dpopulation.parents().as_vector();
+					auto& meta = metadata_parents();
 					//sort
-					auto p = sort_permutation( dpopulation.parents().as_vector(), comp );
-					apply_permutation_in_place(dpopulation.parents().as_vector(), p);
-					apply_permutation_in_place(metadata_parents(), p);
+					auto p = sort_permutation(pop, comp);
+					apply_permutation_in_place(pop, p);
+					apply_permutation_in_place(meta, p);
 					break;
 				}
 			}
@@ -101,17 +104,17 @@ namespace Denn
 		void init_metadata()
 		{
 			//for parent & son
-			for(auto& list_list_mdata : m_double_list_mdata)
+			for(ListListMetadata& list_list_mdata : m_double_list_mdata)
 			{
 				list_list_mdata.clear();
 				list_list_mdata.resize(current_np());
 				//for all individuals
-				for(auto& list_mdata : list_list_mdata)
+				for(ListMetadata& list_mdata : list_list_mdata)
 				{
 					list_mdata.clear();
 					list_mdata.resize(m_mutations_list.size());
 					//for all methods
-					for(auto& mdata : list_mdata)
+					for(Metadata& mdata : list_mdata)
 					{
 						mdata.m_f = parameters().m_default_f;
 						mdata.m_cr = parameters().m_default_f;
@@ -145,8 +148,8 @@ namespace Denn
 		size_t new_metadata(size_t i)
 		{
 			//get vector[ f, cr, v ]
-			auto& l_m_parent = metadata_son(i);
-			auto& l_m_son = metadata_son(i);
+			ListListMetadata& l_m_parents = metadata_parents();
+			ListListMetadata& l_m_sons = metadata_sons();
 			//metadata
 			Scalar f_prime = random(i).uniform(0.7, 1.0);
 			//get deck
@@ -159,16 +162,16 @@ namespace Denn
 			size_t r2 = deck.get_random_id(i);
 			size_t r3 = deck.get_random_id(i);
 			//Update V[0-k]
-			for(size_t k = 0; k!=l_m_parent.size(); ++k)
+			for(size_t k = 0; k!=m_mutations_list.size(); ++k)
 			{
 				//new
-				l_m_son[i].m_v = l_m_parent[r1].m_v + f_prime * ( l_m_parent[r2].m_v - l_m_parent[r3].m_v );				
+				l_m_sons[i][k].m_v = l_m_parents[r1][k].m_v + f_prime * (l_m_parents[r2][k].m_v - l_m_parents[r3][k].m_v);				
 			}
 			//chouse winner
-			size_t w = roulette_wheel(l_m_son, i);
+			size_t w = roulette_wheel(l_m_sons[i], i);
 			//update f and cr
-			l_m_son[w].m_f = l_m_parent[r1].m_f + f_prime * ( l_m_parent[r2].m_f - l_m_parent[r3].m_f );
-			l_m_son[w].m_cr = l_m_parent[r1].m_cr + f_prime * ( l_m_parent[r2].m_cr - l_m_parent[r3].m_cr );
+			l_m_sons[i][w].m_f  = l_m_parents[r1][w].m_f + f_prime * (l_m_parents[r2][w].m_f - l_m_parents[r3][w].m_f );
+			l_m_sons[i][w].m_cr = l_m_parents[r1][w].m_cr + f_prime * (l_m_parents[r2][w].m_cr - l_m_parents[r3][w].m_cr );
 			return w;
 		}
 		//son/parent
