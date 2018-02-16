@@ -117,8 +117,8 @@ namespace Denn
         },
         ParameterInfo {
               m_mutations_list_type
-		    , { m_evolution_type, { Variant("MAB-SHADE") } }
-            , "List of MAB-SHADE mutations"
+		    , { m_evolution_type, { Variant("MAB-SHADE"), Variant("SAMDE") } }
+            , "List of mutations"
             , { "-ml"  }
             , [this](Arguments& args) -> bool
               {

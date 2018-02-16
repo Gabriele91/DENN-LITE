@@ -201,5 +201,5 @@ namespace Denn
 		Crossover::SPtr				 m_crossover;
 
 	};
-	REGISTERED_EVOLUTION_METHOD(SaMDEMethod, "SaMDE")
+	REGISTERED_EVOLUTION_METHOD(SaMDEMethod, "SAMDE")
 }
