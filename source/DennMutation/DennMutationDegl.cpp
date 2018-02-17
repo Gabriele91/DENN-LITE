@@ -46,6 +46,8 @@ namespace Denn
 			//set population size in deck
 			rand_deck.reinit(population.size());
 			rand_deck_ring_segment.reinit(population.size(), id_target, neighborhood);
+			rand_deck.reset();
+			rand_deck_ring_segment.reset();
 			//for each layers
 			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
 			{

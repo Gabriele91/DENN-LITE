@@ -20,21 +20,18 @@ namespace Denn
 		{}
 
 		MultiArmedBanditsBAIO(const std::vector < ActionPtr >& actions)
-			: m_T(1)
-			, m_j(0)
-			, m_actions(actions)
-			, m_s(actions.size(), Scalar(1.0))
-			, m_n(actions.size(), size_t(1.0))
-			, m_cost(actions.size(), Scalar(std::numeric_limits<Scalar>::max()))
-		{}
+		{
+			init(actions);
+		}
 
 		void init(const std::vector < ActionPtr >& actions)
 		{
-			m_T = 1;
-			m_j = 0;
+			m_T		= 0;
+			m_j		= 0;
+			m_start = true;
 			m_actions = actions;
-			m_s = std::vector < Scalar >(actions.size(), Scalar(1.0));
-			m_n = std::vector < size_t >(actions.size(), size_t(1.0));
+			m_s = std::vector < Scalar >(actions.size(), Scalar(0.0));
+			m_n = std::vector < Scalar >(actions.size(), Scalar(0.0));
 			m_cost = std::vector < Scalar >(actions.size(), Scalar(std::numeric_limits<Scalar>::max()));
 		}
 
@@ -42,47 +39,38 @@ namespace Denn
 		{
 			return m_actions[m_j];
 		}
-
-		Scalar& s()
-		{
-			return m_s[m_j];
-		}
-
-		Scalar& n()
-		{
-			return m_n[m_j];
-		}
-
-		void update(Scalar rewards = 0, size_t nT = 1)
+				
+		void update(Scalar rewards, Scalar alpha = 1, Scalar n = 1)
 		{
 			//update
-			m_s[m_j] += rewards;
-			//update cost
-			m_cost[m_j] = (m_s[m_j] / m_n[m_j]) * std::sqrt(Scalar(2) * std::log(m_T + 1) / m_n[m_j]);
+			m_s[m_j] += rewards;			
 			//update count
-			m_n[m_j] += 1;
-			m_T += nT;
-			//argmin
-			//MESSAGE("")
-			//MESSAGE("-----------------------------")
-			//MESSAGE("J = " << m_j)
-			//MESSAGE("rewards: " << rewards)
-			//MESSAGE("factor: " << std::sqrt( Scalar(2) * std::log(m_T) / m_n[m_j] ))
-			for (size_t j = 0; j != m_actions.size(); ++j)
+			m_n[m_j] += n;
+			m_T		 += n;
+			//first do all
+			if (m_start)
 			{
-				if (m_cost[m_j] < m_cost[j]) m_j = j;
-				//MESSAGE("[" << j << "] =" << m_cost[j] << ", " << m_s[j] << ", " << m_n[j] )
+				for (size_t i = 0; i != 0; ++i) if (m_n[i] <= 0) { m_j = i; return; };
+				m_start = false;
 			}
-			//MESSAGE("J -> " << m_j)
+			//update cost
+			m_cost[m_j] = (m_s[m_j] / m_n[m_j]) * std::sqrt(alpha * std::log(m_T) / m_n[m_j]);
+			//argmax
+			m_j = std::max_element(m_cost.begin(), m_cost.end()) - m_cost.begin();
+			//debug
+			//std::cout << "select: " << m_j << " <- ";
+			//for (auto i : m_cost) std::cout << "\t" << i;
+			//std::cout << std::endl;
 		}
 
 	protected:
 
+		bool					  m_start;
 		size_t					  m_j;
-		size_t					  m_T;
+		Scalar					  m_T;
 		std::vector < ActionPtr > m_actions;
 		std::vector < Scalar > 	  m_s;
-		std::vector < size_t > 	  m_n;
+		std::vector < Scalar > 	  m_n;
 		std::vector < Scalar > 	  m_cost;
 	};
 
@@ -165,7 +153,8 @@ namespace Denn
 			size_t n_discarded = 0;
 			//pop
 			size_t np = current_np();
-			Scalar rewards = 0.0;
+			//init
+			m_last_rewards = 0.0;
 			//
 			for (size_t i = 0; i != np; ++i)
 			{
@@ -175,7 +164,7 @@ namespace Denn
 				{
 					if (m_archive_max_size) m_archive.push_back(father->copy());
 					//max
-					rewards += std::abs(std::abs(son->m_eval) - std::abs(father->m_eval)) / std::abs(father->m_eval);
+					m_last_rewards += std::abs(std::abs(son->m_eval) - std::abs(father->m_eval)); // / std::abs(father->m_eval);
 					//F
 					sum_f += son->m_f;
 					sum_f2 += son->m_f * son->m_f;
@@ -209,14 +198,13 @@ namespace Denn
 				m_archive[main_random().index_rand(m_archive.size())] = m_archive.last();
 				m_archive.pop_back();
 			}
-			//update MAB
-			m_mutations.s() += (n_discarded ? rewards / n_discarded : 0.0);
 		}
+
 
 		virtual void end_a_gen_pass(DoubleBufferPopulation& dpopulation) override
 		{
 			//update MAB, chose next
-			m_mutations.update();
+			m_mutations.update(m_last_rewards, current_np(), *parameters().m_sub_gens);
 		}
 
 		virtual const VariantRef get_context_data() const override
@@ -226,6 +214,7 @@ namespace Denn
 
 	protected:
 
+		Scalar				m_last_rewards{ 0.0 };
 		size_t				m_h{ 0 };
 		size_t				m_k{ 0 };
 		size_t              m_archive_max_size{ false };
