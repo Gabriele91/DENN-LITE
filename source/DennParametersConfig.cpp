@@ -680,7 +680,7 @@ namespace Denn
 							 }
 				  }
 				//Time
-				,{ "date",  [&](FunctionArgs&& args) -> ExpValue 
+				, { "date",  [&](FunctionArgs&& args) -> ExpValue 
 							{ 
 								 if (test(args, 1, "date"))
 								 {
@@ -693,6 +693,7 @@ namespace Denn
 								 return ExpValue("");
 							} 
 				}
+				, { "threads", [&](FunctionArgs&& args) -> ExpValue { return double( std::thread::hardware_concurrency() ); } }
 			};
 			//test
 			auto fun_it = funs.find(name);
