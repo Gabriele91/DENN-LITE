@@ -57,10 +57,6 @@ namespace Denn
 			m_cost[m_j] = (m_s[m_j] / m_n[m_j]) * std::sqrt(alpha * std::log(m_T) / m_n[m_j]);
 			//argmax
 			m_j = std::max_element(m_cost.begin(), m_cost.end()) - m_cost.begin();
-			//debug
-			//std::cout << "select: " << m_j << " <- ";
-			//for (auto i : m_cost) std::cout << "\t" << i;
-			//std::cout << std::endl;
 		}
 
 	protected:
