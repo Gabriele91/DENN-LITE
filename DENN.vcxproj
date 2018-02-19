@@ -69,11 +69,11 @@
     <ClInclude Include="include\DennSerializeOutput.h" />
     <ClInclude Include="include\DennVariant.h" />
     <ClInclude Include="include\DennVersion.h" />
-    <ClInclude Include="include\IOFileWrapper.h" />
+    <ClInclude Include="include\DennIOFileWrapper.h" />
     <ClInclude Include="include\DennRandom.h" />
     <ClInclude Include="include\DennParameterInfo.h" />
-    <ClInclude Include="include\ThreadPool.h" />
-    <ClInclude Include="include\TicksTime.h" />
+    <ClInclude Include="include\DennThreadPool.h" />
+    <ClInclude Include="include\DennTicksTime.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\DennActivationFunctionFactory.cpp" />

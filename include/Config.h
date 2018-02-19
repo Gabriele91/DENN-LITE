@@ -19,7 +19,7 @@
 #include <Eigen/Eigen>
 #include <zlib.h>
 //internal include
-#include "TicksTime.h"
+#include "DennTicksTime.h"
 //defines
 #define USE_CROSS_ENTROPY_SAFE
 #define RANDOM_SAFE_MUTATION

@@ -1,6 +1,6 @@
 #pragma once
 #include "Config.h"
-#include "IOFileWrapper.h"
+#include "DennIOFileWrapper.h"
 #include "DennDataset.h"
 #include "DennFilesystem.h"
 

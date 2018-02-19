@@ -5,7 +5,7 @@
 #include "DennIndividual.h"
 #include "DennIndividual.h"
 #include "DennEvaluation.h"
-#include "ThreadPool.h"
+#include "DennThreadPool.h"
 
 namespace Denn
 {

@@ -6,7 +6,7 @@
 #include "DennEvaluation.h"
 #include "DennSerializeOutput.h"
 #include "DennRuntimeOutput.h"
-#include "ThreadPool.h"
+#include "DennThreadPool.h"
 
 namespace Denn
 {
