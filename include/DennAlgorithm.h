@@ -1,6 +1,6 @@
 #pragma once
 #include "Config.h"
-#include "ThreadPool.h"
+#include "DennThreadPool.h"
 #include "DennRandom.h"
 #include "DennCostFunction.h"
 #include "DennEvaluation.h"

@@ -48,13 +48,13 @@
     <ClInclude Include="include\Config.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\IOFileWrapper.h">
+    <ClInclude Include="include\DennIOFileWrapper.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\TicksTime.h">
+    <ClInclude Include="include\DennTicksTime.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ThreadPool.h">
+    <ClInclude Include="include\DennThreadPool.h">
       <Filter>Include</Filter>
     </ClInclude>
     <ClInclude Include="include\DennAlgorithm.h">

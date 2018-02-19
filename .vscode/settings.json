@@ -74,6 +74,7 @@
         "unordered_map": "cpp",
         "__locale": "cpp",
         "__functional_base": "cpp",
-        "stack": "cpp"
+        "stack": "cpp",
+        "*.ipp": "cpp"
     }
 }

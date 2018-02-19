@@ -18,8 +18,6 @@
 //lib include
 #include <Eigen/Eigen>
 #include <zlib.h>
-//internal include
-#include "TicksTime.h"
 //defines
 #define USE_CROSS_ENTROPY_SAFE
 #define RANDOM_SAFE_MUTATION
@@ -153,199 +151,7 @@ namespace Denn
 	inline MapMatrixF as_map(MatrixF& value)
 	{ return MapMatrixF(value.data(), value.rows(), value.cols()); }
 }
-//utilities
-namespace Denn
-{
-	template<typename T, class Compare>
-	inline constexpr T clamp(const T& value, const T& lo, const T& hi, Compare comp)
-	{
-		return denn_assert(!comp(hi, lo)), comp(value, lo) ? lo : comp(hi, value) ? hi : value;
-	}
-
-	template< typename T >
-	inline constexpr T clamp(const T& value, const T& lo, const T& hi)
-	{
-		return clamp(value, lo, hi, std::less<void>());
-	}	
-
-	template< typename T >
-	inline constexpr T sature(const T& v)
-	{
-		return clamp< T >(v, 0.0, 1.0);
-	}
-
-	template < typename T, typename S >
-	inline constexpr T lerp(const T& a, const T& b, const S& alpha)
-	{
-		return a * ( T(1.0) - alpha ) + b * alpha;
-	}
-	
-	template < typename T >
-	inline constexpr T positive_mod(const T& value,const T& base)
-	{
-		return (((value % base) + base) % base);
-	}
-	
-	template < typename T >
-	inline constexpr T positive_fmod(const T& value,const T& base)
-	{
-		//from JS
-		return std::fmod((std::fmod(value, base) + base), base);
-	}
-
-	template <typename T, typename Compare>
-	inline std::vector<size_t> sort_permutation( const std::vector<T>& vec, Compare compare)
-	{
-		std::vector<size_t> p(vec.size());
-		std::iota(p.begin(), p.end(), 0);
-		std::sort(p.begin(), p.end(), [&](size_t i, size_t j) -> bool { return compare(vec[i], vec[j]); });
-		return p;
-	}
-
-	template <typename T>
-	inline std::vector<T> apply_permutation(const std::vector<T>& vec, const std::vector<std::size_t>& p)
-	{
-		std::vector<T> sorted_vec(vec.size());
-		std::transform(p.begin(), p.end(), sorted_vec.begin(), [&](size_t i){ return vec[i]; });
-		return sorted_vec;
-	}
-
-	template<typename T>
-	inline void apply_permutation_in_place(std::vector<T>& v,  std::vector<size_t>& p)
-	{	
-		for (size_t i = 0; i < p.size(); i++) 
-		{
-			auto current = i;
-			while (i != p[current])
-			{
-				auto next = p[current];
-				std::swap(v[current], v[next]);
-				p[current] = current;
-				current = next;
-			}
-			p[current] = current;
-		}
-	}
-
-	inline std::string str_replace(std::string str, const std::string& old_str, const std::string& new_str)
-	{
-		std::string::size_type pos = 0u;
-		while ((pos = str.find(old_str, pos)) != std::string::npos)
-		{
-			str.replace(pos, old_str.length(), new_str);
-			pos += new_str.length();
-		}
-		return str;
-	}
-
-	inline bool case_insensitive_equal(const std::string& lstr, const std::string& rstr)
-	{
-		//not equal len
-		if (lstr.size() != rstr.size()) return false;
-		//test
-		for (std::string::const_iterator c1 = lstr.begin(), c2 = rstr.begin(); c1 != lstr.end(); ++c1, ++c2)
-		{
-			if (std::tolower(*c1) != std::tolower(*c2)) return false;
-		}
-		//..
-		return true;
-	}
-
-	/// Shifts a matrix/vector row-wise.
-	/// A negative \a down value is taken to mean shifting up.
-	/// When passed zero for \a down, the input matrix is returned unchanged.
-	/// The type \a Matrix can be either a fixed- or dynamically-sized matrix.
-	template < typename Matrix >
-	inline Matrix shift_by_rows(const Matrix& in, typename Matrix::Index down)
-	{
-		//no swift
-		if (!down) return in;
-		//result
-		Matrix out(in.rows(), in.cols());
-		//mod
-		if (down > 0) down = down % in.rows();
-		else down = in.rows() - (-down % in.rows());
-		int rest = in.rows() - down;
-		//shif
-		out.topRows(down)	 = in.bottomRows(down);
-		out.bottomRows(rest) = in.topRows(rest);
-		//return
-		return out;
-	}
-
-	template < typename Matrix >
-	inline Matrix shift_bottom(const Matrix& in, unsigned int down)
-	{
-		return shift_by_rows(in, int(down));
-	}
-
-	template < typename Matrix >
-	inline Matrix shift_top(const Matrix& in, unsigned int top)
-	{
-		return shift_by_rows(in, -1*int(top));
-	}
-	
-	template < typename Matrix >
-	inline bool append_rows(Matrix& matrix, const Matrix& rows_to_append)
-	{
-		if (matrix.cols() != rows_to_append.cols()) return false;
-		//alloc
-		matrix.conservativeResize(matrix.rows() + rows_to_append.rows(), matrix.cols());
-		//copy
-		matrix.bottomRows(rows_to_append.rows()) = rows_to_append;
-		//return
-		return true;
-	}
-
-	template < typename Matrix >
-	inline typename Matrix::Scalar distance_pow2(const Matrix& a, const Matrix& b)
-	{
-		return (a.array() - b.array()).square().sum();
-	} 
-
-	template < typename Matrix >
-	inline typename Matrix::Scalar distance(const Matrix& a, const Matrix& b)
-	{
-		return std::sqrt(distance_pow2(a,b));
-	}
-
-	template < typename Matrix >
-	void sort_ascending(Matrix& m) 
-	{
-  	std::sort(m.derived().data(), m.derived().data() + m.derived().size());
-	}
-
-	template < typename Matrix >
-	void sort_rows_ascending(Matrix& m)
-	{
-		m.transposeInPlace();
-		for (size_t r = 0; r < m.cols(); ++r)
-			std::sort(m.col(r).data(), m.col(r).data() + m.col(r).size());
-		m.transposeInPlace();
-	}
-
-	template < typename Matrix >
-	void sort_descending(Matrix& m) 
-	{
-  	std::sort(m.derived().data(), m.derived().data() + m.derived().size());
-		std::reverse(m.derived().data(), m.derived().data() + m.derived().size());
-	}
-
-	template < typename Matrix >
-	void sort_rows_descending(Matrix& m)
-	{
-		m.transposeInPlace();
-		for (size_t r = 0; r < m.cols(); ++r)
-		{
-			std::sort(m.col(r).data(), m.col(r).data() + m.col(r).size());
-			std::reverse(m.col(r).data(), m.col(r).data() + m.col(r).size());
-		}
-		m.transposeInPlace();
-	}
-}
-
-
-
+//types
 namespace Denn
 {
 	enum class DataType
@@ -366,3 +172,12 @@ namespace Denn
 	inline DataType get_data_type<long double>(){ return DataType::DT_LONG_DOUBLE; }
 
 }
+//internal include
+#include "DennTicksTime.h"
+//utilities
+#include "DennUtilitiesMath.h"
+#include "DennUtilitiesMatrix.h"
+#include "DennUtilitiesString.h"
+#include "DennUtilitiesVector.h"
+
+
