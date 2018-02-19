@@ -958,13 +958,15 @@ namespace Denn
 				//remove space
 				conf_skip_line_space_and_comments(line, m_ptr);
 				//push in list
-				variable_processing(table, line);
+				if(!variable_processing(table, line))
+                    break; //error
 			}
 		}
 
 		const char* get_string() override
 		{
-			denn_assert(!eof());
+            //void
+			if(eof()) return "";
 			//get
 			return m_values[m_index++].c_str();
 		}
