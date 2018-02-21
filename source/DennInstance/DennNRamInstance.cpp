@@ -71,6 +71,9 @@ namespace NRam
                 , *parameters.m_registers_values_extraction_type != "defuzzyed" 
 				  ? NRamLayout::P_ZERO 
 				  : NRamLayout::P_DEFUZZYED
+				, *parameters.m_entropy_term
+				, *parameters.m_entropy_decay
+				, *parameters.m_cost_regularization_term
 				, gates
 			);
 			//get eval & set context

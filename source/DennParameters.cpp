@@ -407,6 +407,15 @@ namespace Denn
         ParameterInfo{
             m_step_gen_change_difficulty, "How often the curriculum difficulty is forced changed during the training", { "-nrsgcd" }
         },
+        ParameterInfo{
+            m_entropy_term, "The weight of the entropy when it is calculated", { "--nram_entropy_term", "-nret" }
+        },
+        ParameterInfo{
+            m_entropy_decay, "How much the entropy term decay over time", { "--nram_entropy_decay", "-nred" }
+        },
+        ParameterInfo{
+            m_cost_regularization_term, "The weight of cost regularization", { "--nram_cost_regularization_term", "-nrcrt" }
+        },
         ParameterInfo{ 
             m_output_filename, "Path of output file (json)", { "-o" } 
         },

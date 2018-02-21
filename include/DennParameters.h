@@ -88,6 +88,9 @@ namespace Denn
 		ReadOnly< size_t >  					m_min_difficulty 				 { "min_difficulty"       , size_t(1)};
 		ReadOnly< size_t >  					m_max_difficulty 				 { "max_difficulty"       , size_t(5)};
 		ReadOnly< size_t >  					m_step_gen_change_difficulty { "step_gen_change_difficulty", size_t(100)};
+		ReadOnly< Scalar >  					m_entropy_term 					 { "entropy_term", Scalar(0.0)};
+		ReadOnly< Scalar >  					m_entropy_decay 				 { "entropy_decay", Scalar(0.999)};
+		ReadOnly< Scalar >  					m_cost_regularization_term { "cost_regularization_term", Scalar(0.0)};
 		//nram test 
 		ReadOnly< size_t >					   m_n_test				   { "n_test", size_t(1) };
 		//params info

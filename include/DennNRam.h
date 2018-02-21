@@ -33,6 +33,9 @@ namespace NRam
 			const size_t n_regs,
 			const size_t timesteps,
             const size_t registers_values_extraction_type,
+            const Scalar entropy_term,
+            const Scalar entropy_decay,
+            const Scalar cost_regularization_term,
 			const GateList& gates
         );
 
@@ -42,6 +45,9 @@ namespace NRam
         size_t      m_timesteps;
         size_t      m_nn_output;
         size_t      m_registers_values_extraction_type;
+        Scalar      m_entropy_term;
+        Scalar      m_entropy_decay;
+        Scalar      m_cost_regularization_term;
         GateList    m_gates;
     };
 	

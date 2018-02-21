@@ -128,6 +128,9 @@ namespace NRam
 			size_t nram_n_registers = jarguments["n_registers"].number();
 			size_t nram_time_steps = jarguments["time_steps"].number();
 			size_t nram_registers_values_extract = jarguments["registers_values_extract"].number();
+			Scalar nram_entropy_term = jarguments["entropy_term"].number();
+			Scalar nram_entropy_decay = jarguments["entropy_decay"].number();
+			Scalar nram_cost_regularization_term = jarguments["cost_regularization_term"].number();
 			//if nram_time_steps == 0 || nram_max_int==0 try to find value in metadata
 			if(!nram_time_steps || !nram_max_int)
 			{
@@ -172,6 +175,9 @@ namespace NRam
 				, nram_n_registers
 				, nram_time_steps
 				, nram_registers_values_extract
+				, nram_entropy_term
+				, nram_entropy_decay
+				, nram_cost_regularization_term
 				, gates
 			);
 			//test

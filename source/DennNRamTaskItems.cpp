@@ -197,9 +197,9 @@ namespace NRam
 		MemoryTuple operator()() override
 		{
 			// Create and initialize the starting memory
-			Matrix::Index remaining_size(m_max_int - 2);
+			Matrix::Index remaining_space(m_max_int - 2);
 			Matrix::Index offset(m_max_int / 2);
-			Matrix::Index vector_a_size(remaining_size / 2);
+			Matrix::Index vector_a_size(remaining_space / 2);
 
 			Matrix in_mem = Matrix::Zero(m_batch_size, m_max_int);
 			in_mem.col(0) = ColVector::Constant(in_mem.rows(), offset);
@@ -305,11 +305,11 @@ namespace NRam
 		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
 			m_difficulty_grades = {
-				std::make_tuple(5, 8),
-				std::make_tuple(7, 8),
-				std::make_tuple(9, 8),
-				std::make_tuple(11, 8),
-				std::make_tuple(13, 8),
+				std::make_tuple(5, 6),
+				std::make_tuple(7, 6),
+				std::make_tuple(9, 6),
+				std::make_tuple(11, 6),
+				std::make_tuple(13, 6),
 			};
 		}
 
@@ -322,12 +322,14 @@ namespace NRam
 			// Set pointers of elements to swap
 			for (Matrix::Index r = 0; r < in_mem.rows(); ++r)
 			{
-				in_mem(r, 0) = m_random->uirand(2, m_max_int - 2); 
-				in_mem(r, 1) = m_random->uirand(in_mem(r, 0) + 1, m_max_int - 1); 
+				Matrix::Index index_one = m_random->uirand(2, m_max_int - 2);
+				Matrix::Index index_two = m_random->uirand(index_one + 1, m_max_int - 1);
+				in_mem(r, 0) = index_one;
+				in_mem(r, 1) = index_two;
 
-				if (Matrix::Index(in_mem(r, Matrix::Index(in_mem(r, 0)))) == 
-					Matrix::Index(in_mem(r, Matrix::Index(in_mem(r, 1)))))
-					in_mem(r, Matrix::Index(in_mem(r, 1))) += Scalar(1.0);
+				if (Matrix::Index(in_mem(r, index_one)) == 
+				    Matrix::Index(in_mem(r, index_two)))
+					in_mem(r, index_two) = positive_mod(static_cast<size_t>(in_mem(r, index_two) + 1), m_max_int);
 			}
 			
 			// Set NULL values to the last column as terminator
@@ -339,8 +341,8 @@ namespace NRam
 			// Swap elements for each example
 			for (Matrix::Index r = 0; r < out_mem.rows(); ++r)
 				std::swap(
-					 out_mem(r, Matrix::Index(in_mem(r, 0)))
-				   , out_mem(r, Matrix::Index(in_mem(r, 1)))
+					out_mem(r, Matrix::Index(in_mem(r, 0))), 
+					out_mem(r, Matrix::Index(in_mem(r, 1)))
 				);
 
 			// Cut out the the memory parts that does not make part of the expected output
@@ -376,11 +378,11 @@ namespace NRam
 		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
 		{
 			m_difficulty_grades = {
-				std::make_tuple(6, 6),
-				std::make_tuple(8, 9),
-				std::make_tuple(10, 12),
-				std::make_tuple(12, 15),
-				std::make_tuple(14, 18)
+				std::make_tuple(6, 7),
+				std::make_tuple(8, 10),
+				std::make_tuple(10, 13),
+				std::make_tuple(12, 16),
+				std::make_tuple(14, 19)
 			}; 
 		}
 
@@ -389,12 +391,13 @@ namespace NRam
 			using namespace Eigen;
 
 			//alloc
-			bool remaining_space_is_odd = (m_max_int - 2) % 2 != 0;
+			const size_t remaining_space = (m_max_int - 2);
+			bool remaining_space_is_odd = remaining_space % 2 != 0;
 			Matrix::Index offset(m_max_int / 2);
 			Matrix in_mem(m_batch_size, m_max_int);
 
 			//init in mem
-			in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int - 1)); });
+			in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(floor(remaining_space / 2) - 1, m_max_int - 1)); });
 
 			// Initialize the permutation for all the examples
 			for (size_t r = 0; r < in_mem.rows(); ++r)
@@ -710,11 +713,10 @@ namespace NRam
 		{
 			// Initialize some parameters and create the memory
 			Matrix::Index offset = 3;
-			Matrix::Index remaining_size = m_max_int - 6;
-			bool odd_space = !(remaining_size % 2 == 0);
-			bool odd_subvector_space = !(remaining_size % 4 == 0);
+			Matrix::Index remaining_space = m_max_int - 6;
+			bool odd_subvector_space = !(remaining_space % 4 == 0);
 
-			Matrix::Index list_size_a = remaining_size / 4, 
+			Matrix::Index list_size_a = remaining_space / 4, 
 										list_size_b = (odd_subvector_space ? list_size_a + 1 : list_size_a);
 			
 			Matrix::Index list_size_a_plus_b = list_size_a + list_size_b;
@@ -794,10 +796,10 @@ namespace NRam
 			using namespace Eigen;
 
 			// Create memory and initialize others data
-			Matrix::Index remaining_size(m_max_int - 3);
+			Matrix::Index remaining_space(m_max_int - 3);
 			Matrix in_mem = Matrix::Zero(m_batch_size, m_max_int);
 			Matrix out_mem = in_mem;
-			Matrix::Index num_elements(remaining_size / 4);
+			Matrix::Index num_elements(remaining_space / 4);
 			Matrix::Index offset(2);
 			Matrix::Index divider_position(offset + num_elements);
 
@@ -936,8 +938,8 @@ namespace NRam
 		MemoryTuple operator()() override
 		{
 			// Initialize some parameters and create the memory
-			Matrix::Index remaining_size(m_max_int - 6);
-			Matrix::Index arrays_memory_size(remaining_size / 3);
+			Matrix::Index remaining_space(m_max_int - 6);
+			Matrix::Index arrays_memory_size(remaining_space / 3);
 
 			Matrix in_mem = Matrix::Zero(m_batch_size, m_max_int);
 			Matrix list_elements_a(m_batch_size, arrays_memory_size);
@@ -1007,8 +1009,8 @@ namespace NRam
 		MemoryTuple operator()() override
 		{
 			// Initialize some parameters and create the memory
-			Matrix::Index remaining_size = m_max_int - 5;
-			Matrix::Index arrays_memory_size = remaining_size / 2;
+			Matrix::Index remaining_space = m_max_int - 5;
+			Matrix::Index arrays_memory_size = remaining_space / 2;
 
 			// Create and initialize the starting memory
 			Matrix in_mem = Matrix::Zero(m_batch_size, m_max_int);

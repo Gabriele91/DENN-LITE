@@ -24,6 +24,9 @@ namespace NRam
         const size_t n_regs,
         const size_t timesteps,
         const size_t registers_values_extraction_type,
+        const Scalar entropy_term,
+        const Scalar entropy_decay,
+        const Scalar cost_regularization_term,
         const GateList& gates
     )
     {
@@ -33,6 +36,9 @@ namespace NRam
         m_n_regs = n_regs;
         m_timesteps = timesteps;
         m_registers_values_extraction_type = registers_values_extraction_type;
+        m_entropy_term = entropy_term;
+        m_entropy_decay = entropy_decay;
+        m_cost_regularization_term = cost_regularization_term;
 	    m_gates = gates;
         // Past cardinality
         size_t i = 0;
@@ -376,17 +382,15 @@ namespace NRam
 		Matrix regs;
 		Matrix in_mem;
 		Matrix out;
-        Scalar full_cost = Scalar(0.0);
+        Scalar full_cost(0.0);
 
 		//max int and steps
 		size_t max_int = std::max(context.m_max_int, dataset_max_int);
 		size_t loop_timesteps = std::max(context.m_timesteps, dataset_timesteps);
 
-        #ifdef ENABLE_ENTROPY
         //Entropy
-        const Scalar entropy = Scalar(0.05);
-        const Scalar entropy_decay = Scalar(0.999);
-        #endif
+        const Scalar entropy(context.m_entropy_term);
+        const Scalar entropy_decay(context.m_entropy_decay);
 
         // Run the circuit
         for (Matrix::Index s = 0; s < linear_in_mem.rows(); ++s)
@@ -418,30 +422,38 @@ namespace NRam
                 else                                 p_t = fi * prob_incomplete;
 
                 // Calculate the probability of not complete 
-                prob_incomplete *= Scalar(1.0) - fi;
+                prob_incomplete *= (Scalar(1.0) - fi);
                 cum_prob_complete += p_t;
-
-				//entropy
+				
+                //Entropy
 				Scalar entropy_cost(0.0);
-				//Entropy
-				#ifdef ENABLE_ENTROPY
                 const Scalar entropy_weight = entropy * std::pow(entropy_decay, timestep);
                 const Matrix copy_mem = in_mem;
                 entropy_cost = copy_mem.unaryExpr([&] (Scalar v) -> Scalar {
                     return v * Denn::CostFunction::safe_log(v);
                 }).sum() * entropy_weight;				
-				#endif 
                 
 				// Compute the "sample" cost                
-                Scalar timestep_cost = p_t * calculate_sample_cost(in_mem, linear_out_mem.row(s), linear_mask);
-                sample_cost -= timestep_cost - (entropy_cost > timestep_cost ? 0 : entropy_cost);
-
+                sample_cost -= ((p_t * calculate_sample_cost(in_mem, linear_out_mem.row(s), linear_mask)) - entropy_cost);
             }
             // Add to "batch" cost the "sample" cost
             full_cost += sample_cost;
         }
 
-        return full_cost;
+        // Cost regularization calculation
+        Scalar cost_regularization(0.0);
+        const Scalar regularization_term(context.m_cost_regularization_term);
+        for (NeuralNetwork::LayerConstIterator layer = network.begin(); layer != network.end(); ++layer)
+        {
+            for (Layer::Iterator l_part = (*layer)->begin(); l_part != (*layer)->end(); ++l_part)
+            {
+                Matrix params_copy = (*l_part);
+                cost_regularization += (*l_part).unaryExpr([&](Scalar v) -> Scalar { return v * v; }).sum();
+            }
+        }
+        cost_regularization *= regularization_term;
+
+        return full_cost + cost_regularization;
     }
 
     Scalar run_circuit
