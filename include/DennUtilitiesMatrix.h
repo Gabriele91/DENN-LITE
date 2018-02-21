@@ -85,11 +85,58 @@ namespace Denn
 	void sort_rows_descending(Matrix& m)
 	{
 		m.transposeInPlace();
-		for (size_t r = 0; r < m.cols(); ++r)
+		for (typename Matrix::Index r = 0; r < m.cols(); ++r)
 		{
 			std::sort(m.col(r).data(), m.col(r).data() + m.col(r).size());
 			std::reverse(m.col(r).data(), m.col(r).data() + m.col(r).size());
 		}
 		m.transposeInPlace();
 	}
+
+	template < typename Matrix >
+	Matrix conv2d(const Matrix& input, const Matrix& kernel )
+	{
+		//output
+		Matrix output = Matrix::Zero(input.rows(),input.cols());
+
+		//alias
+		using Index = Matrix::Index;
+		using Scalar = Matrix::Scalar;
+
+		//acc
+		Scalar scalar;
+		Scalar scalar2;
+
+		//kenrel info
+		Index col=0,row=0;
+		Index k_size_x = kernel.rows();
+		Index k_size_y = kernel.cols();
+
+		//input lims
+		Index limit_row = input.rows()-k_size_x;
+		Index limit_col = input.cols()-k_size_y;
+
+		#define NORMALIZE_CONV2
+		#ifdef NORMALIZE_CONV2
+			//normalization factor
+			Scalar normalization = kernel.sum();
+			if ( normalization <  std::numeric_limits<Scalar>::epsilon() ) normalization=1;
+		#endif
+
+		//apply kernel
+		for (Index row = k_size_x; row < limit_row; row++ )
+		for (Index col = k_size_y; col < limit_col; col++ )
+		{
+			Scalar b=(static_cast<Matrix>( input.block(row,col,k_size_x,k_size_y) ).cwiseProduct(kernel)).sum();
+			output.coeffRef(row,col) = b;
+		}
+		
+		#ifdef NORMALIZE_CONV2
+			//normalize
+			return output/normalization;
+		#else
+			return output;
+		#endif 
+	}
+
 }
