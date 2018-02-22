@@ -322,14 +322,15 @@ namespace NRam
 			// Set pointers of elements to swap
 			for (Matrix::Index r = 0; r < in_mem.rows(); ++r)
 			{
+				Matrix::Index value_one = m_random->uirand(2, m_max_int - 3);
+				Matrix::Index value_two = m_random->uirand(value_one + 1, m_max_int - 1);
 				Matrix::Index index_one = m_random->uirand(2, m_max_int - 2);
 				Matrix::Index index_two = m_random->uirand(index_one + 1, m_max_int - 1);
 				in_mem(r, 0) = index_one;
 				in_mem(r, 1) = index_two;
 
-				if (Matrix::Index(in_mem(r, index_one)) == 
-				    Matrix::Index(in_mem(r, index_two)))
-					in_mem(r, index_two) = positive_mod(static_cast<size_t>(in_mem(r, index_two) + 1), m_max_int);
+				in_mem(r, index_one) = value_one;
+				in_mem(r, index_two) = value_two;
 			}
 			
 			// Set NULL values to the last column as terminator
