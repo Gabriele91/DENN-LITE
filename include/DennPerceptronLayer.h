@@ -22,6 +22,8 @@ namespace Denn
 			, size_t features
 			, size_t clazz
 		);
+
+		PerceptronLayer(const PerceptronLayer& lpptr);
 		//////////////////////////////////////////////////
 		Matrix& weights();
 		Matrix& baias();
@@ -33,10 +35,9 @@ namespace Denn
 		//////////////////////////////////////////////////
 		virtual Matrix              apply(const Matrix& input) const override;
 		//////////////////////////////////////////////////
-		virtual Matrix              feedforward(const Matrix& input, Matrix& linear_out)				                               override;
-		virtual Matrix              backpropagate_delta(const Matrix& loss)       			               							   override;
-		virtual Matrix              backpropagate_derive(const Matrix& delta, const Matrix& linear_out)       			               override;
-		virtual std::vector<Matrix> backpropagate_gradient(const Matrix& delta, const Matrix& linear_inpu, Scalar regular=Scalar(0.0)) override;
+		//Backpropagation stuff
+		virtual Matrix feedforward(const Matrix& input) override;
+		virtual Matrix backpropagate(const Matrix& error, Scalar eta = 0.1, Scalar momentum = 0.5) override;
 		//////////////////////////////////////////////////
 		virtual ActivationFunction get_activation_function()							       override;
 		virtual void               set_activation_function(ActivationFunction active_function) override;
@@ -51,5 +52,31 @@ namespace Denn
 		Matrix         m_weights;
 		Matrix         m_baias;
 		ActivationFunction m_activation_function{ nullptr };
+	
+		//backpropagation context
+		struct BPContext
+		{
+			Matrix m_input;
+			Matrix m_output;
+			Matrix m_dweights;
+			Matrix m_dbaias;
+		};
+		//utils
+		void free_context();
+		BPContext& context();
+		Matrix&    output();
+		Matrix&    input();
+		Matrix&    dW();
+		Matrix&    dB();
+		const BPContext& context() const;
+		const Matrix&    output() const;
+		const Matrix&    input() const;
+		const Matrix&    dW() const;
+		const Matrix&    dB() const;
+		//help
+		Matrix compute_delta(const Matrix& err) const;
+		//context ptr
+		mutable std::unique_ptr<BPContext> m_context;
+
 	};
 }

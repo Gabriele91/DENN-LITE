@@ -8,26 +8,26 @@ class Layer : public std::enable_shared_from_this< Layer >
 { 
 public:
 	//ref to Layer
-	using Scalar = Denn::Scalar;
-	using SPtr   = std::shared_ptr<Layer>;
+	using Scalar	= Denn::Scalar;
+	using SPtr		= std::shared_ptr<Layer>;
+	using FFContext = std::tuple<Matrix, Matrix>;
+	using BPContext = std::vector<Matrix>;
 	//return ptr
 	SPtr get_ptr();
 	///////////////////////////////////////////////////////////////////////////
 	//EIGEN_MAKE_ALIGNED_OPERATOR_NEW	
 	///////////////////////////////////////////////////////////////////////////
-	virtual Layer::SPtr copy() const  				                                                 = 0;
-	virtual Matrix apply(const Matrix& input) const								                     = 0;
-	virtual size_t size() const											                             = 0;
-	virtual Matrix& operator[](size_t i)								                             = 0;
-	virtual const Matrix& operator[](size_t i) const						                         = 0;		
-	virtual ActivationFunction get_activation_function()											 = 0;
-	virtual void           set_activation_function(ActivationFunction active_function)				 = 0;
+	virtual Layer::SPtr copy() const  				                          = 0;
+	virtual Matrix apply(const Matrix& input) const							  = 0;
+	virtual size_t size() const											      = 0;
+	virtual Matrix& operator[](size_t i)								      = 0;
+	virtual const Matrix& operator[](size_t i) const						  = 0;		
+	virtual ActivationFunction get_activation_function()					  = 0;
+	virtual void  set_activation_function(ActivationFunction active_function) = 0;
 	///////////////////////////////////////////////////////////////////////////
 	//Backpropagation stuff
-	virtual Matrix              feedforward(const Matrix& input, Matrix& linear_out)				  							   = 0;
-	virtual Matrix              backpropagate_delta(const Matrix& loss)     							                           = 0;		
-	virtual Matrix              backpropagate_derive(const Matrix& delta, const Matrix& linear_out)       			               = 0;
-	virtual std::vector<Matrix> backpropagate_gradient(const Matrix& delta, const Matrix& linear_input, Scalar regular=Scalar(0.0))= 0;
+	virtual Matrix feedforward(const Matrix& input) = 0;
+	virtual Matrix backpropagate(const Matrix& error, Scalar eta = 0.1, Scalar momentum = 0.5) = 0;
 	///////////////////////////////////////////////////////////////////////////
 	class Iterator 
 	{

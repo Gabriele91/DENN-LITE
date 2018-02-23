@@ -23,7 +23,7 @@ namespace Denn
 	{
 		m_f       = individual.m_f;
 		m_cr      = individual.m_cr;
-		m_p        = individual.m_p;
+		m_p       = individual.m_p;
 		m_eval    = individual.m_eval;
 		m_network = individual.m_network;
 	}
