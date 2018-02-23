@@ -1,3 +1,4 @@
+#include <string>
 //String
 namespace Denn
 {

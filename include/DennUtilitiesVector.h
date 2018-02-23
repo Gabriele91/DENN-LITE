@@ -1,3 +1,4 @@
+#include <vector>
 //String
 namespace Denn
 {
@@ -11,7 +12,7 @@ namespace Denn
 	}
 
 	template <typename T>
-	inline std::vector<T> apply_permutation(const std::vector<T>& vec, const std::vector<std::size_t>& p)
+	inline std::vector<T> apply_permutation(const std::vector<T>& vec, const std::vector<size_t>& p)
 	{
 		std::vector<T> sorted_vec(vec.size());
 		std::transform(p.begin(), p.end(), sorted_vec.begin(), [&](size_t i){ return vec[i]; });

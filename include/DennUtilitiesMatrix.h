@@ -100,8 +100,8 @@ namespace Denn
 		Matrix output = Matrix::Zero(input.rows(),input.cols());
 
 		//alias
-		using Index = Matrix::Index;
-		using Scalar = Matrix::Scalar;
+		using Index = typename Matrix::Index;
+		using Scalar = typename Matrix::Scalar;
 
 		//acc
 		Scalar scalar;

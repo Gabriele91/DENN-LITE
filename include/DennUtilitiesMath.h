@@ -1,3 +1,4 @@
+#include <cmath>
 //Math
 namespace Denn
 {

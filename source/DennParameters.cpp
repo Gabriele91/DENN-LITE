@@ -272,7 +272,10 @@ namespace Denn
             } 
         },
         ParameterInfo{ 
-			m_learning_rate, "Learning rate of backpropagation for each pass", { "-lrbp"  },
+			  m_learning_rate
+			, { m_evolution_type,{ Variant("BACKPROPAGATION") } }
+			, "Learning rate of backpropagation for each pass"
+			, { "-lrbp"  },
             [this](Arguments& args) -> bool 
             {
 				m_learning_rate = args.get_double() ;
@@ -280,7 +283,10 @@ namespace Denn
             } 
         },
         ParameterInfo{ 
-			m_regularize, "Regularize of backpropagation for each pass", { "-rbp"  },
+			m_regularize
+			, { m_evolution_type,{ Variant("BACKPROPAGATION") } }
+			, "Regularize of backpropagation for each pass"
+			, { "-rbp"  },
             [this](Arguments& args) -> bool 
             {
 				m_regularize = args.get_double() ;
