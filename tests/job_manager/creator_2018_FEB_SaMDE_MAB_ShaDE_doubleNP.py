@@ -15,16 +15,16 @@ def main():
 
     # tot_gen, batch_size, batch_step, population_size, clamp, dataset_name, dataset
     DATASETS = [
-        (2000, [20, 40], [gen_steps], 123, (-150, 150), "QSAR", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/qsar_balanced_classes.gz"),
-        (2000, [20, 40], [gen_steps], 123, (-1, 1), "QSAR_norm", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/qsar_balanced_classes_normalized.gz"),
-        (2000, [40, 80], [gen_steps], 33, (-600, 600), "MAGIC", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/magic_balanced_classes.gz"),
-        (2000, [40, 80], [gen_steps], 33, (-1, 1), "MAGIC_norm", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/magic_balanced_classes_normalized.gz"),
-        (2000, [40, 80], [gen_steps], 384, (-70000, 70000), "GASS", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/gass_balanced_classes.gz"),
-        (2000, [40, 80], [gen_steps], 384, (-1, 1), "GASS_norm", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/gass_balanced_classes_normalized.gz"),
-        (4000, [50, 100], [gen_steps], 28*28, (-255, 255), "MNIST", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/mnist_balanced_classes.gz"),
-        (4000, [50, 100], [gen_steps], 28*28, (-1, 1), "MNIST_norm", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/mnist_balanced_classes_normalized.gz"),
-        (4000, [50, 100], [gen_steps], 28*28, (-255, 255), "FASHION_MNIST", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/fashion-mnist_balanced_classes.gz"),
-        (4000, [50, 100], [gen_steps], 28*28, (-1, 1), "FASHION_MNIST_norm", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/fashion-mnist_balanced_classes_normalized.gz"),
+        (2000, [20, 40], [gen_steps], 2*123, (-150, 150), "QSAR", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/qsar_balanced_classes.gz"),
+        (2000, [20, 40], [gen_steps], 2*123, (-1, 1), "QSAR_norm", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/qsar_balanced_classes_normalized.gz"),
+        (2000, [40, 80], [gen_steps], 2*33, (-600, 600), "MAGIC", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/magic_balanced_classes.gz"),
+        (2000, [40, 80], [gen_steps], 2*33, (-1, 1), "MAGIC_norm", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/magic_balanced_classes_normalized.gz"),
+        (2000, [40, 80], [gen_steps], 2*384, (-70000, 70000), "GASS", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/gass_balanced_classes.gz"),
+        (2000, [40, 80], [gen_steps], 2*384, (-1, 1), "GASS_norm", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/gass_balanced_classes_normalized.gz"),
+        (4000, [50, 100], [gen_steps], 2*28*28, (-255, 255), "MNIST", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/mnist_balanced_classes.gz"),
+        (4000, [50, 100], [gen_steps], 2*28*28, (-1, 1), "MNIST_norm", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/mnist_balanced_classes_normalized.gz"),
+        (4000, [50, 100], [gen_steps], 2*28*28, (-255, 255), "FASHION_MNIST", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/fashion-mnist_balanced_classes.gz"),
+        (4000, [50, 100], [gen_steps], 2*28*28, (-1, 1), "FASHION_MNIST_norm", "../../DENN-dataset-samples/DATASETS/d_06_01_2018/fashion-mnist_balanced_classes_normalized.gz"),
     ]
 
     TEMPLATES = ["SaMDE", "MAB-ShaDE"]
@@ -45,7 +45,7 @@ def main():
 
     out_names = []
 
-    with open("jobs/job_2018_FEB_SaMDE_MAB_ShaDE.csv", "w") as out_file:
+    with open("jobs/job_2018_FEB_SaMDE_MAB_ShaDE_doubleNP.csv", "w") as out_file:
         ##### -> templates
         for template in TEMPLATES:
             ##### -> datasets
