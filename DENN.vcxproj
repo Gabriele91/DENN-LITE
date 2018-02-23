@@ -95,7 +95,7 @@
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodHistory.cpp" />
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodJADE.cpp" />
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodJDE.cpp" />
-    <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodMabShaDE.Cpp" />
+    <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodMABaioShaDE.cpp" />
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodNone.cpp" />
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodSaMDE.cpp" />
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodSDE.cpp" />
@@ -151,9 +151,9 @@
     <ClCompile Include="source\DennSerializeOutputFactory.cpp" />
     <ClCompile Include="source\DennSerializeOutputItems.cpp" />
     <ClCompile Include="source\DennTestSetStream.cpp" />
+    <ClCompile Include="source\DennTicksTime.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\DennRandom.cpp" />
-    <ClCompile Include="source\TicksTime.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="tests\jobs\job.csv" />

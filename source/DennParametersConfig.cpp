@@ -856,13 +856,13 @@ namespace Denn
 					auto right = term();
 					//sum & concatenation 
 					if (result.is_number() && right.is_number())
-						return result.m_number + right.m_number;
+						result.m_number += right.m_number;
 					else if (result.is_number() && right.is_string()) 
-						return std::to_string(result.m_number) + right.m_str;
+						result = { std::to_string(result.m_number) + right.m_str };
 					else if (result.is_string() && right.is_number()) 
-						return result.m_str + std::to_string(right.m_number);
+						result.m_str += std::to_string(right.m_number);
 					else 
-						return result.m_str + right.m_str;
+						result.m_str += right.m_str;
 				}
 				else
 				{

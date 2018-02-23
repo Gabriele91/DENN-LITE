@@ -164,9 +164,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\TicksTime.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="source\DennIndividual.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -389,14 +386,17 @@
     <ClCompile Include="source\DennInstance\DennDBTestInstance.cpp">
       <Filter>Source\DennInstance</Filter>
     </ClCompile>
-    <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodMabShaDE.Cpp">
-      <Filter>Source\DennEvolutionMethod</Filter>
-    </ClCompile>
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodSaMDE.cpp">
       <Filter>Source\DennEvolutionMethod</Filter>
     </ClCompile>
     <ClCompile Include="source\DennMutation\DennMutationCurrentToRand.cpp">
       <Filter>Source\DennMutation</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennTicksTime.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodMABaioShaDE.cpp">
+      <Filter>Source\DennEvolutionMethod</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
