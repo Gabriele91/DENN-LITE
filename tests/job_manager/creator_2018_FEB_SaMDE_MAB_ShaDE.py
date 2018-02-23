@@ -11,7 +11,7 @@ def main():
 
     CMD = "{exe} ../template/{template}.config workers={num_threads} input={dataset} np={population_size} gens={tot_gen} batch={batch_size} sub_gens={batch_step} batch_offset={batch_offset} crossover={crossover} output={outname}"
 
-    OUTNAME = "{template}_{dataset_name}_{batch_size}_{tot_gen}_{batch_step}_{batch_offset}_{population_size}_{crossover}_run{run}.json"
+    OUTNAME = "{template}_{dataset_name}_{batch_size}_{tot_gen}_{batch_step}_{batch_offset}_{population_size}_{crossover}_run{run}"
 
     # tot_gen, batch_size, batch_step, population_size, clamp, dataset_name, dataset
     DATASETS = [
