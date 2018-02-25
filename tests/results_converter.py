@@ -16,6 +16,11 @@ def files_from_output(folder):
             if line.find("+ -o") != -1:
                 files.append(line.replace(
                     "+ -o\t", "").replace("results/", "").strip())
+            elif line.find("+++ TASK ->") != -1 and line.find("output=") != -1:
+                chunks = line.split("\t")
+                for chunk in chunks:
+                    if chunk.find("output=") != -1:
+                        files.append(chunk.replace("output=", "").strip())
 
     return files
 
@@ -55,10 +60,15 @@ def main():
         try:
             with open(path.join(args.source_folder, file_)) as res_file:
                 tmp = json.load(res_file)
+                if 'mutation_list' in tmp['arguments']:
+                    mutation = " ".join(tmp['arguments']['mutations_list'])
+                else:
+                    mutation = tmp['arguments']['mutation']
+
                 new_data = [
                     tmp['arguments']['dataset'].split("/")[-1].replace(".gz", ""),
                     tmp['arguments']['evolution_method'],
-                    tmp['arguments']['mutation'],
+                    mutation,
                     tmp['arguments']['crossover'],
                     tmp['arguments']['generations'],
                     tmp['arguments']['sub_gens'],
@@ -92,7 +102,7 @@ def main():
         columns=labels
     )
 
-    # print(data_frame)
+    print(data_frame)
 
     if args.output == "csv":
         print("==> Save into 'results.csv'")
