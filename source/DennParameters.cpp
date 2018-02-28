@@ -408,6 +408,9 @@ namespace Denn
             m_step_gen_change_difficulty, "How often the curriculum difficulty is forced changed during the training", { "-nrsgcd" }
         },
         ParameterInfo{
+            m_change_difficulty_lambda, "The factor between the previous and the current best networks, below of which the difficulty is changed.", { "-nrcdl" }
+        },
+        ParameterInfo{
             m_entropy_term, "The weight of the entropy when it is calculated", { "--nram_entropy_term", "-nret" }
         },
         ParameterInfo{

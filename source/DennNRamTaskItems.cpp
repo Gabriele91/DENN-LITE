@@ -29,6 +29,7 @@ namespace NRam
 		, size_t min_difficulty
 		, size_t max_difficulty
 		, size_t step_gen_change_difficulty
+		, Scalar change_difficulty_lambda		
 		, Random& random
 		)
 		:
@@ -41,6 +42,7 @@ namespace NRam
 		, min_difficulty
 		, max_difficulty
 		, step_gen_change_difficulty
+		, change_difficulty_lambda		
 		, random
 		)
 		{
@@ -78,9 +80,10 @@ namespace NRam
 		, size_t min_difficulty
 		, size_t max_difficulty
 		, size_t step_gen_change_difficulty
+		, Scalar change_difficulty_lambda		
 		, Random& random
 		)
-		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
 				std::make_tuple(4, 3),
@@ -132,30 +135,32 @@ namespace NRam
 		, size_t min_difficulty
 		, size_t max_difficulty
 		, size_t step_gen_change_difficulty
+		, Scalar change_difficulty_lambda		
 		, Random& random
 		)
-		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
-				std::make_tuple(4, 2),
-				std::make_tuple(6, 3),
 				std::make_tuple(8, 4),
-				std::make_tuple(10, 5),
-				std::make_tuple(12, 6)
+				std::make_tuple(8, 5),
+				std::make_tuple(8, 6),
+				std::make_tuple(8, 7),
+				std::make_tuple(8, 8)
 			};
 		}
 
 		MemoryTuple operator()() override
 		{
 			// Create and initialize the starting memory
-			Matrix in_mem(m_batch_size, m_max_int);
-			in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int)); });
-			in_mem.col(in_mem.cols() - 1) = ColVector::Zero(m_batch_size);
+			Matrix in_mem = Matrix::Zero(m_batch_size, m_max_int);
+			in_mem.block(0, 0, in_mem.rows(), m_timesteps - 1) = in_mem
+				.block(0, 0, in_mem.rows(), m_timesteps - 1)
+					.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int)); });
 
 			// Initialize desired memory
 			Matrix out_mem = in_mem;
-			out_mem.block(0, 0, out_mem.rows(), out_mem.cols() - 1) \
-				= out_mem.block(0, 0, out_mem.rows(), out_mem.cols() - 1)
+			out_mem.block(0, 0, out_mem.rows(), m_timesteps - 1) \
+				= out_mem.block(0, 0, out_mem.rows(), m_timesteps - 1)
 						.unaryExpr([&](Scalar x) -> Scalar { return Scalar(positive_mod<size_t>((unsigned long)x + 1, m_max_int)); });
 			
 			return std::make_tuple(in_mem, out_mem, Task::init_mask(), Task::init_regs());
@@ -181,9 +186,10 @@ namespace NRam
 		, size_t min_difficulty
 		, size_t max_difficulty
 		, size_t step_gen_change_difficulty
+		, Scalar change_difficulty_lambda
 		, Random& random
 		)
-		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
 				std::make_tuple(4, 3),
@@ -240,16 +246,16 @@ namespace NRam
 		, size_t min_difficulty
 		, size_t max_difficulty
 		, size_t step_gen_change_difficulty
+		, Scalar change_difficulty_lambda		
 		, Random& random
 		)
-		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
-				std::make_tuple(4, 3),
 				std::make_tuple(6, 5),
-				std::make_tuple(8, 7),
-				std::make_tuple(10, 9),
-				std::make_tuple(12, 11)
+				std::make_tuple(8, 6),
+				std::make_tuple(10, 8),
+				std::make_tuple(12, 9)
 			};
 		}
 
@@ -275,7 +281,7 @@ namespace NRam
 
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
 			Matrix mask = Task::init_mask(); //[1, max_int]
-			mask.leftCols(offset) = RowVector::Zero(offset);
+			//mask.leftCols(offset) = RowVector::Zero(offset);
 
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
@@ -300,9 +306,10 @@ namespace NRam
 		, size_t min_difficulty
 		, size_t max_difficulty
 		, size_t step_gen_change_difficulty
+		, Scalar change_difficulty_lambda		
 		, Random& random
 		)
-		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
 				std::make_tuple(5, 6),
@@ -374,9 +381,10 @@ namespace NRam
 		, size_t min_difficulty
 		, size_t max_difficulty
 		, size_t step_gen_change_difficulty
+		, Scalar change_difficulty_lambda		
 		, Random& random
 		)
-		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
 				std::make_tuple(6, 7),
@@ -467,9 +475,10 @@ namespace NRam
 		, size_t min_difficulty
 		, size_t max_difficulty
 		, size_t step_gen_change_difficulty
+		, Scalar change_difficulty_lambda		
 		, Random& random
 		)
-		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
 				std::make_tuple(5, 5),
@@ -579,9 +588,10 @@ namespace NRam
 		, size_t min_difficulty
 		, size_t max_difficulty
 		, size_t step_gen_change_difficulty
+		, Scalar change_difficulty_lambda		
 		, Random& random
 		)
-		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
 				std::make_tuple(5, 5),
@@ -697,9 +707,10 @@ namespace NRam
 		, size_t min_difficulty
 		, size_t max_difficulty
 		, size_t step_gen_change_difficulty
+		, Scalar change_difficulty_lambda		
 		, Random& random
 		)
-		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
 				std::make_tuple(9, 6),
@@ -779,9 +790,10 @@ namespace NRam
 		, size_t min_difficulty
 		, size_t max_difficulty
 		, size_t step_gen_change_difficulty
+		, Scalar change_difficulty_lambda		
 		, Random& random
 		)
-		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
 				std::make_tuple(7, 5),
@@ -923,9 +935,10 @@ namespace NRam
 		, size_t min_difficulty
 		, size_t max_difficulty
 		, size_t step_gen_change_difficulty
+		, Scalar change_difficulty_lambda		
 		, Random& random
 		)
-		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
 				std::make_tuple(9, 5),
@@ -994,9 +1007,10 @@ namespace NRam
 		, size_t min_difficulty
 		, size_t max_difficulty
 		, size_t step_gen_change_difficulty
+		, Scalar change_difficulty_lambda		
 		, Random& random
 		)
-		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, random)
+		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
 				std::make_tuple(7, 5),

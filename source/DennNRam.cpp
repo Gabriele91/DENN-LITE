@@ -434,7 +434,7 @@ namespace NRam
                 }).sum() * entropy_weight;				
                 
 				// Compute the "sample" cost                
-                sample_cost -= ((p_t * calculate_sample_cost(in_mem, linear_out_mem.row(s), linear_mask)) - entropy_cost);
+                sample_cost -= p_t * calculate_sample_cost(in_mem, linear_out_mem.row(s), linear_mask);
             }
             // Add to "batch" cost the "sample" cost
             full_cost += sample_cost;
@@ -453,7 +453,7 @@ namespace NRam
         }
         cost_regularization *= regularization_term;
 
-        return full_cost + cost_regularization;
+        return full_cost;
     }
 
     Scalar run_circuit

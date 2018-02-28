@@ -191,7 +191,7 @@ namespace NRam
 			//get eval & set context
 			m_eval = EvaluationFactory::get<NRamEval>("nram")->set_context(m_nram);
 			//task
-			m_task = TaskFactory::create(jarguments["task"].string(), 1, m_nram.m_max_int, m_nram.m_n_regs, m_nram.m_timesteps, 1, 5, 100, m_random_engine);
+			m_task = TaskFactory::create(jarguments["task"].string(), 1, m_nram.m_max_int, m_nram.m_n_regs, m_nram.m_timesteps, 1, 5, 100, 0, m_random_engine);
 			//test
 			if(!m_task)
 			{
@@ -333,7 +333,7 @@ namespace NRam
 			for(size_t t = 0; t!=m_tests; ++t)
 			{
 				//test
-				const auto& test = (*m_task).create_batch(0);
+				const auto& test = (*m_task).create_batch(0, 0);
 				//Dataset
 				auto& in_mem  = std::get<0>(test);
 				auto& out_mem = std::get<1>(test);
