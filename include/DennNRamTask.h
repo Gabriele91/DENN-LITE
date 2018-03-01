@@ -87,6 +87,8 @@ namespace NRam
 		size_t  m_max_int;
 		size_t  m_n_regs;
 		size_t  m_timesteps;
+		size_t 	previous_generation;
+		size_t  stall_generations;
 
 		bool    m_use_difficulty;
 		size_t  m_min_difficulty;

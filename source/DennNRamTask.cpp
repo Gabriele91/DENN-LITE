@@ -57,9 +57,13 @@ namespace NRam
 	{
 		const bool force_change_difficulty = (1 - (best_m_eval / m_old_best_context_eval)) < m_change_difficulty_lambda;
 		m_old_best_context_eval = best_m_eval;
+		
+		stall_generations += current_generation - previous_generation;
+		previous_generation = current_generation;
+
 		if (force_change_difficulty || 
 					(m_use_difficulty
-        		&& (current_generation == 0 || !((current_generation + 1) % m_step_gen_change_difficulty)))
+        		&& (current_generation == 0 || !((stall_generations) % m_step_gen_change_difficulty)))
 		)
 		{
 			// Select update type
@@ -100,6 +104,10 @@ namespace NRam
 			m_out_mem = std::get<1>(mems);
 			m_mask = std::get<2>(mems);
 			m_regs = std::get<3>(mems);
+
+
+			// Reset the generation counter which indicates how many generation is used the same difficulty
+			stall_generations = 0; 
 		}
 		else if(!m_use_difficulty && current_generation == 0)
 		{
