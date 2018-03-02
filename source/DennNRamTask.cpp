@@ -53,7 +53,7 @@ namespace NRam
 	//init mask
 	Matrix Task::init_mask() const { return Matrix::Ones(1, m_max_int); }
 
-	TaskTuple Task::create_batch(const size_t current_generation, const Scalar& best_m_eval) 
+	TaskTuple Task::create_batch(const size_t& current_generation, const Scalar& best_m_eval) 
 	{
 		const bool force_change_difficulty = (1 - (best_m_eval / m_old_best_context_eval)) < m_change_difficulty_lambda;
 		m_old_best_context_eval = best_m_eval;
@@ -61,13 +61,16 @@ namespace NRam
 		stall_generations += current_generation - previous_generation;
 		previous_generation = current_generation;
 
-		if (force_change_difficulty || 
-					(m_use_difficulty
-        		&& (current_generation == 0 || !((stall_generations) % m_step_gen_change_difficulty)))
+		if (m_use_difficulty &&
+					(current_generation == 0 
+						||force_change_difficulty 
+						||!((stall_generations) % m_step_gen_change_difficulty)
+					)
 		)
 		{
 			// Select update type
 			Scalar random_number = m_random->uniform(0, 1);
+
 			// cases
 			if (random_number <= 0.1)
 			{

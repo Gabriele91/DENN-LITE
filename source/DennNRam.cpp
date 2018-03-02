@@ -355,7 +355,7 @@ namespace NRam
     {
         Scalar s_cost = 0;
         for (size_t idx = 0; idx < M.rows(); ++idx)
-            s_cost += Denn::CostFunction::safe_log(M(idx, Matrix::Index(desired_mem(idx)))) * linear_mask(0, idx);
+            s_cost += Denn::CostFunction::safe_log(std::max(M(idx, Matrix::Index(desired_mem(idx))), Scalar(1e-15))) * linear_mask(0, idx);
         return s_cost;
     }
 
@@ -429,7 +429,7 @@ namespace NRam
                 const Scalar entropy_weight = entropy * std::pow(entropy_decay, timestep);
                 const Matrix copy_mem = in_mem;
                 const Scalar entropy_cost(copy_mem.unaryExpr([&] (Scalar v) -> Scalar {
-                    return v * Denn::CostFunction::safe_log(v);
+                    return v * Denn::CostFunction::safe_log(std::max(v, Scalar(1e-15)));
                 }).sum() * entropy_weight);
                 
 				// Compute the "sample" cost                
@@ -447,7 +447,7 @@ namespace NRam
             for (Layer::Iterator l_part = (*layer)->begin(); l_part != (*layer)->end(); ++l_part)
             {
                 Matrix params_copy = (*l_part);
-                cost_regularization += (*l_part).unaryExpr([&](Scalar v) -> Scalar { return v * v; }).sum();
+                cost_regularization += params_copy.unaryExpr([&](Scalar v) -> Scalar { return v * v; }).sum();
             }
         }
         cost_regularization *= regularization_term;
