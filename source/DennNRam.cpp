@@ -359,11 +359,11 @@ namespace NRam
         return s_cost;
     }
 
-
     static Matrix avg(const Matrix& regs, const Matrix& in)
     {
         return regs.transpose() * in;
     }
+
 	////////////////////////////////////////////////////////////////////////////////////////
 	//Train
 	//tlocal
@@ -425,16 +425,15 @@ namespace NRam
                 prob_incomplete *= (Scalar(1.0) - fi);
                 cum_prob_complete += p_t;
 				
-                //Entropy
-				Scalar entropy_cost(0.0);
+                // Entropy
                 const Scalar entropy_weight = entropy * std::pow(entropy_decay, timestep);
                 const Matrix copy_mem = in_mem;
-                entropy_cost = copy_mem.unaryExpr([&] (Scalar v) -> Scalar {
+                const Scalar entropy_cost(copy_mem.unaryExpr([&] (Scalar v) -> Scalar {
                     return v * Denn::CostFunction::safe_log(v);
-                }).sum() * entropy_weight;				
+                }).sum() * entropy_weight);
                 
 				// Compute the "sample" cost                
-                sample_cost -= p_t * calculate_sample_cost(in_mem, linear_out_mem.row(s), linear_mask);
+                sample_cost -= (p_t * calculate_sample_cost(in_mem, linear_out_mem.row(s), linear_mask)) - entropy_cost;
             }
             // Add to "batch" cost the "sample" cost
             full_cost += sample_cost;
@@ -453,7 +452,7 @@ namespace NRam
         }
         cost_regularization *= regularization_term;
 
-        return full_cost;
+        return full_cost + cost_regularization;
     }
 
     Scalar run_circuit
