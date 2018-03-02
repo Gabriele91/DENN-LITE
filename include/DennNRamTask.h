@@ -45,7 +45,7 @@ namespace NRam
 		virtual ~Task();
 
 		//build dataset
-		TaskTuple create_batch(const size_t current_generation, const Scalar& best_m_eval);
+		TaskTuple create_batch(const size_t& current_generation, const Scalar& best_m_eval);
 
 		/**
 		* Initialize R registers to zero (i.e. set P(x = 0) = 1.0).
