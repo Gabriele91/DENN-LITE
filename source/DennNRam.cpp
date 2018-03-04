@@ -462,10 +462,10 @@ namespace NRam
         }
         cost_regularization *= regularization_term;
 
-        return {
+        return std::make_tuple(
                 full_cost + cost_regularization
             ,   calculate_error_rate(linear_in_mem, linear_out_mem, linear_mask)
-        };
+        );
     }
 
     Scalar run_circuit
