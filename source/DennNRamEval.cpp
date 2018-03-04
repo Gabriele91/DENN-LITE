@@ -9,19 +9,29 @@ namespace NRam
 	REGISTERED_EVALUATION(NRamEval, "nram")
 	//methods
 	bool NRamEval::minimize() const { return true; }
-	Scalar NRamEval::operator () (const Individual& individual, const DataSet& dataset)
+	Scalar NRamEval::operator () (const Individual& individual, const DataSet& d)
 	{
 		denn_assert(m_context);
-		//network
+
+		auto& dataset = *((DataSetScalar*)&d);
+
+		// Network
 		auto& nn = individual.m_network;
-		//Dataset
+		
+		// Dataset
 		auto& in_mem = dataset.features();
 		auto& out_mem = dataset.labels();
 		auto& cost_mask = dataset.mask();
         auto& max_int = dataset.get_metadata("max_int").get<int>();
         auto& timesteps = dataset.get_metadata("time_steps").get<int>();
-		//execute
-        return NRam::train(*m_context, nn, in_mem, out_mem, cost_mask, max_int, timesteps);
+
+		// Execute
+        auto train_result = NRam::train(*m_context, nn, in_mem, out_mem, cost_mask, max_int, timesteps);
+		
+		// Set error rate
+		dataset.m_metadata["error_rate"] = std::get<1>(train_result);
+
+		return std::get<0>(train_result);
 	}
 	//set context
 	Evaluation::SPtr NRamEval::set_context(const NRamLayout& context)

@@ -52,8 +52,9 @@ namespace NRam
 	// READ TEST SET
 	bool DataSetTask::read_test(const DennAlgorithm& algorithm, DataSet& t_out) 
 	{
-		auto& dataset            = *((DataSetScalar*)&t_out);
-		const auto& data		 = m_task_train->create_batch(algorithm.current_generation(), algorithm.best_context().m_eval);
+		auto& dataset          = *((DataSetScalar*)&t_out);
+		const auto& data		   = m_task_train->create_batch(algorithm.current_generation(),
+                                                                dataset.get_metadata("error_rate").get<Scalar>());
 		dataset.m_features 		 = std::get<0>(data);
 		dataset.m_labels   		 = std::get<1>(data);
 		dataset.m_mask     		 = std::get<2>(data);
@@ -68,8 +69,9 @@ namespace NRam
 	// READ VALIDATION SET
 	bool DataSetTask::read_validation(const DennAlgorithm& algorithm, DataSet& t_out) 
 	{
-		auto& dataset            = *((DataSetScalar*)&t_out);
-		const auto& data		 = m_task_validation->create_batch(algorithm.current_generation(), algorithm.best_context().m_eval);
+		auto& dataset          = *((DataSetScalar*)&t_out);
+		const auto& data		   = m_task_validation->create_batch(algorithm.current_generation(),
+                                                                     dataset.get_metadata("error_rate").get<Scalar>());
 		dataset.m_features 		 = std::get<0>(data);
 		dataset.m_labels   		 = std::get<1>(data);
 		dataset.m_mask     		 = std::get<2>(data);
@@ -90,7 +92,8 @@ namespace NRam
 	bool DataSetTask::read_batch(const DennAlgorithm& algorithm, DataSet& t_out, bool loop) 
 	{
 		auto& dataset            = *((DataSetScalar*)&t_out);
-		const auto& data		 = m_task_test->create_batch(algorithm.current_generation(), algorithm.best_context().m_eval);
+		const auto& data		 = m_task_test->create_batch(algorithm.current_generation(),
+                                                             dataset.get_metadata("error_rate").get<Scalar>());
 		dataset.m_features 		 = std::get<0>(data);
 		dataset.m_labels   		 = std::get<1>(data);
 		dataset.m_mask     		 = std::get<2>(data);

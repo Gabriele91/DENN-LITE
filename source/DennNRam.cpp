@@ -351,12 +351,23 @@ namespace NRam
         }
     }
 
-    Scalar calculate_sample_cost(Matrix &M, const RowVector &desired_mem, const Matrix& linear_mask)
+    Scalar calculate_sample_cost(const Matrix &M, const RowVector &desired_mem, const Matrix& linear_mask)
     {
-        Scalar s_cost = 0;
+        Scalar s_cost(0);
         for (size_t idx = 0; idx < M.rows(); ++idx)
             s_cost += Denn::CostFunction::safe_log(std::max(M(idx, Matrix::Index(desired_mem(idx))), Scalar(1e-15))) * linear_mask(0, idx);
         return s_cost;
+    }
+
+    Scalar calculate_error_rate(const Matrix& modified_mem, const Matrix& desired_mem, const Matrix& linear_mask)
+    {
+        Scalar c(0);
+        const Scalar m(modified_mem.rows() * linear_mask.sum());
+        for (size_t row = 0; row < modified_mem.rows(); ++row)
+            for (size_t col = 0; col < modified_mem.cols(); ++col)
+                if (linear_mask(0, col) && Matrix::Index(modified_mem(row, col)) == Matrix::Index(desired_mem(row, col))) 
+                    c += 1;
+        return c / m;
     }
 
     static Matrix avg(const Matrix& regs, const Matrix& in)
@@ -367,7 +378,7 @@ namespace NRam
 	////////////////////////////////////////////////////////////////////////////////////////
 	//Train
 	//tlocal
-    Scalar train
+    std::tuple<Scalar, Scalar> train
     (
       const NRamLayout &context
     , const NeuralNetwork& network
@@ -407,7 +418,6 @@ namespace NRam
             Scalar prob_incomplete = Scalar(1.0);
             Scalar cum_prob_complete = Scalar(0.0);
             Scalar sample_cost = Scalar(0.0);
-
             // Execute sa sample for all timestep
             for (size_t timestep = 0; timestep < loop_timesteps; timestep++)
             {
@@ -452,7 +462,10 @@ namespace NRam
         }
         cost_regularization *= regularization_term;
 
-        return full_cost + cost_regularization;
+        return {
+                full_cost + cost_regularization
+            ,   calculate_error_rate(linear_in_mem, linear_out_mem, linear_mask)
+        };
     }
 
     Scalar run_circuit

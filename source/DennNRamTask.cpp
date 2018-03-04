@@ -20,6 +20,8 @@ namespace NRam
 	, m_current_difficulty(0)
 	, m_step_gen_change_difficulty(0)
 	, m_change_difficulty_lambda(0)
+	, m_previous_generation(0)
+	, m_stall_generations(0)
 	{}
 	Task::Task(size_t batch_size, size_t max_int, size_t n_regs, size_t timesteps, size_t min_difficulty, size_t max_difficulty, size_t step_gen_change_difficulty, Scalar change_difficulty_lambda, Random& random)
 	: m_batch_size(batch_size)
@@ -33,6 +35,8 @@ namespace NRam
 	, m_current_difficulty(m_min_difficulty)
 	, m_step_gen_change_difficulty(step_gen_change_difficulty)
 	, m_change_difficulty_lambda(change_difficulty_lambda)
+	, m_previous_generation(0)
+	, m_stall_generations(0)
 	{
 	}
 
@@ -53,18 +57,17 @@ namespace NRam
 	//init mask
 	Matrix Task::init_mask() const { return Matrix::Ones(1, m_max_int); }
 
-	TaskTuple Task::create_batch(const size_t& current_generation, const Scalar& best_m_eval) 
+	TaskTuple Task::create_batch(const size_t& current_generation, const Scalar& error_rate) 
 	{
-		const bool force_change_difficulty = (1 - (best_m_eval / m_old_best_context_eval)) < m_change_difficulty_lambda;
-		m_old_best_context_eval = best_m_eval;
+		const bool force_change_difficulty = (1 - error_rate) < m_change_difficulty_lambda;
 		
-		stall_generations += current_generation - previous_generation;
-		previous_generation = current_generation;
+		m_stall_generations += current_generation - m_previous_generation;
+		m_previous_generation = current_generation;
 
 		if (m_use_difficulty &&
 					(current_generation == 0 
 						||force_change_difficulty 
-						||!((stall_generations) % m_step_gen_change_difficulty)
+						||!((m_stall_generations) % m_step_gen_change_difficulty)
 					)
 		)
 		{
@@ -110,7 +113,7 @@ namespace NRam
 
 
 			// Reset the generation counter which indicates how many generation is used the same difficulty
-			stall_generations = 0; 
+			m_stall_generations = 0; 
 		}
 		else if(!m_use_difficulty && current_generation == 0)
 		{
