@@ -67,7 +67,7 @@ namespace NRam
 		if (m_use_difficulty &&
 					(current_generation == 0 
 						||force_change_difficulty 
-						||!((m_stall_generations) % m_step_gen_change_difficulty)
+						||!((m_stall_generations + 1) % m_step_gen_change_difficulty)
 					)
 		)
 		{
