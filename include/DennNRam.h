@@ -118,13 +118,13 @@ namespace NRam
 
     Scalar calculate_sample_cost(const Matrix& M, const RowVector& desired_mem,  const Matrix& mask);
 
-    Scalar calculate_error_rate(const Matrix& M, const Matrix& desired_mem, const Matrix& mask);
+    Scalar calculate_error_rate(const NRamLayout& context, const NeuralNetwork& network, const Matrix& linear_test_in_mem, const Matrix& linear_test_desired_mem, const Matrix& linear_mask, const size_t& max_int, const size_t& timesteps);
 
     Scalar run_circuit(const NRamLayout &context, const Matrix& nn_out_decision, Matrix& regs, Matrix& in_mem);
 
     void run_circuit(const NRamLayout &context, const Matrix& nn_out_decision, Matrix& regs, Matrix& in_mem, ExecutionDebug& debug);
 
-    std::tuple<Scalar, Scalar> train(const NRamLayout &context, const NeuralNetwork &nn,  const Matrix& in_mem, const Matrix &out_mem, const Matrix& mask, const size_t& max_int, const size_t& timesteps);
+    Scalar train(const NRamLayout &context, const NeuralNetwork &nn,  const Matrix& in_mem, const Matrix &out_mem, const Matrix& mask, const size_t& max_int, const size_t& timesteps);
 
     ResultAndExecutionDebug execute(const NRamLayout &context, const NeuralNetwork& network, const Matrix& linear_in_mem);
 

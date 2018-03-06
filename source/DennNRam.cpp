@@ -72,17 +72,17 @@ namespace NRam
     {
         m_steps.resize(m_steps.size()+1);
     }
-    void ExecutionDebug::push_op(const Gate& gate, const Matrix& m, const Matrix& out)
+    void ExecutionDebug::push_op(const Gate& gate, const Matrix& m, const Matrix& circuit_configuration)
     {
-        m_steps[m_steps.size()-1].push_op(OpNode( gate.name() , Values{ m, out }));
+        m_steps[m_steps.size()-1].push_op(OpNode( gate.name() , Values{ m, circuit_configuration }));
     }
-    void ExecutionDebug::push_op(const Gate& gate, const Matrix& a, const Matrix& in_a, const Matrix& m, const Matrix& out)
+    void ExecutionDebug::push_op(const Gate& gate, const Matrix& a, const Matrix& in_a, const Matrix& m, const Matrix& circuit_configuration)
     {
-        m_steps[m_steps.size()-1].push_op(OpNode( gate.name() , Values{ a, in_a, m, out }));
+        m_steps[m_steps.size()-1].push_op(OpNode( gate.name() , Values{ a, in_a, m, circuit_configuration }));
     }
-    void ExecutionDebug::push_op(const Gate& gate, const Matrix& a, const Matrix& in_a, const Matrix& b, const Matrix& in_b, const Matrix& m, const Matrix& out)
+    void ExecutionDebug::push_op(const Gate& gate, const Matrix& a, const Matrix& in_a, const Matrix& b, const Matrix& in_b, const Matrix& m, const Matrix& circuit_configuration)
     {           
-        m_steps[m_steps.size()-1].push_op(OpNode( gate.name() , Values{ a, in_a, b, in_b, m, out }));
+        m_steps[m_steps.size()-1].push_op(OpNode( gate.name() , Values{ a, in_a, b, in_b, m, circuit_configuration }));
     }
     void ExecutionDebug::push_update(size_t r, const Matrix& c, const Matrix& in_c)
     {          
@@ -355,19 +355,8 @@ namespace NRam
     {
         Scalar s_cost(0);
         for (size_t idx = 0; idx < M.rows(); ++idx)
-            s_cost += Denn::CostFunction::safe_log(std::max(M(idx, Matrix::Index(desired_mem(idx))), Scalar(1e-15))) * linear_mask(0, idx);
+            s_cost += Denn::CostFunction::safe_log(M(idx, Matrix::Index(desired_mem(idx)))) * linear_mask(0, idx);
         return s_cost;
-    }
-
-    Scalar calculate_error_rate(const Matrix& modified_mem, const Matrix& desired_mem, const Matrix& linear_mask)
-    {
-        Scalar c(0);
-        const Scalar m(modified_mem.rows() * linear_mask.sum());
-        for (size_t row = 0; row < modified_mem.rows(); ++row)
-            for (size_t col = 0; col < modified_mem.cols(); ++col)
-                if (linear_mask(0, col) && Matrix::Index(modified_mem(row, col)) == Matrix::Index(desired_mem(row, col))) 
-                    c += 1;
-        return c / m;
     }
 
     static Matrix avg(const Matrix& regs, const Matrix& in)
@@ -378,12 +367,12 @@ namespace NRam
 	////////////////////////////////////////////////////////////////////////////////////////
 	//Train
 	//tlocal
-    std::tuple<Scalar, Scalar> train
+    Scalar train
     (
       const NRamLayout &context
     , const NeuralNetwork& network
-    , const Matrix& linear_in_mem
-    , const Matrix& linear_out_mem
+    , const Matrix& linear_test_in_mem
+    , const Matrix& linear_test_desired_mem
     , const Matrix& linear_mask
     , const size_t& dataset_max_int
     , const size_t& dataset_timesteps
@@ -392,7 +381,7 @@ namespace NRam
 		//init by threads
 		Matrix regs;
 		Matrix in_mem;
-		Matrix out;
+		Matrix circuit_configuration;
         Scalar full_cost(0.0);
 
 		//max int and steps
@@ -404,14 +393,14 @@ namespace NRam
         const Scalar entropy_decay(context.m_entropy_decay);
 
         // Run the circuit
-        for (Matrix::Index s = 0; s < linear_in_mem.rows(); ++s)
+        for (Matrix::Index s = 0; s < linear_test_in_mem.rows(); ++s)
         {
             // Alloc regs and initialize
             regs = Matrix::Zero(context.m_n_regs,max_int);
             regs.col(0).fill(1);
 
             // In mem fuzzy
-			in_mem = fuzzy_encode(linear_in_mem.row(s));
+			in_mem = fuzzy_encode(linear_test_in_mem.row(s));
 
             // Cost helper
             Scalar p_t = Scalar(0.0);
@@ -422,10 +411,10 @@ namespace NRam
             for (size_t timestep = 0; timestep < loop_timesteps; timestep++)
             {
 				// NN
-				out = network.apply(get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
+				circuit_configuration = network.apply(get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
 
                 // Run circuit
-                Scalar fi = run_circuit(context, out, regs, in_mem);
+                Scalar fi = run_circuit(context, circuit_configuration, regs, in_mem);
 
                 // Calculate p_t
                 if (timestep == loop_timesteps - 1)  p_t = 1 - cum_prob_complete;
@@ -439,11 +428,11 @@ namespace NRam
                 const Scalar entropy_weight = entropy * std::pow(entropy_decay, timestep);
                 const Matrix copy_mem = in_mem;
                 const Scalar entropy_cost(copy_mem.unaryExpr([&] (Scalar v) -> Scalar {
-                    return v * Denn::CostFunction::safe_log(std::max(v, Scalar(1e-15)));
+                    return v * Denn::CostFunction::safe_log(v);
                 }).sum() * entropy_weight);
                 
 				// Compute the "sample" cost                
-                sample_cost -= (p_t * calculate_sample_cost(in_mem, linear_out_mem.row(s), linear_mask)) - entropy_cost;
+                sample_cost -= (p_t * calculate_sample_cost(in_mem, linear_test_desired_mem.row(s), linear_mask)) - entropy_cost;
             }
             // Add to "batch" cost the "sample" cost
             full_cost += sample_cost;
@@ -462,10 +451,7 @@ namespace NRam
         }
         cost_regularization *= regularization_term;
 
-        return std::make_tuple(
-                full_cost + cost_regularization
-            ,   calculate_error_rate(linear_in_mem, linear_out_mem, linear_mask)
-        );
+        return full_cost + cost_regularization;
     }
 
     Scalar run_circuit
@@ -545,13 +531,71 @@ namespace NRam
 
         return PointFunction::sigmoid(nn_out_decision.col(nn_out_decision.cols() - 1)(0));
     }
+
+    ////////////////////////////////////////////////////////////////////////////////////////
+    // Calculate error rate
+    Scalar calculate_error_rate(
+            const NRamLayout&       context 
+        ,   const NeuralNetwork&    network
+        ,   const Matrix&           linear_test_in_mem
+        ,   const Matrix&           linear_test_desired_mem
+        ,   const Matrix&           linear_mask
+        ,   const size_t&           d_max_int
+        ,   const size_t&           d_timesteps
+    )
+    {
+        //init by threads
+		Matrix regs;
+		Matrix in_mem;
+		Matrix circuit_configuration;
+
+		//max int and steps
+		const size_t max_int = std::max(context.m_max_int, d_max_int);
+		const size_t timesteps = std::max(context.m_timesteps, d_timesteps);
+
+        // Error rate variables
+        Scalar c(0);
+        const Scalar m(linear_test_in_mem.rows() * linear_mask.sum());
+
+        // Run the circuit
+        for (Matrix::Index s = 0; s < linear_test_in_mem.rows(); ++s)
+        {
+            // Alloc regs and initialize
+            regs = Matrix::Zero(context.m_n_regs,max_int);
+            regs.col(0).fill(1);
+
+            // In mem fuzzy
+			in_mem = fuzzy_encode(linear_test_in_mem.row(s));
+
+            // Execute sa sample for all timestep
+            for (size_t timestep = 0; timestep < timesteps; timestep++)
+            {
+				// NN
+				circuit_configuration = network.apply(get_registers_values(regs, 
+                    context.m_registers_values_extraction_type)).transpose();
+
+                // Run circuit
+                run_circuit(context, circuit_configuration, regs, in_mem);
+            }
+
+            // Calculate error rate for the sample
+            in_mem = defuzzy_mem(in_mem);
+            for (size_t col = 0; col < in_mem.cols(); ++col)
+                if (linear_mask(0, col) 
+                    && Matrix::Index(in_mem(0, col)) == Matrix::Index(in_mem(0, col))) 
+                    c += 1;
+        }
+
+        return (1 - (c / m)); // Error rate
+    }
+
 	////////////////////////////////////////////////////////////////////////////////////////
 	//Execute
     ResultAndExecutionDebug execute
     (
       const NRamLayout &context
     , const NeuralNetwork& network
-    , const Matrix& linear_in_mem
+    , const Matrix& linear_test_in_mem
     )
     {		
         // Ouput
@@ -559,14 +603,14 @@ namespace NRam
         //list of execution debugger
         ListExecutionDebug samples_debug;
         // Run the circuit
-        for (Matrix::Index s = 0; s < linear_in_mem.rows(); ++s)
+        for (Matrix::Index s = 0; s < linear_test_in_mem.rows(); ++s)
         {
             //Alloc regs
             Matrix regs = Matrix::Zero(context.m_n_regs,context.m_max_int); 
             //P(X=0)
             regs.col(0).fill(1);
             //In mem fazzy
-            Matrix in_mem = fuzzy_encode(linear_in_mem.row(s));
+            Matrix in_mem = fuzzy_encode(linear_test_in_mem.row(s));
             //debugger
             ExecutionDebug execution_debug(context);
             //for all timestep
@@ -575,9 +619,9 @@ namespace NRam
                 //new step
                 execution_debug.push_step();
                 //execute nn
-                Matrix out = network.apply(get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
+                Matrix circuit_configuration = network.apply(get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
                 //run
-                run_circuit(context, out, regs, in_mem, execution_debug);
+                run_circuit(context, circuit_configuration, regs, in_mem, execution_debug);
             }
             // Add to connections sample history
             samples_debug.push_back(execution_debug);

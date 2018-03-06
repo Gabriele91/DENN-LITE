@@ -59,15 +59,15 @@ namespace NRam
 
 	TaskTuple Task::create_batch(const size_t& current_generation, const Scalar& error_rate) 
 	{
-		const bool force_change_difficulty = (1 - error_rate) < m_change_difficulty_lambda;
+		const bool force_change_difficulty = error_rate <= m_change_difficulty_lambda;
 		
 		m_stall_generations += current_generation - m_previous_generation;
 		m_previous_generation = current_generation;
 
 		if (m_use_difficulty &&
 					(current_generation == 0 
-						||force_change_difficulty 
-						||!((m_stall_generations + 1) % m_step_gen_change_difficulty)
+					 || (force_change_difficulty 
+							 && m_stall_generations >= m_step_gen_change_difficulty)
 					)
 		)
 		{
