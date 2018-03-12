@@ -48,13 +48,13 @@
     <ClInclude Include="include\Config.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\IOFileWrapper.h">
+    <ClInclude Include="include\DennIOFileWrapper.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\TicksTime.h">
+    <ClInclude Include="include\DennTicksTime.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\ThreadPool.h">
+    <ClInclude Include="include\DennThreadPool.h">
       <Filter>Include</Filter>
     </ClInclude>
     <ClInclude Include="include\DennAlgorithm.h">
@@ -164,9 +164,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="source\TicksTime.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="source\DennIndividual.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -397,6 +394,18 @@
     </ClCompile>
     <ClCompile Include="source\DennNRamEval.cpp">
       <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodSaMDE.cpp">
+      <Filter>Source\DennEvolutionMethod</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennMutation\DennMutationCurrentToRand.cpp">
+      <Filter>Source\DennMutation</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennTicksTime.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodMABaioShaDE.cpp">
+      <Filter>Source\DennEvolutionMethod</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

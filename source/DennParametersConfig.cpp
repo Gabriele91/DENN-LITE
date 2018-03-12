@@ -8,6 +8,7 @@
 #include <sstream>
 #include <iomanip>
 #include <ctime>
+#include <thread>
 
 namespace Denn
 {
@@ -681,7 +682,7 @@ namespace Denn
 							 }
 				  }
 				//Time
-				,{ "date",  [&](FunctionArgs&& args) -> ExpValue 
+				, { "date",  [&](FunctionArgs&& args) -> ExpValue 
 							{ 
 								 if (test(args, 1, "date"))
 								 {
@@ -694,6 +695,7 @@ namespace Denn
 								 return ExpValue("");
 							} 
 				}
+				, { "threads", [&](FunctionArgs&& args) -> ExpValue { return double( std::thread::hardware_concurrency() ); } }
 			};
 			//test
 			auto fun_it = funs.find(name);
@@ -856,13 +858,13 @@ namespace Denn
 					auto right = term();
 					//sum & concatenation 
 					if (result.is_number() && right.is_number())
-						return result.m_number + right.m_number;
+						result.m_number += right.m_number;
 					else if (result.is_number() && right.is_string()) 
-						return std::to_string(result.m_number) + right.m_str;
+						result = { std::to_string(result.m_number) + right.m_str };
 					else if (result.is_string() && right.is_number()) 
-						return result.m_str + std::to_string(right.m_number);
+						result.m_str += std::to_string(right.m_number);
 					else 
-						return result.m_str + right.m_str;
+						result.m_str += right.m_str;
 				}
 				else
 				{
@@ -958,13 +960,15 @@ namespace Denn
 				//remove space
 				conf_skip_line_space_and_comments(line, m_ptr);
 				//push in list
-				variable_processing(table, line);
+				if(!variable_processing(table, line))
+                    break; //error
 			}
 		}
 
 		const char* get_string() override
 		{
-			denn_assert(!eof());
+            //void
+			if(eof()) return "";
 			//get
 			return m_values[m_index++].c_str();
 		}
@@ -1300,7 +1304,7 @@ namespace Denn
         //////////////////////////////////////////////////////////////////////////////////
         static bool conf_parse_variable
         (
-                const Parameters& params
+              const Parameters& params
             , VariableTable& context
             , size_t& line
             , const char*& ptr
@@ -1311,15 +1315,21 @@ namespace Denn
             //variable type
             std::string variable_name = conf_name(ptr);
             //jump spaces
-            conf_skip_space_and_comments(line, ptr);
-            //value
-            std::string value;
-            //endline?
-            while(*ptr && (*ptr)!='\n') value += *(ptr++);
+            conf_skip_line_space_and_comments(line, ptr);
+            //exp parser
+			ConfExpParser exp(context, line, ptr);
+            //exp error
+            if (exp.errors().size())
+            {
+                for(const auto& error : exp.errors()) std::cerr << error << std::endl;
+                return false;
+            }
+            //update ptr
+            ptr = exp.get_ptr();
             //set
             if(!context.exists(variable_name))
             {
-                context.add_vairable(variable_name, value);
+                context.add_vairable(variable_name, exp.result().str());
             }
             //jump spaces
             conf_skip_space_and_comments(line, ptr);
@@ -1407,7 +1417,7 @@ namespace Denn
     {
         //ptr
         const char* ptr = source.c_str();
-        size_t line = 0;
+        size_t line = 1;
         //jump
         conf_skip_space_and_comments(line, ptr);
         //Var table

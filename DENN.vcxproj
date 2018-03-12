@@ -69,11 +69,11 @@
     <ClInclude Include="include\DennSerializeOutput.h" />
     <ClInclude Include="include\DennVariant.h" />
     <ClInclude Include="include\DennVersion.h" />
-    <ClInclude Include="include\IOFileWrapper.h" />
+    <ClInclude Include="include\DennIOFileWrapper.h" />
     <ClInclude Include="include\DennRandom.h" />
     <ClInclude Include="include\DennParameterInfo.h" />
-    <ClInclude Include="include\ThreadPool.h" />
-    <ClInclude Include="include\TicksTime.h" />
+    <ClInclude Include="include\DennThreadPool.h" />
+    <ClInclude Include="include\DennTicksTime.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\DennActivationFunctionFactory.cpp" />
@@ -96,7 +96,9 @@
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodHistory.cpp" />
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodJADE.cpp" />
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodJDE.cpp" />
+    <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodMABaioShaDE.cpp" />
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodNone.cpp" />
+    <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodSaMDE.cpp" />
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodSDE.cpp" />
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodShaDE.cpp" />
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodTDE.cpp" />
@@ -130,6 +132,7 @@
     <ClCompile Include="source\DennMutation\DennMutationDegl.cpp" />
     <ClCompile Include="source\DennMutation\DennMutationNone.cpp" />
     <ClCompile Include="source\DennMutation\DennMutationRand.cpp" />
+    <ClCompile Include="source\DennMutation\DennMutationCurrentToRand.cpp" />
     <ClCompile Include="source\DennMutation\DennMutationTrigonometric.cpp" />
     <ClCompile Include="source\DennNeuralNetwork.cpp" />
     <ClCompile Include="source\DennNRam.cpp" />
@@ -151,9 +154,9 @@
     <ClCompile Include="source\DennSerializeOutputItems.cpp" />
     <ClCompile Include="source\DennTestSetStream.cpp" />
     <ClCompile Include="source\DennVariant.cpp" />
+    <ClCompile Include="source\DennTicksTime.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\DennRandom.cpp" />
-    <ClCompile Include="source\TicksTime.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="tests\jobs\job.csv" />

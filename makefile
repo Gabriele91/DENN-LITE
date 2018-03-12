@@ -21,14 +21,16 @@ S_DIR  = $(TOP)/source/
 S_INC  = $(TOP)/include/
 # Subdirs
 SUB_DIRS := $(wildcard $(S_DIR)/**/.)\
-            $(wildcard $(S_DIR)/**/**/.)
+            $(wildcard $(S_DIR)/**/**/.)\
+            $(wildcard $(S_DIR)/**/**/**/.)
 
 #global include
 DIPS_INCLUDE = $(TOP)/dips/include/
 # source files
 ALL_SOURCE_FILES := $(wildcard $(S_DIR)/*.cpp)\
 				    $(wildcard $(S_DIR)/**/*.cpp)\
-				    $(wildcard $(S_DIR)/**/**/*.cpp)	
+				    $(wildcard $(S_DIR)/**/**/*.cpp)\
+				    $(wildcard $(S_DIR)/**/**/**/*.cpp)	
 # C FLAGS
 C_FLAGS = -fPIC -D_FORCE_INLINES $(FLAGS)
 # CPP FLAGS

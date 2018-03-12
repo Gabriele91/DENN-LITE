@@ -4,7 +4,7 @@
 #include "DennNeuralNetwork.h"
 #include "DennIndividual.h"
 #include "DennEvaluation.h"
-#include "ThreadPool.h"
+#include "DennThreadPool.h"
 
 namespace Denn
 {
@@ -45,6 +45,10 @@ namespace Denn
 		//copy
 		Population copy() const;
 	
+		//as vector
+		std::vector < Individual::SPtr >& as_vector();
+		const std::vector < Individual::SPtr >& as_vector() const;
+
 	protected:
 
 		std::vector < Individual::SPtr > m_individuals;

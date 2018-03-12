@@ -117,13 +117,15 @@ namespace Denn
         },
         ParameterInfo {
               m_mutations_list_type
-		    , { m_evolution_type, { Variant("MAB-SHADE") } }
-            , "List of MAB-SHADE mutations"
+		    , { m_evolution_type, { Variant("MAB-SHADE"), Variant("SAMDE") } }
+            , "List of mutations"
             , { "-ml"  }
             , [this](Arguments& args) -> bool
               {
                   //success flag
                   bool success = true;
+				  //free list
+				  m_mutations_list_type.get().clear();
                   //for all values
                   while(!args.end_vals() && success)
                   {
@@ -288,7 +290,10 @@ namespace Denn
         ParameterInfo{
             m_hidden_layers, "Size of hidden layers", { "-hl"  },
             [this](Arguments& args) -> bool 
-            { 
+            {
+				//clear
+				m_hidden_layers.get().clear();
+				//ok
                 while(!args.end_vals())
                 {
                     m_hidden_layers.get().push_back(args.get_int());
@@ -300,7 +305,10 @@ namespace Denn
         ParameterInfo{
             m_activation_functions, "Activation functions of hidden layers", {  "-hlaf"  },
             [this](Arguments& args) -> bool 
-            { 
+            {
+				//clear
+				m_activation_functions.get().clear();
+				//ok
                 while(!args.end_vals())
                 {
                     std::string str_c_type = args.get_string();
@@ -360,7 +368,10 @@ namespace Denn
         ParameterInfo{
 			m_gates, "List of gates of nram machine", { "-nrg"  },
             [this](Arguments& args) -> bool 
-            { 
+            {
+				//clear
+				m_gates.get().clear();
+				//ok
                 while(!args.end_vals())
                 {
                     std::string str_c_type = args.get_string();

@@ -2,8 +2,8 @@
 
 //main includes
 #include  "Config.h"
-#include  "TicksTime.h"
-#include  "IOFileWrapper.h"
+#include  "DennTicksTime.h"
+#include  "DennIOFileWrapper.h"
 #include  "DennVersion.h"
 #include  "DennConstants.h"
 #include  "DennRandom.h"

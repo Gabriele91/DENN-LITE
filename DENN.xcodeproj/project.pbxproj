@@ -515,9 +515,9 @@
 		CDE197711F7E420300A6160B /* DennRuntimeOutput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DennRuntimeOutput.h; sourceTree = "<group>"; };
 		CDE197721F7E420300A6160B /* DennSerializeOutput.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DennSerializeOutput.h; sourceTree = "<group>"; };
 		CDE197731F7E420300A6160B /* DennVariant.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DennVariant.h; sourceTree = "<group>"; };
-		CDE197741F7E420300A6160B /* IOFileWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IOFileWrapper.h; sourceTree = "<group>"; };
+		CDE197741F7E420300A6160B /* DennIOFileWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DennIOFileWrapper.h; sourceTree = "<group>"; };
 		CDE197751F7E420300A6160B /* ThreadPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ThreadPool.h; sourceTree = "<group>"; };
-		CDE197761F7E420300A6160B /* TicksTime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TicksTime.h; sourceTree = "<group>"; };
+		CDE197761F7E420300A6160B /* DennTicksTime.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TicksTime.h; sourceTree = "<group>"; };
 		CDE197771F7E420300A6160B /* makefile */ = {isa = PBXFileReference; explicitFileType = text.script.sh; fileEncoding = 4; path = makefile; sourceTree = "<group>"; };
 		CDE197791F7E420300A6160B /* DennActivationFunctionFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennActivationFunctionFactory.cpp; sourceTree = "<group>"; };
 		CDE1977A1F7E420300A6160B /* DennActivationFunctionItems.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = DennActivationFunctionItems.cpp; sourceTree = "<group>"; };
@@ -1682,9 +1682,9 @@
 				CDE197711F7E420300A6160B /* DennRuntimeOutput.h */,
 				CDE197721F7E420300A6160B /* DennSerializeOutput.h */,
 				CDE197731F7E420300A6160B /* DennVariant.h */,
-				CDE197741F7E420300A6160B /* IOFileWrapper.h */,
-				CDE197751F7E420300A6160B /* ThreadPool.h */,
-				CDE197761F7E420300A6160B /* TicksTime.h */,
+				CDE197741F7E420300A6160B /* DennIOFileWrapper.h */,
+				CDE197751F7E420300A6160B /* DennThreadPool.h */,
+				CDE197761F7E420300A6160B /* DennTicksTime.h */,
 			);
 			path = include;
 			sourceTree = "<group>";
