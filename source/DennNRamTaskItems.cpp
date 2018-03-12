@@ -392,6 +392,7 @@ namespace NRam
 				std::make_tuple(10, 9),
 				std::make_tuple(12, 11),
 				std::make_tuple(14, 13),
+				std::make_tuple(15, 14),
 			}; 
 		}
 
