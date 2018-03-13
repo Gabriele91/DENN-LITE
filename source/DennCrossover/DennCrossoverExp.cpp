@@ -14,31 +14,42 @@ namespace Denn
 			//baias
 			const auto& i_target = *population[id_target];
 			const auto& cr = i_mutant.m_cr;
-			//the chosen layer
-			size_t i_layer = current_layer_to_train();
-			//weights and baias
-			for (size_t m = 0; m != i_target[i_layer].size(); ++m)
+			//for each layers
+			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
 			{
-				//elements
-				auto w_target = i_target[i_layer][m].array();
-				auto w_mutant = i_mutant[i_layer][m].array();
-				//random i
-				size_t e_rand = random(id_target).index_rand(w_target.size());
-				size_t e_start = random(id_target).index_rand(w_target.size());
-				//event
-				bool copy_event = false;
-				//CROSS
-				for (decltype(w_target.size()) e = 0; e != w_target.size(); ++e)
+				//copy old level
+				if( i_layer != current_layer_to_train() )
 				{
-					//id circ
-					size_t e_circ = (e_start + e) % w_target.size();
-					//crossover
-					//!(RandomIndices::random() < cr || e_rand == e)
-					copy_event |= (e_rand != e_circ && cr <= random(id_target).uniform());
-					//copy all vector
-					if (copy_event)
+					for (size_t m = 0; m != i_target[i_layer].size(); ++m)
 					{
-						w_mutant(e_circ) = w_target(e_circ);
+						i_mutant[i_layer][m] = i_target[i_layer][m];
+					}
+					continue;
+				}
+				//weights and baias
+				for (size_t m = 0; m != i_target[i_layer].size(); ++m)
+				{
+					//elements
+					auto w_target = i_target[i_layer][m].array();
+					auto w_mutant = i_mutant[i_layer][m].array();
+					//random i
+					size_t e_rand = random(id_target).index_rand(w_target.size());
+					size_t e_start = random(id_target).index_rand(w_target.size());
+					//event
+					bool copy_event = false;
+					//CROSS
+					for (decltype(w_target.size()) e = 0; e != w_target.size(); ++e)
+					{
+						//id circ
+						size_t e_circ = (e_start + e) % w_target.size();
+						//crossover
+						//!(RandomIndices::random() < cr || e_rand == e)
+						copy_event |= (e_rand != e_circ && cr <= random(id_target).uniform());
+						//copy all vector
+						if (copy_event)
+						{
+							w_mutant(e_circ) = w_target(e_circ);
+						}
 					}
 				}
 			}
