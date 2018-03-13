@@ -26,25 +26,23 @@ namespace Denn
 			//set population size in deck
 			rand_deck.reinit(population.size());
 			rand_deck.reset();
-			//for each layers
-			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
+			//the chosen layer
+			size_t i_layer = current_layer_to_train();
+			//weights and baias
+			for (size_t m = 0; m != i_target[i_layer].size(); ++m)
 			{
-				//weights and baias
-				for (size_t m = 0; m != i_target[i_layer].size(); ++m)
-				{
-					//do rand
-					rand_deck.reset();
-					//do cross + mutation
-					const Individual& nn_a = *population[rand_deck.get_random_id(id_target)];
-					const Individual& nn_b = *population[rand_deck.get_random_id(id_target)];
-					//from_archive ? archive[r2] : father(r2);
-					const Matrix& w_target = i_target[i_layer][m];
-						  Matrix& w_final  = i_final[i_layer][m];
-					const Matrix& w_best   = i_best[i_layer][m];
-					const Matrix& x_a = nn_a[i_layer][m];
-					const Matrix& x_b = nn_b[i_layer][m];
-					w_final = ( w_target + ((w_best - w_target) + (x_a - x_b)) * f ).unaryExpr(m_algorithm.clamp_function());
-				}
+				//do rand
+				rand_deck.reset();
+				//do cross + mutation
+				const Individual& nn_a = *population[rand_deck.get_random_id(id_target)];
+				const Individual& nn_b = *population[rand_deck.get_random_id(id_target)];
+				//from_archive ? archive[r2] : father(r2);
+				const Matrix& w_target = i_target[i_layer][m];
+						Matrix& w_final  = i_final[i_layer][m];
+				const Matrix& w_best   = i_best[i_layer][m];
+				const Matrix& x_a = nn_a[i_layer][m];
+				const Matrix& x_b = nn_b[i_layer][m];
+				w_final = ( w_target + ((w_best - w_target) + (x_a - x_b)) * f ).unaryExpr(m_algorithm.clamp_function());
 			}
 		}
 
@@ -84,37 +82,35 @@ namespace Denn
 			auto& rand_deck = random(id_target).deck();
 			//set population size in deck
 			rand_deck.reinit(current_np());
-			//for each layers
-			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
+			//the chosen layer
+			size_t i_layer = current_layer_to_train();
+			//weights and baias
+			for (size_t m = 0; m != i_target[i_layer].size(); ++m)
 			{
-				//weights and baias
-				for (size_t m = 0; m != i_target[i_layer].size(); ++m)
+				//do rand
+				rand_deck.reset();
+				//do cross + mutation
+				const Individual& nn_a = *population[rand_deck.get_random_id(id_target)];
+				//b from archive  or pop
+				Individual::SPtr nn_b  = nullptr;
+				//b from archive (JADE)
+				if(m_archive)
 				{
-					//do rand
-					rand_deck.reset();
-					//do cross + mutation
-					const Individual& nn_a = *population[rand_deck.get_random_id(id_target)];
-					//b from archive  or pop
-					Individual::SPtr nn_b  = nullptr;
-					//b from archive (JADE)
-					if(m_archive)
-					{
-						size_t rand_b = random(id_target).index_rand(m_archive->size() + population.size() - 2);
-						bool get_from_archive = rand_b < m_archive->size();
-						nn_b = get_from_archive ? (*m_archive)[rand_b] : population[rand_deck.get_random_id(id_target)];
-					}
-					else 
-					{
-						nn_b =  population[rand_deck.get_random_id(id_target)];
-					}
-					//from_archive ? archive[r2] : father(r2);
-					const Matrix& w_target = i_target[i_layer][m];
-						  Matrix& w_final  = i_final[i_layer][m];
-					const Matrix& w_best   = i_best[i_layer][m];
-					const Matrix& x_a 	   = nn_a[i_layer][m];
-					const Matrix& x_b 	   = (*nn_b)[i_layer][m];
-					w_final = ( w_target + ((w_best - w_target) + (x_a - x_b)) * f ).unaryExpr(m_algorithm.clamp_function());
+					size_t rand_b = random(id_target).index_rand(m_archive->size() + population.size() - 2);
+					bool get_from_archive = rand_b < m_archive->size();
+					nn_b = get_from_archive ? (*m_archive)[rand_b] : population[rand_deck.get_random_id(id_target)];
 				}
+				else 
+				{
+					nn_b =  population[rand_deck.get_random_id(id_target)];
+				}
+				//from_archive ? archive[r2] : father(r2);
+				const Matrix& w_target = i_target[i_layer][m];
+						Matrix& w_final  = i_final[i_layer][m];
+				const Matrix& w_best   = i_best[i_layer][m];
+				const Matrix& x_a 	   = nn_a[i_layer][m];
+				const Matrix& x_b 	   = (*nn_b)[i_layer][m];
+				w_final = ( w_target + ((w_best - w_target) + (x_a - x_b)) * f ).unaryExpr(m_algorithm.clamp_function());
 			}
 		}
 

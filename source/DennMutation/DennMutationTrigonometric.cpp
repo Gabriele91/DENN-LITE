@@ -30,20 +30,18 @@ namespace Denn
 			Scalar p_a = nn_a.m_eval / p;
 			Scalar p_b = nn_b.m_eval / p;
 			Scalar p_c = nn_c.m_eval / p;
-			//for each layer
-			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
+			//the chosen layer
+			size_t i_layer = current_layer_to_train();
+			//weights and biases
+			for ( size_t m = 0; m != i_target[i_layer].size(); ++m)
 			{
-				//weights and biases
-				for ( size_t m = 0; m != i_target[i_layer].size(); ++m)
-				{
-					//mutation
-					Matrix& w_final = i_final[i_layer][m];
-					const Matrix& x_a = nn_a[i_layer][m];
-					const Matrix& x_b = nn_b[i_layer][m];
-					const Matrix& x_c = nn_c[i_layer][m];
-					w_final = (x_a + x_b + x_c) / Scalar(3) + (p_b -p_a) * (x_a - x_b) + (p_c - p_b) * (x_b - x_c) + (p_a - p_c) * (x_c - x_a);
-					w_final = w_final.unaryExpr(m_algorithm.clamp_function());
-				}
+				//mutation
+				Matrix& w_final = i_final[i_layer][m];
+				const Matrix& x_a = nn_a[i_layer][m];
+				const Matrix& x_b = nn_b[i_layer][m];
+				const Matrix& x_c = nn_c[i_layer][m];
+				w_final = (x_a + x_b + x_c) / Scalar(3) + (p_b -p_a) * (x_a - x_b) + (p_c - p_b) * (x_b - x_c) + (p_a - p_c) * (x_c - x_a);
+				w_final = w_final.unaryExpr(m_algorithm.clamp_function());
 			}
         }
 	};

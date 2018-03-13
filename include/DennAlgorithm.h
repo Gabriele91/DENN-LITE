@@ -241,6 +241,11 @@ public:
 		m_execution = false;
 	}
 
+	size_t current_layer_to_train() const
+	{
+		return m_current_layer_to_train;
+	}
+
 protected:
 	//using the last batch on a individual
 	Scalar execute_train() const;
@@ -305,6 +310,7 @@ protected:
 	//generation info
 	size_t m_current_sub_gen;
 	size_t m_current_global_gen;
+	size_t m_current_layer_to_train;
 	//execution info
 	mutable std::atomic< bool > m_execution;
 	//function for DE

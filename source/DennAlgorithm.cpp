@@ -21,6 +21,7 @@ namespace Denn
 	, m_params(params)
 	, m_current_global_gen(0)
 	, m_current_sub_gen(0)
+	, m_current_layer_to_train(0)
     , m_execution(true)
 	{
 	}
@@ -410,13 +411,19 @@ namespace Denn
 	{
 		//get np
 		size_t np = current_np();
-		//for all
-		for (size_t i = 0; i != np; ++i)
+		//layer
+		for (size_t i_layer = 0; i_layer!= m_default->m_network.size(); ++i_layer)
 		{
-			execute_generation_task(i);
+			//current layer
+			m_current_layer_to_train = i_layer;
+			//for all
+			for (size_t i = 0; i != np; ++i)
+			{
+				execute_generation_task(i);
+			}
+			//swap
+			m_e_method->selection(m_population);
 		}
-		//swap
-		m_e_method->selection(m_population);
 	}
 	void DennAlgorithm::parallel_execute_pass(ThreadPool& thpool)
 	{
@@ -424,19 +431,25 @@ namespace Denn
 		size_t np = current_np();
 		//alloc promises
 		m_promises.resize(np);
-		//execute
-		for (size_t i = 0; i != np; ++i)
+		//layer
+		for (size_t i_layer = 0; i_layer!= m_default->m_network.size(); ++i_layer)
 		{
-			//add
-			m_promises[i] = thpool.push_task([this, i]()
+			//current layer
+			m_current_layer_to_train = i_layer;
+			//execute
+			for (size_t i = 0; i != np; ++i)
 			{
-				execute_generation_task(i);
-			});
+				//add
+				m_promises[i] = thpool.push_task([this, i]()
+				{
+					execute_generation_task(i);
+				});
+			}
+			//wait
+			for (auto& promise : m_promises) promise.wait();
+			//swap
+			m_e_method->selection(m_population);
 		}
-		//wait
-		for (auto& promise : m_promises) promise.wait();
-		//swap
-		m_e_method->selection(m_population);
 	}
 	void DennAlgorithm::execute_generation_task(size_t i)
 	{

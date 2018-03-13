@@ -22,6 +22,8 @@ namespace Denn
 	Random& Mutation::population_random(size_t i)     const { return m_algorithm.population_random(i);}
 	Random& Mutation::random(size_t i)			      const { return m_algorithm.random(i); }
 	
+
+    size_t Mutation::current_layer_to_train() const { return m_algorithm.current_layer_to_train(); }
 	//help, how is the best
 	bool Mutation::loss_function_compare(Scalar left, Scalar right) const       { return  m_algorithm.loss_function_compare(left,right);  }
 	bool Mutation::validation_function_compare(Scalar left, Scalar right) const { return  m_algorithm.validation_function_compare(left,right);  }

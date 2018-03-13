@@ -48,51 +48,49 @@ namespace Denn
 			rand_deck_ring_segment.reinit(population.size(), id_target, neighborhood);
 			rand_deck.reset();
 			rand_deck_ring_segment.reset();
-			//for each layers
-			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
+			//the chosen layer
+			size_t i_layer = current_layer_to_train();
+			//weights and baias
+			for (size_t m = 0; m != i_target[i_layer].size(); ++m)
 			{
-				//weights and baias
-				for (size_t m = 0; m != i_target[i_layer].size(); ++m)
-				{
-					//do rand
-					rand_deck.reset();
-					rand_deck_ring_segment.reset();
-					//do cross + mutation
-					const Individual& nn_g_a = *population[rand_deck.get_random_id(id_target)]; //a != target
-					const Individual& nn_g_b = *population[rand_deck.get_random_id(id_target)]; //b != target 
+				//do rand
+				rand_deck.reset();
+				rand_deck_ring_segment.reset();
+				//do cross + mutation
+				const Individual& nn_g_a = *population[rand_deck.get_random_id(id_target)]; //a != target
+				const Individual& nn_g_b = *population[rand_deck.get_random_id(id_target)]; //b != target 
 
-					const Individual& nn_l_a = *population[rand_deck_ring_segment.get_random_id()];//local a != target
-					const Individual& nn_l_b = *population[rand_deck_ring_segment.get_random_id()];//local b != target
-					//									
-					const Matrix& w_target = i_target[i_layer][m];
-					const Matrix& w_g_best = g_best[i_layer][m];
-					const Matrix& w_l_best = l_best[i_layer][m];
-					      Matrix& w_final  = i_final[i_layer][m];
+				const Individual& nn_l_a = *population[rand_deck_ring_segment.get_random_id()];//local a != target
+				const Individual& nn_l_b = *population[rand_deck_ring_segment.get_random_id()];//local b != target
+				//									
+				const Matrix& w_target = i_target[i_layer][m];
+				const Matrix& w_g_best = g_best[i_layer][m];
+				const Matrix& w_l_best = l_best[i_layer][m];
+						Matrix& w_final  = i_final[i_layer][m];
 
-					const Matrix& x_g_a = nn_g_a[i_layer][m];
-					const Matrix& x_g_b = nn_g_b[i_layer][m];					
-					const Matrix& x_l_a = nn_l_a[i_layer][m];
-					const Matrix& x_l_b = nn_l_b[i_layer][m];
+				const Matrix& x_g_a = nn_g_a[i_layer][m];
+				const Matrix& x_g_b = nn_g_b[i_layer][m];					
+				const Matrix& x_l_a = nn_l_a[i_layer][m];
+				const Matrix& x_l_b = nn_l_b[i_layer][m];
 
-					//global
-					Matrix g_m = ( w_target + ((w_g_best - w_target) + (x_g_a - x_g_b)) * f );
+				//global
+				Matrix g_m = ( w_target + ((w_g_best - w_target) + (x_g_a - x_g_b)) * f );
 
-					//local
-					Matrix l_m = ( w_target + ((w_l_best - w_target) + (x_l_a - x_l_b)) * f );
+				//local
+				Matrix l_m = ( w_target + ((w_l_best - w_target) + (x_l_a - x_l_b)) * f );
 
-					//final (lerp)
-					//from the DEGL's peper
-					//lambda = 1 -> g_m (aka rand-to-best/1)
-					//lambda = 0 -> l_m
-					Scalar* w_final_array = w_final.data();
-					Scalar* w_g_m_array   = g_m.data();
-					Scalar* w_l_m_array   = l_m.data();
-					for(Matrix::Index i=0; i != w_final.size(); ++i)
-						w_final_array[i] = Denn::lerp(w_l_m_array[i], w_g_m_array[i], scalar_weight);
+				//final (lerp)
+				//from the DEGL's peper
+				//lambda = 1 -> g_m (aka rand-to-best/1)
+				//lambda = 0 -> l_m
+				Scalar* w_final_array = w_final.data();
+				Scalar* w_g_m_array   = g_m.data();
+				Scalar* w_l_m_array   = l_m.data();
+				for(Matrix::Index i=0; i != w_final.size(); ++i)
+					w_final_array[i] = Denn::lerp(w_l_m_array[i], w_g_m_array[i], scalar_weight);
 
-					//clamp
-					w_final = w_final.unaryExpr(m_algorithm.clamp_function());
-				}
+				//clamp
+				w_final = w_final.unaryExpr(m_algorithm.clamp_function());
 			}
 		}
 	};
@@ -136,76 +134,74 @@ namespace Denn
 			auto& rand_deck_ring_segment = random(id_target).deck_ring_segment();
 			//set population size in deck
 			rand_deck_ring_segment.reinit(population.size(), id_target, neighborhood);
-			//for each layers
-			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
+			//the chosen layer
+			size_t i_layer = current_layer_to_train();
+			//weights and baias
+			for (size_t m = 0; m != i_target[i_layer].size(); ++m)
 			{
-				//weights and baias
-				for (size_t m = 0; m != i_target[i_layer].size(); ++m)
+				//search near values
+				Scalar v_min[2] { std::numeric_limits<Scalar>::max(),  std::numeric_limits<Scalar>::max() };
+				size_t id_min[2]{ 0, 0 };
+				for(size_t n = 0; n!= current_np(); ++n)
 				{
-					//search near values
-					Scalar v_min[2] { std::numeric_limits<Scalar>::max(),  std::numeric_limits<Scalar>::max() };
-					size_t id_min[2]{ 0, 0 };
-					for(size_t n = 0; n!= current_np(); ++n)
-					{
-						//jump target
-						if(n==id_target) continue;
-						//search
-						auto dist = distance(i_target[i_layer][m],(*population[n])[i_layer][m]);
-						// dist < min 0
-						if(dist < v_min[0]) 
-						{ 
-							//move first to second
-							v_min[1]  = v_min[0];
-							id_min[1] = id_min[0];
-							//save new 
-							v_min[0]  = dist; 
-							id_min[0] = n; 
-						}
-						// min 0 < dist < min 1
-						else if(dist < v_min[1]) 
-						{ 
-							v_min[1] = dist; 
-							id_min[1] = n; 
-						}
+					//jump target
+					if(n==id_target) continue;
+					//search
+					auto dist = distance(i_target[i_layer][m],(*population[n])[i_layer][m]);
+					// dist < min 0
+					if(dist < v_min[0]) 
+					{ 
+						//move first to second
+						v_min[1]  = v_min[0];
+						id_min[1] = id_min[0];
+						//save new 
+						v_min[0]  = dist; 
+						id_min[0] = n; 
 					}
-					//do rand
-					rand_deck_ring_segment.reset();
-					//do cross + mutation
-					const Individual& nn_g_a = *population[id_min[0]]; //a != target
-					const Individual& nn_g_b = *population[id_min[1]]; //b != target 
-
-					const Individual& nn_l_a = *population[rand_deck_ring_segment.get_random_id()];//local a != target
-					const Individual& nn_l_b = *population[rand_deck_ring_segment.get_random_id()];//local b != target
-					//									
-					const Matrix& w_target = i_target[i_layer][m];
-					const Matrix& w_g_best = g_best[i_layer][m];
-					const Matrix& w_l_best = l_best[i_layer][m];
-					      Matrix& w_final  = i_final[i_layer][m];
-
-					const Matrix& x_g_a = nn_g_a[i_layer][m];
-					const Matrix& x_g_b = nn_g_b[i_layer][m];					
-					const Matrix& x_l_a = nn_l_a[i_layer][m];
-					const Matrix& x_l_b = nn_l_b[i_layer][m];
-
-					//global
-					Matrix g_m = ( w_target + ((w_g_best - w_target) + (x_g_a - x_g_b)) * f );
-
-					//local
-					Matrix l_m = ( w_target + ((w_l_best - w_target) + (x_l_a - x_l_b)) * f );
-
-					//final (lerp)
-					//from the DEGL's peper
-					//lambda = 1 -> g_m (aka rand-to-best/1)
-					//lambda = 0 -> l_m
-					Scalar* w_final_array = w_final.data();
-					Scalar* w_g_m_array   = g_m.data();
-					Scalar* w_l_m_array   = l_m.data();
-					for(Matrix::Index i=0; i != w_final.size(); ++i)
-						w_final_array[i] = Denn::lerp(w_l_m_array[i], w_g_m_array[i], scalar_weight);
-
-					//clamp
-					w_final = w_final.unaryExpr(m_algorithm.clamp_function());
+					// min 0 < dist < min 1
+					else if(dist < v_min[1]) 
+					{ 
+						v_min[1] = dist; 
+						id_min[1] = n; 
+					}
 				}
+				//do rand
+				rand_deck_ring_segment.reset();
+				//do cross + mutation
+				const Individual& nn_g_a = *population[id_min[0]]; //a != target
+				const Individual& nn_g_b = *population[id_min[1]]; //b != target 
+
+				const Individual& nn_l_a = *population[rand_deck_ring_segment.get_random_id()];//local a != target
+				const Individual& nn_l_b = *population[rand_deck_ring_segment.get_random_id()];//local b != target
+				//									
+				const Matrix& w_target = i_target[i_layer][m];
+				const Matrix& w_g_best = g_best[i_layer][m];
+				const Matrix& w_l_best = l_best[i_layer][m];
+						Matrix& w_final  = i_final[i_layer][m];
+
+				const Matrix& x_g_a = nn_g_a[i_layer][m];
+				const Matrix& x_g_b = nn_g_b[i_layer][m];					
+				const Matrix& x_l_a = nn_l_a[i_layer][m];
+				const Matrix& x_l_b = nn_l_b[i_layer][m];
+
+				//global
+				Matrix g_m = ( w_target + ((w_g_best - w_target) + (x_g_a - x_g_b)) * f );
+
+				//local
+				Matrix l_m = ( w_target + ((w_l_best - w_target) + (x_l_a - x_l_b)) * f );
+
+				//final (lerp)
+				//from the DEGL's peper
+				//lambda = 1 -> g_m (aka rand-to-best/1)
+				//lambda = 0 -> l_m
+				Scalar* w_final_array = w_final.data();
+				Scalar* w_g_m_array   = g_m.data();
+				Scalar* w_l_m_array   = l_m.data();
+				for(Matrix::Index i=0; i != w_final.size(); ++i)
+					w_final_array[i] = Denn::lerp(w_l_m_array[i], w_g_m_array[i], scalar_weight);
+
+				//clamp
+				w_final = w_final.unaryExpr(m_algorithm.clamp_function());
 			}
 		}
 	};
@@ -253,36 +249,34 @@ namespace Denn
 			//local / global network
 			NeuralNetwork nn_l(i_final.m_network);
 			NeuralNetwork nn_g(i_final.m_network);
-			//for each layers
-			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
+			//the chosen layer
+			size_t i_layer = current_layer_to_train();
+			//weights and baias
+			for (size_t m = 0; m != i_target[i_layer].size(); ++m)
 			{
-				//weights and baias
-				for (size_t m = 0; m != i_target[i_layer].size(); ++m)
-				{
-					//do rand
-					rand_deck.reset();
-					rand_deck_ring_segment.reset();
-					//do cross + mutation
-					const Individual& nn_g_a = *population[rand_deck.get_random_id(id_target)]; //a != target
-					const Individual& nn_g_b = *population[rand_deck.get_random_id(id_target)]; //b != target 
+				//do rand
+				rand_deck.reset();
+				rand_deck_ring_segment.reset();
+				//do cross + mutation
+				const Individual& nn_g_a = *population[rand_deck.get_random_id(id_target)]; //a != target
+				const Individual& nn_g_b = *population[rand_deck.get_random_id(id_target)]; //b != target 
 
-					const Individual& nn_l_a = *population[rand_deck_ring_segment.get_random_id()];//local a != target
-					const Individual& nn_l_b = *population[rand_deck_ring_segment.get_random_id()];//local b != target
-					// target + best								
-					const Matrix& w_target = i_target[i_layer][m];
-					const Matrix& w_g_best = g_best[i_layer][m];
-					const Matrix& w_l_best = l_best[i_layer][m];
-					// others
-					const Matrix& x_g_a = nn_g_a[i_layer][m];
-					const Matrix& x_g_b = nn_g_b[i_layer][m];					
-					const Matrix& x_l_a = nn_l_a[i_layer][m];
-					const Matrix& x_l_b = nn_l_b[i_layer][m];
+				const Individual& nn_l_a = *population[rand_deck_ring_segment.get_random_id()];//local a != target
+				const Individual& nn_l_b = *population[rand_deck_ring_segment.get_random_id()];//local b != target
+				// target + best								
+				const Matrix& w_target = i_target[i_layer][m];
+				const Matrix& w_g_best = g_best[i_layer][m];
+				const Matrix& w_l_best = l_best[i_layer][m];
+				// others
+				const Matrix& x_g_a = nn_g_a[i_layer][m];
+				const Matrix& x_g_b = nn_g_b[i_layer][m];					
+				const Matrix& x_l_a = nn_l_a[i_layer][m];
+				const Matrix& x_l_b = nn_l_b[i_layer][m];
 
-					//global
-					nn_g[i_layer][m] = ( w_target + ((w_g_best - w_target) + (x_g_a - x_g_b)) * f );
-					//local
-					nn_l[i_layer][m] = ( w_target + ((w_l_best - w_target) + (x_l_a - x_l_b)) * f );
-				}
+				//global
+				nn_g[i_layer][m] = ( w_target + ((w_g_best - w_target) + (x_g_a - x_g_b)) * f );
+				//local
+				nn_l[i_layer][m] = ( w_target + ((w_l_best - w_target) + (x_l_a - x_l_b)) * f );
 			}
 			//backpropagation
 			for(short nbp=0; nbp!=2; ++nbp)

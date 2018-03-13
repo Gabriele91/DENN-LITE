@@ -36,6 +36,9 @@ namespace Denn
 
 		Random& population_random(size_t i)  const;
 		Random& random(size_t i)  const;
+
+		size_t current_layer_to_train() const;
+		
 		//help, how is the best
 		bool loss_function_compare(Scalar left, Scalar right) const;
 		bool validation_function_compare(Scalar left, Scalar right) const;

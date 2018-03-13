@@ -27,24 +27,22 @@ namespace Denn
 			//set population size in deck
 			rand_deck.reinit(population.size());
 			rand_deck.reset();
-			//for each layers
-			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
+			//the chosen layer
+			size_t i_layer = current_layer_to_train();
+			//weights and baias
+			for (size_t m = 0; m != i_target[i_layer].size(); ++m)
 			{
-				//weights and baias
-				for (size_t m = 0; m != i_target[i_layer].size(); ++m)
-				{
-					//do rand
-					rand_deck.reset();
-					//do cross + mutation
-					const Individual& nn_a = *population[rand_deck.get_random_id(id_best)];
-					const Individual& nn_b = *population[rand_deck.get_random_id(id_best)];
-					//
-					Matrix& w_final      = i_final[i_layer][m];
-					const Matrix& x_best = i_best[i_layer][m];
-					const Matrix& x_a    = nn_a[i_layer][m];
-					const Matrix& x_b    = nn_b[i_layer][m];
-					w_final = (x_best + (x_a - x_b) * f).unaryExpr(m_algorithm.clamp_function());
-				}
+				//do rand
+				rand_deck.reset();
+				//do cross + mutation
+				const Individual& nn_a = *population[rand_deck.get_random_id(id_best)];
+				const Individual& nn_b = *population[rand_deck.get_random_id(id_best)];
+				//
+				Matrix& w_final      = i_final[i_layer][m];
+				const Matrix& x_best = i_best[i_layer][m];
+				const Matrix& x_a    = nn_a[i_layer][m];
+				const Matrix& x_b    = nn_b[i_layer][m];
+				w_final = (x_best + (x_a - x_b) * f).unaryExpr(m_algorithm.clamp_function());
 			}
 		}
 	};
@@ -71,28 +69,26 @@ namespace Denn
 			auto& rand_deck = random(id_target).deck();
 			//set population size in deck
 			rand_deck.reinit(population.size());
-			//for each layers
-			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
+			//the chosen layer
+			size_t i_layer = current_layer_to_train();
+			//weights and baias
+			for (size_t m = 0; m != i_target[i_layer].size(); ++m)
 			{
-				//weights and baias
-				for (size_t m = 0; m != i_target[i_layer].size(); ++m)
-				{
-					//do rand
-					rand_deck.reset();
-					//do cross + mutation
-					const Individual& nn_a = *population[rand_deck.get_random_id(id_best)];
-					const Individual& nn_b = *population[rand_deck.get_random_id(id_best)];
-					const Individual& nn_c = *population[rand_deck.get_random_id(id_best)];
-					const Individual& nn_d = *population[rand_deck.get_random_id(id_best)];
-					//
-					Matrix& w_final      = i_final[i_layer][m];
-					const Matrix& w_best = i_best[i_layer][m];
-					const Matrix& x_a = nn_a[i_layer][m];
-					const Matrix& x_b = nn_b[i_layer][m];
-					const Matrix& x_c = nn_c[i_layer][m];
-					const Matrix& x_d = nn_d[i_layer][m];
-					w_final = (w_best + ((x_a - x_b) + (x_c - x_d)) * f).unaryExpr(m_algorithm.clamp_function());
-				}
+				//do rand
+				rand_deck.reset();
+				//do cross + mutation
+				const Individual& nn_a = *population[rand_deck.get_random_id(id_best)];
+				const Individual& nn_b = *population[rand_deck.get_random_id(id_best)];
+				const Individual& nn_c = *population[rand_deck.get_random_id(id_best)];
+				const Individual& nn_d = *population[rand_deck.get_random_id(id_best)];
+				//
+				Matrix& w_final      = i_final[i_layer][m];
+				const Matrix& w_best = i_best[i_layer][m];
+				const Matrix& x_a = nn_a[i_layer][m];
+				const Matrix& x_b = nn_b[i_layer][m];
+				const Matrix& x_c = nn_c[i_layer][m];
+				const Matrix& x_d = nn_d[i_layer][m];
+				w_final = (w_best + ((x_a - x_b) + (x_c - x_d)) * f).unaryExpr(m_algorithm.clamp_function());
 			}
 		}
 	};
@@ -127,24 +123,22 @@ namespace Denn
 			auto& rand_deck = random(id_target).deck();
 			//set population size in deck
 			rand_deck.reinit(population.size());
-			//for each layers
-			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
+			//the chosen layer
+			size_t i_layer = current_layer_to_train();
+			//weights and baias
+			for (size_t m = 0; m != i_target[i_layer].size(); ++m)
 			{
-				//weights and baias
-				for (size_t m = 0; m != i_target[i_layer].size(); ++m)
-				{
-					//do rand
-					rand_deck.reset();
-					//do cross + mutation
-					const Individual& nn_a = *population[rand_deck.get_random_id(id_best)];
-					const Individual& nn_b = *population[rand_deck.get_random_id(id_best)];
-					//
-					Matrix& w_final      = i_final[i_layer][m];
-					const Matrix& w_best = i_best[i_layer][m];
-					const Matrix& x_a = nn_a[i_layer][m];
-					const Matrix& x_b = nn_b[i_layer][m];
-					w_final = (w_best + (x_a - x_b) * f).unaryExpr(m_algorithm.clamp_function());
-				}
+				//do rand
+				rand_deck.reset();
+				//do cross + mutation
+				const Individual& nn_a = *population[rand_deck.get_random_id(id_best)];
+				const Individual& nn_b = *population[rand_deck.get_random_id(id_best)];
+				//
+				Matrix& w_final      = i_final[i_layer][m];
+				const Matrix& w_best = i_best[i_layer][m];
+				const Matrix& x_a = nn_a[i_layer][m];
+				const Matrix& x_b = nn_b[i_layer][m];
+				w_final = (w_best + (x_a - x_b) * f).unaryExpr(m_algorithm.clamp_function());
 			}
 		}
 	};
@@ -179,28 +173,26 @@ namespace Denn
 			auto& rand_deck = random(id_target).deck();
 			//set population size in deck
 			rand_deck.reinit(population.size());
-			//for each layers
-			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
+			//the chosen layer
+			size_t i_layer = current_layer_to_train();
+			//weights and baias
+			for (size_t m = 0; m != i_target[i_layer].size(); ++m)
 			{
-				//weights and baias
-				for (size_t m = 0; m != i_target[i_layer].size(); ++m)
-				{
-					//do rand
-					rand_deck.reset();
-					//do cross + mutation
-					const Individual& nn_a = *population[rand_deck.get_random_id(id_best)];
-					const Individual& nn_b = *population[rand_deck.get_random_id(id_best)];
-					const Individual& nn_c = *population[rand_deck.get_random_id(id_best)];
-					const Individual& nn_d = *population[rand_deck.get_random_id(id_best)];
-					//
-					Matrix& w_final      = i_final[i_layer][m];
-					const Matrix& w_best = i_best[i_layer][m];
-					const Matrix& x_a = nn_a[i_layer][m];
-					const Matrix& x_b = nn_b[i_layer][m];
-					const Matrix& x_c = nn_c[i_layer][m];
-					const Matrix& x_d = nn_d[i_layer][m];
-					w_final = (w_best + ((x_a - x_b) + (x_c - x_d)) * f).unaryExpr(m_algorithm.clamp_function());
-				}
+				//do rand
+				rand_deck.reset();
+				//do cross + mutation
+				const Individual& nn_a = *population[rand_deck.get_random_id(id_best)];
+				const Individual& nn_b = *population[rand_deck.get_random_id(id_best)];
+				const Individual& nn_c = *population[rand_deck.get_random_id(id_best)];
+				const Individual& nn_d = *population[rand_deck.get_random_id(id_best)];
+				//
+				Matrix& w_final      = i_final[i_layer][m];
+				const Matrix& w_best = i_best[i_layer][m];
+				const Matrix& x_a = nn_a[i_layer][m];
+				const Matrix& x_b = nn_b[i_layer][m];
+				const Matrix& x_c = nn_c[i_layer][m];
+				const Matrix& x_d = nn_d[i_layer][m];
+				w_final = (w_best + ((x_a - x_b) + (x_c - x_d)) * f).unaryExpr(m_algorithm.clamp_function());
 			}
 		}
 	};
