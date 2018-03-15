@@ -159,8 +159,8 @@ namespace NRam
 
 			// Initialize desired memory
 			Matrix out_mem = in_mem;
-			out_mem.block(0, 0, out_mem.rows(), m_max_int - 1) \
-				= out_mem.block(0, 0, out_mem.rows(), m_max_int - 1)
+			out_mem.block(0, 0, out_mem.rows(), m_timesteps) \
+				= out_mem.block(0, 0, out_mem.rows(), m_timesteps)
 						.unaryExpr([&](Scalar x) -> Scalar { return Scalar(x + 1); });
 			
 			return std::make_tuple(in_mem, out_mem, Task::init_mask(), Task::init_regs());
