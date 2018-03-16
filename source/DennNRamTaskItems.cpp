@@ -86,11 +86,12 @@ namespace NRam
 		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
-				std::make_tuple(4, 3),
-				std::make_tuple(6, 3),
-				std::make_tuple(8, 3),
-				std::make_tuple(10, 3),
-				std::make_tuple(12, 3)
+				std::make_tuple(12, 2),
+				std::make_tuple(12, 3),
+				std::make_tuple(12, 4),
+				std::make_tuple(12, 5),
+				std::make_tuple(12, 6),
+				std::make_tuple(12, 7)
 			};
 		}
 
@@ -221,7 +222,6 @@ namespace NRam
 
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
 			Matrix mask = Task::init_mask(); //[1, max_int]
-			mask.leftCols(offset) = RowVector::Zero(offset);
 
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
@@ -314,10 +314,11 @@ namespace NRam
 		{
 			m_difficulty_grades = {
 				std::make_tuple(10, 6),
-				std::make_tuple(12, 6),
-				std::make_tuple(14, 6),
-				std::make_tuple(16, 6),
-				std::make_tuple(18, 6),
+				std::make_tuple(10, 7),
+				std::make_tuple(10, 8),
+				std::make_tuple(10, 9),
+				std::make_tuple(10, 10),
+				std::make_tuple(10, 11),
 			};
 		}
 
@@ -441,7 +442,7 @@ namespace NRam
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
 			Matrix mask = Task::init_mask(); //[1, max_int]
 			mask.leftCols(1)       = RowVector::Zero(1);
-			mask.rightCols(size_of_sequences_a) = RowVector::Zero(size_of_sequences_a);
+			//mask.rightCols(size_of_sequences_a) = RowVector::Zero(size_of_sequences_a);
 
 			//return
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
