@@ -86,11 +86,12 @@ namespace NRam
 		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
-				std::make_tuple(4, 3),
-				std::make_tuple(6, 3),
-				std::make_tuple(8, 3),
-				std::make_tuple(10, 3),
-				std::make_tuple(12, 3)
+				std::make_tuple(12, 2),
+				std::make_tuple(12, 3),
+				std::make_tuple(12, 4),
+				std::make_tuple(12, 5),
+				std::make_tuple(12, 6),
+				std::make_tuple(12, 7)
 			};
 		}
 
@@ -141,11 +142,11 @@ namespace NRam
 		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
-				std::make_tuple(12, 4),
-				std::make_tuple(12, 6),
-				std::make_tuple(12, 8),
-				std::make_tuple(12, 10),
-				std::make_tuple(12, 12)
+				std::make_tuple(8, 7),
+				std::make_tuple(9, 8),
+				std::make_tuple(10, 9),
+				std::make_tuple(11, 10),
+				std::make_tuple(12, 11)
 			};
 		}
 
@@ -153,15 +154,15 @@ namespace NRam
 		{
 			// Create and initialize the starting memory
 			Matrix in_mem = Matrix::Zero(m_batch_size, m_max_int);
-			in_mem.block(0, 0, in_mem.rows(), m_timesteps - 1) = in_mem
-				.block(0, 0, in_mem.rows(), m_timesteps - 1)
-					.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int)); });
+			in_mem.block(0, 0, in_mem.rows(), m_max_int - 1) = in_mem
+				.block(0, 0, in_mem.rows(), m_max_int - 1)
+					.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(0, m_max_int - 1)); });
 
 			// Initialize desired memory
 			Matrix out_mem = in_mem;
-			out_mem.block(0, 0, out_mem.rows(), m_timesteps - 1) \
-				= out_mem.block(0, 0, out_mem.rows(), m_timesteps - 1)
-						.unaryExpr([&](Scalar x) -> Scalar { return Scalar(positive_mod<size_t>((unsigned long)x + 1, m_max_int)); });
+			out_mem.block(0, 0, out_mem.rows(), m_timesteps) \
+				= out_mem.block(0, 0, out_mem.rows(), m_timesteps)
+						.unaryExpr([&](Scalar x) -> Scalar { return Scalar(x + 1); });
 			
 			return std::make_tuple(in_mem, out_mem, Task::init_mask(), Task::init_regs());
 		}
@@ -221,7 +222,6 @@ namespace NRam
 
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
 			Matrix mask = Task::init_mask(); //[1, max_int]
-			mask.leftCols(offset) = RowVector::Zero(offset);
 
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
@@ -313,11 +313,12 @@ namespace NRam
 		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
-				std::make_tuple(6, 6),
-				std::make_tuple(7, 6),
-				std::make_tuple(8, 6),
-				std::make_tuple(9, 6),
 				std::make_tuple(10, 6),
+				std::make_tuple(10, 7),
+				std::make_tuple(10, 8),
+				std::make_tuple(10, 9),
+				std::make_tuple(10, 10),
+				std::make_tuple(10, 11),
 			};
 		}
 
@@ -388,11 +389,11 @@ namespace NRam
 		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
-				std::make_tuple(8, 7),
-				std::make_tuple(10, 9),
-				std::make_tuple(12, 11),
-				std::make_tuple(14, 13),
-				std::make_tuple(15, 14),
+				std::make_tuple(7, 7),
+				std::make_tuple(9, 9),
+				std::make_tuple(11, 11),
+				std::make_tuple(13, 13),
+				std::make_tuple(15, 15),
 			}; 
 		}
 
@@ -401,53 +402,47 @@ namespace NRam
 			using namespace Eigen;
 
 			//alloc
-			const size_t remaining_space = (m_max_int - 2);
-			bool remaining_space_is_odd = remaining_space % 2 != 0;
+			const size_t remaining_space = (m_max_int - 1);
+			const size_t size_of_sequences_a = remaining_space / 2;
 			Matrix::Index offset(m_max_int / 2);
 			Matrix in_mem(m_batch_size, m_max_int);
 
 			//init in mem
-			in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(floor(remaining_space / 2) - 1, m_max_int - 1)); });
+			in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(size_of_sequences_a - 1, m_max_int - 1)); });
 
 			// Initialize the permutation for all the examples
 			for (size_t r = 0; r < in_mem.rows(); ++r)
 			{ 
-				PermutationMatrix< Dynamic, Dynamic > perm(offset - 1);
+				PermutationMatrix< Dynamic, Dynamic > perm(size_of_sequences_a);
 				perm.setIdentity();
 				std::random_device rd;
 				std::mt19937 g(rd());
 				std::shuffle(perm.indices().data(), perm.indices().data() + perm.indices().size(), g);
-				in_mem.block(r, 1, 1, offset - 1) = perm
+				in_mem.block(r, 1, 1, size_of_sequences_a) = perm
 					.indices()
 					.cast<Scalar>()
 					.transpose();
 			}
 			in_mem.col(0) = ColVector::Constant(in_mem.rows(), offset); // Set pointer to vector A position in memory
-				
-			// Set NULL value in memory
-			if (remaining_space_is_odd)
-				in_mem.block(0, in_mem.cols() - 2, in_mem.rows(), 2) = Matrix::Zero(in_mem.rows(), 2);
-			else
-				in_mem.col(in_mem.cols() - 1) = ColVector::Zero(in_mem.rows()); 
-
+			
 			// Create and initialize the desired memory
 			Matrix out_mem = in_mem;
 			for (Matrix::Index r = 0; r < out_mem.rows(); ++r)
 			{
 				// Select the permutation P
-				Matrix perm = fuzzy_encode(out_mem.block(r, 1, 1, offset - 1));
+				Matrix perm = fuzzy_encode(out_mem.block(r, 1, 1, size_of_sequences_a));
 
 				// Select the not already permutated A
-				Matrix A = out_mem.block(r, offset, 1, out_mem.cols() - offset - 1);
+				Matrix A = out_mem.block(r, 1 + size_of_sequences_a, 1, size_of_sequences_a);
 
 				// Permutate the elements of A according to the permutation P
-				out_mem.block(r, 1, 1, offset - 1) = A * perm.transpose();
+				out_mem.block(r, 1, 1, size_of_sequences_a) = A * perm.transpose();
 			}
 
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
 			Matrix mask = Task::init_mask(); //[1, max_int]
 			mask.leftCols(1)       = RowVector::Zero(1);
-			mask.rightCols(offset) = RowVector::Zero(offset);
+			//mask.rightCols(size_of_sequences_a) = RowVector::Zero(size_of_sequences_a);
 
 			//return
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
@@ -982,7 +977,6 @@ namespace NRam
 
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
 			Matrix mask = Task::init_mask(); //[3, max_int - 1]
-			mask.leftCols(3)  = RowVector::Zero(3);
 
 			return std::make_tuple(in_mem, out_mem, mask, Task::init_regs());
 		}
