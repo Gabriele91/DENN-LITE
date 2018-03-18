@@ -75,6 +75,7 @@ namespace NRam
 				, *parameters.m_entropy_decay
 				, *parameters.m_cost_regularization_term
 				, gates
+				, *parameters.m_max_int == 0 && *parameters.m_time_steps == 0 && *parameters.m_min_difficulty > 0
 			);
 			//get eval & set context
 			m_eval = EvaluationFactory::get<NRamEval>("nram")->set_context(m_nram);

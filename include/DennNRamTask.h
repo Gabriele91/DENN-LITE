@@ -10,8 +10,8 @@ namespace Denn
 namespace NRam 
 {
 	//memory struct
-	using TaskTuple = std::tuple<Matrix, Matrix, Matrix, Matrix, size_t, size_t>;
-	using MemoryTuple = std::tuple<Matrix, Matrix, Matrix, Matrix>;
+	using TaskTuple = std::tuple<Matrix, Matrix, Matrix, size_t, size_t, Matrix>;
+	using MemoryTuple = std::tuple<Matrix, Matrix, Matrix, Matrix, Matrix>;
 
 	//Task
 	class Task : public std::enable_shared_from_this< Task >
@@ -89,7 +89,6 @@ namespace NRam
 		size_t  m_timesteps;
 		size_t 	m_previous_generation;
 		size_t  m_stall_generations;
-
 		bool    m_use_difficulty;
 		size_t  m_min_difficulty;
 		size_t  m_max_difficulty;
@@ -101,6 +100,8 @@ namespace NRam
 		Matrix  m_out_mem;
 		Matrix  m_mask;
 		Matrix  m_regs;
+		Matrix  m_error_m;
+
 
 		std::vector<DifficultyGrade> m_difficulty_grades;
 

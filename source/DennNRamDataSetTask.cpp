@@ -1,5 +1,6 @@
 #include "DennAlgorithm.h"
 #include "DennNRamDatasetTask.h"
+#include "DennDump.h"
 
 namespace Denn
 {
@@ -59,9 +60,10 @@ namespace NRam
 		dataset.m_features 		 = std::get<0>(data);
 		dataset.m_labels   		 = std::get<1>(data);
 		dataset.m_mask     		 = std::get<2>(data);
-		dataset.m_metadata["max_int"] = int(std::get<4>(data));
-		dataset.m_metadata["time_steps"] = int(std::get<5>(data));
-		m_fake_header.m_n_classes = std::get<4>(data);
+		dataset.m_metadata["max_int"] = int(std::get<3>(data));
+		dataset.m_metadata["time_steps"] = int(std::get<4>(data));
+        dataset.m_mask_error     = std::get<5>(data);
+        m_fake_header.m_n_classes = std::get<4>(data);
 		m_fake_header.m_n_features = std::get<4>(data);
 		return true;
 	}
@@ -77,8 +79,9 @@ namespace NRam
 		dataset.m_features 		 = std::get<0>(data);
 		dataset.m_labels   		 = std::get<1>(data);
 		dataset.m_mask     		 = std::get<2>(data);
-		dataset.m_metadata["max_int"] = int(std::get<4>(data));
-		dataset.m_metadata["time_steps"] = int(std::get<5>(data));
+		dataset.m_metadata["max_int"] = int(std::get<3>(data));
+		dataset.m_metadata["time_steps"] = int(std::get<4>(data));
+        dataset.m_mask_error     = std::get<5>(data);
 		m_fake_header.m_n_classes = std::get<4>(data);
 		m_fake_header.m_n_features = std::get<4>(data);
 		return true;
@@ -100,8 +103,9 @@ namespace NRam
 		dataset.m_features 		 = std::get<0>(data);
 		dataset.m_labels   		 = std::get<1>(data);
 		dataset.m_mask     		 = std::get<2>(data);
-		dataset.m_metadata["max_int"] = int(std::get<4>(data));
-		dataset.m_metadata["time_steps"] = int(std::get<5>(data));
+		dataset.m_metadata["max_int"] = int(std::get<3>(data));
+		dataset.m_metadata["time_steps"] = int(std::get<4>(data));
+		dataset.m_mask_error          = std::get<5>(data);
 		m_fake_header.m_n_classes = std::get<4>(data);
 		m_fake_header.m_n_features = std::get<4>(data);
 		return true;

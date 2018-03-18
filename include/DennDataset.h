@@ -12,10 +12,12 @@ namespace Denn
     public:
 		virtual void* ptr_features() const 	 = 0;
 		virtual void* ptr_mask()     const 	 = 0;
+		virtual void* ptr_mask_error() const = 0;
 		virtual void* ptr_labels()   const 	 = 0;
 
 		virtual void* data_features() const  = 0;
 		virtual void* data_mask()     const  = 0;
+		virtual void* data_mask_error() const  = 0;
 		virtual void* data_labels()   const  = 0;
 
 		virtual size_t features_rows() const = 0;
@@ -23,6 +25,9 @@ namespace Denn
 
 		virtual size_t mask_rows() const     = 0;
 		virtual size_t mask_cols() const  	 = 0;
+
+		virtual size_t mask_error_rows() const = 0;
+		virtual size_t mask_error_cols() const = 0;
 
 		virtual size_t labels_rows() const   = 0;
 		virtual size_t labels_cols() const   = 0;
@@ -43,6 +48,10 @@ namespace Denn
 		{
 			return *((const Matrix*)(ptr_mask()));
 		}
+		const Matrix&  mask_error() const
+		{
+			return *((const Matrix*)(ptr_mask_error()));
+		}
 		const Matrix&  labels() const
 		{
 			return *((const Matrix*)(ptr_labels()));
@@ -54,6 +63,10 @@ namespace Denn
 		Matrix&  mask()
 		{
 			return *((Matrix*)(ptr_mask()));
+		}
+		Matrix&  mask_error()
+		{
+			return *((Matrix*)(ptr_mask_error()));
 		}
 		Matrix&  labels()
 		{
@@ -82,16 +95,19 @@ namespace Denn
 		//values
 		Eigen::Matrix< ScalarType, Eigen::Dynamic, Eigen::Dynamic > m_features;
 		Eigen::Matrix< ScalarType, Eigen::Dynamic, Eigen::Dynamic > m_mask;
+		Eigen::Matrix< ScalarType, Eigen::Dynamic, Eigen::Dynamic > m_mask_error;
 		Eigen::Matrix< ScalarType, Eigen::Dynamic, Eigen::Dynamic > m_labels;
 		//metadata
 		MetaData m_metadata; 
 		//pure virtual methods
 		virtual void* ptr_features() const { return (void*)&m_features;       }
 		virtual void* ptr_mask()     const { return (void*)&m_mask;           }
+		virtual void* ptr_mask_error()     const { return (void*)&m_mask_error;           }
 		virtual void* ptr_labels()	 const { return (void*)&m_labels;         }
 
 		virtual void* data_features() const { return (void*)m_features.data(); }
 		virtual void* data_mask()     const { return (void*)m_mask.data();     }
+		virtual void* data_mask_error()     const { return (void*)m_mask_error.data();     }
 		virtual void* data_labels()   const { return (void*)m_labels.data();   }
 
 
@@ -111,6 +127,15 @@ namespace Denn
 		virtual size_t mask_cols() const
         {
             return m_mask.cols();
+        }
+
+		virtual size_t mask_error_rows() const
+        {
+            return m_mask_error.rows();
+        }
+		virtual size_t mask_error_cols() const
+        {
+            return m_mask_error.cols();
         }
 		
 		virtual size_t labels_rows() const
