@@ -199,11 +199,32 @@ namespace NRam
 		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
+				std::make_tuple(10, 3),
+				std::make_tuple(10, 5),
+				std::make_tuple(10, 7),
 				std::make_tuple(10, 9),
+				std::make_tuple(10, 10),
+				std::make_tuple(12, 3),
+				std::make_tuple(12, 5),
+				std::make_tuple(12, 7),
+				std::make_tuple(12, 9),
 				std::make_tuple(12, 11),
+				std::make_tuple(12, 12),
+				std::make_tuple(14, 3),
+				std::make_tuple(14, 5),
+				std::make_tuple(14, 7),
+				std::make_tuple(14, 9),
+				std::make_tuple(14, 11),
 				std::make_tuple(14, 13),
+				std::make_tuple(14, 14),
+				std::make_tuple(16, 3),
+				std::make_tuple(16, 5),
+				std::make_tuple(16, 7),
+				std::make_tuple(16, 9),
+				std::make_tuple(16, 11),
+				std::make_tuple(16, 13),
 				std::make_tuple(16, 15),
-				std::make_tuple(20, 19)
+				std::make_tuple(16, 16),
 			};
 		}
 
@@ -212,7 +233,7 @@ namespace NRam
 			// Create and initialize the starting memory
 			Matrix::Index remaining_space(m_max_int - 2);
 			Matrix::Index offset(m_max_int / 2);
-			Matrix::Index vector_a_size = m_timesteps > m_max_int ? remaining_space / 2 : (m_timesteps - 1) / 2;
+			Matrix::Index vector_a_size = m_timesteps >= m_max_int ? (m_max_int - 2) / 2 : (m_timesteps - 1) / 2;
 
 			Matrix in_mem = Matrix::Zero(m_batch_size, m_max_int);
 			in_mem.col(0) = ColVector::Constant(in_mem.rows(), offset);
@@ -261,11 +282,32 @@ namespace NRam
 		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
+				std::make_tuple(10, 3),
+				std::make_tuple(10, 5),
+				std::make_tuple(10, 7),
 				std::make_tuple(10, 9),
+				std::make_tuple(10, 10),
+				std::make_tuple(12, 3),
+				std::make_tuple(12, 5),
+				std::make_tuple(12, 7),
+				std::make_tuple(12, 9),
 				std::make_tuple(12, 11),
+				std::make_tuple(12, 12),
+				std::make_tuple(14, 3),
+				std::make_tuple(14, 5),
+				std::make_tuple(14, 7),
+				std::make_tuple(14, 9),
+				std::make_tuple(14, 11),
 				std::make_tuple(14, 13),
+				std::make_tuple(14, 14),
+				std::make_tuple(16, 3),
+				std::make_tuple(16, 5),
+				std::make_tuple(16, 7),
+				std::make_tuple(16, 9),
+				std::make_tuple(16, 11),
+				std::make_tuple(16, 13),
 				std::make_tuple(16, 15),
-				std::make_tuple(18, 17)
+				std::make_tuple(16, 16),
 			};
 		}
 
@@ -274,7 +316,7 @@ namespace NRam
 			// Init some things
 			Matrix::Index remaining_space(m_max_int - 2); // Remaining space without pointers and null terminators
 			Matrix::Index offset(m_max_int / 2); // Pointer to the part of the memory where the NRAM will be reverse the vector A
-			Matrix::Index vector_a_size = m_timesteps > m_max_int ? remaining_space / 2 : (m_timesteps - 1) / 2;
+			Matrix::Index vector_a_size = m_timesteps >= m_max_int ? (m_max_int - 2) / 2 : (m_timesteps - 1) / 2;
 
 			// Initialize the starting memory
 			Matrix in_mem = Matrix::Zero(m_batch_size, m_max_int);
