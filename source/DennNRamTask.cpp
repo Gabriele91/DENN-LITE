@@ -129,8 +129,6 @@ namespace NRam
 			m_stall_generations = 0;
 		}
 
-        MESSAGE(Dump::json_matrix(m_error_m))
-
 		return std::make_tuple(m_in_mem, m_out_mem, m_mask, m_max_int, m_timesteps, m_error_m);
 	}
 

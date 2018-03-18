@@ -44,7 +44,6 @@ namespace NRam
 		}
 		auto& cost_mask = dataset.mask();
         auto& error_m = dataset.mask_error();
-        MESSAGE(Dump::json_matrix(error_m))
 
 		// Execute
 		Scalar train_result =
