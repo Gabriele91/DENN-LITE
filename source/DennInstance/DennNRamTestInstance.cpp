@@ -179,6 +179,7 @@ namespace NRam
 				, nram_entropy_decay
 				, nram_cost_regularization_term
 				, gates
+				, false
 			);
 			//test
 			if (!m_nram.m_max_int || !m_nram.m_n_regs || !m_nram.m_timesteps)

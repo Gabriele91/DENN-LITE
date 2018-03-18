@@ -109,30 +109,29 @@ namespace NRam
 			m_in_mem = std::get<0>(mems);
 			m_out_mem = std::get<1>(mems);
 			m_mask = std::get<2>(mems);
-			m_regs = std::get<3>(mems);
+			m_error_m = std::get<3>(mems);
+			m_regs = std::get<4>(mems);
 
 
 			// Reset the generation counter which indicates how many generation is used the same difficulty
 			m_stall_generations = 0; 
 		}
-		else if(!m_use_difficulty && current_generation == 0)
+		else if(!m_use_difficulty && (current_generation == 0 || m_stall_generations >= m_step_gen_change_difficulty))
 		{
 			// Generate memories
 			const auto& mems = (*this)();
 			m_in_mem = std::get<0>(mems);
 			m_out_mem = std::get<1>(mems);
 			m_mask = std::get<2>(mems);
-			m_regs = std::get<3>(mems);
+			m_error_m = std::get<3>(mems);
+			m_regs = std::get<4>(mems);
+
+			m_stall_generations = 0;
 		}
 
-		return std::make_tuple(
-			m_in_mem, 
-			m_out_mem,
-			m_mask, 
-			m_regs, 
-			m_max_int, 
-			m_timesteps
-		);
+        MESSAGE(Dump::json_matrix(m_error_m))
+
+		return std::make_tuple(m_in_mem, m_out_mem, m_mask, m_max_int, m_timesteps, m_error_m);
 	}
 
 	//info
