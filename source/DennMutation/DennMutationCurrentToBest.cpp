@@ -58,10 +58,8 @@ namespace Denn
 
 		CurrentToPBest(const DennAlgorithm& algorithm):Mutation(algorithm) 
 		{ 
-			//Get JADE archive
-			if(*m_algorithm.parameters().m_evolution_type == "JADE" 
-			|| (*m_algorithm.parameters().m_evolution_type).find("SHADE") != std::string::npos
-			)
+			//Get archive
+			if(m_algorithm.evolution_method().get_context_data().get_type() == static_variant_type<Population>())
 			{
 				m_archive_enable = true;
 			}
