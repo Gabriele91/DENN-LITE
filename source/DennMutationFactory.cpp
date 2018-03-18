@@ -14,7 +14,7 @@ namespace Denn
 
 	//easy access
 	const Parameters& Mutation::parameters()            const { return m_algorithm.parameters();        }
-	const EvolutionMethod& Mutation::evolution_method() const	{ return m_algorithm.evolution_method();  }
+	const EvolutionMethods& Mutation::evolution_method() const	{ return m_algorithm.evolution_method();  }
 
 	const size_t Mutation::current_np()                  const   { return m_algorithm.current_np(); }
 	const DoubleBufferPopulation& Mutation::population() const   { return m_algorithm.population(); }

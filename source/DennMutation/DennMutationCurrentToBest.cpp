@@ -59,9 +59,11 @@ namespace Denn
 		CurrentToPBest(const DennAlgorithm& algorithm):Mutation(algorithm) 
 		{ 
 			//Get JADE archive
-			if(*m_algorithm.parameters().m_evolution_type == "JADE")
+			if(*m_algorithm.parameters().m_evolution_type == "JADE" 
+			|| (*m_algorithm.parameters().m_evolution_type).find("SHADE") != std::string::npos
+			)
 			{
-				m_archive = m_algorithm.evolution_method().get_context_data().get_ptr<Population>();
+				m_archive_enable = true;
 			}
 			//Get percentage of best individuals
 			m_perc_of_best = m_algorithm.parameters().m_perc_of_best;
@@ -84,6 +86,13 @@ namespace Denn
 			rand_deck.reinit(current_np());
 			//the chosen layer
 			size_t i_layer = current_layer_to_train();
+			//get archive
+			const Population* archive = nullptr;
+			//test
+			if (m_archive_enable)
+			{
+				archive = m_algorithm.evolution_method()[i_layer]->get_context_data().get_ptr<Population>();
+			}
 			//weights and baias
 			for (size_t m = 0; m != i_target[i_layer].size(); ++m)
 			{
@@ -94,11 +103,11 @@ namespace Denn
 				//b from archive  or pop
 				Individual::SPtr nn_b  = nullptr;
 				//b from archive (JADE)
-				if(m_archive)
+				if(archive)
 				{
-					size_t rand_b = random(id_target).index_rand(m_archive->size() + population.size() - 2);
-					bool get_from_archive = rand_b < m_archive->size();
-					nn_b = get_from_archive ? (*m_archive)[rand_b] : population[rand_deck.get_random_id(id_target)];
+					size_t rand_b = random(id_target).index_rand(archive->size() + population.size() - 2);
+					bool get_from_archive = rand_b < archive->size();
+					nn_b = get_from_archive ? (*archive)[rand_b] : population[rand_deck.get_random_id(id_target)];
 				}
 				else 
 				{
@@ -117,7 +126,7 @@ namespace Denn
 	protected:
 
 		Scalar m_perc_of_best;
-		const Population* m_archive{ nullptr };
+		bool m_archive_enable{ false };
 
 	};
 	REGISTERED_MUTATION(CurrentToPBest, "curr_p_best")

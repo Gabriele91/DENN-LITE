@@ -72,10 +72,19 @@ namespace Denn
 			,  m_thpool
 			,  gen_random_func_thread()
 		);
+		//nlevels
+		size_t nlevels = m_default->m_network.size();
+		//init
+		m_e_methods.reserve(nlevels);
+		m_e_methods.clear();
 		//method of evoluction
-		m_e_method = EvolutionMethodFactory::create(m_params.m_evolution_type, *this);
-		//reset method
-		m_e_method->start();
+		for (size_t l = 0; l != nlevels; ++l)
+		{
+			//create
+			m_e_methods.push_back( EvolutionMethodFactory::create(m_params.m_evolution_type, *this) );
+			//reset method
+			m_e_methods.back()->start();
+		}
 		//true
 		return true;
 	}
@@ -96,7 +105,7 @@ namespace Denn
 		//restart init
 		m_restart_ctx = RestartContext();
 		//best
-		Scalar worst_eval = m_e_method->best_from_validation() 
+		Scalar worst_eval = m_e_methods[0]->best_from_validation() 
 						  ? validation_function_worst() 
 						  : loss_function_worst();
 		//default best
@@ -276,7 +285,7 @@ namespace Denn
 			//re-eval all pop
 			execute_fitness_on(m_population.parents());
 			//re-eval best on traning set (if validation is disable)
-			if (!m_e_method->best_from_validation())
+			if (!m_e_methods[0]->best_from_validation())
 			{
 				m_best_ctx.m_eval = execute_train();
 			}
@@ -285,7 +294,10 @@ namespace Denn
 		//output
 		if(m_output) m_output->start_a_pass();
 		//start pass
-		m_e_method->start_a_gen_pass(m_population);
+		for(auto e_method : m_e_methods)
+		{
+			e_method->start_a_gen_pass(m_population);
+		}
 		//sub pass
 		for (size_t sub_pass = 0; sub_pass != n_sub_pass && m_execution; ++sub_pass)
 		{
@@ -295,11 +307,17 @@ namespace Denn
 			execute_a_sub_pass(pass, sub_pass);
 		}
 		//end pass
-		m_e_method->end_a_gen_pass(m_population);
+		for (auto e_method : m_e_methods)
+		{
+			e_method->end_a_gen_pass(m_population);
+		}
 		//update context
 		execute_update_best();
 		//restart
-		if(m_e_method->can_reset()) execute_update_restart(pass);
+		if (m_e_methods[0]->can_reset())
+		{
+			execute_update_restart(pass);
+		}
 		//output
 		if(m_output) m_output->end_a_pass();
 	}
@@ -314,8 +332,8 @@ namespace Denn
 	}
 	void DennAlgorithm::execute_update_best()
 	{
-		if(m_e_method->best_from_validation()) execute_update_best_on_validation();
-		else             					   execute_update_best_on_loss_function();
+		if(m_e_methods[0]->best_from_validation()) execute_update_best_on_validation();
+		else             					       execute_update_best_on_loss_function();
 	}	
 	void DennAlgorithm::execute_update_best_on_validation()
 	{
@@ -402,10 +420,14 @@ namespace Denn
 	//execute a pass
 	void DennAlgorithm::execute_pass()
 	{
-		m_e_method->start_a_subgen_pass(m_population);
+		for (auto e_method : m_e_methods)
+			e_method->start_a_subgen_pass(m_population);
+
 		if (m_thpool) parallel_execute_pass(*m_thpool);
 		else          serial_execute_pass();
-		m_e_method->end_a_subgen_pass(m_population);
+
+		for (auto e_method : m_e_methods)
+			e_method->end_a_subgen_pass(m_population);
 	}
 	void DennAlgorithm::serial_execute_pass()
 	{
@@ -422,7 +444,13 @@ namespace Denn
 				execute_generation_task(i);
 			}
 			//swap
-			m_e_method->selection(m_population);
+			for (auto e_method : m_e_methods)
+			{
+				auto tmp = m_population;
+				e_method->selection(tmp);
+			}
+			//end selection
+			m_population.the_best_sons_become_parents();
 		}
 	}
 	void DennAlgorithm::parallel_execute_pass(ThreadPool& thpool)
@@ -447,8 +475,16 @@ namespace Denn
 			}
 			//wait
 			for (auto& promise : m_promises) promise.wait();
+			/////////////////////////////////////////////////////////////////
 			//swap
-			m_e_method->selection(m_population);
+			for (auto e_method : m_e_methods)
+			{
+				auto tmp = m_population;
+				e_method->selection(tmp);
+			}
+			//end selection
+			m_population.the_best_sons_become_parents();
+			/////////////////////////////////////////////////////////////////
 		}
 	}
 	void DennAlgorithm::execute_generation_task(size_t i)
@@ -458,7 +494,7 @@ namespace Denn
 		//get temp individual
 		auto& new_son = sons[i];
 		//Compute new individual
-		m_e_method->create_a_individual(m_population, i, *new_son);
+		m_e_methods[m_current_layer_to_train]->create_a_individual(m_population, i, *new_son);
 		//eval
 		new_son->m_eval = (*m_loss_function)(*new_son, current_batch());
 	}

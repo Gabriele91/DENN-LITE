@@ -1,6 +1,7 @@
 #pragma once
 #include "Config.h"
 #include "DennPopulation.h"
+#include "DennEvolutionMethod.h"
 
 namespace Denn
 {	
@@ -29,8 +30,7 @@ namespace Denn
 
 		//easy access
 		const Parameters& parameters() const;
-		const EvolutionMethod& evolution_method() const;
-
+		const EvolutionMethods& evolution_method() const;
 		const size_t current_np() const;
 		const DoubleBufferPopulation& population() const;
 

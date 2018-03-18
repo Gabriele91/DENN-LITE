@@ -11,7 +11,8 @@ namespace Denn
 	class Random;
 	class DoubleBufferPopulation;
 	class Individual;
-
+	
+	//class interface
 	class EvolutionMethod : public std::enable_shared_from_this< EvolutionMethod >
 	{
 	public:
@@ -39,7 +40,7 @@ namespace Denn
 
 		//easy access
 		const Parameters& parameters() const;
-		const EvolutionMethod& evolution_method() const;
+		const std::vector< EvolutionMethod::SPtr >& evolution_method() const;
 	
 		const size_t current_np() const;
 		const DoubleBufferPopulation& population() const;
@@ -57,6 +58,9 @@ namespace Denn
 		Random& random()  const;
 		#endif	
 	};
+
+	//alias
+	using EvolutionMethods = std::vector<EvolutionMethod::SPtr>;
 
 	//class factory of Evolution methods
 	class EvolutionMethodFactory

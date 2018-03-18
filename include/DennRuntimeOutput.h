@@ -1,13 +1,12 @@
 #pragma once
 #include "Config.h"
+#include "DennEvolutionMethod.h"
 
 namespace Denn
 {
 	//
 	class Parameters;
 	class DennAlgorithm;
-	class EvolutionMethod;
-	class DoubleBufferPopulation;
 	//
 	class RuntimeOutput : public std::enable_shared_from_this< RuntimeOutput >
 	{
@@ -33,7 +32,7 @@ namespace Denn
 		//Output / Parameters
 		virtual std::ostream&     output()     const { return m_stream;      }
 		//easy access		
-		const EvolutionMethod&        evolution_method() const;
+		const EvolutionMethods&       evolution_method() const;
 		const Parameters&             parameters()       const;	
 		const DoubleBufferPopulation& population()       const;
 		const size_t                  current_np()       const;
