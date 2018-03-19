@@ -114,10 +114,10 @@ namespace NRam
 			for (Matrix::Index r = 0; r < out_mem.rows(); ++r)  
 				out_mem(r, 0) = out_mem(r, Matrix::Index(out_mem(r, 0)));
 
-			Matrix error_m = Matrix::Zero(m_batch_size, m_max_int);
-			error_m.col(0) = ColVector::Ones(m_batch_size);
+			Matrix error_mask = Matrix::Zero(m_batch_size, m_max_int);
+			error_mask.col(0) = ColVector::Ones(m_batch_size);
 			
-			return std::make_tuple(in_mem, out_mem, Task::init_mask(), error_m, Task::init_regs());
+			return std::make_tuple(in_mem, out_mem, Task::init_mask(), error_mask, Task::init_regs());
 		};
 	}; 
 	REGISTERED_TASK(TaskAccess, "access")
@@ -167,10 +167,10 @@ namespace NRam
 				= out_mem.block(0, 0, out_mem.rows(), m_timesteps)
 						.unaryExpr([&](Scalar x) -> Scalar { return Scalar(x + 1); });
 
-			Matrix error_m = Matrix::Zero(m_batch_size, m_max_int);
-			error_m.block(0, 0, error_m.rows(), m_timesteps) = Matrix::Ones(m_batch_size, m_timesteps);
+			Matrix error_mask = Matrix::Zero(m_batch_size, m_max_int);
+			error_mask.block(0, 0, error_mask.rows(), m_timesteps) = Matrix::Ones(m_batch_size, m_timesteps);
 			
-			return std::make_tuple(in_mem, out_mem, Task::init_mask(), error_m, Task::init_regs());
+			return std::make_tuple(in_mem, out_mem, Task::init_mask(), error_mask, Task::init_regs());
 		}
 	};
 	REGISTERED_TASK(TaskIncrement, "increment")
@@ -250,10 +250,10 @@ namespace NRam
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
 			Matrix mask = Task::init_mask(); //[1, max_int]
 
-			Matrix error_m = Matrix::Zero(m_batch_size, m_max_int);
-			error_m.block(0, offset, error_m.rows(), vector_a_size) = Matrix::Ones(m_batch_size, vector_a_size);
+			Matrix error_mask = Matrix::Zero(m_batch_size, m_max_int);
+			error_mask.block(0, offset, error_mask.rows(), vector_a_size) = Matrix::Ones(m_batch_size, vector_a_size);
 
-			return std::make_tuple(in_mem, out_mem, mask, error_m, Task::init_regs());
+			return std::make_tuple(in_mem, out_mem, mask, error_mask, Task::init_regs());
 		}
 	};
 	REGISTERED_TASK(TaskCopy, "copy")
@@ -335,10 +335,10 @@ namespace NRam
 			Matrix mask = Task::init_mask(); //[1, max_int]
 			//mask.leftCols(offset) = RowVector::Zero(offset);
 
-			Matrix error_m = Matrix::Zero(m_batch_size, m_max_int);
-			error_m.block(0, offset, error_m.rows(), vector_a_size) = Matrix::Ones(m_batch_size, vector_a_size);
+			Matrix error_mask = Matrix::Zero(m_batch_size, m_max_int);
+			error_mask.block(0, offset, error_mask.rows(), vector_a_size) = Matrix::Ones(m_batch_size, vector_a_size);
 
-			return std::make_tuple(in_mem, out_mem, mask, error_m, Task::init_regs());
+			return std::make_tuple(in_mem, out_mem, mask, error_mask, Task::init_regs());
 		}
 	};
 	REGISTERED_TASK(TaskReverse, "reverse")
@@ -367,17 +367,19 @@ namespace NRam
 		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
-				std::make_tuple(10, 6),
-				std::make_tuple(10, 7),
-				std::make_tuple(10, 8),
-				std::make_tuple(10, 9),
-				std::make_tuple(10, 10),
-				std::make_tuple(10, 11),
+				std::make_tuple(8, 4),
+				std::make_tuple(8, 6),
+				std::make_tuple(12, 4),
+				std::make_tuple(12, 6),
+				std::make_tuple(16, 4),
+				std::make_tuple(16, 6)
 			};
 		}
 
 		MemoryTuple operator()() override
 		{
+			const int values_to_swap = int(std::floor(m_timesteps / 3));
+
 			// Initialize starting memory
 			Matrix in_mem(m_batch_size, m_max_int);
 			in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int - 1)); });
@@ -403,24 +405,27 @@ namespace NRam
 			Matrix out_mem = in_mem;
 
 			// Swap elements for each example
-			Matrix error_m = Matrix::Zero(m_batch_size, m_max_int);
+			Matrix error_mask = Matrix::Zero(m_batch_size, m_max_int);
 			for (Matrix::Index r = 0; r < out_mem.rows(); ++r)
 			{
-				std::swap(
-					out_mem(r, Matrix::Index(in_mem(r, 0))), 
-					out_mem(r, Matrix::Index(in_mem(r, 1)))
-				);
-				error_m(r, Matrix::Index(in_mem(r, 0))) = 1;
-				error_m(r, Matrix::Index(in_mem(r, 1))) = 1;
+				error_mask(r, Matrix::Index(in_mem(r, 1))) = 1;
+				if (values_to_swap == 1)
+					out_mem(r, Matrix::Index(in_mem(r, 1))) = out_mem(r, Matrix::Index(in_mem(r, 0)));
+				else
+				{
+					std::swap(
+						out_mem(r, Matrix::Index(in_mem(r, 0))), 
+						out_mem(r, Matrix::Index(in_mem(r, 1)))
+					);
+					error_mask(r, Matrix::Index(in_mem(r, 0))) = 1;
+				}	
 			}
-				
 
 			// Cut out the the memory parts that does not make part of the expected output
 			Matrix mask = Task::init_mask(); //[1, max_int]
 			mask.leftCols(2)  = RowVector::Zero(2);
-
-
-			return std::make_tuple(in_mem, out_mem, mask, error_m, Task::init_regs());
+			
+			return std::make_tuple(in_mem, out_mem, mask, error_mask, Task::init_regs());
 		}
 	};
 	REGISTERED_TASK(TaskSwap, "swap")
@@ -450,11 +455,24 @@ namespace NRam
 		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
+				std::make_tuple(7, 3),
+				std::make_tuple(7, 5),
 				std::make_tuple(7, 7),
+				std::make_tuple(9, 3),
+				std::make_tuple(9, 5),
+				std::make_tuple(9, 7),
 				std::make_tuple(9, 9),
+				std::make_tuple(11, 3),
+				std::make_tuple(11, 5),
+				std::make_tuple(11, 7),
+				std::make_tuple(11, 9),
 				std::make_tuple(11, 11),
+				std::make_tuple(13, 3),
+				std::make_tuple(13, 5),
+				std::make_tuple(13, 7),
+				std::make_tuple(13, 9),
+				std::make_tuple(13, 11),
 				std::make_tuple(13, 13),
-				std::make_tuple(15, 15),
 			}; 
 		}
 
@@ -463,23 +481,24 @@ namespace NRam
 			using namespace Eigen;
 
 			//alloc
-			const size_t remaining_space = (m_max_int - 1);
-			const size_t size_of_sequences_a = remaining_space / 2;
-			Matrix::Index offset(m_max_int / 2);
-			Matrix in_mem(m_batch_size, m_max_int);
+			const size_t remaining_space = (m_timesteps - 1);
+			const size_t l_bound_values = (m_max_int - 1) / 2;
+			const size_t size_of_sequence_a = remaining_space / 2;
+			Matrix::Index offset(std::floor(m_max_int / 2) + 1);
+			Matrix in_mem = Matrix::Zero(m_batch_size, m_max_int);
 
 			//init in mem
-			in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(size_of_sequences_a - 1, m_max_int - 1)); });
+			in_mem.block(0, offset, in_mem.rows(), size_of_sequence_a) = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(l_bound_values - 1, m_max_int - 1)); });
 
 			// Initialize the permutation for all the examples
 			for (size_t r = 0; r < in_mem.rows(); ++r)
 			{ 
-				PermutationMatrix< Dynamic, Dynamic > perm(size_of_sequences_a);
+				PermutationMatrix< Dynamic, Dynamic > perm(size_of_sequence_a);
 				perm.setIdentity();
 				std::random_device rd;
 				std::mt19937 g(rd());
 				std::shuffle(perm.indices().data(), perm.indices().data() + perm.indices().size(), g);
-				in_mem.block(r, 1, 1, size_of_sequences_a) = perm
+				in_mem.block(r, 1, 1, size_of_sequence_a) = perm
 					.indices()
 					.cast<Scalar>()
 					.transpose();
@@ -491,13 +510,13 @@ namespace NRam
 			for (Matrix::Index r = 0; r < out_mem.rows(); ++r)
 			{
 				// Select the permutation P
-				Matrix perm = fuzzy_encode(out_mem.block(r, 1, 1, size_of_sequences_a));
+				Matrix perm = fuzzy_encode(out_mem.block(r, 1, 1, size_of_sequence_a));
 
 				// Select the not already permutated A
-				Matrix A = out_mem.block(r, 1 + size_of_sequences_a, 1, size_of_sequences_a);
+				Matrix A = out_mem.block(r, offset, 1, size_of_sequence_a);
 
 				// Permutate the elements of A according to the permutation P
-				out_mem.block(r, 1, 1, size_of_sequences_a) = A * perm.transpose();
+				out_mem.block(r, 1, 1, size_of_sequence_a) = A * perm.transpose();
 			}
 
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
@@ -505,8 +524,11 @@ namespace NRam
 			mask.leftCols(1)       = RowVector::Zero(1);
 			//mask.rightCols(size_of_sequences_a) = RowVector::Zero(size_of_sequences_a);
 
+			Matrix error_mask = Matrix::Zero(m_batch_size, m_max_int);
+			error_mask.block(0, 1, in_mem.rows(), size_of_sequence_a) = Matrix::Ones(m_batch_size, size_of_sequence_a);
+
 			//return
-			return std::make_tuple(in_mem, out_mem, mask, Matrix::Zero(m_batch_size, m_max_int), Task::init_regs());
+			return std::make_tuple(in_mem, out_mem, mask, error_mask, Task::init_regs());
 		}
 	};
 	REGISTERED_TASK(TaskPermutation, "permutation")
@@ -999,10 +1021,15 @@ namespace NRam
 		{
 			m_difficulty_grades = {
 				std::make_tuple(9, 5),
+				std::make_tuple(12, 5),
 				std::make_tuple(12, 7),
+				std::make_tuple(15, 5),
+				std::make_tuple(15, 7),
 				std::make_tuple(15, 9),
-				std::make_tuple(18, 11),
-				std::make_tuple(21, 12)
+				std::make_tuple(18, 5),
+				std::make_tuple(18, 7),
+				std::make_tuple(18, 9),
+				std::make_tuple(18, 11)
 			};
 		}
 
@@ -1010,11 +1037,12 @@ namespace NRam
 		{
 			// Initialize some parameters and create the memory
 			Matrix::Index remaining_space(m_max_int - 6);
-			Matrix::Index arrays_memory_size(remaining_space / 3);
+			Matrix::Index space_size(remaining_space / 3);
+			Matrix::Index arrays_memory_size((m_timesteps - 3) / 2);
 
 			Matrix in_mem = Matrix::Zero(m_batch_size, m_max_int);
-			Matrix list_elements_a(m_batch_size, arrays_memory_size);
-			Matrix list_elements_b(m_batch_size, arrays_memory_size);
+			Matrix list_elements_a = Matrix::Zero(m_batch_size, arrays_memory_size);
+			Matrix list_elements_b = Matrix::Zero(m_batch_size, arrays_memory_size);
 			Matrix list_elements_a_plus_b = Matrix::Zero(m_batch_size, arrays_memory_size);
 
 			// Initialize arrays
@@ -1027,19 +1055,25 @@ namespace NRam
 
 			// Add data to starting NRAM memory
 			in_mem.col(0) = ColVector::Constant(in_mem.rows(), 3); // Starting point of list A
-			in_mem.col(1) = ColVector::Constant(in_mem.rows(), 3 + arrays_memory_size + 1); // Starting point of list B
-			in_mem.col(2) = ColVector::Constant(in_mem.rows(), 3 + (2 * arrays_memory_size) +  2); // Starting point of list A + B
+			in_mem.col(1) = ColVector::Constant(in_mem.rows(), 3 + space_size + 1); // Starting point of list B
+			in_mem.col(2) = ColVector::Constant(in_mem.rows(), 3 + (2 * space_size) +  2); // Starting point of list A + B
 			in_mem.block(0, 3, in_mem.rows(), arrays_memory_size) = list_elements_a; // Copy of A
-			in_mem.block(0, 3 + arrays_memory_size + 1, in_mem.rows(), arrays_memory_size) = list_elements_b; // Copy B
+			in_mem.block(0, 3 + space_size + 1, in_mem.rows(), arrays_memory_size) = list_elements_b; // Copy B
 			
 			// Create and initialize desired memory
 			Matrix out_mem = in_mem;
-			out_mem.block(0, 3 + (2 * arrays_memory_size) + 2, out_mem.rows(), arrays_memory_size) = list_elements_a_plus_b;
+			out_mem.block(0, 3 + (2 * space_size) + 2, out_mem.rows(), arrays_memory_size) = list_elements_a_plus_b;
 
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
 			Matrix mask = Task::init_mask(); //[3, max_int - 1]
+			mask.leftCols(3) = RowVector::Zero(3);
 
-			return std::make_tuple(in_mem, out_mem, mask, Matrix::Zero(m_batch_size, m_max_int), Task::init_regs());
+			// Create the error mask
+			Matrix::Index index_o(in_mem(0, 2));
+			Matrix error_mask = Matrix::Zero(m_batch_size, m_max_int);
+			error_mask.block(0, index_o, error_mask.rows(), arrays_memory_size) = Matrix::Ones(m_batch_size, arrays_memory_size);
+
+			return std::make_tuple(in_mem, out_mem, mask, error_mask, Task::init_regs());
 		}
 	};
 	REGISTERED_TASK(TaskSum, "sum")
