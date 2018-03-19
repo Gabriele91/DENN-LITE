@@ -28,16 +28,17 @@ namespace NRam
 
         void init
         (
-            const size_t batch_size,
-			const size_t max_int,
-			const size_t n_regs,
-			const size_t timesteps,
-            const size_t registers_values_extraction_type,
-            const Scalar entropy_term,
-            const Scalar entropy_decay,
-            const Scalar cost_regularization_term,
-			const GateList& gates,
-            const bool   activate_curriculum_learning
+                const size_t batch_size
+            ,   const size_t max_int
+            ,   const size_t n_regs
+            ,   const size_t timesteps
+            ,   const int    sequence_size
+            ,   const size_t registers_values_extraction_type
+            ,   const Scalar entropy_term
+            ,   const Scalar entropy_decay
+            ,   const Scalar cost_regularization_term
+            ,   const GateList& gates
+            ,   const bool   activate_curriculum_learning
         );
 
         size_t      m_batch_size;
@@ -51,6 +52,7 @@ namespace NRam
         Scalar      m_cost_regularization_term;
         GateList    m_gates;
         bool        m_activate_curriculum_learning;
+        int         m_sequence_size;
     };
 	
     class ExecutionDebug

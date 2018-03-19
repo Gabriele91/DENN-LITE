@@ -126,6 +126,7 @@ namespace NRam
 			//nram context info
 			size_t nram_max_int = jarguments["max_int"].number();
 			size_t nram_n_registers = jarguments["n_registers"].number();
+			int		 nram_sequence_size = jarguments["sequence_size"].number();
 			size_t nram_time_steps = jarguments["time_steps"].number();
 			size_t nram_registers_values_extract = jarguments["registers_values_extract"].number();
 			Scalar nram_entropy_term = jarguments["entropy_term"].number();
@@ -174,6 +175,7 @@ namespace NRam
 				, nram_max_int
 				, nram_n_registers
 				, nram_time_steps
+				, nram_sequence_size
 				, nram_registers_values_extract
 				, nram_entropy_term
 				, nram_entropy_decay
@@ -192,7 +194,7 @@ namespace NRam
 			//get eval & set context
 			m_eval = EvaluationFactory::get<NRamEval>("nram")->set_context(m_nram);
 			//task
-			m_task = TaskFactory::create(jarguments["task"].string(), 1, m_nram.m_max_int, m_nram.m_n_regs, m_nram.m_timesteps, 1, 5, 100, 0, m_random_engine);
+			m_task = TaskFactory::create(jarguments["task"].string(), 1, m_nram.m_max_int, m_nram.m_n_regs, m_nram.m_timesteps, m_nram.m_sequence_size, 1, 5, 100, 0, m_random_engine);
 			//test
 			if(!m_task)
 			{

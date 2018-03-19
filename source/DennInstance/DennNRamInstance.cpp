@@ -68,7 +68,8 @@ namespace NRam
 				, *parameters.m_max_int
 				, *parameters.m_n_registers
 				, *parameters.m_time_steps
-                , *parameters.m_registers_values_extraction_type != "defuzzyed" 
+				, *parameters.m_sequence_size
+        , *parameters.m_registers_values_extraction_type != "defuzzyed" 
 				  ? NRamLayout::P_ZERO 
 				  : NRamLayout::P_DEFUZZYED
 				, *parameters.m_entropy_term
@@ -81,7 +82,7 @@ namespace NRam
 			m_eval = EvaluationFactory::get<NRamEval>("nram")->set_context(m_nram);
 			//task
 			m_task = TaskFactory::create(*parameters.m_task, m_nram.m_batch_size, m_nram.m_max_int, m_nram.m_n_regs, 
-				*parameters.m_time_steps, *parameters.m_min_difficulty, *parameters.m_max_difficulty, 
+				*parameters.m_time_steps, *parameters.m_sequence_size, *parameters.m_min_difficulty, *parameters.m_max_difficulty, 
 				*parameters.m_step_gen_change_difficulty, *parameters.m_change_difficulty_lambda, m_random_engine
 			);
 			//Dataset

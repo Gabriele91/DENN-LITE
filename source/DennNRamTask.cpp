@@ -13,6 +13,7 @@ namespace NRam
 	, m_max_int(0)
 	, m_n_regs(0)
 	, m_timesteps(0)
+	, m_sequence_size(-1)
 	, m_random(nullptr)
 	, m_use_difficulty(false)
 	, m_max_difficulty(0)
@@ -23,11 +24,12 @@ namespace NRam
 	, m_previous_generation(0)
 	, m_stall_generations(0)
 	{}
-	Task::Task(size_t batch_size, size_t max_int, size_t n_regs, size_t timesteps, size_t min_difficulty, size_t max_difficulty, size_t step_gen_change_difficulty, Scalar change_difficulty_lambda, Random& random)
+	Task::Task(size_t batch_size, size_t max_int, size_t n_regs, size_t timesteps, int sequence_size, size_t min_difficulty, size_t max_difficulty, size_t step_gen_change_difficulty, Scalar change_difficulty_lambda, Random& random)
 	: m_batch_size(batch_size)
 	, m_max_int(max_int)
 	, m_n_regs(n_regs)
 	, m_timesteps(timesteps)
+	, m_sequence_size(sequence_size)
 	, m_random(&random)
 	, m_use_difficulty(max_int == 0 && timesteps == 0 && min_difficulty > 0)
 	, m_max_difficulty(std::max(min_difficulty,max_difficulty))
@@ -103,6 +105,7 @@ namespace NRam
 			DifficultyGrade difficulty_params =  m_difficulty_grades[current_difficulty];
 			m_max_int = std::get<0>(difficulty_params);
 			m_timesteps = std::get<1>(difficulty_params);
+			m_sequence_size = std::get<2>(difficulty_params);
 
 			// Generate memories
 			const auto& mems = (*this)();
@@ -111,7 +114,6 @@ namespace NRam
 			m_mask = std::get<2>(mems);
 			m_error_m = std::get<3>(mems);
 			m_regs = std::get<4>(mems);
-
 
 			// Reset the generation counter which indicates how many generation is used the same difficulty
 			m_stall_generations = 0; 
@@ -126,6 +128,7 @@ namespace NRam
 			m_error_m = std::get<3>(mems);
 			m_regs = std::get<4>(mems);
 
+			// Reset the generation counter which indicates how many generation is used the same difficulty
 			m_stall_generations = 0;
 		}
 
@@ -133,16 +136,17 @@ namespace NRam
 	}
 
 	//info
-	size_t  Task::get_batch_size()    const { return m_batch_size; }
-	size_t  Task::get_max_int()       const { return m_max_int; }
-	size_t  Task::get_num_regs()      const { return m_n_regs; }
-	size_t  Task::get_min_difficulty()  const { return m_min_difficulty; }
-	size_t  Task::get_max_difficulty()  const { return m_max_difficulty; }
-	size_t  Task::get_timestemps()  const { return m_timesteps; }
-	size_t  Task::get_current_difficulty()  const { return m_current_difficulty; }
-	size_t  Task::get_step_gen_change_difficulty()  const { return m_step_gen_change_difficulty; }
-	Task::DifficultyGrade Task::get_difficulty_grade() { return {}; }
-	Random* Task::get_random_engine() const { return m_random; }
+	size_t  Task::get_batch_size()    									const { return m_batch_size; }
+	size_t  Task::get_max_int()       									const { return m_max_int; }
+	size_t  Task::get_num_regs()      									const { return m_n_regs; }
+	size_t  Task::get_min_difficulty()  								const { return m_min_difficulty; }
+	size_t  Task::get_max_difficulty()  								const { return m_max_difficulty; }
+	size_t  Task::get_timestemps()  										const { return m_timesteps; }
+	int  		Task::get_sequence_size()  									const { return m_sequence_size; }
+	size_t  Task::get_current_difficulty()  						const { return m_current_difficulty; }
+	size_t  Task::get_step_gen_change_difficulty()  		const { return m_step_gen_change_difficulty; }
+	Task::DifficultyGrade Task::get_difficulty_grade() 				{ return {}; }
+	Random* Task::get_random_engine() 									const { return m_random; }
 
 	// Clone a this task
 	Task::SPtr Task::clone() const
@@ -164,6 +168,7 @@ namespace NRam
 		, size_t max_int
 		, size_t n_regs
 		, size_t timesteps
+		, int 	 sequence_size
 		, size_t min_difficulty
 		, size_t max_difficulty
 		, size_t step_gen_change_difficulty
@@ -174,7 +179,7 @@ namespace NRam
 		//find
 		auto it = t_map().find(name);
 		//return
-		return it == t_map().end() ? nullptr : it->second(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random);
+		return it == t_map().end() ? nullptr : it->second(batch_size, max_int, n_regs, timesteps, sequence_size, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random);
 	}
 	void TaskFactory::append(const std::string& name, TaskFactory::CreateObject fun, size_t size)
 	{

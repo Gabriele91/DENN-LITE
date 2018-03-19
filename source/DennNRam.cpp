@@ -19,16 +19,17 @@ namespace NRam
 
     void NRamLayout::init
     (
-        const size_t batch_size,
-        const size_t max_int,
-        const size_t n_regs,
-        const size_t timesteps,
-        const size_t registers_values_extraction_type,
-        const Scalar entropy_term,
-        const Scalar entropy_decay,
-        const Scalar cost_regularization_term,
-        const GateList& gates,
-        const bool activate_curriculum_learning
+            const size_t batch_size
+        ,   const size_t max_int
+        ,   const size_t n_regs
+        ,   const size_t timesteps
+        ,   const int    sequence_size
+        ,   const size_t registers_values_extraction_type
+        ,   const Scalar entropy_term
+        ,   const Scalar entropy_decay
+        ,   const Scalar cost_regularization_term
+        ,   const GateList& gates
+        ,   const bool activate_curriculum_learning
     )
     {
         // values init
@@ -36,6 +37,7 @@ namespace NRam
         m_max_int = max_int;
         m_n_regs = n_regs;
         m_timesteps = timesteps;
+        m_sequence_size = sequence_size;
         m_registers_values_extraction_type = registers_values_extraction_type;
         m_entropy_term = entropy_term;
         m_entropy_decay = entropy_decay;
