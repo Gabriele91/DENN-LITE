@@ -367,17 +367,22 @@ namespace NRam
 		: TaskImplement(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
-				std::make_tuple(10, 6),
-				std::make_tuple(10, 7),
-				std::make_tuple(10, 8),
-				std::make_tuple(10, 9),
-				std::make_tuple(10, 10),
-				std::make_tuple(10, 11),
+				std::make_tuple(8, 3),
+				std::make_tuple(8, 6),
+				std::make_tuple(8, 7),
+				std::make_tuple(12, 3),
+				std::make_tuple(12, 6),
+				std::make_tuple(12, 7),
+				std::make_tuple(16, 3),
+				std::make_tuple(16, 6),
+				std::make_tuple(16, 7)
 			};
 		}
 
 		MemoryTuple operator()() override
 		{
+			const int values_to_swap = int(std::floor(m_timesteps / 3));
+
 			// Initialize starting memory
 			Matrix in_mem(m_batch_size, m_max_int);
 			in_mem = in_mem.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int - 1)); });
@@ -406,20 +411,23 @@ namespace NRam
 			Matrix error_m = Matrix::Zero(m_batch_size, m_max_int);
 			for (Matrix::Index r = 0; r < out_mem.rows(); ++r)
 			{
-				std::swap(
-					out_mem(r, Matrix::Index(in_mem(r, 0))), 
-					out_mem(r, Matrix::Index(in_mem(r, 1)))
-				);
 				error_m(r, Matrix::Index(in_mem(r, 0))) = 1;
-				error_m(r, Matrix::Index(in_mem(r, 1))) = 1;
+				if (values_to_swap == 1)
+					out_mem(r, Matrix::Index(in_mem(r, 0))) = out_mem(r, Matrix::Index(in_mem(r, 1)));
+				else
+				{
+					std::swap(
+						out_mem(r, Matrix::Index(in_mem(r, 0))), 
+						out_mem(r, Matrix::Index(in_mem(r, 1)))
+					);
+					error_m(r, Matrix::Index(in_mem(r, 1))) = 1;
+				}	
 			}
-				
 
 			// Cut out the the memory parts that does not make part of the expected output
 			Matrix mask = Task::init_mask(); //[1, max_int]
 			mask.leftCols(2)  = RowVector::Zero(2);
-
-
+			
 			return std::make_tuple(in_mem, out_mem, mask, error_m, Task::init_regs());
 		}
 	};
