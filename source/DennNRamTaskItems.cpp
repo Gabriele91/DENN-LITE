@@ -1021,10 +1021,15 @@ namespace NRam
 		{
 			m_difficulty_grades = {
 				std::make_tuple(9, 5),
+				std::make_tuple(12, 5),
 				std::make_tuple(12, 7),
+				std::make_tuple(15, 5),
+				std::make_tuple(15, 7),
 				std::make_tuple(15, 9),
-				std::make_tuple(18, 11),
-				std::make_tuple(21, 12)
+				std::make_tuple(18, 5),
+				std::make_tuple(18, 7),
+				std::make_tuple(18, 9),
+				std::make_tuple(18, 11)
 			};
 		}
 
@@ -1032,11 +1037,12 @@ namespace NRam
 		{
 			// Initialize some parameters and create the memory
 			Matrix::Index remaining_space(m_max_int - 6);
-			Matrix::Index arrays_memory_size(remaining_space / 3);
+			Matrix::Index space_size(remaining_space / 3);
+			Matrix::Index arrays_memory_size((m_timesteps - 3) / 2);
 
 			Matrix in_mem = Matrix::Zero(m_batch_size, m_max_int);
-			Matrix list_elements_a(m_batch_size, arrays_memory_size);
-			Matrix list_elements_b(m_batch_size, arrays_memory_size);
+			Matrix list_elements_a = Matrix::Zero(m_batch_size, arrays_memory_size);
+			Matrix list_elements_b = Matrix::Zero(m_batch_size, arrays_memory_size);
 			Matrix list_elements_a_plus_b = Matrix::Zero(m_batch_size, arrays_memory_size);
 
 			// Initialize arrays
@@ -1049,19 +1055,25 @@ namespace NRam
 
 			// Add data to starting NRAM memory
 			in_mem.col(0) = ColVector::Constant(in_mem.rows(), 3); // Starting point of list A
-			in_mem.col(1) = ColVector::Constant(in_mem.rows(), 3 + arrays_memory_size + 1); // Starting point of list B
-			in_mem.col(2) = ColVector::Constant(in_mem.rows(), 3 + (2 * arrays_memory_size) +  2); // Starting point of list A + B
+			in_mem.col(1) = ColVector::Constant(in_mem.rows(), 3 + space_size + 1); // Starting point of list B
+			in_mem.col(2) = ColVector::Constant(in_mem.rows(), 3 + (2 * space_size) +  2); // Starting point of list A + B
 			in_mem.block(0, 3, in_mem.rows(), arrays_memory_size) = list_elements_a; // Copy of A
-			in_mem.block(0, 3 + arrays_memory_size + 1, in_mem.rows(), arrays_memory_size) = list_elements_b; // Copy B
+			in_mem.block(0, 3 + space_size + 1, in_mem.rows(), arrays_memory_size) = list_elements_b; // Copy B
 			
 			// Create and initialize desired memory
 			Matrix out_mem = in_mem;
-			out_mem.block(0, 3 + (2 * arrays_memory_size) + 2, out_mem.rows(), arrays_memory_size) = list_elements_a_plus_b;
+			out_mem.block(0, 3 + (2 * space_size) + 2, out_mem.rows(), arrays_memory_size) = list_elements_a_plus_b;
 
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
 			Matrix mask = Task::init_mask(); //[3, max_int - 1]
+			mask.leftCols(3) = RowVector::Zero(3);
 
-			return std::make_tuple(in_mem, out_mem, mask, Matrix::Zero(m_batch_size, m_max_int), Task::init_regs());
+			// Create the error mask
+			Matrix::Index index_o(in_mem(0, 2));
+			Matrix error_mask = Matrix::Zero(m_batch_size, m_max_int);
+			error_mask.block(0, index_o, error_mask.rows(), arrays_memory_size) = Matrix::Ones(m_batch_size, arrays_memory_size);
+
+			return std::make_tuple(in_mem, out_mem, mask, error_mask, Task::init_regs());
 		}
 	};
 	REGISTERED_TASK(TaskSum, "sum")
