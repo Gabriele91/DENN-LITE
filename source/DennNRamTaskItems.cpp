@@ -238,14 +238,14 @@ namespace NRam
 
 			Matrix in_mem = Matrix::Zero(m_batch_size, m_max_int);
 			in_mem.col(0) = ColVector::Constant(in_mem.rows(), offset);
-			in_mem.block(0, 1, in_mem.rows(), m_sequence_size) \
+			in_mem.block(0, 1, in_mem.rows(), m_sequence_size) 
 				= in_mem
 						.block(0, 1, in_mem.rows(), m_sequence_size)
 							.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int)); });
 
 			// Create the desired mem
 			Matrix out_mem = in_mem;
-			out_mem.block(0, offset, in_mem.rows(), m_sequence_size) \
+			out_mem.block(0, offset, in_mem.rows(), m_sequence_size) 
 				= in_mem.block(0, 1, in_mem.rows(), m_sequence_size);
 
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
@@ -316,14 +316,14 @@ namespace NRam
 
 			// Initialize the starting memory
 			Matrix in_mem = Matrix::Zero(m_batch_size, m_max_int);
-			in_mem.block(0, 1, in_mem.rows(), m_sequence_size) \
+			in_mem.block(0, 1, in_mem.rows(), m_sequence_size)
 				= in_mem
 						.block(0, 1, in_mem.rows(), m_sequence_size)
 						.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(1, m_max_int)); });
 
 			// Create the desired memory
 			Matrix out_mem = in_mem;
-			out_mem.block(0, m_max_int - 1 - m_sequence_size, in_mem.rows(), m_sequence_size) \
+			out_mem.block(0, m_max_int - 1 - m_sequence_size, in_mem.rows(), m_sequence_size)
 				= out_mem.block(0, 1, in_mem.rows(), m_sequence_size).rowwise().reverse();
 
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
