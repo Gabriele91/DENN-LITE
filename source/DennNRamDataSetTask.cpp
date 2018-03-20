@@ -63,8 +63,8 @@ namespace NRam
 		dataset.m_metadata["max_int"] = int(std::get<3>(data));
 		dataset.m_metadata["time_steps"] = int(std::get<4>(data));
         dataset.m_mask_error     = std::get<5>(data);
-        m_fake_header.m_n_classes = std::get<4>(data);
-		m_fake_header.m_n_features = std::get<4>(data);
+        m_fake_header.m_n_classes = std::get<3>(data);
+		m_fake_header.m_n_features = std::get<3>(data);
 		return true;
 	}
 
@@ -82,8 +82,8 @@ namespace NRam
 		dataset.m_metadata["max_int"] = int(std::get<3>(data));
 		dataset.m_metadata["time_steps"] = int(std::get<4>(data));
         dataset.m_mask_error     = std::get<5>(data);
-		m_fake_header.m_n_classes = std::get<4>(data);
-		m_fake_header.m_n_features = std::get<4>(data);
+		m_fake_header.m_n_classes = std::get<3>(data);
+		m_fake_header.m_n_features = std::get<3>(data);
 		return true;
 	}
 
@@ -106,8 +106,8 @@ namespace NRam
 		dataset.m_metadata["max_int"] = int(std::get<3>(data));
 		dataset.m_metadata["time_steps"] = int(std::get<4>(data));
 		dataset.m_mask_error          = std::get<5>(data);
-		m_fake_header.m_n_classes = std::get<4>(data);
-		m_fake_header.m_n_features = std::get<4>(data);
+		m_fake_header.m_n_classes = std::get<3>(data);
+		m_fake_header.m_n_features = std::get<3>(data);
 		return true;
 	}
 
