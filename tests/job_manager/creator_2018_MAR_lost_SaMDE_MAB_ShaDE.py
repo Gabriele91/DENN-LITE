@@ -12,7 +12,7 @@ def main():
     NUM_THREADS = 16
     NUM_RUNS = 5
 
-    CMD = "{exe} ../template/{template}.config workers={num_threads} input={dataset} np={population_size} gens={tot_gen} batch={batch_size} sub_gens={batch_step} batch_offset={batch_offset} crossover={crossover} output={outname}.json"
+    CMD = "{exe} ../template/{template}.config workers={num_threads} input={dataset} np={population_size} gens={tot_gen} batch={batch_size} sub_gens={batch_step} batch_offset={batch_offset} crossover={crossover} compute_test_per_pass=true output={outname}.json"
 
     OUTNAME = "{template}_{dataset_name}_{batch_size}_{tot_gen}_{batch_step}_{batch_offset}_{population_size}_{crossover}_run{run}"
 
