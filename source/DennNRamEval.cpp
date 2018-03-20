@@ -51,8 +51,7 @@ namespace NRam
 		
 		// Set error rate
 		if (m_context->m_activate_curriculum_learning)
-			dataset.m_metadata["error_rate"] = \
-				NRam::calculate_error_rate(*m_context, nn, test_in_mem, test_out_mem, cost_mask, error_m, max_int, timesteps);
+			dataset.m_metadata["error_rate"] = NRam::calculate_error_rate(*m_context, nn, test_in_mem, test_out_mem, cost_mask, error_m, max_int, timesteps);
 		else
 			dataset.m_metadata["error_rate"] = Scalar(0.0);
 

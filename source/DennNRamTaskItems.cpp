@@ -169,7 +169,7 @@ namespace NRam
 
 			// Initialize desired memory
 			Matrix out_mem = in_mem;
-			out_mem.block(0, 0, out_mem.rows(), m_sequence_size) \
+			out_mem.block(0, 0, out_mem.rows(), m_sequence_size)
 				= out_mem.block(0, 0, out_mem.rows(), m_sequence_size)
 						.unaryExpr([&](Scalar x) -> Scalar { return Scalar(x + 1); });
 
