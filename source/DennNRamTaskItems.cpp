@@ -164,7 +164,7 @@ namespace NRam
 			// Create and initialize the starting memory
 			Matrix in_mem = Matrix::Zero(m_batch_size, m_max_int);
 			in_mem.block(0, 0, in_mem.rows(), m_sequence_size) = in_mem
-				.block(0, 0, in_mem.rows(), m_max_int - 1)
+				.block(0, 0, in_mem.rows(), m_sequence_size)
 					.unaryExpr([&](Scalar x) -> Scalar { return std::floor(m_random->uniform(0, m_max_int - 1)); });
 
 			// Initialize desired memory
@@ -206,7 +206,7 @@ namespace NRam
 		: TaskImplement(batch_size, max_int, n_regs, timesteps, sequence_size, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
-				std::make_tuple(10, 5, 	1),
+				/*std::make_tuple(10, 5, 	1),
 				std::make_tuple(10, 6, 	1),
 				std::make_tuple(10, 7, 	1),
 				std::make_tuple(10, 8, 	1),
@@ -219,12 +219,17 @@ namespace NRam
 				std::make_tuple(10, 9, 	3),
 				std::make_tuple(10, 10, 3),
 				std::make_tuple(10, 11, 3),
-				std::make_tuple(10, 12, 3),
+				std::make_tuple(10, 12, 3),*/
 
 				std::make_tuple(10, 11, 4),
 				std::make_tuple(10, 12, 4),
 				std::make_tuple(10, 13, 4),
-				std::make_tuple(10, 14, 4)
+				std::make_tuple(10, 14, 4),
+
+				std::make_tuple(14, 16, 6),
+				std::make_tuple(14, 17, 6),
+				std::make_tuple(14, 18, 6),
+				std::make_tuple(14, 19, 6)
 			};
 		}
 
@@ -250,7 +255,7 @@ namespace NRam
 
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
 			Matrix mask = Task::init_mask(); //[1, max_int]
-			mask.leftCols(1) = RowVector::Zero(1);
+			//mask.leftCols(1) = RowVector::Zero(1);
 
 			Matrix error_mask = Matrix::Zero(m_batch_size, m_max_int);
 			error_mask.block(0, offset, error_mask.rows(), m_sequence_size) = Matrix::Ones(m_batch_size, m_sequence_size);

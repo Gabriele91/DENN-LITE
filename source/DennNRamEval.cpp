@@ -44,7 +44,7 @@ namespace NRam
 			train_out_mem = out_mem;
 		}
 		auto& cost_mask = dataset.mask();
-    auto& error_m = dataset.mask_error();
+		auto& error_m = dataset.mask_error().block(batch_size - (batch_size / 10), 0 , (batch_size / 10), max_int); // TODO
 
 		// Execute
 		Scalar train_result = NRam::train(*m_context, nn, train_in_mem, train_out_mem, cost_mask, max_int, timesteps);

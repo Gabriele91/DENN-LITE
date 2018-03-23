@@ -587,7 +587,7 @@ namespace NRam
             in_mem = defuzzy_mem(in_mem);
             for (size_t col = 0; col < in_mem.cols(); ++col)
                 if (error_m(s, col) 
-                    && Matrix::Index(in_mem(s, col)) == Matrix::Index(linear_test_desired_mem(s, col))) 
+                    && Matrix::Index(in_mem(0, col)) == Matrix::Index(linear_test_desired_mem(s, col))) 
                     c += 1;
         }
 
