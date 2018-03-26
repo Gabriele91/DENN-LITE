@@ -1,0 +1,12 @@
+DENN-float ../template/nram/Shade.config task=sum registers=6 rand=0.3 mutation=DEGL step_change_difficulty=150 mse_difficulty=0.2
+DENN-float ../template/nram/Shade.config task=sum registers=6 rand=0.3 mutation=DEGL max_int=15 time_steps=9
+DENN-float ../template/nram/Shade.config task=sum registers=6 rand=0.3 mutation=curr_p_best step_change_difficulty=150 mse_difficulty=0.2
+DENN-float ../template/nram/Shade.config task=sum registers=6 rand=0.3 mutation=curr_p_best max_int=15 time_steps=9
+DENN-float ../template/nram/JADE.config task=sum registers=6 rand=0.3 mutation=DEGL step_change_difficulty=150 mse_difficulty=0.2
+DENN-float ../template/nram/JADE.config task=sum registers=6 rand=0.3 mutation=DEGL max_int=15 time_steps=9
+DENN-float ../template/nram/JADE.config task=sum registers=6 rand=0.3 mutation=curr_p_best step_change_difficulty=150 mse_difficulty=0.2
+DENN-float ../template/nram/JADE.config task=sum registers=6 rand=0.3 mutation=curr_p_best max_int=15 time_steps=9
+DENN-float ../template/nram/LShade.config task=sum registers=6 rand=0.3 mutation=DEGL step_change_difficulty=150 mse_difficulty=0.2
+DENN-float ../template/nram/LShade.config task=sum registers=6 rand=0.3 mutation=DEGL max_int=15 time_steps=9
+DENN-float ../template/nram/LShade.config task=sum registers=6 rand=0.3 mutation=curr_p_best step_change_difficulty=150 mse_difficulty=0.2
+DENN-float ../template/nram/LShade.config task=sum registers=6 rand=0.3 mutation=curr_p_best max_int=15 time_steps=9

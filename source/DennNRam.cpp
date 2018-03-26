@@ -27,7 +27,8 @@ namespace NRam
         const Scalar entropy_term,
         const Scalar entropy_decay,
         const Scalar cost_regularization_term,
-        const GateList& gates
+        const GateList& gates,
+        const bool activate_curriculum_learning
     )
     {
         // values init
@@ -40,6 +41,7 @@ namespace NRam
         m_entropy_decay = entropy_decay;
         m_cost_regularization_term = cost_regularization_term;
 	    m_gates = gates;
+        m_activate_curriculum_learning = activate_curriculum_learning;
         // Past cardinality
         size_t i = 0;
         m_nn_output = 0;
@@ -540,6 +542,7 @@ namespace NRam
         ,   const Matrix&           linear_test_in_mem
         ,   const Matrix&           linear_test_desired_mem
         ,   const Matrix&           linear_mask
+        ,   const Matrix&           error_m
         ,   const size_t&           d_max_int
         ,   const size_t&           d_timesteps
     )
@@ -555,7 +558,7 @@ namespace NRam
 
         // Error rate variables
         Scalar c(0);
-        const Scalar m(linear_test_in_mem.rows() * linear_mask.sum());
+        const Scalar m(error_m.sum());
 
         // Run the circuit
         for (Matrix::Index s = 0; s < linear_test_in_mem.rows(); ++s)
@@ -581,8 +584,8 @@ namespace NRam
             // Calculate error rate for the sample
             in_mem = defuzzy_mem(in_mem);
             for (size_t col = 0; col < in_mem.cols(); ++col)
-                if (linear_mask(0, col) 
-                    && Matrix::Index(in_mem(0, col)) == Matrix::Index(linear_test_desired_mem(s, col))) 
+                if (error_m(s, col) 
+                    && Matrix::Index(in_mem(s, col)) == Matrix::Index(linear_test_desired_mem(s, col))) 
                     c += 1;
         }
 

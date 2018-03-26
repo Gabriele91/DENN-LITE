@@ -7,7 +7,7 @@
 namespace Denn 
 {
 	//easy access		
-	const EvolutionMethod&        RuntimeOutput::evolution_method() const{ return m_algorithm.evolution_method();  }
+	const EvolutionMethods&       RuntimeOutput::evolution_method() const{ return m_algorithm.evolution_method();  }
 	const Parameters&             RuntimeOutput::parameters()       const{ return m_algorithm.parameters();        }
 	const DoubleBufferPopulation& RuntimeOutput::population()       const{ return m_algorithm.population(); }
 	const size_t                  RuntimeOutput::current_np()       const{ return m_algorithm.current_np(); }

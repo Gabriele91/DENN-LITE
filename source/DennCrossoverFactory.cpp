@@ -13,7 +13,7 @@ namespace Denn
 	}
 	//easy access
 	const Parameters& Crossover::parameters()            const { return m_algorithm.parameters();        }
-	const EvolutionMethod& Crossover::evolution_method() const	{ return m_algorithm.evolution_method();  }
+	const EvolutionMethods& Crossover::evolution_method() const	{ return m_algorithm.evolution_method();  }
 
 	const size_t Crossover::current_np()                  const   { return m_algorithm.current_np(); }
 	const DoubleBufferPopulation& Crossover::population() const   { return m_algorithm.population(); }

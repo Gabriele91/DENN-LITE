@@ -24,21 +24,37 @@ namespace NRam
 
 		const size_t batch_size = m_context->m_batch_size;
 
-        auto& max_int = dataset.get_metadata("max_int").get<int>();
-        auto& timesteps = dataset.get_metadata("time_steps").get<int>();
-		auto& train_in_mem = in_mem.block(0, 0, batch_size - (batch_size / 10), max_int);
-		auto& test_in_mem = in_mem.block(batch_size - (batch_size / 10), 0, (batch_size / 10), max_int);
-		auto& train_out_mem = out_mem.block(0, 0, batch_size - (batch_size / 10), max_int);
-		auto& test_out_mem = out_mem.block(batch_size - (batch_size / 10), 0, (batch_size / 10), max_int);
+		int& max_int = dataset.get_metadata("max_int").get<int>();
+		int& timesteps = dataset.get_metadata("time_steps").get<int>();
+		Matrix train_in_mem;
+		Matrix test_in_mem;
+		Matrix train_out_mem;
+		Matrix test_out_mem;
+
+		if (m_context->m_activate_curriculum_learning)
+		{
+			train_in_mem = in_mem.block(0, 0, batch_size - (batch_size / 10), max_int);
+			test_in_mem = in_mem.block(batch_size - (batch_size / 10), 0, (batch_size / 10), max_int);
+			train_out_mem = out_mem.block(0, 0, batch_size - (batch_size / 10), max_int);
+			test_out_mem = out_mem.block(batch_size - (batch_size / 10), 0, (batch_size / 10), max_int);
+		}
+		else
+		{
+			train_in_mem = in_mem;
+			train_out_mem = out_mem;
+		}
 		auto& cost_mask = dataset.mask();
+    auto& error_m = dataset.mask_error();
 
 		// Execute
-        Scalar train_result = 
-			NRam::train(*m_context, nn, train_in_mem, train_out_mem, cost_mask, max_int, timesteps);
+		Scalar train_result = NRam::train(*m_context, nn, train_in_mem, train_out_mem, cost_mask, max_int, timesteps);
 		
 		// Set error rate
-		dataset.m_metadata["error_rate"] = 
-			NRam::calculate_error_rate(*m_context, nn, test_in_mem, test_out_mem, cost_mask, max_int, timesteps);
+		if (m_context->m_activate_curriculum_learning)
+			dataset.m_metadata["error_rate"] = \
+				NRam::calculate_error_rate(*m_context, nn, test_in_mem, test_out_mem, cost_mask, error_m, max_int, timesteps);
+		else
+			dataset.m_metadata["error_rate"] = Scalar(0.0);
 
 		return train_result;
 	}

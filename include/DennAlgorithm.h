@@ -27,6 +27,7 @@ public:
 	using DBPopulation         = DoubleBufferPopulation;
 	using RandomFunction       = std::function<Scalar(Scalar)>;
 	using RandomFunctionThread = std::function<Scalar(Scalar, size_t)>;
+
 	//Ref mutation crossover
 	using ClampFunction  = std::function<Scalar(Scalar)>;
 	//Vector of random
@@ -103,9 +104,9 @@ public:
 		return m_population;
 	}
 
-	const EvolutionMethod& evolution_method() const
+	const EvolutionMethods& evolution_method() const
 	{
-		return *m_e_method;
+		return m_e_methods;
 	}
 
 	const Individual::SPtr get_default_individual() const
@@ -306,7 +307,7 @@ protected:
 	RestartContext		  m_restart_ctx;
 	//params of DE
 	Parameters 		      m_params;
-	EvolutionMethod::SPtr m_e_method;
+	EvolutionMethods	  m_e_methods;
 	//generation info
 	size_t m_current_sub_gen;
 	size_t m_current_global_gen;

@@ -36,7 +36,8 @@ namespace NRam
             const Scalar entropy_term,
             const Scalar entropy_decay,
             const Scalar cost_regularization_term,
-			const GateList& gates
+			const GateList& gates,
+            const bool   activate_curriculum_learning
         );
 
         size_t      m_batch_size;
@@ -49,6 +50,7 @@ namespace NRam
         Scalar      m_entropy_decay;
         Scalar      m_cost_regularization_term;
         GateList    m_gates;
+        bool        m_activate_curriculum_learning;
     };
 	
     class ExecutionDebug
@@ -118,7 +120,7 @@ namespace NRam
 
     Scalar calculate_sample_cost(const Matrix& M, const RowVector& desired_mem,  const Matrix& mask);
 
-    Scalar calculate_error_rate(const NRamLayout& context, const NeuralNetwork& network, const Matrix& linear_test_in_mem, const Matrix& linear_test_desired_mem, const Matrix& linear_mask, const size_t& max_int, const size_t& timesteps);
+    Scalar calculate_error_rate(const NRamLayout& context, const NeuralNetwork& network, const Matrix& linear_test_in_mem, const Matrix& linear_test_desired_mem, const Matrix& linear_mask, const Matrix& error_m, const size_t& max_int, const size_t& timesteps);
 
     Scalar run_circuit(const NRamLayout &context, const Matrix& nn_out_decision, Matrix& regs, Matrix& in_mem);
 
