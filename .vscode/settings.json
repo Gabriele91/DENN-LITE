@@ -75,6 +75,7 @@
         "__locale": "cpp",
         "__functional_base": "cpp",
         "stack": "cpp",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "__mutex_base": "cpp"
     }
 }

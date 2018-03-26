@@ -10,6 +10,7 @@
 #include <fstream>
 #include <utility>
 #include "Denn.h"
+#include "DennDump.h"
 
 int main(int argc,const char** argv)
 {
