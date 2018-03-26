@@ -419,7 +419,7 @@ namespace NRam
 
                 // Run circuit
                 Scalar fi = run_circuit(context, circuit_configuration, regs, in_mem);
-
+                
                 // Calculate p_t
                 if (timestep == loop_timesteps - 1)  p_t = 1 - cum_prob_complete;
                 else                                 p_t = fi * prob_incomplete;
@@ -437,6 +437,8 @@ namespace NRam
                 
 				// Compute the "sample" cost                
                 sample_cost -= (p_t * calculate_sample_cost(in_mem, linear_test_desired_mem.row(s), linear_mask)) - entropy_cost;
+
+                if (fi >= 1.0) break;
             }
             // Add to "batch" cost the "sample" cost
             full_cost += sample_cost;
@@ -531,9 +533,9 @@ namespace NRam
         }
 		//resize regs
 		regs.conservativeResize(context.m_n_regs, regs.cols());
-        //return fi
-
-        return PointFunction::sigmoid(nn_out_decision.col(nn_out_decision.cols() - 1)(0));
+        
+        // return fi
+        return PointFunction::sigmoid(nn_out_decision.row(nn_out_decision.rows() - 1)(0));
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////
@@ -618,6 +620,10 @@ namespace NRam
             Matrix in_mem = fuzzy_encode(linear_test_in_mem.row(s));
             //debugger
             ExecutionDebug execution_debug(context);
+            Scalar p_t = Scalar(0.0);
+            Scalar prob_incomplete = Scalar(1.0);
+            Scalar cum_prob_complete = Scalar(0.0);
+            Scalar sample_cost = Scalar(0.0);
             //for all timestep
             for (size_t timestep = 0; timestep < context.m_timesteps; timestep++)
             {
@@ -626,7 +632,16 @@ namespace NRam
                 //execute nn
                 Matrix circuit_configuration = network.apply(get_registers_values(regs, context.m_registers_values_extraction_type)).transpose();
                 //run
-                run_circuit(context, circuit_configuration, regs, in_mem, execution_debug);
+                Scalar fi = run_circuit(context, circuit_configuration, regs, in_mem, execution_debug);
+                MESSAGE("F_i: " << fi)
+                // Calculate p_t
+                if (timestep ==  context.m_timesteps - 1) p_t = 1 - cum_prob_complete;
+                else                                      p_t = fi * prob_incomplete;
+                // Calculate the probability of not complete 
+                prob_incomplete *= (Scalar(1.0) - fi);
+                cum_prob_complete += p_t;
+                //exit
+                if(fi >= 1) break;
             }
             // Add to connections sample history
             samples_debug.push_back(execution_debug);
@@ -637,7 +652,7 @@ namespace NRam
         return ResultAndExecutionDebug( output, samples_debug );
     }
 
-    void run_circuit
+    Scalar run_circuit
     (
       const NRamLayout &context
     , const Matrix& nn_out_decision
@@ -734,6 +749,9 @@ namespace NRam
         }
 		//resize regs
 		regs.conservativeResize(context.m_n_regs, regs.cols());
+        
+        //return fi
+        return PointFunction::sigmoid(nn_out_decision.row(nn_out_decision.rows() - 1)(0));
     }
 	////////////////////////////////////////////////////////////////////////////////////////
 }
