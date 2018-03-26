@@ -44,14 +44,15 @@ namespace NRam
 			train_out_mem = out_mem;
 		}
 		auto& cost_mask = dataset.mask();
-    auto& error_m = dataset.mask_error();
+		auto& error_m = dataset.mask_error();
+		Matrix error_mask = error_m.block(batch_size - (batch_size / 10), 0, (batch_size / 10), max_int); // TODO
 
 		// Execute
 		Scalar train_result = NRam::train(*m_context, nn, train_in_mem, train_out_mem, cost_mask, max_int, timesteps);
 		
 		// Set error rate
 		if (m_context->m_activate_curriculum_learning)
-			dataset.m_metadata["error_rate"] = NRam::calculate_error_rate(*m_context, nn, test_in_mem, test_out_mem, cost_mask, error_m, max_int, timesteps);
+			dataset.m_metadata["error_rate"] = NRam::calculate_error_rate(*m_context, nn, test_in_mem, test_out_mem, cost_mask, error_mask, max_int, timesteps);
 		else
 			dataset.m_metadata["error_rate"] = Scalar(0.0);
 
