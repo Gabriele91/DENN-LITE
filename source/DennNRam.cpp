@@ -582,7 +582,7 @@ namespace NRam
                     context.m_registers_values_extraction_type)).transpose();
 
                 // Run circuit
-                run_circuit(context, circuit_configuration, regs, in_mem);
+                if (run_circuit(context, circuit_configuration, regs, in_mem) >= 1.0) break;
             }
 
             // Calculate error rate for the sample

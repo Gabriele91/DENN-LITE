@@ -89,7 +89,6 @@ namespace NRam
 		: TaskImplement(batch_size, max_int, n_regs, timesteps, sequence_size, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
-				std::make_tuple(12, 2, 10),
 				std::make_tuple(12, 3, 10),
 				std::make_tuple(12, 4, 10),
 				std::make_tuple(12, 5, 10),
