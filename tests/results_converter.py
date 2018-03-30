@@ -33,28 +33,37 @@ def main():
                         help='the output format')
     parser.add_argument('--filter', type=str, dest="filter", default="", nargs="+",
                         help='the filter that have to be applied to results')
+    parser.add_argument('--only-performances', type=bool, dest="only_performances", default=False,
+                        help='Extract only time performances from results')
 
     args = parser.parse_args()
 
     if args.output not in ['csv']:
         raise Exception(
-            "'{}' is not a supported extension...".format(args.output))
+            "'{}' is not a supported extension... use one of this: ['csv']".format(args.output))
 
     data = []
-    labels = [
-        'dataset',
-        'evolution_method',
-        'mutation',
-        'crossover',
-        'generations',
-        'sub_gens',
-        'batch_size',
-        'batch_offset',
-        'number_parents',
-        'clamp_min',
-        'clamp_max',
-        'accuracy',
-    ]
+    if not args.only_performances:
+        labels = [
+            'dataset',
+            'evolution_method',
+            'mutation',
+            'crossover',
+            'generations',
+            'sub_gens',
+            'batch_size',
+            'batch_offset',
+            'number_parents',
+            'clamp_min',
+            'clamp_max',
+            'accuracy',
+        ]
+    elif args.only_performances:
+        labels = [
+            'dataset',
+            'batch_size',
+            'time'
+        ]
     # Load results
     for file_ in tqdm(files_from_output(args.source_folder), desc="Extract data from json files"):
         try:
@@ -65,20 +74,27 @@ def main():
                 else:
                     mutation = tmp['arguments']['mutation']
 
-                new_data = [
-                    tmp['arguments']['dataset'].split("/")[-1].replace(".gz", ""),
-                    tmp['arguments']['evolution_method'],
-                    mutation,
-                    tmp['arguments']['crossover'],
-                    tmp['arguments']['generations'],
-                    tmp['arguments']['sub_gens'],
-                    tmp['arguments']['batch_size'],
-                    tmp['arguments']['batch_offset'],
-                    tmp['arguments']['number_parents'],
-                    tmp['arguments']['clamp_min'],
-                    tmp['arguments']['clamp_max'],
-                    tmp['accuracy']
-                ]
+                if not args.only_performances:
+                    new_data = [
+                        tmp['arguments']['dataset'].split("/")[-1].replace(".gz", ""),
+                        tmp['arguments']['evolution_method'],
+                        mutation,
+                        tmp['arguments']['crossover'],
+                        tmp['arguments']['generations'],
+                        tmp['arguments']['sub_gens'],
+                        tmp['arguments']['batch_size'],
+                        tmp['arguments']['batch_offset'],
+                        tmp['arguments']['number_parents'],
+                        tmp['arguments']['clamp_min'],
+                        tmp['arguments']['clamp_max'],
+                        tmp['accuracy']
+                    ]
+                elif args.only_performances:
+                    new_data = [
+                        tmp['arguments']['dataset'].split("/")[-1].replace(".gz", ""),
+                        tmp['arguments']['batch_size'],
+                        tmp['time']
+                    ]
 
                 if tmp['arguments']['output'].find("run") != -1:
                     new_data.append(
@@ -107,24 +123,36 @@ def main():
     if args.output == "csv":
         print("==> Save into 'results.csv'")
         df_to_csv = data_frame
-
-        if "mean" in args.filter:
-            df_to_csv = df_to_csv.reset_index().groupby(['dataset',
-                                                          'evolution_method',
-                                                          'mutation',
-                                                          'crossover',
-                                                          'generations',
-                                                          'sub_gens',
-                                                          'batch_size',
-                                                          'batch_offset',
-                                                          'number_parents',
-                                                          'clamp_min',
-                                                          'clamp_max', ], as_index=False).mean()
-            df_to_csv = df_to_csv.drop("run", 1)
-            df_to_csv = df_to_csv.drop("index", 1)
         
-        if "sort" in args.filter:
-            df_to_csv = df_to_csv.sort_values(["dataset", "accuracy"], ascending=False)
+        if not args.only_performances:
+            if "mean" in args.filter:
+                df_to_csv = df_to_csv.reset_index().groupby(['dataset',
+                                                            'evolution_method',
+                                                            'mutation',
+                                                            'crossover',
+                                                            'generations',
+                                                            'sub_gens',
+                                                            'batch_size',
+                                                            'batch_offset',
+                                                            'number_parents',
+                                                            'clamp_min',
+                                                            'clamp_max', ], as_index=False).mean()
+                df_to_csv = df_to_csv.drop("run", 1)
+                df_to_csv = df_to_csv.drop("index", 1)
+            
+            if "sort" in args.filter:
+                df_to_csv = df_to_csv.sort_values(["dataset", "accuracy"], ascending=False)
+        
+        elif args.only_performances:
+
+            if "mean" in args.filter:
+                df_to_csv = df_to_csv.reset_index().groupby(['dataset',
+                                                            'batch_size'], as_index=False).mean()
+                df_to_csv = df_to_csv.drop("run", 1)
+                df_to_csv = df_to_csv.drop("index", 1)
+            
+            if "sort" in args.filter:
+                df_to_csv = df_to_csv.sort_values(["dataset", "batch_size"], ascending=True)
         
         df_to_csv.to_csv("results.csv", index=False, float_format='%.9f')
 
