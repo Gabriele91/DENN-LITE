@@ -80,11 +80,6 @@ namespace Denn
 			//init
 			m_archive_max_size = parameters().m_archive_size;
 			m_h = parameters().m_shade_h;
-			//get mutations
-			for(const std::string& mut_name : parameters().m_mutations_list_type.get()) 
-			{
-				m_mutations_list.push_back(MutationFactory::create(mut_name, m_algorithm));
-			}
 		}
 
 		virtual void start() override
@@ -96,9 +91,16 @@ namespace Denn
 			m_pmin = Scalar(2) / Scalar(current_np());
 			//clear
 			m_archive.clear();
+			//clear
+			m_mutations_list.clear();
 			//create mutation/crossover
-			m_mutations.init(m_mutations_list);
+			for(const std::string& mut_name : parameters().m_mutations_list_type.get()) 
+			{
+				m_mutations_list.push_back(MutationFactory::create(mut_name, m_algorithm));
+			}
 			m_crossover = CrossoverFactory::create(parameters().m_crossover_type, m_algorithm);
+			//init muts
+			m_mutations.init(m_mutations_list);
 		}
 
 		virtual void start_a_gen_pass(DoubleBufferPopulation& dpopulation) override
