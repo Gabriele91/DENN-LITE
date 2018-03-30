@@ -16,6 +16,12 @@ namespace Denn
 
 		SaMDEMethod(const DennAlgorithm& algorithm) : EvolutionMethod(algorithm) 
 		{
+		}
+		
+		virtual void start() override
+		{
+			//clear
+			m_mutations_list.clear();
 			//get mutations
 			for(const std::string& mut_name : parameters().m_mutations_list_type.get()) 
 			{
@@ -23,10 +29,6 @@ namespace Denn
 			}
 			//crossover
 			m_crossover = CrossoverFactory::create(parameters().m_crossover_type, m_algorithm);
-		}
-		
-		virtual void start() override
-		{
 			//init metadata
 			init_metadata();
 			//debug
