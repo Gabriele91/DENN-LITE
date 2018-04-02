@@ -56,7 +56,7 @@ namespace NRam
 		auto& dataset          = *((DataSetScalar*)&t_out);
 		VariantRef error_rate = dataset.get_metadata("error_rate");
 		const auto& data		   = m_task_train->create_batch(algorithm.current_generation(),
-			error_rate.get_type() == VR_NONE ? Scalar(0.0) : error_rate.get<Scalar>());
+			error_rate.get_type() == VR_NONE ? Scalar(0.0) : error_rate.get<Scalar>(), "test");
 		dataset.m_features 		 = std::get<0>(data);
 		dataset.m_labels   		 = std::get<1>(data);
 		dataset.m_mask     		 = std::get<2>(data);
@@ -75,7 +75,7 @@ namespace NRam
 		auto& dataset          = *((DataSetScalar*)&t_out);
 		VariantRef error_rate = dataset.get_metadata("error_rate");
 		const auto& data		   = m_task_train->create_batch(algorithm.current_generation(),
-			error_rate.get_type() == VR_NONE ? Scalar(0.0) : error_rate.get<Scalar>());
+			error_rate.get_type() == VR_NONE ? Scalar(0.0) : error_rate.get<Scalar>(), "validation");
 		dataset.m_features 		 = std::get<0>(data);
 		dataset.m_labels   		 = std::get<1>(data);
 		dataset.m_mask     		 = std::get<2>(data);
@@ -99,7 +99,7 @@ namespace NRam
 		auto& dataset            = *((DataSetScalar*)&t_out);
 		VariantRef error_rate = dataset.get_metadata("error_rate");
 		const auto& data		   = m_task_train->create_batch(algorithm.current_generation(),
-			error_rate.get_type() == VR_NONE ? Scalar(0.0) : error_rate.get<Scalar>());
+			error_rate.get_type() == VR_NONE ? Scalar(0.0) : error_rate.get<Scalar>(), "train");
 		dataset.m_features 		 = std::get<0>(data);
 		dataset.m_labels   		 = std::get<1>(data);
 		dataset.m_mask     		 = std::get<2>(data);

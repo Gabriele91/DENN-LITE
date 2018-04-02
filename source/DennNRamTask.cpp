@@ -1,6 +1,7 @@
 #include "Denn.h"
 #include "DennNRam.h"
 #include "DennNRamTask.h"
+#include "../include/DennNRamTask.h"
 #include <iterator>
 
 namespace Denn
@@ -59,53 +60,65 @@ namespace NRam
 	//init mask
 	Matrix Task::init_mask() const { return Matrix::Ones(1, m_max_int); }
 
-	TaskTuple Task::create_batch(const size_t& current_generation, const Scalar& error_rate) 
+	TaskTuple Task::create_batch(const size_t& current_generation, const Scalar& error_rate, const std::string type) 
 	{
 		const bool force_change_difficulty = error_rate <= m_change_difficulty_lambda;
 		
-		m_stall_generations += current_generation - m_previous_generation;
-		m_previous_generation = current_generation;
-
+		if (type == "train")
+		{
+			m_stall_generations += current_generation - m_previous_generation;
+			m_previous_generation = current_generation;
+		}
+		
 		if (m_use_difficulty &&
 					(current_generation == 0 
 					 || (force_change_difficulty 
-							 && m_stall_generations >= m_step_gen_change_difficulty)
+							 && m_stall_generations + 1 >= m_step_gen_change_difficulty)
 					)
 		)
 		{
-			// Select update type
-			Scalar random_number = m_random->uniform(0, 1);
-
-			// cases
-			if (random_number <= 0.1)
+			if (type == "train")
 			{
-				m_current_difficulty = m_random->irand(m_min_difficulty, m_max_difficulty + 1);
-			}
-			else
-			{
-				// Geometric value
-				int number_e = m_random->geometric(0.5);
-
-				// Value D
-				int D_plus_e_difficulty = clamp<int>(m_current_difficulty + number_e, m_min_difficulty, m_max_difficulty);
-
-				//cases
-				if (random_number <= 0.35)
+				if (current_generation != 0)
 				{
-					m_current_difficulty = m_random->irand(m_min_difficulty, D_plus_e_difficulty + 1);
+					// Select update type
+					Scalar random_number = m_random->uniform(0, 1);
+
+					// cases
+					if (random_number <= 0.1)
+					{
+						m_current_difficulty = m_random->irand(m_min_difficulty, m_max_difficulty + 1);
+					}
+					else
+					{
+						// Geometric value
+						int number_e = m_random->geometric(0.5);
+
+						// Value D
+						int D_plus_e_difficulty = clamp<int>(m_current_difficulty + number_e, m_min_difficulty, m_max_difficulty);
+
+						//cases
+						if (random_number <= 0.35)
+						{
+							m_current_difficulty = m_random->irand(m_min_difficulty, D_plus_e_difficulty + 1);
+						}
+						else
+						{
+							m_current_difficulty = D_plus_e_difficulty;
+						}
+					}
 				}
-				else
-				{
-					m_current_difficulty = D_plus_e_difficulty;
-				}
+				
+				// Set task difficulty parameters
+				int current_difficulty = clamp<int>(m_current_difficulty - 1,0, m_difficulty_grades.size() - 1);
+				DifficultyGrade difficulty_params =  m_difficulty_grades[current_difficulty];
+				m_max_int = std::get<0>(difficulty_params);
+				m_timesteps = std::get<1>(difficulty_params);
+				m_sequence_size = std::get<2>(difficulty_params);
+
+				// Reset the generation counter which indicates how many generation is used the same difficulty
+				m_stall_generations = 0; 
 			}
-			
-			// Set task difficulty parameters
-			int current_difficulty = clamp<int>(m_current_difficulty - 1,0, m_difficulty_grades.size() - 1);
-			DifficultyGrade difficulty_params =  m_difficulty_grades[current_difficulty];
-			m_max_int = std::get<0>(difficulty_params);
-			m_timesteps = std::get<1>(difficulty_params);
-			m_sequence_size = std::get<2>(difficulty_params);
 
 			// Generate memories
 			const auto& mems = (*this)();
@@ -114,11 +127,9 @@ namespace NRam
 			m_mask = std::get<2>(mems);
 			m_error_m = std::get<3>(mems);
 			m_regs = std::get<4>(mems);
-
-			// Reset the generation counter which indicates how many generation is used the same difficulty
-			m_stall_generations = 0; 
 		}
-		else if(!m_use_difficulty && (current_generation == 0 || m_stall_generations >= m_step_gen_change_difficulty))
+		else if(!m_use_difficulty &&
+                (current_generation == 0 || m_stall_generations + 1 >= m_step_gen_change_difficulty))
 		{
 			// Generate memories
 			const auto& mems = (*this)();
