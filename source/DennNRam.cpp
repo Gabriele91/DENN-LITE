@@ -520,6 +520,7 @@ namespace NRam
         }
 
         // Update regs after circuit execution
+        Matrix new_regs = Matrix::Zero(context.m_n_regs, regs.cols());
         for (size_t r = 0; i < context.m_gates.size() + context.m_n_regs; ++i, ++r)
         {
 			// get row
@@ -527,12 +528,12 @@ namespace NRam
 			// softmax
             coeff_c = CostFunction::softmax_col(c) /* / CostFunction::softmax_col(c).sum() */;
 			// update
-			regs.row(r) = avg(regs, coeff_c).transpose();
+			new_regs.row(r) = avg(regs, coeff_c).transpose();
 			// next
 			ptr_col += coefficient_size;
         }
 		//resize regs
-		regs.conservativeResize(context.m_n_regs, regs.cols());
+		regs = new_regs;
         
         // return fi
         return PointFunction::sigmoid(nn_out_decision.row(nn_out_decision.rows() - 1)(0));
@@ -734,6 +735,7 @@ namespace NRam
         }
 
         // Update regs after circuit execution
+        Matrix new_regs = Matrix::Zero(context.m_n_regs, regs.cols());
         for (size_t r = 0; i < context.m_gates.size() + context.m_n_regs; ++i, ++r)
         {
 			// get row
@@ -741,14 +743,14 @@ namespace NRam
 			// softmax
             Matrix coeff_c = CostFunction::softmax_col(c) /* / CostFunction::softmax_col(c).sum() */;
 			// update
-			regs.row(r) = avg(regs, coeff_c).transpose();
+			new_regs.row(r) = avg(regs, coeff_c).transpose();
 			// next
 			ptr_col += coefficient_size;
             // Add to history execution
-            debug.push_update(r, defuzzy_mem_cols(coeff_c), defuzzy_mem_cols(regs.row(r).transpose()));
+            debug.push_update(r, defuzzy_mem_cols(coeff_c), defuzzy_mem_cols(new_regs.row(r).transpose()));
         }
 		//resize regs
-		regs.conservativeResize(context.m_n_regs, regs.cols());
+        regs = new_regs;
         
         //return fi
         return PointFunction::sigmoid(nn_out_decision.row(nn_out_decision.rows() - 1)(0));
