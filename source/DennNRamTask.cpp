@@ -60,8 +60,10 @@ namespace NRam
 	//init mask
 	Matrix Task::init_mask() const { return Matrix::Ones(1, m_max_int); }
 
-	TaskTuple Task::create_batch(const size_t& current_generation, const Scalar& error_rate, const std::string type) 
+	TaskTuple Task::create_batch(const DennAlgorithm& algorithm, const Scalar& error_rate, const std::string type) 
 	{
+		const RuntimeOutput::SPtr m_output = algorithm.get_output();
+		const size_t current_generation = algorithm.current_generation();
 		const bool force_change_difficulty = error_rate <= m_change_difficulty_lambda;
 		
 		if (type == "train")
@@ -79,7 +81,7 @@ namespace NRam
 		{
 			if (type == "train")
 			{
-				if (current_generation != 0)
+				if (current_generation > 0)
 				{
 					// Select update type
 					Scalar random_number = m_random->uniform(0, 1);
@@ -107,6 +109,8 @@ namespace NRam
 							m_current_difficulty = D_plus_e_difficulty;
 						}
 					}
+
+					m_output->output() << "\t[CL]->[Current difficulty:" << clamp<int>(m_current_difficulty - 1, 0, m_difficulty_grades.size() - 1) << "][Error rate:" << error_rate << "]";				
 				}
 				
 				// Set task difficulty parameters
@@ -117,7 +121,7 @@ namespace NRam
 				m_sequence_size = std::get<2>(difficulty_params);
 
 				// Reset the generation counter which indicates how many generation is used the same difficulty
-				m_stall_generations = 0; 
+				m_stall_generations = 0;
 			}
 
 			// Generate memories
@@ -144,6 +148,18 @@ namespace NRam
 		}
 
 		return std::make_tuple(m_in_mem, m_out_mem, m_mask, m_max_int, m_timesteps, m_error_m);
+	}
+
+	TaskTuple Task::create_batch()
+	{
+			const auto& mems = (*this)();
+			m_in_mem = std::get<0>(mems);
+			m_out_mem = std::get<1>(mems);
+			m_mask = std::get<2>(mems);
+			m_error_m = std::get<3>(mems);
+			m_regs = std::get<4>(mems);
+
+			return std::make_tuple(m_in_mem, m_out_mem, m_mask, m_max_int, m_timesteps, m_error_m);
 	}
 
 	//info

@@ -336,7 +336,7 @@ namespace NRam
 			for(size_t t = 0; t!=m_tests; ++t)
 			{
 				//test
-				const auto& test = (*m_task).create_batch(0, 0, "train");
+				const auto& test = (*m_task).create_batch();
 				//Dataset
 				auto& in_mem  = std::get<0>(test);
 				auto& out_mem = std::get<1>(test);

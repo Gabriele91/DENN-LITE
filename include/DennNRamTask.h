@@ -45,8 +45,11 @@ namespace NRam
 		//delete
 		virtual ~Task();
 
+		// Build test dataset
+		TaskTuple create_batch();
+
 		//build dataset
-		TaskTuple create_batch(const size_t& current_generation, const Scalar& best_m_eval, const std::string type);
+		TaskTuple create_batch(const DennAlgorithm& algorithm, const Scalar& best_m_eval, const std::string type);
 
 		/**
 		* Initialize R registers to zero (i.e. set P(x = 0) = 1.0).

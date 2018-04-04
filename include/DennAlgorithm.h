@@ -241,6 +241,11 @@ public:
 		m_execution = false;
 	}
 
+	RuntimeOutput::SPtr get_output() const
+	{
+		return m_output;
+	}
+
 protected:
 	//using the last batch on a individual
 	Scalar execute_train() const;
