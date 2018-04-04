@@ -23,7 +23,7 @@ namespace NRam
             {
                 C(0, value) += A(i, 0) * B(positive_mod(j - i, max_int), 0);
             }
-            return C;
+            return C / C.sum();
         }
     };
     REGISTERED_GATE(AddGate, "add");

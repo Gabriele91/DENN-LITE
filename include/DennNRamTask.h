@@ -20,7 +20,7 @@ namespace NRam
 
 		//ref to Crossover
 		using SPtr = std::shared_ptr<Task>;
-		using DifficultyGrade = std::tuple<size_t, size_t>;
+		using DifficultyGrade = std::tuple<size_t, size_t, int>;
 
 		//return ptr
 		SPtr get_ptr() { return this->shared_from_this(); }
@@ -34,6 +34,7 @@ namespace NRam
 		, size_t max_int
 		, size_t n_regs
 		, size_t timesteps
+		, int 	 sequence_size
 		, size_t min_difficulty
 		, size_t max_difficulty
 		, size_t step_gen_change_difficulty
@@ -45,7 +46,7 @@ namespace NRam
 		virtual ~Task();
 
 		//build dataset
-		TaskTuple create_batch(const size_t& current_generation, const Scalar& best_m_eval);
+		TaskTuple create_batch(const size_t& current_generation, const Scalar& best_m_eval, const std::string type);
 
 		/**
 		* Initialize R registers to zero (i.e. set P(x = 0) = 1.0).
@@ -68,6 +69,7 @@ namespace NRam
 		size_t  get_max_int()       const;
 		size_t  get_num_regs()      const;
 		size_t  get_timestemps()    const;
+		int			get_sequence_size() const;
 		size_t  get_min_difficulty() const;
 		size_t  get_max_difficulty() const;
 		size_t  get_current_difficulty() const;
@@ -87,6 +89,7 @@ namespace NRam
 		size_t  m_max_int;
 		size_t  m_n_regs;
 		size_t  m_timesteps;
+		int			m_sequence_size;
 		size_t 	m_previous_generation;
 		size_t  m_stall_generations;
 		bool    m_use_difficulty;
@@ -114,7 +117,7 @@ namespace NRam
 
 	public:
 		//Gate classes map
-		typedef Task::SPtr(*CreateObject)(size_t batch_size, size_t max_int, size_t n_regs, size_t timesteps, size_t min_difficulty, size_t max_difficulty, size_t step_gen_change_difficulty, Scalar change_difficulty_lambda, Random& random);
+		typedef Task::SPtr(*CreateObject)(size_t batch_size, size_t max_int, size_t n_regs, size_t timesteps, int sequence_size, size_t min_difficulty, size_t max_difficulty, size_t step_gen_change_difficulty, Scalar change_difficulty_lambda, Random& random);
 
 		//public
 		static Task::SPtr create
@@ -124,6 +127,7 @@ namespace NRam
 			, size_t max_int
 			, size_t n_regs
 			, size_t timesteps
+			, int 	 sequence_size
 			, size_t min_difficulty
 			, size_t max_difficulty
 			, size_t step_gen_change_difficulty
@@ -152,6 +156,7 @@ namespace NRam
 		, size_t max_int
 		, size_t n_regs
 		, size_t timesteps
+		, int 	 sequence_size
 		, size_t min_difficulty
 		, size_t max_difficulty
 		, size_t step_gen_change_difficulty
@@ -159,7 +164,7 @@ namespace NRam
 		, Random& random
 		)
 		{
-			return (std::make_shared< T >(batch_size, max_int, n_regs, timesteps, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random))->get_ptr();
+			return (std::make_shared< T >(batch_size, max_int, n_regs, timesteps, sequence_size, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random))->get_ptr();
 		}
 
 		TaskItem(const std::string& name, size_t size)

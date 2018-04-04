@@ -56,15 +56,15 @@ namespace NRam
 		auto& dataset          = *((DataSetScalar*)&t_out);
 		VariantRef error_rate = dataset.get_metadata("error_rate");
 		const auto& data		   = m_task_train->create_batch(algorithm.current_generation(),
-			error_rate.get_type() == VR_NONE ? Scalar(0.0) : error_rate.get<Scalar>());
+			error_rate.get_type() == VR_NONE ? Scalar(0.0) : error_rate.get<Scalar>(), "test");
 		dataset.m_features 		 = std::get<0>(data);
 		dataset.m_labels   		 = std::get<1>(data);
 		dataset.m_mask     		 = std::get<2>(data);
 		dataset.m_metadata["max_int"] = int(std::get<3>(data));
 		dataset.m_metadata["time_steps"] = int(std::get<4>(data));
         dataset.m_mask_error     = std::get<5>(data);
-        m_fake_header.m_n_classes = std::get<4>(data);
-		m_fake_header.m_n_features = std::get<4>(data);
+        m_fake_header.m_n_classes = std::get<3>(data);
+		m_fake_header.m_n_features = std::get<3>(data);
 		return true;
 	}
 
@@ -75,15 +75,15 @@ namespace NRam
 		auto& dataset          = *((DataSetScalar*)&t_out);
 		VariantRef error_rate = dataset.get_metadata("error_rate");
 		const auto& data		   = m_task_train->create_batch(algorithm.current_generation(),
-			error_rate.get_type() == VR_NONE ? Scalar(0.0) : error_rate.get<Scalar>());
+			error_rate.get_type() == VR_NONE ? Scalar(0.0) : error_rate.get<Scalar>(), "validation");
 		dataset.m_features 		 = std::get<0>(data);
 		dataset.m_labels   		 = std::get<1>(data);
 		dataset.m_mask     		 = std::get<2>(data);
 		dataset.m_metadata["max_int"] = int(std::get<3>(data));
 		dataset.m_metadata["time_steps"] = int(std::get<4>(data));
         dataset.m_mask_error     = std::get<5>(data);
-		m_fake_header.m_n_classes = std::get<4>(data);
-		m_fake_header.m_n_features = std::get<4>(data);
+		m_fake_header.m_n_classes = std::get<3>(data);
+		m_fake_header.m_n_features = std::get<3>(data);
 		return true;
 	}
 
@@ -99,15 +99,15 @@ namespace NRam
 		auto& dataset            = *((DataSetScalar*)&t_out);
 		VariantRef error_rate = dataset.get_metadata("error_rate");
 		const auto& data		   = m_task_train->create_batch(algorithm.current_generation(),
-			error_rate.get_type() == VR_NONE ? Scalar(0.0) : error_rate.get<Scalar>());
+			error_rate.get_type() == VR_NONE ? Scalar(0.0) : error_rate.get<Scalar>(), "train");
 		dataset.m_features 		 = std::get<0>(data);
 		dataset.m_labels   		 = std::get<1>(data);
 		dataset.m_mask     		 = std::get<2>(data);
 		dataset.m_metadata["max_int"] = int(std::get<3>(data));
 		dataset.m_metadata["time_steps"] = int(std::get<4>(data));
 		dataset.m_mask_error          = std::get<5>(data);
-		m_fake_header.m_n_classes = std::get<4>(data);
-		m_fake_header.m_n_features = std::get<4>(data);
+		m_fake_header.m_n_classes = std::get<3>(data);
+		m_fake_header.m_n_features = std::get<3>(data);
 		return true;
 	}
 

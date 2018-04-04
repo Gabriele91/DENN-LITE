@@ -349,6 +349,9 @@ namespace Denn
 		ParameterInfo{
 			m_time_steps, "Time steps of nram machine",{ "-nrts" }
 		},
+		ParameterInfo{
+			m_sequence_size, "Sequence used for the training of NRAM", { "-nrss" }
+		},
         ParameterInfo{
 			m_task, "Task of nram machine", { "-nrtk"  },
             [this](Arguments& args) -> bool 
