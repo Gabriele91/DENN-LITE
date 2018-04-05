@@ -82,7 +82,7 @@ namespace Denn
 		ReadOnly< size_t >					  				m_max_int			           			{ "max_int"                			, size_t(0) };
 		ReadOnly< size_t >					  				m_n_registers		         			{ "n_registers"              		, size_t(4) };
 		ReadOnly< size_t >					 				  m_time_steps			       			{ "time_steps"               		, size_t(0) };
-		ReadOnly< size_t >					  				m_sequence_size			     			{ "sequence_size"               , int(-1) };
+		ReadOnly< int >												m_sequence_size			     			{ "sequence_size"               , int(-1) };
 		ReadOnly< std::string >								m_registers_values_extraction_type { "registers_values_extraction_type", "zero" };
 		ReadOnly< std::string >               m_task				   				 			{ "task"                  /* , none */ };
 		ReadOnly< std::vector<std::string> >  m_gates				   							{ "gates"                 /* , none */ };

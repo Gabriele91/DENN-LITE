@@ -110,7 +110,7 @@ namespace NRam
 						}
 					}
 
-					m_output->output() << "\t[CL]->[Current difficulty:" << clamp<int>(m_current_difficulty - 1, 0, m_difficulty_grades.size() - 1) << "][Error rate:" << error_rate << "]";				
+					m_output->output() << "\t[CL]->[Current difficulty:" << clamp<int>(m_current_difficulty - 1, 0, m_difficulty_grades.size() - 1) << "][Error rate:" << error_rate << "]" << std::endl;
 				}
 				
 				// Set task difficulty parameters
