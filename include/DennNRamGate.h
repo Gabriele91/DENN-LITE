@@ -38,9 +38,19 @@ namespace NRam
             return Matrix();
         }
 
+        virtual Scalar operator() (const Scalar& A, const Matrix& M) const
+        {
+            return Scalar(-1);
+        }
+
         virtual Matrix operator () (const Matrix& A, const Matrix& B, Matrix& M)  const
         {
             return Matrix();
+        }
+
+        virtual Scalar operator() (const Scalar& A, const Scalar& B, const Matrix& M) const
+        {
+            return Scalar(-1);
         }
 
         const std::string& name() const

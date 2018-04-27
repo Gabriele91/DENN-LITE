@@ -93,6 +93,7 @@ namespace Denn
 		ReadOnly< Scalar >				  					m_entropy_term 					 			{ "entropy_term"								, Scalar(0.0)};
 		ReadOnly< Scalar >  									m_entropy_decay 				 			{ "entropy_decay"								, Scalar(0.999)};
 		ReadOnly< Scalar >  									m_cost_regularization_term 		{ "cost_regularization_term"		, Scalar(0.0)};
+		ReadOnly< bool >  										m_nram_enhanced 							{ "nram_enhanced"								, false};
 		//nram test 
 		ReadOnly< size_t >					   				m_n_test				   						{ "n_test"											,	 size_t(1) };
 		//params info

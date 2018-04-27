@@ -433,6 +433,9 @@ namespace Denn
         ParameterInfo{
             m_cost_regularization_term, "The weight of cost regularization", { "--nram_cost_regularization_term", "-nrcrt" }
         },
+        ParameterInfo{
+            m_nram_enhanced, "Enabled the enhancend version of NRAM", { "--nram_enhanced", "-nrenh" }
+        },
         ParameterInfo{ 
             m_output_filename, "Path of output file (json)", { "-o" } 
         },
