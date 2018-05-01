@@ -2,5 +2,9 @@ site_name: 'DENN-LITE Documentation'
 
 docs_dir: 'sources'
 
+pages:
+    - DENN-LITE Doc: index.md
+    - Test bench system: tests.md
+
 theme:
   name: 'material'
