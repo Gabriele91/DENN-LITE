@@ -331,17 +331,17 @@ namespace NRamEnhanced
 
         // Prepare to the output of the gate
         Matrix regs_and_output(1, regs.cols() + 1);
-        regs_and_output.leftCols(regs.cols()) = regs;
+        regs_and_output.block(0, 0, 1, regs.cols()) = regs;
         switch (selected_gate.arity())
         {
             case NRam::Gate::CONST:
-                regs_and_output.rightCols(1) = RowVector::Constant(1, defuzzy_mem(selected_gate(in_mem))(0, 0));
+                regs_and_output(0, regs.cols()) = defuzzy_mem(selected_gate(in_mem))(0, 0);
                 break;
             case NRam::Gate::UNARY:
-                regs_and_output.rightCols(1) = RowVector::Constant(1, selected_gate(first_input, in_mem));
+                regs_and_output(0, regs.cols()) = selected_gate(first_input, in_mem);
                 break;
             case NRam::Gate::BINARY:
-                regs_and_output.rightCols(1) = RowVector::Constant(1, selected_gate(first_input, second_input, in_mem));
+                regs_and_output(0, regs.cols()) = selected_gate(first_input, second_input, in_mem);
                 break;
             default:
                 break;
