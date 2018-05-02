@@ -46,9 +46,15 @@ namespace NRamEnhanced
 	    m_gates = gates;
         m_activate_curriculum_learning = activate_curriculum_learning;
         m_enhanced = enhanced;
-        // Past cardinality
-        size_t i = 0;
-        m_nn_output = m_gates.size() + 4; // Gates + First Value + Second Value + Register update + Willingess
+
+        // Structure composed by 6 values: 
+        // (Gate to execute, 
+        //  First Value, 
+        //  Second Value, 
+        //  Register update, 
+        //  Pointer to the value to use to update the register, 
+        //  Willingess)
+        m_nn_output = 6; 
     }
 	////////////////////////////////////////////////////////////////////////////////////////
 	// debugger
@@ -108,183 +114,181 @@ namespace NRamEnhanced
         return "Unknow";
     }
 	//shell
-    std::string ExecutionDebug::shell() const
-    {
-        std::stringstream output;            
-        for(size_t s = 0; s != m_steps.size(); ++s)
-        {
-            #define get_name_input_from(out_id)\
-                get_gate_or_register_name_from_id( m_layout.m_gates, m_layout.m_n_regs,  values[out_id](0,0) )
-            //get step
-            auto& step = m_steps[s];
-            //print step
-            output << "Timestep [" << s << "]:" << std::endl;
-            //get op
-            for(size_t p = 0; p != step.m_ops.size(); ++p)
-            {
-                //operation
-                auto& operation = step.m_ops[p];
-                //name, value
-                auto& name     = std::get<0>(operation);
-                auto& values   = std::get<1>(operation);
-                auto  arity    = get_arity(values.size());
-                //gate name
-                std::string  gate_name= name; 
-                gate_name[0] = std::toupper(gate_name[0]);
-                //output by type
-                switch(arity)
-                {
-                    case Gate::Arity::CONST:
-                        output << u8"\t• "
-                               << gate_name << " => "
-                               << values.back()(0,0)
-                               << std::endl;
-                    break;
-                    case Gate::Arity::UNARY:
-                        output << u8"\t• "
-                               << gate_name 
-                               << "(" 
-                               << get_name_input_from(0)
-                               << " : "
-                               << values[1](0,0)
-                               << ") => "
-                               << values.back()(0,0)
-                               << std::endl;
-                    break;
-                    case Gate::Arity::BINARY:
-                        output << u8"\t• "
-                               << gate_name 
-                               << "(" 
-                               << get_name_input_from(0)
-                               << " : "
-                               << values[1](0,0)
-                               << ", "
-                               << get_name_input_from(2)
-                               << " : "
-                               << values[3](0,0)
-                               << ") => ";
-                        //print memory (write)
-                        if(gate_name == "Write")
-                        {
-                            output 
-                            << values.back()(0,0) 
-                            << ", mem["<<values[1](0,0)<<"] : "
-                            << values[4](0,values[1](0,0)) 
-                            << std::endl;
-                        }
-                        else 
-                        {
-                            output << values.back()(0,0) << std::endl;
-                        }
-                    break;
-                    //none
-                    default: break;
-                }
-            }
-            //get update
-            for(size_t p = 0; p != step.m_ups.size(); ++p)
-            {
-                //operation
-                auto& update =  step.m_ups[p];
-                //name, value
-                auto& r      = std::get<0>(update);
-                auto& values = std::get<1>(update);
-                //update
-                output << u8"\t• R" << r << " <= " << get_name_input_from(0) << " : " <<  values.back()(0,0) << std::endl;
-            }
-            // Print mem at last timestep
-            auto& last_gate_op = step.m_ops.back();
-            auto& values       = std::get<1>(last_gate_op);
-            output << u8"\t• Mem " << Dump::json_matrix(values[values.size() - 2]) << std::endl;
-            //undef get_value_from
-            #undef get_name_input_from
+    // std::string ExecutionDebug::shell() const
+    // {
+    //     std::stringstream output;            
+    //     for(size_t s = 0; s != m_steps.size(); ++s)
+    //     {
+    //         #define get_name_input_from(out_id)\
+    //             get_gate_or_register_name_from_id( m_layout.m_gates, m_layout.m_n_regs,  values[out_id](0,0) )
+    //         //get step
+    //         auto& step = m_steps[s];
+    //         //print step
+    //         output << "Timestep [" << s << "]:" << std::endl;
+    //         //get op
+    //         for(size_t p = 0; p != step.m_ops.size(); ++p)
+    //         {
+    //             //operation
+    //             auto& operation = step.m_ops[p];
+    //             //name, value
+    //             auto& name     = std::get<0>(operation);
+    //             auto& values   = std::get<1>(operation);
+    //             auto  arity    = get_arity(values.size());
+    //             //gate name
+    //             std::string  gate_name= name; 
+    //             gate_name[0] = std::toupper(gate_name[0]);
+    //             //output by type
+    //             switch(arity)
+    //             {
+    //                 case Gate::Arity::CONST:
+    //                     output << u8"\t• "
+    //                            << gate_name << " => "
+    //                            << values.back()(0,0)
+    //                            << std::endl;
+    //                 break;
+    //                 case Gate::Arity::UNARY:
+    //                     output << u8"\t• "
+    //                            << gate_name 
+    //                            << "(" 
+    //                            << get_name_input_from(0)
+    //                            << " : "
+    //                            << values[1](0,0)
+    //                            << ") => "
+    //                            << values.back()(0,0)
+    //                            << std::endl;
+    //                 break;
+    //                 case Gate::Arity::BINARY:
+    //                     output << u8"\t• "
+    //                            << gate_name 
+    //                            << "(" 
+    //                            << get_name_input_from(0)
+    //                            << " : "
+    //                            << values[1](0,0)
+    //                            << ", "
+    //                            << get_name_input_from(2)
+    //                            << " : "
+    //                            << values[3](0,0)
+    //                            << ") => ";
+    //                     //print memory (write)
+    //                     if(gate_name == "Write")
+    //                     {
+    //                         output 
+    //                         << values.back()(0,0) 
+    //                         << ", mem["<<values[1](0,0)<<"] : "
+    //                         << values[4](0,values[1](0,0)) 
+    //                         << std::endl;
+    //                     }
+    //                     else 
+    //                     {
+    //                         output << values.back()(0,0) << std::endl;
+    //                     }
+    //                 break;
+    //                 //none
+    //                 default: break;
+    //             }
+    //         }
+    //         //get update
+    //         for(size_t p = 0; p != step.m_ups.size(); ++p)
+    //         {
+    //             //operation
+    //             auto& update =  step.m_ups[p];
+    //             //name, value
+    //             auto& r      = std::get<0>(update);
+    //             auto& values = std::get<1>(update);
+    //             //update
+    //             output << u8"\t• R" << r << " <= " << get_name_input_from(0) << " : " <<  values.back()(0,0) << std::endl;
+    //         }
+    //         // Print mem at last timestep
+    //         auto& last_gate_op = step.m_ops.back();
+    //         auto& values       = std::get<1>(last_gate_op);
+    //         output << u8"\t• Mem " << Dump::json_matrix(values[values.size() - 2]) << std::endl;
+    //         //undef get_value_from
+    //         #undef get_name_input_from
        
-        }
-        return output.str();
-    }
-	//json
-    Json ExecutionDebug::json() const
-	{
-		//Array of steps
-		JsonArray jsteps;
-		//for each step
-		for (size_t s = 0; s != m_steps.size(); ++s)
-		{
-			//get step
-			auto& step = m_steps[s];
-			//Json array of ops
-			JsonArray jops;
-			//get op
-			for (size_t p = 0; p != step.m_ops.size(); ++p)
-			{
-				//Json op
-				JsonObject jop;
-				//operation
-				auto& operation = step.m_ops[p];
-				//name, value
-				auto& name = std::get<0>(operation);
-				auto& values = std::get<1>(operation);
-				auto  arity = get_arity(values.size());
-				//info json
-				jop["type"]  = "gate";
-				jop["name"]  = name;
-				jop["arity"] = arity == Gate::Arity::CONST
-							? "CONST" 
-							: arity == Gate::Arity::UNARY
-							? "UNARY"
-							: "BINARY";
-				//values
-				JsonArray jvalues;
-				for (auto& value : values)
-				{
-					//save matrix
-					jvalues.push_back(json_array_from_matrix(value));
-				}
-				//save values
-				jop["values"] = std::move(jvalues);
-				//save jop
-				jops.emplace_back(jop);
-			}
-			//get update
-			for (size_t p = 0; p != step.m_ups.size(); ++p)
-			{
-				//Json op
-				JsonObject jup;
-				//operation
-				auto& update = step.m_ups[p];
-				//name, value
-				auto& r = std::get<0>(update);
-				auto& values = std::get<1>(update);
-				//info update
-				jup["type"] = "update";
-				jup["register"] = int(r);
-				//values
-				JsonArray jvalues;
-				for (auto& value : values)
-				{
-					//save matrix
-					jvalues.push_back(json_array_from_matrix(value));
-				}
-				//save values
-				jup["values"] = std::move(jvalues);
-				//save jop
-				jops.emplace_back(jup);
-			}
-			//save jops in steps
-			jsteps.emplace_back(jops);
-		}
-		//return 
-        return Json(jsteps);
-    }
+    //     }
+    //     return output.str();
+    // }
+	// //json
+    // Json ExecutionDebug::json() const
+	// {
+	// 	//Array of steps
+	// 	JsonArray jsteps;
+	// 	//for each step
+	// 	for (size_t s = 0; s != m_steps.size(); ++s)
+	// 	{
+	// 		//get step
+	// 		auto& step = m_steps[s];
+	// 		//Json array of ops
+	// 		JsonArray jops;
+	// 		//get op
+	// 		for (size_t p = 0; p != step.m_ops.size(); ++p)
+	// 		{
+	// 			//Json op
+	// 			JsonObject jop;
+	// 			//operation
+	// 			auto& operation = step.m_ops[p];
+	// 			//name, value
+	// 			auto& name = std::get<0>(operation);
+	// 			auto& values = std::get<1>(operation);
+	// 			auto  arity = get_arity(values.size());
+	// 			//info json
+	// 			jop["type"]  = "gate";
+	// 			jop["name"]  = name;
+	// 			jop["arity"] = arity == Gate::Arity::CONST
+	// 						? "CONST" 
+	// 						: arity == Gate::Arity::UNARY
+	// 						? "UNARY"
+	// 						: "BINARY";
+	// 			//values
+	// 			JsonArray jvalues;
+	// 			for (auto& value : values)
+	// 			{
+	// 				//save matrix
+	// 				jvalues.push_back(json_array_from_matrix(value));
+	// 			}
+	// 			//save values
+	// 			jop["values"] = std::move(jvalues);
+	// 			//save jop
+	// 			jops.emplace_back(jop);
+	// 		}
+	// 		//get update
+	// 		for (size_t p = 0; p != step.m_ups.size(); ++p)
+	// 		{
+	// 			//Json op
+	// 			JsonObject jup;
+	// 			//operation
+	// 			auto& update = step.m_ups[p];
+	// 			//name, value
+	// 			auto& r = std::get<0>(update);
+	// 			auto& values = std::get<1>(update);
+	// 			//info update
+	// 			jup["type"] = "update";
+	// 			jup["register"] = int(r);
+	// 			//values
+	// 			JsonArray jvalues;
+	// 			for (auto& value : values)
+	// 			{
+	// 				//save matrix
+	// 				jvalues.push_back(json_array_from_matrix(value));
+	// 			}
+	// 			//save values
+	// 			jup["values"] = std::move(jvalues);
+	// 			//save jop
+	// 			jops.emplace_back(jup);
+	// 		}
+	// 		//save jops in steps
+	// 		jsteps.emplace_back(jops);
+	// 	}
+	// 	//return 
+    //     return Json(jsteps);
+    // }
 
+    std::string ExecutionDebug::shell() const { return ""; }
+
+    Json ExecutionDebug::json() const { return {}; }
 
 	////////////////////////////////////////////////////////////////////////////////////////
 	// NRam
-
-    int discrete_trunker(Scalar value, int min, int max)
-    {
-        return clamp<int>(round(value), min, max);
-    }
 
     Matrix defuzzy_mem(const Matrix &M)
     {
@@ -310,7 +314,7 @@ namespace NRamEnhanced
     {
         int s_cost = 0;
         for (size_t idx = 0; idx < M.cols(); ++idx)
-            if (!int(linear_mask(0, idx)) && M(idx) == desired_mem(idx))
+            if (int(linear_mask(0, idx)) && int(M(0, idx)) != int(desired_mem(0, idx)))
                 s_cost += 1;
         return s_cost;
     }
@@ -318,33 +322,37 @@ namespace NRamEnhanced
     Scalar run_gate(const NRamLayout &context, const Matrix& nn_out_decision, Matrix& regs, Matrix& in_mem)
     {
         // Retrieve the gate to execute
-        Matrix gates_probabilities = CostFunction::softmax(nn_out_decision.leftCols(context.m_gates.size()));
-        int gate_index = (int) defuzzy_mem(gates_probabilities)(0, 0);
+        int gate_index = round(PointFunction::sigmoid(nn_out_decision(0, 0)) * (context.m_gates.size() - 1));
         auto& selected_gate = *context.m_gates[gate_index];
 
         // Retrieve the input(s) of the gate
-        Scalar first_input  = nn_out_decision(1, context.m_gates.size() + 1);
-        Scalar second_input = nn_out_decision(1, context.m_gates.size() + 2);
+        int first_input  = round(PointFunction::sigmoid(nn_out_decision(0, 1)) * (context.m_max_int - 1));
+        int second_input = round(PointFunction::sigmoid(nn_out_decision(0, 2)) * (context.m_max_int - 1));
 
         // Prepare to the output of the gate
         Matrix regs_and_output(1, regs.cols() + 1);
         regs_and_output.leftCols(regs.cols()) = regs;
-        switch (selected_gate.arity)
+        switch (selected_gate.arity())
         {
             case NRam::Gate::CONST:
                 regs_and_output.rightCols(1) = RowVector::Constant(1, defuzzy_mem(selected_gate(in_mem))(0, 0));
                 break;
             case NRam::Gate::UNARY:
-                
+                regs_and_output.rightCols(1) = RowVector::Constant(1, selected_gate(first_input, in_mem));
                 break;
             case NRam::Gate::BINARY:
-
+                regs_and_output.rightCols(1) = RowVector::Constant(1, selected_gate(first_input, second_input, in_mem));
                 break;
             default:
                 break;
         }
 
-        return PointFunction::sigmoid(nn_out_decision.rightCols(1)(0));
+        // Update a register with a new content
+        int register_index  = round(PointFunction::sigmoid(nn_out_decision(0, 3)) * (context.m_n_regs - 1));
+        int pointer         = round(PointFunction::sigmoid(nn_out_decision(0, 4)) * (context.m_n_regs));
+        regs(0, register_index) = regs_and_output(0, pointer);
+
+        return PointFunction::sigmoid(nn_out_decision(0, 5));
     }
 
 	////////////////////////////////////////////////////////////////////////////////////////
@@ -361,7 +369,7 @@ namespace NRamEnhanced
     , const size_t& dataset_timesteps
     )
     {
-		//init by threads
+        //init by threads
 		Matrix regs;
 		Matrix in_mem;
 		Matrix circuit_configuration;
@@ -405,14 +413,14 @@ namespace NRamEnhanced
                 cum_prob_complete += p_t;
                 
 				// // Compute the "sample" cost                
-                sample_cost -= p_t * calculate_sample_cost(in_mem, linear_test_desired_mem.row(s), linear_mask);
+                Scalar cost = calculate_sample_cost(in_mem, linear_test_desired_mem.row(s), linear_mask);
+                sample_cost += p_t * cost;
 
                 if (fi >= 1.0) break;
             }
             // Add to "batch" cost the "sample" cost
             full_cost += sample_cost;
         }
-
         return full_cost;
     }
 

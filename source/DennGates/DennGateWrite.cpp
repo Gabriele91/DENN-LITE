@@ -27,6 +27,12 @@ namespace NRam
             zero(0, 0) = Scalar(1.0);
             return zero;
         }
+
+        int operator() (const int Ptr, const int Val, Matrix& M) const override 
+        {
+            M(0, Ptr) = Val;
+            return 0;
+        }
     };
     REGISTERED_GATE(WriteGate, "write");
 }

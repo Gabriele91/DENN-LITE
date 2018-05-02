@@ -16,6 +16,11 @@ namespace NRam
             Matrix C = (*GateFactory::create("lt"))(A, B, M);
             return (C(0, 0) < C(0, 1) ? A : B).transpose();
         }
+
+        int operator() (const int A, const int B, Matrix& M) const override 
+        {
+            return std::min(A, B);
+        }
     };
     REGISTERED_GATE(MinGate, "min");
 }

@@ -20,6 +20,11 @@ namespace NRam
             C(0, 0) = 1 - C(0, 1);
             return C;
         }
+
+        int operator() (const int A, const int B, Matrix& M) const override 
+        {
+            return int(A < B);
+        }
     };
     REGISTERED_GATE(LessThanGate, "lt");
 }

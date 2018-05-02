@@ -120,7 +120,7 @@ namespace NRam
 
 			Matrix error_mask = Matrix::Zero(m_batch_size, m_max_int);
 			error_mask.col(0) = ColVector::Ones(m_batch_size);
-			
+
 			return std::make_tuple(in_mem, out_mem, Task::init_mask(), error_mask, Task::init_regs());
 		};
 	}; 

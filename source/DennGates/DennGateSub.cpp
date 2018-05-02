@@ -22,6 +22,11 @@ namespace NRam
             }
             return C / C.sum();
         }
+
+        int operator() (const int A, const int B, Matrix& M) const override 
+        {
+            return positive_mod(A - B, int(M.cols()));
+        }
     };
     REGISTERED_GATE(SubGate, "sub");
 }

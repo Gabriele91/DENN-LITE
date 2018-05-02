@@ -114,9 +114,6 @@ namespace NRamEnhanced
 		Evaluation::SPtr set_context(const NRamLayout& context);
 	};
 
-    template < type T >
-    T discrete_trunker(Scalar value, T min, T max);
-
     Matrix defuzzy_mem(const Matrix &M);
 
     Scalar run_gate(const NRamLayout &context, const Matrix& nn_out_decision, Matrix& regs, Matrix& in_mem);

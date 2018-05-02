@@ -80,7 +80,7 @@ namespace NRamEnhanced
         , *parameters.m_nram_enhanced
 			);
 			//get eval & set context
-			m_eval = EvaluationFactory::get<NRamEval>("nram")->set_context(m_nram);
+			m_eval = EvaluationFactory::get<NRamEval>("nram_enhanced")->set_context(m_nram);
 			//task
 			m_task = NRam::TaskFactory::create(*parameters.m_task, m_nram.m_batch_size, m_nram.m_max_int, m_nram.m_n_regs, 
 				*parameters.m_time_steps, *parameters.m_sequence_size, *parameters.m_min_difficulty, *parameters.m_max_difficulty, 

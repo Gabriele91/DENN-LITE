@@ -15,6 +15,11 @@ namespace NRam
             Matrix C = (*GateFactory::create("lt"))(A, B, M);
             return (C(0, 0) < C(0, 1) ? B : A).transpose();
         }
+
+        int operator() (const int A, const int B, Matrix& M) const override 
+        {
+            return std::max(A, B);
+        }
     };
     REGISTERED_GATE(MaxGate, "max");
 }

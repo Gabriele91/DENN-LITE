@@ -15,6 +15,11 @@ namespace NRam
         {
             return (M.transpose() * Ptr).transpose();
         }
+
+        int operator() (const int Ptr, Matrix& M) const override 
+        {
+            return M(0, Ptr);
+        }
     };
 
     REGISTERED_GATE(ReadGate, "read");
