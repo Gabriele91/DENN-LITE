@@ -49,6 +49,7 @@
     <ClInclude Include="include\DennEvaluation.h" />
     <ClInclude Include="include\DennJson.h" />
     <ClInclude Include="include\DennNRamDatasetTask.h" />
+    <ClInclude Include="include\DennNRamEnhanced.h" />
     <ClInclude Include="include\DennNRamGate.h" />
     <ClInclude Include="include\DennNRam.h" />
     <ClInclude Include="include\DennNRamTask.h" />
@@ -67,6 +68,10 @@
     <ClInclude Include="include\DennPopulation.h" />
     <ClInclude Include="include\DennRuntimeOutput.h" />
     <ClInclude Include="include\DennSerializeOutput.h" />
+    <ClInclude Include="include\DennUtilitiesMath.h" />
+    <ClInclude Include="include\DennUtilitiesMatrix.h" />
+    <ClInclude Include="include\DennUtilitiesString.h" />
+    <ClInclude Include="include\DennUtilitiesVector.h" />
     <ClInclude Include="include\DennVariant.h" />
     <ClInclude Include="include\DennVersion.h" />
     <ClInclude Include="include\DennIOFileWrapper.h" />
@@ -137,6 +142,8 @@
     <ClCompile Include="source\DennNeuralNetwork.cpp" />
     <ClCompile Include="source\DennNRam.cpp" />
     <ClCompile Include="source\DennNRamDatasetTask.cpp" />
+    <ClCompile Include="source\DennNRamEnhanced.cpp" />
+    <ClCompile Include="source\DennNRamEnhancedEval.cpp" />
     <ClCompile Include="source\DennNRamEval.cpp" />
     <ClCompile Include="source\DennNRamGate.cpp" />
     <ClCompile Include="source\DennNRamTask.cpp" />
