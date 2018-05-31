@@ -51,8 +51,8 @@ namespace NRamEnhanced
         // (Gate to execute, 
         //  First Value, 
         //  Second Value, 
+        //  Value to save, 
         //  Register update, 
-        //  Pointer to the value to use to update the register, 
         //  Willingess)
         m_nn_output = 6; 
     }
@@ -312,47 +312,62 @@ namespace NRamEnhanced
 
     Scalar calculate_sample_cost(const Matrix &M, const RowVector &desired_mem, const Matrix& linear_mask)
     {
-        int s_cost = 0;
-        for (size_t idx = 0; idx < M.cols(); ++idx)
-            if (int(linear_mask(0, idx)) && int(M(0, idx)) != int(desired_mem(0, idx)))
-                s_cost += 1;
-        return s_cost;
+        Scalar s_cost = 1;
+		for (size_t idx = 0; idx < M.cols(); ++idx)
+		{
+			if (int(linear_mask(0, idx)) && int(M(0, idx)) != int(desired_mem(0, idx)))
+			{
+				s_cost += 1;
+			}
+		}
+        return log(s_cost);
     }
+
+	static int in_range(Scalar s_value, int range)
+	{
+		int value = round(s_value * range);
+		return clamp(value, 0, range);
+	}
 
     Scalar run_gate(const NRamLayout &context, const Matrix& nn_out_decision, Matrix& regs, Matrix& in_mem)
     {
+		//Matrix nn_output = nn_out_decision;
+		const Matrix& nn_output = nn_out_decision;
         // Retrieve the gate to execute
-        int gate_index = round(PointFunction::sigmoid(nn_out_decision(0, 0)) * (context.m_gates.size() - 1));
+        int gate_index = in_range(nn_output(0, 0), context.m_gates.size()-1);
         auto& selected_gate = *context.m_gates[gate_index];
 
         // Retrieve the input(s) of the gate
-        int first_input  = round(PointFunction::sigmoid(nn_out_decision(0, 1)) * (context.m_max_int - 1));
-        int second_input = round(PointFunction::sigmoid(nn_out_decision(0, 2)) * (context.m_max_int - 1));
+		int first_input  = in_range(nn_output(0, 1), context.m_max_int - 1);
+        int second_input = in_range(nn_output(0, 2), context.m_max_int - 1);
 
         // Prepare to the output of the gate
-        Matrix regs_and_output(1, regs.cols() + 1);
-        regs_and_output.block(0, 0, 1, regs.cols()) = regs;
+        Scalar c = 0;
         switch (selected_gate.arity())
         {
             case NRam::Gate::CONST:
-                regs_and_output(0, regs.cols()) = defuzzy_mem(selected_gate(in_mem))(0, 0);
+				c = defuzzy_mem(selected_gate(in_mem))(0, 0);
                 break;
             case NRam::Gate::UNARY:
-                regs_and_output(0, regs.cols()) = selected_gate(first_input, in_mem);
+				c = selected_gate(first_input, in_mem);
                 break;
             case NRam::Gate::BINARY:
-                regs_and_output(0, regs.cols()) = selected_gate(first_input, second_input, in_mem);
+				c = selected_gate(first_input, second_input, in_mem);
                 break;
             default:
                 break;
         }
 
         // Update a register with a new content
-        int register_index  = round(PointFunction::sigmoid(nn_out_decision(0, 3)) * (context.m_n_regs - 1));
-        int pointer         = round(PointFunction::sigmoid(nn_out_decision(0, 4)) * (context.m_n_regs));
-        regs(0, register_index) = regs_and_output(0, pointer);
+		int value_index = in_range(nn_output(0, 3), context.m_n_regs);
+		int register_index = in_range(nn_output(0, 4), context.m_n_regs - 1);
+		//update
+		if (value_index >= context.m_n_regs) 
+			regs(0, register_index) = c;
+		else 
+			regs(0, register_index) = regs(0, value_index);
 
-        return PointFunction::sigmoid(nn_out_decision(0, 5));
+        return PointFunction::relu(nn_output(0, 5));
     }
 
 	////////////////////////////////////////////////////////////////////////////////////////
@@ -399,8 +414,10 @@ namespace NRamEnhanced
 				// NN
                 Matrix nn_example(1, context.m_n_regs + 1);
                 nn_example.leftCols(context.m_n_regs) = regs;
-                nn_example.rightCols(1) = RowVector::Constant(1, timestep);
-                circuit_configuration = network.apply(regs);
+				nn_example(0, context.m_n_regs) = Scalar(timestep) / loop_timesteps;
+				Matrix output = network.apply(nn_example);
+                circuit_configuration = output;
+				//MESSAGE("input: " << Dump::json_matrix(nn_example) << "\noutput:" << Dump::json_matrix(circuit_configuration));
 
                 Scalar fi = run_gate(context, circuit_configuration, regs, in_mem);
 
@@ -421,6 +438,19 @@ namespace NRamEnhanced
             // Add to "batch" cost the "sample" cost
             full_cost += sample_cost;
         }
+		if (0)
+		{
+			MESSAGE(
+				"full cost:"
+				<< full_cost
+				<< " . "
+				<< Dump::json_matrix(in_mem)
+				<< " . "
+				<< Dump::json_matrix(linear_mask)
+				<< " . "
+				<< Dump::json_matrix(linear_test_desired_mem.row(linear_test_in_mem.rows() - 1))
+			)
+		}
         return full_cost;
     }
 

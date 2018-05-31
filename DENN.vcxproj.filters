@@ -428,6 +428,9 @@
     <ClCompile Include="source\DennNRamEnhancedEval.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="source\DennInstance\DennNRamEnhancedInstance.cpp">
+      <Filter>Source\DennInstance</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="tests\run_bench.sh">

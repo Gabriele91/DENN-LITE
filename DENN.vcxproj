@@ -126,6 +126,7 @@
     <ClCompile Include="source\DennInstance.cpp" />
     <ClCompile Include="source\DennInstance\DennDBTestInstance.cpp" />
     <ClCompile Include="source\DennInstance\DennDefaultInstance.cpp" />
+    <ClCompile Include="source\DennInstance\DennNRamEnhancedInstance.cpp" />
     <ClCompile Include="source\DennInstance\DennNRamInstance.cpp" />
     <ClCompile Include="source\DennInstance\DennNRamTestInstance.cpp" />
     <ClCompile Include="source\DennJson.cpp" />

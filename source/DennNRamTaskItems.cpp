@@ -249,8 +249,9 @@ namespace NRam
 			out_mem.block(0, offset, in_mem.rows(), m_sequence_size) = in_mem.block(0, 1, in_mem.rows(), m_sequence_size);
 
 			// Cut out from the cost calculation the memory part that does not make part of the expected output
-			Matrix mask = Task::init_mask(); //[1, max_int]
+			Matrix mask = Matrix::Zero(1, m_max_int);// Task::init_mask(); //[1, max_int]
 			//mask.leftCols(1) = RowVector::Zero(1);
+			mask.block(0, offset, 1, m_sequence_size) = Matrix::Ones(1, m_sequence_size);
 
 			Matrix error_mask = Matrix::Zero(m_batch_size, m_max_int);
 			error_mask.block(0, offset, error_mask.rows(), m_sequence_size) = Matrix::Ones(m_batch_size, m_sequence_size);
