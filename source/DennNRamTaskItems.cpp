@@ -149,10 +149,10 @@ namespace NRam
 		)
 		: TaskImplement(batch_size, max_int, n_regs, timesteps, sequence_size, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
-			m_difficulty_grades = {                                
-				std::make_tuple(16, 4, 4),
-				std::make_tuple(16, 8, 4),
-				std::make_tuple(16, 13, 4),
+			m_difficulty_grades = {
+				std::make_tuple(16,  4,  4),
+				std::make_tuple(16,  8,  4),
+				std::make_tuple(16, 13,  4),
 				std::make_tuple(16, 15, 15),
 				std::make_tuple(16, 18, 15),
 				std::make_tuple(16, 20, 15)
@@ -212,20 +212,20 @@ namespace NRam
 		: TaskImplement(batch_size, max_int, n_regs, timesteps, sequence_size, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
+				std::make_tuple(10,  2, 1),
+				std::make_tuple(10,  3, 2),
 				std::make_tuple(10,  5, 4),
-				std::make_tuple(10,  9, 4),
-				std::make_tuple(10, 12, 4),
-				std::make_tuple(10, 13, 4),
+				std::make_tuple(10, 11, 4),
+				std::make_tuple(10, 40, 4),
 
-				std::make_tuple(12,  6, 5),
-				std::make_tuple(12, 11, 5),
-				std::make_tuple(12, 14, 5),
-				std::make_tuple(12, 15, 5),
-
+				std::make_tuple(14,  3, 2),
+				std::make_tuple(14,  4, 3),
 				std::make_tuple(14,  7, 6),
 				std::make_tuple(14, 13, 6),
-				std::make_tuple(14, 16, 6),
-				std::make_tuple(14, 17, 6)
+				std::make_tuple(14, 42, 6),
+
+				std::make_tuple(20, 19, 9),
+				std::make_tuple(20, 43, 9)
 			};
 		}
 
@@ -285,20 +285,20 @@ namespace NRam
 		: TaskImplement(batch_size, max_int, n_regs, timesteps, sequence_size, min_difficulty, max_difficulty, step_gen_change_difficulty, change_difficulty_lambda, random)
 		{
 			m_difficulty_grades = {
-				std::make_tuple(10, 9, 	4),
-				std::make_tuple(10, 10, 4),
+				std::make_tuple(10,  2, 1),
+				std::make_tuple(10,  3, 2),
+				std::make_tuple(10,  5, 4),
 				std::make_tuple(10, 11, 4),
-				std::make_tuple(10, 12, 4),
+				std::make_tuple(10, 40, 4),
 
-				std::make_tuple(12, 11, 5),
-				std::make_tuple(12, 12, 5),
-				std::make_tuple(12, 13, 5),
-				std::make_tuple(12, 14, 5),
-
+				std::make_tuple(14,  3, 2),
+				std::make_tuple(14,  4, 3),
+				std::make_tuple(14,  7, 6),
 				std::make_tuple(14, 13, 6),
-				std::make_tuple(14, 14, 6),
-				std::make_tuple(14, 15, 6),
-				std::make_tuple(14, 16, 6)
+				std::make_tuple(14, 42, 6),
+
+				std::make_tuple(20, 19, 9),
+				std::make_tuple(20, 43, 9)
 			};
 		}
 
