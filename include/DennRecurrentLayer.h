@@ -5,29 +5,33 @@
 
 namespace Denn
 {
-
-	class PerceptronLayer : public Layer
+    //RNN
+    //http://www.wildml.com/2015/09/recurrent-neural-networks-tutorial-part-2-implementing-a-language-model-rnn-with-python-numpy-and-theano/
+    //
+	class RecurrentLayer : public Layer
 	{
 	public:
 		///////////////////////////////////////
-		PerceptronLayer
+		RecurrentLayer
 		(
 			  int features
 			, int clazz
 		);
 
-		PerceptronLayer
+		RecurrentLayer
 		(
 			  ActivationFunction active_function
 			, size_t features
 			, size_t clazz
 		);
 		//////////////////////////////////////////////////
-		Matrix& weights();
-		Matrix& baias();
+		Matrix& U();
+		Matrix& W();
+		Matrix& V();
 		//////////////////////////////////////////////////
-		const Matrix& weights() const;
-		const Matrix& baias()   const;
+		const Matrix& U()   const;
+		const Matrix& W()   const;
+		const Matrix& V()   const;
 		//////////////////////////////////////////////////
 		virtual Layer::SPtr copy() const override;
 		//////////////////////////////////////////////////
@@ -52,10 +56,12 @@ namespace Denn
 		virtual const Matrix& operator[](size_t i) const operator_override;
 		//////////////////////////////////////////////////
 
-	protected:
-
-		Matrix         m_weights;
-		Matrix         m_baias;
+	protected:  
+        //parameters
+		Matrix             m_U;
+		Matrix             m_W;
+		Matrix             m_V;
+        //function
 		ActivationFunction m_activation_function{ nullptr };
 	};
 }

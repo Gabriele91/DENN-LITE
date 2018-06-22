@@ -8,8 +8,10 @@ class Layer : public std::enable_shared_from_this< Layer >
 { 
 public:
 	//ref to Layer
-	using Scalar = Denn::Scalar;
-	using SPtr   = std::shared_ptr<Layer>;
+	using VMatrix  = std::vector<Matrix>;
+	using VVMatrix = std::vector<VMatrix>;
+	using Scalar   = Denn::Scalar;
+	using SPtr     = std::shared_ptr<Layer>;
 	//return ptr
 	SPtr get_ptr();
 	///////////////////////////////////////////////////////////////////////////
@@ -24,11 +26,20 @@ public:
 	virtual void           set_activation_function(ActivationFunction active_function)				 = 0;
 	///////////////////////////////////////////////////////////////////////////
 	//Backpropagation stuff
-	virtual Matrix              feedforward(const Matrix& input, Matrix& linear_out)				  							   = 0;
-	virtual Matrix              backpropagate_delta(const Matrix& loss)     							                           = 0;		
-	virtual Matrix              backpropagate_derive(const Matrix& delta, const Matrix& linear_out)       			               = 0;
-	virtual std::vector<Matrix> backpropagate_gradient(const Matrix& delta, const Matrix& linear_input, Scalar regular=Scalar(0.0))= 0;
+	virtual Matrix    feedforward(const Matrix& input, Matrix& linear_out)				  							     = 0;
+	virtual Matrix    backpropagate_delta(const Matrix& loss)     							                             = 0;		
+	virtual Matrix    backpropagate_derive(const Matrix& delta, const Matrix& linear_out)       			             = 0;
+	virtual VMatrix   backpropagate_gradient(const Matrix& delta, const Matrix& linear_input, Scalar regular=Scalar(0.0))= 0;
 	///////////////////////////////////////////////////////////////////////////
+	//Recurrent network
+	virtual VMatrix apply(const std::vector<Matrix>& input) const					     							     = 0;
+	virtual VMatrix feedforward(const VMatrix& input, VMatrix& linear_out)				  							     = 0;
+	virtual VMatrix backpropagate_delta(const VMatrix& loss)     							                             = 0;		
+	virtual VMatrix backpropagate_derive(const VMatrix& delta, const VMatrix& linear_out)       			             = 0;
+	virtual VVMatrix backpropagate_gradient(const VMatrix& delta, const VMatrix& linear_input, Scalar regular=Scalar(0.0))= 0;
+	///////////////////////////////////////////////////////////////////////////
+
+	
 	class Iterator 
 	{
 	public:

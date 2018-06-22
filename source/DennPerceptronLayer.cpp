@@ -127,4 +127,48 @@ namespace Denn
 		else		 return  m_weights;//0
 	}
 	//////////////////////////////////////////////////
+	Layer::VMatrix PerceptronLayer::apply(const std::vector<Matrix>& inputs) const
+	{
+		VMatrix vout; vout.reserve(inputs.size());
+		for(auto& input : inputs) vout.push_back(apply(input));
+		return vout;
+	}
+	Layer::VMatrix PerceptronLayer::feedforward(const VMatrix& inputs, VMatrix& linear_outs)
+	{
+		//alloc output
+		VMatrix vout; 
+		vout.reserve(inputs.size());
+		linear_outs.resize(inputs.size());
+		//compute
+		for(size_t i=0; i!=inputs.size() ;++i) vout.push_back(feedforward(inputs[i],linear_outs[i]));
+		//return
+		return vout;
+	}
+	Layer::VMatrix PerceptronLayer::backpropagate_delta(const VMatrix& vloss)
+	{
+		//alloc
+		VMatrix vout;
+		vout.reserve(vloss.size());
+		//compute
+		for(auto& loss : vloss) vout.push_back(backpropagate_delta(loss));
+		return vout;
+	}
+	Layer::VMatrix PerceptronLayer::backpropagate_derive(const VMatrix& deltas, const VMatrix& linear_outs)
+	{
+		//alloc
+		VMatrix vout; 
+		vout.reserve(deltas.size());
+		//compute
+		for(size_t i=0; i!=deltas.size() ;++i) vout.push_back(backpropagate_derive(deltas[i],linear_outs[i]));
+		return vout;
+	}
+	Layer::VVMatrix PerceptronLayer::backpropagate_gradient(const VMatrix& deltas, const VMatrix& linear_inputs, Scalar regular)
+	{
+		//alloc
+		VVMatrix vout; 
+		vout.reserve(deltas.size());
+		//compute
+		for(size_t i=0; i!=deltas.size() ;++i) vout.push_back(backpropagate_gradient(deltas[i],linear_inputs[i],regular));
+		return vout;
+	}
 }
