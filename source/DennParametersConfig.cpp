@@ -1182,9 +1182,21 @@ namespace Denn
             if((*ptr) == '}') return true;
             //layer type
             std::string layer_type = conf_name(ptr);
+            //test perceptron
+            bool is_perceptron = 
+                layer_type == "lp" 
+            ||  layer_type == "layer_perceptron"
+            ||  layer_type == "perceptron";
+            //test recurrent
+            bool is_recurrent = 
+                layer_type == "lr" 
+            ||  layer_type == "layer_recurrent"
+            ||  layer_type == "recurrent";
             //type
-            if (layer_type == "lp" || layer_type == "layer_perceptron")
+            if (is_perceptron || is_recurrent)
             {
+                //type
+                layer_type = is_perceptron ? "perceptron" : "recurrent";
                 //jump space
                 conf_skip_line_space_and_comments(line, ptr);
                 //get int
@@ -1250,6 +1262,7 @@ namespace Denn
                     return false;
                 }
                 //add
+                params.m_hidden_layers_types.get().push_back(layer_type);
                 params.m_hidden_layers.get().push_back(layer_size);
                 params.m_activation_functions.get().push_back(layer_af);
             }

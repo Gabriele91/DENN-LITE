@@ -325,6 +325,28 @@ namespace Denn
 			,{ "list(string)",  ActivationFunctionFactory::list_of_activation_functions() }
         },
         ParameterInfo{
+            m_hidden_layers_types, "Type of hidden layers", {  "-hlt"  },
+            [this](Arguments& args) -> bool 
+            {
+				//clear
+				m_hidden_layers_types.get().clear();
+				//ok
+                while(!args.end_vals())
+                {
+                    std::string str_c_type = args.get_string();
+                    //all lower case
+                    std::transform(str_c_type.begin(),str_c_type.end(), str_c_type.begin(), ::tolower);
+                    //test
+                    if(!LayerFactory::exists(str_c_type)) return false;
+                    //push
+                    m_hidden_layers_types.get().push_back(str_c_type);
+                }
+                //ok
+                return m_hidden_layers_types.get().size() != 0; 
+            }
+			,{ "list(string)",  LayerFactory::list_of_layers() }
+        },
+        ParameterInfo{
 			m_output_activation_function, "Activation function of output layer", { "-oaf"  },
             [this](Arguments& args) -> bool 
             { 

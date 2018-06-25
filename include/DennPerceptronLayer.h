@@ -22,6 +22,16 @@ namespace Denn
 			, size_t features
 			, size_t clazz
 		);
+
+		PerceptronLayer
+		(
+			  ActivationFunction active_function
+			, const std::vector< size_t >& input_output
+		)
+		: PerceptronLayer(active_function, input_output[0], input_output[1])
+		{
+
+		}
 		//////////////////////////////////////////////////
 		Matrix& weights();
 		Matrix& baias();
@@ -58,4 +68,5 @@ namespace Denn
 		Matrix         m_baias;
 		ActivationFunction m_activation_function{ nullptr };
 	};
+	REGISTERED_LAYER(PerceptronLayer, "perceptron")
 }

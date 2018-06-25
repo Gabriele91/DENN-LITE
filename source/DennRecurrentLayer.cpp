@@ -1,6 +1,9 @@
 #include "DennCostFunction.h"
 #include "DennActivationFunction.h"
 #include "DennRecurrentLayer.h"
+//http://\
+  www.wildml.com/2015/09/\
+  recurrent-neural-networks-tutorial-part-2-implementing-a-language-model-rnn-with-python-numpy-and-theano/
 
 namespace Denn
 {
@@ -13,7 +16,9 @@ namespace Denn
 	{		
         U().resize(features, clazz);
 		W().resize(clazz, clazz);
+		B().resize(1, clazz);
 		V().resize(clazz, features);
+		C().resize(1, features);
 	}
 
 	RecurrentLayer::RecurrentLayer
@@ -26,16 +31,22 @@ namespace Denn
 		set_activation_function(active_function);
         U().resize(features, clazz);
 		W().resize(clazz, clazz);
+		B().resize(1, clazz);
 		V().resize(clazz, features);
+		C().resize(1, features);
 	}
 	//////////////////////////////////////////////////
 	Matrix& RecurrentLayer::U() { return m_U; }
 	Matrix& RecurrentLayer::W() { return m_W; }
+	Matrix& RecurrentLayer::B() { return m_B; }
 	Matrix& RecurrentLayer::V() { return m_V; }
+	Matrix& RecurrentLayer::C() { return m_C; }
 	//////////////////////////////////////////////////
 	const Matrix& RecurrentLayer::U() const { return m_U; }
 	const Matrix& RecurrentLayer::W() const { return m_W; }
+	const Matrix& RecurrentLayer::B() const { return m_B; }
 	const Matrix& RecurrentLayer::V() const { return m_V; }	
+	const Matrix& RecurrentLayer::C() const { return m_C; }	
     //////////////////////////////////////////////////
 	ActivationFunction RecurrentLayer::get_activation_function() 
 	{
@@ -50,9 +61,16 @@ namespace Denn
 	{
 		return std::static_pointer_cast<Layer>(std::make_shared<RecurrentLayer>(*this));
 	}
-	//////////////////////////////////////////////////
+	//////////////////////////////////////////////////    
+	Matrix  RecurrentLayer::apply(const Matrix& input) const
+	{
+		return apply(VMatrix{input}).back();
+	}
     Layer::VMatrix  RecurrentLayer::apply(const VMatrix& inputs) const
     {
+		//alias
+		const Eigen::Map<RowVector>& b_bais = Eigen::Map<RowVector>((Scalar*)B().data(), B().cols()*B().rows());
+		const Eigen::Map<RowVector>& c_bais = Eigen::Map<RowVector>((Scalar*)C().data(), C().cols()*C().rows());
         //outputs
         Layer::VMatrix o;
         //h0
@@ -61,10 +79,10 @@ namespace Denn
         for(size_t t = 0; t!=inputs.size(); ++t)
         {
             //get state
-            h = (U() * inputs[t]) +  (W() * h);
+            h = ((U() * inputs[t]) +  (W() * h)).rowwise() + b_bais;
             if (m_activation_function) h = m_activation_function(h);
             //output
-            Matrix out = V()*h;
+            Matrix out = (V()*h).rowwise() + c_bais;
             o.push_back(CostFunction::softmax_row_samples(out));
         }
         return o;
@@ -72,28 +90,32 @@ namespace Denn
     //////////////////////////////////////////////////
     size_t RecurrentLayer::size() const
 	{
-		return 3;
+		return 5;
 	}
 	Matrix& RecurrentLayer::operator[](size_t i)
 	{
-		denn_assert(i < 3);
+		denn_assert(i < 5);
         switch(i)
         {
             default:
-            case 1: return U();
-            case 2: return W();
+            case 0: return U();
+            case 1: return W();
+            case 2: return B();
             case 3: return V();
+			case 4: return C();
         }
 	}
 	const Matrix& RecurrentLayer::operator[](size_t i) const
 	{
-		denn_assert(i < 3);
+		denn_assert(i < 5);
         switch(i)
         {
             default:
-            case 1: return U();
-            case 2: return W();
+            case 0: return U();
+            case 1: return W();
+            case 2: return B();
             case 3: return V();
+            case 4: return C();
         }
 	}
     /////////////////////////////////////////////////////////////////////////////////////////////

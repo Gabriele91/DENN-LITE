@@ -14,6 +14,18 @@ namespace Denn
 		, const std::vector<std::string>& active_layers
 		, const std::string& active_output
 	);
+	//build a network from parameters
+	NeuralNetwork build_network(size_t n_features, size_t n_class, const Denn::Parameters& parameters);
+	//build a network from parameters
+	NeuralNetwork build_network
+	(
+		  size_t n_features
+		, size_t n_class
+		, const std::vector<unsigned int>& hidden_layers
+		, const std::vector<std::string>& active_layers
+		, const std::vector<std::string>& types_layers
+		, const std::string& active_output
+	);
 	//build output stream
 	bool build_outputstream(std::ostream& output, std::ofstream& file, const Denn::Parameters& parameters);
 	//build output stream

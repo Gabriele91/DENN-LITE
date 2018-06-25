@@ -75,6 +75,10 @@
         "__locale": "cpp",
         "__functional_base": "cpp",
         "stack": "cpp",
-        "*.ipp": "cpp"
+        "*.ipp": "cpp",
+        "typeindex": "cpp",
+        "strstream": "cpp",
+        "__functional_base_03": "cpp",
+        "variant": "cpp"
     }
 }

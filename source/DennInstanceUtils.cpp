@@ -1,5 +1,6 @@
 #include <fstream>
 #include "DennInstanceUtils.h"
+#include "DennLayer.h"
 
 namespace Denn
 {
@@ -66,7 +67,83 @@ namespace Denn
 		//return NeuralNetwork
 		return mlp_nn;
 	}
-
+	//build a network from parameters
+	NeuralNetwork build_network
+	(
+		  size_t n_features
+		, size_t n_class
+		, const Denn::Parameters& parameters
+	)
+	{
+		//mlp network
+		NeuralNetwork mlp_nn;
+		//hidden layer list
+		const auto& hidden_layers = (*parameters.m_hidden_layers);
+		const auto& active_layers = (*parameters.m_activation_functions);
+		const auto& hidden_types  = (*parameters.m_hidden_layers_types);
+		const auto& active_output = (*parameters.m_output_activation_function);
+		//return NeuralNetwork
+		return build_network(n_features,n_class, hidden_layers, active_layers, hidden_types, active_output);
+	}
+	//build a mlp network from parameters
+	NeuralNetwork build_network
+	(
+		  size_t n_features
+		, size_t n_class
+		, const std::vector<unsigned int>& hidden_layers
+		, const std::vector<std::string>& active_layers
+		, const std::vector<std::string>& types_layers
+		, const std::string& active_output
+	)
+	{ 
+		//input of next layer
+		size_t input_size = n_features;
+		//layer gen
+		auto new_layer = [&](size_t i) -> Layer::SPtr 
+		{ 
+			//get activation function
+			auto function = (i < active_layers.size()) ? ActivationFunctionFactory::get(active_layers[i]) : nullptr;
+			//build layer
+			if(types_layers.size() <= i || types_layers[i] == "perceptron")
+			{
+				return  LayerFactory::create(
+					  types_layers[i]
+					, function
+					, { input_size , hidden_layers[i] }
+				);
+				input_size = hidden_layers[i];
+			}
+			else if (types_layers[i] == "recurrent")
+			{
+				return  LayerFactory::create(
+					  types_layers[i]
+					, function
+					, { input_size , hidden_layers[i] }
+				);
+				//next same size
+			}
+			return nullptr; 
+		};	
+		//network
+		NeuralNetwork nn;
+		//push all hidden layers
+		if (hidden_layers.size())
+		{
+			//add hiddens
+			for (size_t i = 0; i != hidden_layers.size() - 1; ++i)
+			{
+				nn.add(new_layer(i));
+			}
+		}
+		//add last layer
+		nn.add(Layer::SPtr((Layer*)new PerceptronLayer(
+			  ActivationFunctionFactory::get(active_output)
+			, input_size
+			, n_class
+		)));
+		//return NeuralNetwork
+		return nn;
+	}
 	//build output stream
 	bool build_outputstream(std::ostream& runtime_output_stream, std::ofstream& runtime_output_file_stream, const Denn::Parameters& arguments)
 	{

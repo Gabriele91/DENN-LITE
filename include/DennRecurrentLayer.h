@@ -6,8 +6,6 @@
 namespace Denn
 {
     //RNN
-    //http://www.wildml.com/2015/09/recurrent-neural-networks-tutorial-part-2-implementing-a-language-model-rnn-with-python-numpy-and-theano/
-    //
 	class RecurrentLayer : public Layer
 	{
 	public:
@@ -24,14 +22,28 @@ namespace Denn
 			, size_t features
 			, size_t clazz
 		);
+
+		RecurrentLayer
+		(
+			  ActivationFunction active_function
+			, const std::vector< size_t >& input_output
+		)
+		: RecurrentLayer(active_function, input_output[0], input_output[1])
+		{
+
+		}
 		//////////////////////////////////////////////////
 		Matrix& U();
 		Matrix& W();
+		Matrix& B();
 		Matrix& V();
+		Matrix& C();
 		//////////////////////////////////////////////////
 		const Matrix& U()   const;
 		const Matrix& W()   const;
+		const Matrix& B()   const;
 		const Matrix& V()   const;
+		const Matrix& C()   const;
 		//////////////////////////////////////////////////
 		virtual Layer::SPtr copy() const override;
 		//////////////////////////////////////////////////
@@ -60,8 +72,11 @@ namespace Denn
         //parameters
 		Matrix             m_U;
 		Matrix             m_W;
+		Matrix             m_B;
 		Matrix             m_V;
+		Matrix             m_C;
         //function
 		ActivationFunction m_activation_function{ nullptr };
 	};
+	REGISTERED_LAYER(RecurrentLayer, "recurrent")
 }

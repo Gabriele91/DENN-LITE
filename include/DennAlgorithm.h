@@ -170,7 +170,7 @@ public:
 	bool loss_function_compare(Scalar left, Scalar right) const
 	{
 		return  m_loss_function->minimize() 
-		    ?   left < right
+		    ?   left <= right
 			:  right < left
 			;
 	}
@@ -178,7 +178,7 @@ public:
 	bool validation_function_compare(Scalar left, Scalar right) const
 	{
 		return  m_validation_function->minimize() 
-		    ?   left < right
+		    ?   left <= right
 			:  right < left
 			;
 	}
@@ -186,7 +186,7 @@ public:
 	bool test_function_compare(Scalar left, Scalar right) const
 	{
 		return  m_test_function->minimize() 
-		    ?  left < right
+		    ?  left <= right
 			:  right < left
 			;
 	}

@@ -36,6 +36,11 @@ public:
 		add_layer(layer);
 		add_layer(layers...);
 	}
+	//easy add
+	void add(const Layer::SPtr layer)
+	{
+		m_layers.push_back(layer);
+	}
 	/////////////////////////////////////////////////////////////////////////
 	Matrix apply(const Matrix& input) const;
     //pointer to context
