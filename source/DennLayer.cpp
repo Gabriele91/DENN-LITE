@@ -1,3 +1,4 @@
+#include <iterator>
 #include "DennLayer.h"
 
 namespace Denn
