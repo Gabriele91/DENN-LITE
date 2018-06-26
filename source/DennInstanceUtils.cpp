@@ -90,7 +90,7 @@ namespace Denn
 	(
 		  size_t n_features
 		, size_t n_class
-		, const std::vector<unsigned int>& hidden_layers
+		,       std::vector<unsigned int> hidden_layers
 		, const std::vector<std::string>& active_layers
 		, const std::vector<std::string>& types_layers
 		, const std::string& active_output
@@ -99,28 +99,32 @@ namespace Denn
 		//input of next layer
 		size_t input_size = n_features;
 		//layer gen
-		auto new_layer = [&](size_t i) -> Layer::SPtr 
+		auto new_layer = [&](size_t& i) -> Layer::SPtr 
 		{ 
 			//get activation function
 			auto function = (i < active_layers.size()) ? ActivationFunctionFactory::get(active_layers[i]) : nullptr;
 			//build layer
-			if(types_layers.size() <= i || types_layers[i] == "perceptron")
+			if(types_layers.size() <= i)
 			{
-				return  LayerFactory::create(
+				//get size
+				size_t size_input = LayerFactory::input_size(types_layers[i]);
+				//build input
+				std::vector<size_t> input;
+				//add first input
+				input.push_back(input_size);
+				//add others valus
+				while(size_input--)
+				{ 
+					if(hidden_layers.size() <= i) return nullptr; 
+					input.push_back(hidden_layers[++i]);
+				}
+				//build input
+				return LayerFactory::create(
 					  types_layers[i]
 					, function
-					, { input_size , hidden_layers[i] }
+					, input
 				);
 				input_size = hidden_layers[i];
-			}
-			else if (types_layers[i] == "recurrent")
-			{
-				return  LayerFactory::create(
-					  types_layers[i]
-					, function
-					, { input_size , hidden_layers[i] }
-				);
-				//next same size
 			}
 			return nullptr; 
 		};	
@@ -129,10 +133,12 @@ namespace Denn
 		//push all hidden layers
 		if (hidden_layers.size())
 		{
+			size_t i = 0;
+			Layer::SPtr layer_to_add = nullptr;
 			//add hiddens
-			for (size_t i = 0; i != hidden_layers.size() - 1; ++i)
+			while ( (i != hidden_layers.size() - 1) && (layer_to_add = new_layer(i)).get() )
 			{
-				nn.add(new_layer(i));
+				nn.add(layer_to_add);
 			}
 		}
 		//add last layer

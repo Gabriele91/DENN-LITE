@@ -1,5 +1,6 @@
 #include "DennParameters.h"
 #include "DennConstants.h"
+#include "DennLayer.h"
 #include <string>
 #include <cctype>
 #include <unordered_map>
@@ -1182,55 +1183,52 @@ namespace Denn
             if((*ptr) == '}') return true;
             //layer type
             std::string layer_type = conf_name(ptr);
-            //test perceptron
-            bool is_perceptron = 
-                layer_type == "lp" 
-            ||  layer_type == "layer_perceptron"
-            ||  layer_type == "perceptron";
-            //test recurrent
-            bool is_recurrent = 
-                layer_type == "lr" 
-            ||  layer_type == "layer_recurrent"
-            ||  layer_type == "recurrent";
+            //short cust
+            if( layer_type == "lp"  ||  layer_type == "layer_perceptron") layer_type = "perceptron";
+            if( layer_type == "lr"  ||  layer_type == "layer_recurrent") layer_type = "recurrent";
+            //exits
+            bool exists= LayerFactory::exists(layer_type);
             //type
-            if (is_perceptron || is_recurrent)
+            if (exists)
             {
-                //type
-                layer_type = is_perceptron ? "perceptron" : "recurrent";
+                size_t n_input = LayerFactory::input_size(layer_type);
                 //jump space
                 conf_skip_line_space_and_comments(line, ptr);
                 //get int
-                long layer_size;
+                std::vector<size_t> layer_sizes;
                 //is not a variable?
-                if(!conf_is_variable(*ptr))
+                for(size_t p=0; p < n_input; ++p)
                 {
-                    layer_size = conf_string_to_int(ptr);
-                }
-                else
-                {
-                    //next
-                    ++ptr;
-                    //varname
-                    std::string varname = conf_name(ptr);
-                    //find
-                    if(!context.exists(varname))
+                    if(!conf_is_variable(*ptr))
                     {
-                        std::cerr << line << ": \'" << varname << "\' is not valid variable" << std::endl;
+                        layer_sizes.push_back( conf_string_to_int(ptr) );
+                    }
+                    else
+                    {
+                        //next
+                        ++ptr;
+                        //varname
+                        std::string varname = conf_name(ptr);
+                        //find
+                        if(!context.exists(varname))
+                        {
+                            std::cerr << line << ": \'" << varname << "\' is not valid variable" << std::endl;
+                            return false;
+                        }
+                        //value
+                        std::string value = context.get(varname);
+                        //parse
+                        layer_sizes.push_back( conf_string_to_int_no_skip(value.c_str()) );
+                    }
+                    //more than 0
+                    if (layer_sizes.back() <= 0)
+                    {
+                        std::cerr << line << ": layer size (" << layer_sizes.back() << ") not valid " << std::endl;
                         return false;
                     }
-                    //value
-                    std::string value = context.get(varname);
-                    //parse
-                    layer_size = conf_string_to_int_no_skip(value.c_str());
+                    //jump space
+                    conf_skip_line_space_and_comments(line, ptr);
                 }
-                //more than 0
-                if (layer_size <= 0)
-                {
-                    std::cerr << line << ": layer size (" << layer_size << ") not valid " << std::endl;
-                    return false;
-                }
-                //jump space
-                conf_skip_line_space_and_comments(line, ptr);
                 //activation function (default linear)
                 std::string layer_af;
                 //is not a variable?
@@ -1263,7 +1261,7 @@ namespace Denn
                 }
                 //add
                 params.m_hidden_layers_types.get().push_back(layer_type);
-                params.m_hidden_layers.get().push_back(layer_size);
+                for(size_t size : layer_sizes) params.m_hidden_layers.get().push_back(size);
                 params.m_activation_functions.get().push_back(layer_af);
             }
             else if (layer_type == "out" || layer_type == "output")

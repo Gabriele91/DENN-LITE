@@ -12,15 +12,17 @@ namespace Denn
 		///////////////////////////////////////
 		RecurrentLayer
 		(
-			  int features
-			, int clazz
+			  size_t features
+			, size_t iweight
+			, size_t output
 		);
 
 		RecurrentLayer
 		(
 			  ActivationFunction active_function
 			, size_t features
-			, size_t clazz
+			, size_t iweight
+			, size_t output
 		);
 
 		RecurrentLayer
@@ -28,7 +30,7 @@ namespace Denn
 			  ActivationFunction active_function
 			, const std::vector< size_t >& input_output
 		)
-		: RecurrentLayer(active_function, input_output[0], input_output[1])
+		: RecurrentLayer(active_function, input_output[0], input_output[1], input_output[2])
 		{
 
 		}
@@ -78,5 +80,5 @@ namespace Denn
         //function
 		ActivationFunction m_activation_function{ nullptr };
 	};
-	REGISTERED_LAYER(RecurrentLayer, "recurrent")
+	REGISTERED_LAYER(RecurrentLayer, "recurrent", 2)
 }

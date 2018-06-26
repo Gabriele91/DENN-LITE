@@ -10,30 +10,32 @@ namespace Denn
 	///////////////////////////////////////	
 	RecurrentLayer::RecurrentLayer
 	(
-		  int features
-		, int iweigth
+		  size_t features
+		, size_t weights
+		, size_t output
 	)
 	{		
-        U().resize(features, iweigth);
-		W().resize(iweigth, iweigth);
-		B().resize(1, iweigth);
-		V().resize(iweigth, features);
-		C().resize(1, features);
+        U().resize(features, weights);
+		W().resize(weights, weights);
+		B().resize(1, weights);
+		V().resize(weights, output);
+		C().resize(1, output);
 	}
 
 	RecurrentLayer::RecurrentLayer
 	(
 		  ActivationFunction active_function
 		, size_t features
-		, size_t iweigth
+		, size_t weights
+		, size_t output
 	)
 	{
 		set_activation_function(active_function);
-        U().resize(features, iweigth);
-		W().resize(iweigth, iweigth);
-		B().resize(1, iweigth);
-		V().resize(iweigth, features);
-		C().resize(1, features);
+        U().resize(features, weights);
+		W().resize(weights, weights);
+		B().resize(1, weights);
+		V().resize(weights, output);
+		C().resize(1, output);
 	}
 	//////////////////////////////////////////////////
 	Matrix& RecurrentLayer::U() { return m_U; }

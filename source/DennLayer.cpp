@@ -25,9 +25,14 @@ namespace Denn
 
 	///////////////////////////////////////////////////////////////////////////
 	// Factory
-	static std::map< std::string, LayerFactory::CreateObject >& lr_map()
+	struct LayerInfoLayer
 	{
-		static std::map< std::string, LayerFactory::CreateObject > lr_map;
+		size_t m_n_input{0};
+		LayerFactory::CreateObject m_create;
+	}; 
+	static std::map< std::string, LayerInfoLayer >& lr_map()
+	{
+		static std::map< std::string, LayerInfoLayer > lr_map;
 		return lr_map;
 	}
 	
@@ -37,12 +42,19 @@ namespace Denn
 		//find
 		auto it = lr_map().find(name);
 		//return
-		return it == lr_map().end() ? nullptr : it->second(active_function,input_output);
+		return it == lr_map().end() ? nullptr : it->second.m_create(active_function,input_output);
 	}
-	void LayerFactory::append(const std::string& name, CreateObject fun, size_t size)
+	void LayerFactory::append(const std::string& name, CreateObject fun, size_t ninput, size_t size)
 	{
 		//add
-		lr_map()[name] = fun;
+		lr_map()[name] = LayerInfoLayer{ ninput, fun };
+	}		
+	size_t LayerFactory::input_size(const std::string& name)
+	{
+		//find
+		auto it = lr_map().find(name);
+		//return
+		return it == lr_map().end() ? 0 : it->second.m_n_input;
 	}
 	//list of methods
 	std::vector< std::string > LayerFactory::list_of_layers()

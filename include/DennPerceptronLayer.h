@@ -68,5 +68,5 @@ namespace Denn
 		Matrix         m_baias;
 		ActivationFunction m_activation_function{ nullptr };
 	};
-	REGISTERED_LAYER(PerceptronLayer, "perceptron")
+	REGISTERED_LAYER(PerceptronLayer, "perceptron", 1)
 }

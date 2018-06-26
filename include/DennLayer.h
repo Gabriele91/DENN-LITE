@@ -93,7 +93,8 @@ namespace Denn
 
 		//public
 		static Layer::SPtr create(const std::string& name, ActivationFunction active_function, const std::vector<size_t>& input_output);
-		static void append(const std::string& name, CreateObject fun, size_t size);
+		static void append(const std::string& name, CreateObject fun, size_t ninput, size_t size);
+		static size_t input_size(const std::string& name);
 
 		//list of methods
 		static std::vector< std::string > list_of_layers();
@@ -114,26 +115,26 @@ namespace Denn
 			return (std::make_shared< T >(active_function, input_output))->get_ptr();
 		}
 
-		LayerItem(const std::string& name, size_t size)
+		LayerItem(const std::string& name, size_t ninput, size_t size)
 		{
-			LayerFactory::append(name, LayerItem<T>::create, size);
+			LayerFactory::append(name, LayerItem<T>::create, ninput, size);
 		}
 
 	public:
 
 
-		static LayerItem<T>& instance(const std::string& name, size_t size)
+		static LayerItem<T>& instance(const std::string& name, size_t ninput, size_t size)
 		{
-			static LayerItem<T> objectItem(name, size);
+			static LayerItem<T> objectItem(name, ninput, size);
 			return objectItem;
 		}
 
 	};
 
-	#define REGISTERED_LAYER(class_,name_)\
+	#define REGISTERED_LAYER(class_,name_ , ninput_)\
 	namespace\
 	{\
-		static const LayerItem<class_>& _Denn_ ## class_ ## _LayerItem = LayerItem<class_>::instance( name_, sizeof(class_) );\
+		static const LayerItem<class_>& _Denn_ ## class_ ## _LayerItem = LayerItem<class_>::instance( name_, ninput_, sizeof(class_) );\
 	}
 
 }

@@ -21,7 +21,7 @@ namespace Denn
 	(
 		  size_t n_features
 		, size_t n_class
-		, const std::vector<unsigned int>& hidden_layers
+		,       std::vector<unsigned int> hidden_layers
 		, const std::vector<std::string>& active_layers
 		, const std::vector<std::string>& types_layers
 		, const std::string& active_output
