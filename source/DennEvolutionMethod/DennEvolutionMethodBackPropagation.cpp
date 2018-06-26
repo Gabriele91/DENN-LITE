@@ -29,8 +29,8 @@ namespace Denn
 			//apply on parent
 			dpopulation.parents()[i_target]->m_network.backpropagation_gradient_descent
 			(
-				  m_algorithm.current_batch().m_features
-				, m_algorithm.current_batch().m_labels
+				  m_algorithm.current_batch().features()
+				, m_algorithm.current_batch().labels()
 				, m_learning_rate
 				, m_regularize
 			);

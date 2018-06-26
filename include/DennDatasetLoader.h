@@ -31,22 +31,38 @@ namespace Denn
 		}
 	});
 
+	/* Version 1 */
 	ASPACKED(struct DataSetTestHeader
 	{
-		unsigned int m_n_row;
+		unsigned int m_n_row{ 0 };
 	});
 
 	ASPACKED(struct DataSetValidationHeader
 	{
-		unsigned int m_n_row;
+		unsigned int m_n_row{ 0 };
 	});
 
 	ASPACKED(struct DataSetTrainHeader
 	{
-		unsigned int m_batch_id;
-		unsigned int m_n_row;
+		unsigned int m_batch_id{ 0 };
+		unsigned int m_n_row{ 0 };
 	});
 
+	/* Version 2 */
+	ASPACKED(struct DataSetTestHeaderV2  : public DataSetTestHeader
+	{
+		unsigned int m_n_depth{ 1 };
+	});
+
+	ASPACKED(struct DataSetValidationHeaderV2 : public DataSetValidationHeader
+	{
+		unsigned int m_n_depth{ 1 };
+	});
+
+	ASPACKED(struct DataSetTrainHeaderV2 : public DataSetTrainHeader
+	{
+		unsigned int m_n_depth{ 1 };
+	});
 
 	class DataSetLoader
 	{
@@ -60,7 +76,7 @@ namespace Denn
 
 		virtual const DataSetHeader& get_main_header_info() const  = 0;
 
-		virtual const DataSetTrainHeader& get_last_batch_info() const  = 0;
+		virtual const DataSetTrainHeaderV2& get_last_batch_info() const  = 0;
 
 		///////////////////////////////////////////////////////////////////
 		// READ TEST SET
@@ -121,7 +137,7 @@ namespace Denn
 			return m_header;
 		}
 
-		const DataSetTrainHeader& get_last_batch_info() const override
+		const DataSetTrainHeaderV2& get_last_batch_info() const override
 		{
 			return m_train_header;
 		}
@@ -137,9 +153,15 @@ namespace Denn
 				//set file to test offset 
 				m_file.seek_set(m_header.m_test_offset);
 				//read header
-				m_file.read(&m_test_header, sizeof(DataSetTestHeader), 1);
+				switch(m_header.m_version)
+				{
+					default:
+					m_file.read(&m_test_header, sizeof(DataSetTestHeader), 1); break;
+					case 3:
+					m_file.read(&m_test_header, sizeof(DataSetTestHeaderV2), 1); break;
+				}
 				//read data
-				bool status = read(t_out, m_test_header.m_n_row);
+				bool status = read(t_out, m_test_header.m_n_row, m_test_header.m_n_depth);
 				//return back
 				m_file.seek_set(cur_pos);
 				//return
@@ -159,9 +181,15 @@ namespace Denn
 				//set file to validation offset 
 				m_file.seek_set(m_header.m_validation_offset);
 				//read header
-				m_file.read(&m_val_header, sizeof(DataSetValidationHeader), 1);
+				switch(m_header.m_version)
+				{
+					default:
+					m_file.read(&m_val_header, sizeof(DataSetValidationHeader), 1); break;
+					case 3:
+					m_file.read(&m_val_header, sizeof(DataSetValidationHeaderV2), 1); break;
+				}
 				//read data
-				bool status = read(t_out, m_val_header.m_n_row);
+				bool status = read(t_out, m_val_header.m_n_row,  m_test_header.m_n_depth);
 				//return back
 				m_file.seek_set(cur_pos);
 				//return
@@ -189,9 +217,15 @@ namespace Denn
 			if (is_open())
 			{
 				//read header
-				m_file.read(&m_train_header, sizeof(DataSetTrainHeader), 1);
+				switch(m_header.m_version)
+				{
+					default:
+					m_file.read(&m_train_header, sizeof(DataSetTrainHeader), 1); break;
+					case 3:
+					m_file.read(&m_train_header, sizeof(DataSetTrainHeaderV2), 1); break;
+				}
 				//read data
-				bool status = read(t_out, m_train_header.m_n_row);
+				bool status = read(t_out, m_train_header.m_n_row, m_train_header.m_n_depth);
 				//inc count 
 				++m_n_batch_read;
 				//if loop enable and batch is the last
@@ -219,15 +253,15 @@ namespace Denn
 
 	protected:
 
-		bool read(DataSet& t_out, const unsigned int size)
+		bool read(DataSet& t_out, const unsigned int size, const unsigned int depth)
 		{
 			if (t_out.get_data_type() == m_header.get_data_type())
 			{
 				switch(t_out.get_data_type())
 				{
-					case DataType::DT_FLOAT:  return template_read(*((DataSetX<float>*)(&t_out)),size);
-					case DataType::DT_DOUBLE: return template_read(*((DataSetX<double>*)(&t_out)),size);
-					case DataType::DT_LONG_DOUBLE: return template_read(*((DataSetX<long double>*)(&t_out)),size);
+					case DataType::DT_FLOAT:  return template_read(*((DataSetX<float>*)(&t_out)),size, depth);
+					case DataType::DT_DOUBLE: return template_read(*((DataSetX<double>*)(&t_out)),size, depth);
+					case DataType::DT_LONG_DOUBLE: return template_read(*((DataSetX<long double>*)(&t_out)),size, depth);
 					default: return false;
 				}
 			}
@@ -238,7 +272,7 @@ namespace Denn
 					case DataType::DT_FLOAT:
 					{
 						DataSetX<float> t_float;
-						bool success = template_read(t_float,size);
+						bool success = template_read(t_float, size, depth);
 						switch(t_out.get_data_type())
 						{
 							case DataType::DT_DOUBLE:
@@ -261,7 +295,7 @@ namespace Denn
 					case DataType::DT_DOUBLE:
 					{
 						DataSetX<double> t_double;
-						bool success = template_read(t_double,size);
+						bool success = template_read(t_double, size, depth);
 						switch(t_out.get_data_type())
 						{
 							case DataType::DT_FLOAT:
@@ -284,7 +318,7 @@ namespace Denn
 					case DataType::DT_LONG_DOUBLE:
 					{
 						DataSetX<long double> t_long_double;
-						bool success = template_read(t_long_double,size);
+						bool success = template_read(t_long_double, size, depth);
 						switch(t_out.get_data_type())
 						{
 							case DataType::DT_FLOAT:
@@ -310,25 +344,30 @@ namespace Denn
 		}
 
 		template < typename ScalarType >
-		bool template_read(DataSetX<ScalarType>& t_out, const unsigned int size)
+		bool template_read(DataSetX<ScalarType>& t_out, const unsigned int size, const unsigned int depth)
 		{
 			//equal type?
 			if (t_out.get_data_type() != m_header.get_data_type()) return false;
-			//alloc output 
-			//data are in row-major layour then the shape is traspose
-			t_out.m_features.resize(m_header.m_n_features, size);
-			//read features
-			m_file.read
-			(
-				 (void*)(t_out.data_features())
-				, t_out.features_rows()*t_out.features_cols() * sizeof(ScalarType)
-				, 1
-			);
-			//to column-major
-			t_out.m_features.transposeInPlace();
+			//alloc output
+			if(!t_out.features_depth()) t_out.features_vector().resize(depth);
+			//for depth
+			for(unsigned int d = 0; d != depth; ++d)
+			{
+				//data are in row-major layour then the shape is traspose
+				t_out.features(d).resize(m_header.m_n_features, size);
+				//read features
+				m_file.read
+				(
+					(void*)(t_out.data_features())
+					, t_out.features_rows()*t_out.features_cols() * sizeof(ScalarType)
+					, 1
+				);
+				//to column-major
+				t_out.features().transposeInPlace();
+			}
 			//alloc output
 			//data are in row-major layour then the shape is traspose
-			t_out.m_labels.resize(m_header.m_n_classes, size);
+			t_out.labels().resize(m_header.m_n_classes, size);
 			//read labels
 			m_file.read
 			(
@@ -337,17 +376,17 @@ namespace Denn
 				, 1
 			);
 			//to column-major
-			t_out.m_labels.transposeInPlace();
+			t_out.labels().transposeInPlace();
 			//
 			return true;
 		}
 
 		IO m_file;
-		size_t 					m_n_batch_read;
-		DataSetHeader           m_header;
-		DataSetTestHeader       m_test_header;
-		DataSetValidationHeader m_val_header;
-		DataSetTrainHeader      m_train_header;
+		size_t 					  m_n_batch_read;
+		DataSetHeader             m_header;
+		DataSetTestHeaderV2       m_test_header;
+		DataSetValidationHeaderV2 m_val_header;
+		DataSetTrainHeaderV2      m_train_header;
 	};
 
 	using DataSetLoaderSTD = DataSetLoaderT< IOFileWrapper::std_file    >;

@@ -10,23 +10,24 @@ namespace Denn
 		m_batch_size = batch_size;
 		m_batch_offset = rows_offset;
 		m_dataset->start_read_batch();
-		//init batch
-		//int features
-		m_batch.m_features.conservativeResize
-		(
-			m_batch_size
+		//allac cache (depth size 1 is need)
+		m_cache_batch.resize_depth(1);
+		//alloc
+		m_batch.features_conservative_resize(
+			  m_batch_size
 			, m_dataset->get_main_header_info().m_n_features
+			, m_cache_batch.features_depth()
 		);
 		//mask
-		m_batch.m_mask.conservativeResize
+		m_batch.mask().conservativeResize
 		(
 			  1
 			, m_dataset->get_main_header_info().m_n_features
 		);
 		//init labels
-		m_batch.m_labels.conservativeResize
+		m_batch.labels().conservativeResize
 		(
-			m_batch_size
+			  m_batch_size
 			, m_dataset->get_main_header_info().m_n_classes
 		);
 		//read
@@ -48,48 +49,43 @@ namespace Denn
 	DataSetScalar& TestSetStream::read_batch(size_t n_rows)
 	{
 		//test
-		denn_assert(n_rows <= m_batch.m_features.size());
+		denn_assert(n_rows <= m_batch.features().size());
 		//olready read
 		const size_t c_features = m_dataset->get_main_header_info().m_n_features;
 		const size_t c_labels = m_dataset->get_main_header_info().m_n_classes;
 		size_t offset = 0;
 		size_t n_read = 0;
-		#if 0
-		//swift
-		if (n_rows < m_batch.m_features.rows())
+		
+		if (n_rows < m_batch.features().rows())
 		{
 			//put the last N values on the top
-			m_batch.m_features = Denn::shift_by_rows(m_batch.m_features, m_batch.m_features.size() - n_rows);
-			m_batch.m_labels = Denn::shift_by_rows(m_batch.m_labels, m_batch.m_labels.size() - n_rows);
+			for(int i = 0; i != m_batch.features_depth(); ++i)
+			{
+				m_batch.features(i) = Denn::shift_top(m_batch.features(i), n_rows);
+			}
+			m_batch.labels() = Denn::shift_top(m_batch.labels(), n_rows);
 			//start to n_rows
-			offset = n_rows;
+			offset = m_batch.features().rows() - n_rows;
 		}
-		#else 
-		if (n_rows < m_batch.m_features.rows())
-		{
-			//put the last N values on the top
-			m_batch.m_features = Denn::shift_top(m_batch.m_features, n_rows);
-			m_batch.m_labels = Denn::shift_top(m_batch.m_labels, n_rows);
-			//start to n_rows
-			offset = m_batch.m_features.rows() - n_rows;
-		}
-		#endif
 		//copy last
-		if (m_cache_rows_read < m_cache_batch.m_features.rows())
+		if (m_cache_rows_read < m_cache_batch.features().rows())
 		{
 			//remaning
-			size_t remaning = m_cache_batch.m_features.rows() - m_cache_rows_read;
+			size_t remaning = m_cache_batch.features().rows() - m_cache_rows_read;
 			size_t to_read = std::min(remaning, n_rows);
-			//read
-			m_batch.m_features.block(offset, 0, to_read, c_features) = m_cache_batch.m_features.block(m_cache_rows_read, 0, to_read, c_features);
-			m_batch.m_labels.block(offset, 0, to_read, c_labels) = m_cache_batch.m_labels.block(m_cache_rows_read, 0, to_read, c_labels);
+			//read			
+			for(int i = 0; i != m_cache_batch.features_depth(); ++i)
+			{
+				m_batch.features(i).block(offset, 0, to_read, c_features) = m_cache_batch.features(i).block(m_cache_rows_read, 0, to_read, c_features);
+			}
+			m_batch.labels().block(offset, 0, to_read, c_labels) = m_cache_batch.labels().block(m_cache_rows_read, 0, to_read, c_labels);
 			//move
 			n_read += to_read;
 			offset += to_read;
 			m_cache_rows_read += to_read;
 		}
 		//first read?
-		bool is_first_read = !m_cache_batch.m_features.rows();
+		bool is_first_read = !m_cache_batch.features().rows();
 		//copy next
 		while (n_read < n_rows)
 		{
@@ -101,13 +97,25 @@ namespace Denn
 			//copy mask
 			if(is_first_read)
 			{
-				m_batch.m_mask = m_cache_batch.m_mask;
+				m_batch.mask() = m_cache_batch.mask();
 			}
 			//compute n rows to read
-			size_t to_read = std::min<size_t>(m_cache_batch.m_features.rows(), read_remaning);
+			size_t to_read = std::min<size_t>(m_cache_batch.features().rows(), read_remaning);
+			//alloc if need
+			if(m_batch.features_depth()!=m_cache_batch.features_depth())
+			{
+				m_batch.features_conservative_resize(
+					  m_batch_size
+					, m_cache_batch.features_cols()
+					, m_cache_batch.features_depth()
+				);
+			}
 			//read
-			m_batch.m_features.block(offset, 0, to_read, c_features) = m_cache_batch.m_features.topRows(to_read);
-			m_batch.m_labels.block(offset, 0, to_read, c_labels) = m_cache_batch.m_labels.topRows(to_read);
+			for(int i = 0; i != m_cache_batch.features_depth(); ++i)
+			{
+				m_batch.features(i).block(offset, 0, to_read, c_features) = m_cache_batch.features(i).topRows(to_read);
+			}
+			m_batch.labels().block(offset, 0, to_read, c_labels) = m_cache_batch.labels().topRows(to_read);
 			//move
 			n_read += to_read;
 			offset += to_read;

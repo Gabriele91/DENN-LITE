@@ -26,7 +26,7 @@ namespace NRam
 
 		const DataSetHeader& get_main_header_info() const override;
 
-		const DataSetTrainHeader& get_last_batch_info() const override;
+		const DataSetTrainHeaderV2& get_last_batch_info() const override;
 
 		///////////////////////////////////////////////////////////////////
 		// READ TEST SET
@@ -53,7 +53,7 @@ namespace NRam
 		DataSetScalar    m_test;
 
 		DataSetHeader       m_fake_header;
-		DataSetTrainHeader  m_fake_train_header;
+		DataSetTrainHeaderV2  m_fake_train_header;
 	};
 
 }

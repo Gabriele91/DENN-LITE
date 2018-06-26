@@ -21,17 +21,20 @@ namespace NRam
 		auto validation = task();
 		auto test = task();
 
-		m_train.m_features = std::get<0>(train);
-		m_train.m_labels   = std::get<1>(train);
-		m_train.m_mask     = std::get<2>(train);
+		m_train.features_vector().resize(1);
+		m_train.features() = std::get<0>(train);
+		m_train.labels()   = std::get<1>(train);
+		m_train.mask()     = std::get<2>(train);
 
-		m_validation.m_features = std::get<0>(validation);
-		m_validation.m_labels   = std::get<1>(validation);
-		m_validation.m_mask     = std::get<2>(validation);
+		m_validation.features_vector().resize(1);
+		m_validation.features() = std::get<0>(validation);
+		m_validation.labels()   = std::get<1>(validation);
+		m_validation.mask()     = std::get<2>(validation);
 
-		m_test.m_features = std::get<0>(test);
-		m_test.m_labels   = std::get<1>(test);
-		m_test.m_mask     = std::get<2>(test);
+		m_test.features_vector().resize(1);
+		m_test.features() = std::get<0>(test);
+		m_test.labels()   = std::get<1>(test);
+		m_test.mask()     = std::get<2>(test);
 		
 		return true;
 	}
@@ -51,7 +54,7 @@ namespace NRam
 		return m_fake_header;
 	}
 
-	const DataSetTrainHeader& DataSetTask::get_last_batch_info() const 
+	const DataSetTrainHeaderV2& DataSetTask::get_last_batch_info() const 
 	{
 		return m_fake_train_header;
 	}

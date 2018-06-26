@@ -11,13 +11,13 @@ namespace Denn
 	RecurrentLayer::RecurrentLayer
 	(
 		  int features
-		, int clazz
+		, int iweigth
 	)
 	{		
-        U().resize(features, clazz);
-		W().resize(clazz, clazz);
-		B().resize(1, clazz);
-		V().resize(clazz, features);
+        U().resize(features, iweigth);
+		W().resize(iweigth, iweigth);
+		B().resize(1, iweigth);
+		V().resize(iweigth, features);
 		C().resize(1, features);
 	}
 
@@ -25,14 +25,14 @@ namespace Denn
 	(
 		  ActivationFunction active_function
 		, size_t features
-		, size_t clazz
+		, size_t iweigth
 	)
 	{
 		set_activation_function(active_function);
-        U().resize(features, clazz);
-		W().resize(clazz, clazz);
-		B().resize(1, clazz);
-		V().resize(clazz, features);
+        U().resize(features, iweigth);
+		W().resize(iweigth, iweigth);
+		B().resize(1, iweigth);
+		V().resize(iweigth, features);
 		C().resize(1, features);
 	}
 	//////////////////////////////////////////////////
