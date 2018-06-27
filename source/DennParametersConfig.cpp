@@ -1196,6 +1196,7 @@ namespace Denn
                 conf_skip_line_space_and_comments(line, ptr);
                 //get int
                 std::vector<size_t> layer_sizes;
+                layer_sizes.reserve(n_input);
                 //is not a variable?
                 for(size_t p=0; p < n_input; ++p)
                 {
@@ -1223,7 +1224,7 @@ namespace Denn
                     //more than 0
                     if (layer_sizes.back() <= 0)
                     {
-                        std::cerr << line << ": layer size (" << layer_sizes.back() << ") not valid " << std::endl;
+                        std::cerr << line << ": layer input size ["<< p <<"] = " << layer_sizes.back() << "; not valid " << std::endl;
                         return false;
                     }
                     //jump space
