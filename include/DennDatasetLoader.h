@@ -277,13 +277,17 @@ namespace Denn
 						{
 							case DataType::DT_DOUBLE:
 							{
-								t_out.features_as_type<double>() = t_float.features_as_type<float>().cast<double>();
+								t_out.resize_depth(depth);
+								for(size_t d = 0; d != depth; ++d)
+									t_out.features_as_type<double>(d) = t_float.features_as_type<float>(d).cast<double>();
 								t_out.labels_as_type<double>()   = t_float.labels_as_type<float>().cast<double>();
 							}
 							break;
 							case DataType::DT_LONG_DOUBLE: 
 							{
-								t_out.features_as_type<long double>() = t_float.features_as_type<float>().cast<long double>();
+								t_out.resize_depth(depth);
+								for(size_t d = 0; d != depth; ++d)
+									t_out.features_as_type<long double>(d) = t_float.features_as_type<float>(d).cast<long double>();
 								t_out.labels_as_type<long double>()   = t_float.labels_as_type<float>().cast<long double>();
 							}
 							break;
@@ -300,13 +304,17 @@ namespace Denn
 						{
 							case DataType::DT_FLOAT:
 							{
-								t_out.features_as_type<float>() = t_double.features_as_type<double>().cast<float>();
+								t_out.resize_depth(depth);
+								for(size_t d = 0; d != depth; ++d)
+									t_out.features_as_type<float>(d) = t_double.features_as_type<double>(d).cast<float>();
 								t_out.labels_as_type<float>()   = t_double.labels_as_type<double>().cast<float>();
 							}
 							break;
 							case DataType::DT_LONG_DOUBLE: 
 							{
-								t_out.features_as_type<long double>() = t_double.features_as_type<double>().cast<long double>();
+								t_out.resize_depth(depth);
+								for(size_t d = 0; d != depth; ++d)
+									t_out.features_as_type<long double>(d) = t_double.features_as_type<double>(d).cast<long double>();
 								t_out.labels_as_type<long double>()   = t_double.labels_as_type<double>().cast<long double>();
 							}
 							break;
@@ -323,13 +331,17 @@ namespace Denn
 						{
 							case DataType::DT_FLOAT:
 							{
-								t_out.features_as_type<float>() = t_long_double.features_as_type<long double>().cast<float>();
+								t_out.resize_depth(depth);
+								for(size_t d = 0; d != depth; ++d)
+									t_out.features_as_type<float>(d) = t_long_double.features_as_type<long double>(d).cast<float>();
 								t_out.labels_as_type<float>()   = t_long_double.labels_as_type<long double>().cast<float>();
 							}
 							break;
 							case DataType::DT_DOUBLE: 
 							{
-								t_out.features_as_type<double>() = t_long_double.features_as_type<long double>().cast<double>();
+								t_out.resize_depth(depth);
+								for(size_t d = 0; d != depth; ++d)
+									t_out.features_as_type<double>(d) = t_long_double.features_as_type<long double>(d).cast<double>();
 								t_out.labels_as_type<double>()   = t_long_double.labels_as_type<long double>().cast<double>();
 							}
 							break;
@@ -349,7 +361,7 @@ namespace Denn
 			//equal type?
 			if (t_out.get_data_type() != m_header.get_data_type()) return false;
 			//alloc output
-			if(!t_out.features_depth()) t_out.features_vector().resize(depth);
+			if(t_out.features_depth() != depth) t_out.resize_depth(depth);
 			//for depth
 			for(unsigned int d = 0; d != depth; ++d)
 			{
@@ -358,12 +370,12 @@ namespace Denn
 				//read features
 				m_file.read
 				(
-					(void*)(t_out.data_features())
-					, t_out.features_rows()*t_out.features_cols() * sizeof(ScalarType)
+					(void*)(t_out.data_features(d))
+					, t_out.features_rows(d)*t_out.features_cols(d) * sizeof(ScalarType)
 					, 1
 				);
 				//to column-major
-				t_out.features().transposeInPlace();
+				t_out.features(d).transposeInPlace();
 			}
 			//alloc output
 			//data are in row-major layour then the shape is traspose
