@@ -12,7 +12,7 @@ namespace Denn
         virtual bool minimize() const { return false; }
         virtual Scalar operator () (const Individual& individual, const DataSet& dataset)
         {
-            auto x = individual.m_network.apply(dataset.features());
+            auto x = individual.m_network.apply(dataset.features_vector());
             return CostFunction::accuracy(x,dataset.labels());
         }
 		
@@ -26,7 +26,7 @@ namespace Denn
         virtual bool minimize() const { return true; }
         virtual Scalar operator () (const Individual& individual, const DataSet& dataset)
         {
-            auto x = individual.m_network.apply(dataset.features());
+            auto x = individual.m_network.apply(dataset.features_vector());
             return CostFunction::inverse_accuracy(x,dataset.labels());
         }
 		
