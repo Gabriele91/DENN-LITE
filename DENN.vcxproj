@@ -52,6 +52,7 @@
     <ClInclude Include="include\DennNRamGate.h" />
     <ClInclude Include="include\DennNRam.h" />
     <ClInclude Include="include\DennNRamTask.h" />
+    <ClInclude Include="include\DennRecurrentLayer.h" />
     <ClInclude Include="include\DennTestSetStream.h" />
     <ClInclude Include="include\DennDump.h" />
     <ClInclude Include="include\DennEvolutionMethod.h" />
@@ -67,6 +68,10 @@
     <ClInclude Include="include\DennPopulation.h" />
     <ClInclude Include="include\DennRuntimeOutput.h" />
     <ClInclude Include="include\DennSerializeOutput.h" />
+    <ClInclude Include="include\DennUtilitiesMath.h" />
+    <ClInclude Include="include\DennUtilitiesMatrix.h" />
+    <ClInclude Include="include\DennUtilitiesString.h" />
+    <ClInclude Include="include\DennUtilitiesVector.h" />
     <ClInclude Include="include\DennVariant.h" />
     <ClInclude Include="include\DennVersion.h" />
     <ClInclude Include="include\DennIOFileWrapper.h" />
@@ -146,6 +151,7 @@
     <ClCompile Include="source\DennParametersJson.cpp" />
     <ClCompile Include="source\DennPerceptronLayer.cpp" />
     <ClCompile Include="source\DennPopulation.cpp" />
+    <ClCompile Include="source\DennRecurrentLayer.cpp" />
     <ClCompile Include="source\DennRuntimeOutputFactory.cpp" />
     <ClCompile Include="source\DennRuntimeOutputItems.cpp" />
     <ClCompile Include="source\DennSerializeOutputFactory.cpp" />

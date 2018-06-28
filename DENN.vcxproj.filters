@@ -162,6 +162,21 @@
     <ClInclude Include="include\DennParameterInfo.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="include\DennRecurrentLayer.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DennUtilitiesMath.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DennUtilitiesMatrix.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DennUtilitiesString.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DennUtilitiesVector.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\DennIndividual.cpp">
@@ -397,6 +412,9 @@
     </ClCompile>
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodMABaioShaDE.cpp">
       <Filter>Source\DennEvolutionMethod</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennRecurrentLayer.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
