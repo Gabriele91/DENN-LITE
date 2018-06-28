@@ -14,7 +14,7 @@ namespace Denn
         {
 			return CostFunction::cross_entropy(
                   dataset.labels()
-                , individual.m_network.apply(dataset.features())
+                , individual.m_network.apply(dataset.features_vector())
 			);
         }
     };
@@ -29,7 +29,7 @@ namespace Denn
         {
 			return CostFunction::cross_entropy(
                   dataset.labels()
-                , CostFunction::softmax_row_samples<Matrix>(individual.m_network.apply(dataset.features()))
+                , CostFunction::softmax_row_samples<Matrix>(individual.m_network.apply(dataset.features_vector()))
 			);
         }
     };
@@ -44,7 +44,7 @@ namespace Denn
         {
 			return CostFunction::cross_entropy_logistic_regression(
 					  dataset.labels()
-					, individual.m_network.apply(dataset.features())
+					, individual.m_network.apply(dataset.features_vector())
 			);
         }
     };
@@ -59,7 +59,7 @@ namespace Denn
         {
 			return CostFunction::cross_entropy_logistic_regression(
 					  dataset.labels()
-					, CostFunction::softmax_row_samples<Matrix>(individual.m_network.apply(dataset.features()))
+					, CostFunction::softmax_row_samples<Matrix>(individual.m_network.apply(dataset.features_vector()))
 			);
         }
     };

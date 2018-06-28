@@ -1,3 +1,4 @@
+#include <cmath>
 #include "DennCostFunction.h"
 #include "DennActivationFunction.h"
 #include "DennRecurrentLayer.h"
@@ -82,10 +83,15 @@ namespace Denn
         {
             //get state
             h = ((U() * inputs[t]) +  (W() * h)).rowwise() + b_bais;
-            if (m_activation_function) h = m_activation_function(h);
+			#if 0
+            	if (m_activation_function) h = m_activation_function(h);
+			#else
+            	h = h.unaryExpr(&Denn::PointFunction::tanh<typename Matrix::Scalar>);
+			#endif
             //output
             Matrix out = (V()*h).rowwise() + c_bais;
-            o.push_back(CostFunction::softmax_row_samples(out));
+			if (m_activation_function) out = m_activation_function(out);
+            o.push_back(out);
         }
         return o;
     }

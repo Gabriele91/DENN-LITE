@@ -43,6 +43,7 @@ public:
 	}
 	/////////////////////////////////////////////////////////////////////////
 	Matrix apply(const Matrix& input) const;
+	Matrix apply(const std::vector< Matrix >& input) const;
     //pointer to context
 	using BackpropagationDelta    = std::vector< Matrix >;
 	using BackpropagationGradient = std::vector< std::vector< Matrix > >;

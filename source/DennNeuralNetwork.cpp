@@ -31,6 +31,20 @@ namespace Denn
 		return *this;
 	}
 	/////////////////////////////////////////////////////////////////////////
+	Matrix NeuralNetwork::apply(const std::vector< Matrix >& input) const
+	{
+		//no layer?
+		denn_assert(m_layers.size());
+		//input layer
+		auto output = m_layers[0]->apply(input);
+		//hidden layers
+		for (size_t i = 1; i < m_layers.size(); ++i)
+		{
+			output = m_layers[i]->apply(output);
+		}
+		//return
+		return output.back();
+	}	
 	Matrix NeuralNetwork::apply(const Matrix& input) const
 	{
 		//no layer?
