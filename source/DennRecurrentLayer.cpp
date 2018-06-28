@@ -2,9 +2,7 @@
 #include "DennCostFunction.h"
 #include "DennActivationFunction.h"
 #include "DennRecurrentLayer.h"
-//http://\
-  www.wildml.com/2015/09/\
-  recurrent-neural-networks-tutorial-part-2-implementing-a-language-model-rnn-with-python-numpy-and-theano/
+//http://www.wildml.com/2015/09/recurrent-neural-networks-tutorial-part-2-implementing-a-language-model-rnn-with-python-numpy-and-theano/
 
 namespace Denn
 {
@@ -71,25 +69,28 @@ namespace Denn
 	}
     Layer::VMatrix  RecurrentLayer::apply(const VMatrix& inputs) const
     {
-		//alias
-		const Eigen::Map<RowVector>& b_bais = Eigen::Map<RowVector>((Scalar*)B().data(), B().cols()*B().rows());
-		const Eigen::Map<RowVector>& c_bais = Eigen::Map<RowVector>((Scalar*)C().data(), C().cols()*C().rows());
-        //outputs
+		//alias		
+		const Eigen::Map<ColVector>& b_bais_c = Eigen::Map<ColVector>((Scalar*)B().data(), B().cols()*B().rows());
+		const Eigen::Map<RowVector>& b_bais_r = Eigen::Map<RowVector>((Scalar*)B().data(), B().cols()*B().rows());
+		const Eigen::Map<ColVector>& c_bais_c = Eigen::Map<ColVector>((Scalar*)C().data(), C().cols()*C().rows());
+		const Eigen::Map<RowVector>& c_bais_r = Eigen::Map<RowVector>((Scalar*)C().data(), C().cols()*C().rows());
+		//outputs
         Layer::VMatrix o;
         //h0
-        Matrix h = Matrix::Zero(inputs.size(), inputs[0].rows()); 
+        Matrix h = Matrix::Zero(inputs[0].rows(), W().cols());
         //
         for(size_t t = 0; t!=inputs.size(); ++t)
         {
             //get state
-            h = ((U() * inputs[t]) +  (W() * h)).rowwise() + b_bais;
+			auto hW = h * W();
+			h = (inputs[t] * U() + hW).rowwise() + b_bais_r;
 			#if 0
             	if (m_activation_function) h = m_activation_function(h);
 			#else
             	h = h.unaryExpr(&Denn::PointFunction::tanh<typename Matrix::Scalar>);
 			#endif
             //output
-            Matrix out = (V()*h).rowwise() + c_bais;
+			Matrix out = (h * V()).rowwise() + c_bais_r;
 			if (m_activation_function) out = m_activation_function(out);
             o.push_back(out);
         }

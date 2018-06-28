@@ -98,13 +98,15 @@ namespace Denn
 	{ 
 		//input of next layer
 		size_t input_size = n_features;
+		size_t i = 0;
+		size_t arg = 0;
 		//layer gen
-		auto new_layer = [&](size_t& i) -> Layer::SPtr 
+		auto new_layer = [&]() -> Layer::SPtr 
 		{ 
 			//get activation function
 			auto function = (i < active_layers.size()) ? ActivationFunctionFactory::get(active_layers[i]) : nullptr;
 			//build layer
-			if(types_layers.size() <= i)
+			if(i < types_layers.size())
 			{
 				//get size
 				size_t size_input = LayerFactory::input_size(types_layers[i]);
@@ -115,16 +117,17 @@ namespace Denn
 				//add others valus
 				while(size_input--)
 				{ 
-					if(hidden_layers.size() <= i) return nullptr; 
-					input.push_back(hidden_layers[++i]);
+					if(hidden_layers.size() <= arg) return nullptr;
+					input.push_back(hidden_layers[arg++]);
 				}
+				//update
+				input_size = input.back();
 				//build input
 				return LayerFactory::create(
-					  types_layers[i]
+					  types_layers[i++] //get type and go to next layer
 					, function
 					, input
 				);
-				input_size = hidden_layers[i];
 			}
 			return nullptr; 
 		};	
@@ -133,12 +136,11 @@ namespace Denn
 		//push all hidden layers
 		if (hidden_layers.size())
 		{
-			size_t i = 0;
-			Layer::SPtr layer_to_add = nullptr;
+			Layer::SPtr layer = nullptr;
 			//add hiddens
-			while ( (i != hidden_layers.size() - 1) && (layer_to_add = new_layer(i)).get() )
+			while ((layer = new_layer()).get())
 			{
-				nn.add(layer_to_add);
+				nn.add(layer);
 			}
 		}
 		//add last layer

@@ -189,7 +189,7 @@ namespace Denn
 					m_file.read(&m_val_header, sizeof(DataSetValidationHeaderV2), 1); break;
 				}
 				//read data
-				bool status = read(t_out, m_val_header.m_n_row,  m_test_header.m_n_depth);
+				bool status = read(t_out, m_val_header.m_n_row, m_val_header.m_n_depth);
 				//return back
 				m_file.seek_set(cur_pos);
 				//return

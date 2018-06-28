@@ -1,5 +1,7 @@
+#include <iostream> 
 #include "DennNeuralNetwork.h"
 #include "DennCostFunction.h"
+#include "DennDump.h"
 namespace Denn
 {	
 	////////////////////////////////////////////////////////////////
@@ -15,7 +17,7 @@ namespace Denn
 		//copy all layers
 		for (size_t i = 0; i != nn.size(); ++i)
 		{
-			m_layers.push_back(nn[i].copy()->get_ptr());
+			m_layers.push_back(nn[i].copy());
 		}
 	}
 	NeuralNetwork& NeuralNetwork::operator= (const NeuralNetwork & nn)
@@ -25,7 +27,7 @@ namespace Denn
 		//copy all layers
 		for (size_t i = 0; i != nn.size(); ++i)
 		{
-			m_layers.push_back(nn[i].copy()->get_ptr());
+			m_layers.push_back(nn[i].copy());
 		}
 		//self return
 		return *this;
@@ -34,7 +36,7 @@ namespace Denn
 	Matrix NeuralNetwork::apply(const std::vector< Matrix >& input) const
 	{
 		//no layer?
-		denn_assert(m_layers.size());
+		denn_assert(m_layers.size()); 
 		//input layer
 		auto output = m_layers[0]->apply(input);
 		//hidden layers

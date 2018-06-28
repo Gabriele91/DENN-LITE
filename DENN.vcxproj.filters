@@ -416,6 +416,9 @@
     <ClCompile Include="source\DennRecurrentLayer.cpp">
       <Filter>Source</Filter>
     </ClCompile>
+    <ClCompile Include="source\DennInstance\DennDefaultInstance2.cpp">
+      <Filter>Source\DennInstance</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="tests\run_bench.sh">
