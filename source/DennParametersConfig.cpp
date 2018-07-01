@@ -1,6 +1,7 @@
 #include "DennParameters.h"
 #include "DennConstants.h"
 #include "DennLayer.h"
+#include "DennInstanceUtils.h"
 #include <string>
 #include <cctype>
 #include <unordered_map>
@@ -521,6 +522,7 @@ namespace Denn
 			//void
 			bool is_false() { return is_number() && !m_number; }
 			bool is_true() { return is_string() || m_number; }
+			//cast
 			//str
 			std::string str() const 
 			{
@@ -530,6 +532,14 @@ namespace Denn
 					? std::to_string(long(m_number))
 					: std::to_string(m_number);
 			}
+			//number
+			double number() const
+			{
+				const char* str_ptr = m_str.data();
+				return is_number()
+					? m_number
+					: conf_string_to_double(str_ptr);
+			}
 		};
 		//alias
 		using ListString = std::vector < std::string >;
@@ -538,7 +548,7 @@ namespace Denn
 		using MapConstants = std::unordered_map < std::string, ExpValue >;
 		using MapFunctions = std::unordered_map < std::string, FunctionMath >;
 		//init
-		ConfExpParser(const VariableTable& table, size_t& line, const char* ptr)
+		ConfExpParser(const VariableTable& table, size_t line, const char* ptr)
 		: m_table(table)
 		, m_line(line)
 		, m_ptr(ptr)
@@ -562,6 +572,11 @@ namespace Denn
 		const char* get_ptr() const
 		{
 			return m_ptr;
+		}
+		//new line
+		size_t get_line() const
+		{
+			return m_line;
 		}
 
 	protected:
@@ -934,7 +949,7 @@ namespace Denn
 		}
 
 		//values
-		size_t&              m_line;
+		size_t               m_line;
 		const char*          m_ptr;
 		ListString           m_errors;
 		const VariableTable& m_table;
@@ -1041,6 +1056,7 @@ namespace Denn
 			if (exp.errors().size())
 			{
 				for (auto&& error : exp.errors()) m_errors.push_back(error);
+				//false
 				return false;
 			}
 			//get value
@@ -1052,6 +1068,7 @@ namespace Denn
 			for (; it != end; ++it) m_values.push_back(*it);
 			//move ptr
 			m_ptr = exp.get_ptr();
+			line  = exp.get_line();
 			//ok
 			return true;
 		}
@@ -1181,133 +1198,159 @@ namespace Denn
         {
             //it's close
             if((*ptr) == '}') return true;
+			//parser state
+			enum NetLineState
+			{
+				S_READ_TYPE,
+				S_READ_INPUT,
+				S_READ_ACTIVATIONS,
+				S_FINALIZE
+			};
+			NetLineState state = S_READ_TYPE;
             //layer type
-            std::string layer_type = conf_name(ptr);
+            std::string type = conf_name(ptr);
             //short cust
-            if( layer_type == "lp"  ||  layer_type == "layer_perceptron") layer_type = "perceptron";
-            if( layer_type == "lr"  ||  layer_type == "layer_recurrent") layer_type = "recurrent";
+            if(type == "lp"  || type == "layer_perceptron") type = "perceptron";
+            if(type == "lr"  || type == "layer_recurrent")  type = "recurrent";
             //exits
-            bool exists= LayerFactory::exists(layer_type);
+            bool exists= LayerFactory::exists(type);
             //type
             if (exists)
             {
-                size_t n_input = LayerFactory::input_size(layer_type);
-                //jump space
-                conf_skip_line_space_and_comments(line, ptr);
+				size_t min_n_input = LayerFactory::min_input_size(type);
+				size_t max_n_input = LayerFactory::max_input_size(type);
+				size_t min_n_fun   = LayerFactory::min_activation_size(type);
+				size_t max_n_fun   = LayerFactory::max_activation_size(type);
                 //get int
-                std::vector<size_t> layer_sizes;
-                layer_sizes.reserve(n_input);
+                std::vector<size_t> sizes;
+				sizes.reserve(max_n_input);
+				//activation function (default linear)
+				std::vector<std::string> functions;
+				functions.reserve(max_n_fun);
+				//start state
+				state = max_n_input ? S_READ_INPUT : S_READ_ACTIVATIONS;
+				//jump space
+				conf_skip_line_space_and_comments(line, ptr);
                 //is not a variable?
-                for(size_t p=0; p < n_input; ++p)
+                while(*ptr && *ptr != '\0' && *ptr != '}' && *ptr != EOF)
                 {
-                    if(!conf_is_variable(*ptr))
-                    {
-                        layer_sizes.push_back( conf_string_to_int(ptr) );
-                    }
-                    else
-                    {
-                        //next
-                        ++ptr;
-                        //varname
-                        std::string varname = conf_name(ptr);
-                        //find
-                        if(!context.exists(varname))
-                        {
-                            std::cerr << line << ": \'" << varname << "\' is not valid variable" << std::endl;
-                            return false;
-                        }
-                        //value
-                        std::string value = context.get(varname);
-                        //parse
-                        layer_sizes.push_back( conf_string_to_int_no_skip(value.c_str()) );
-                    }
-                    //more than 0
-                    if (layer_sizes.back() <= 0)
-                    {
-                        std::cerr << line << ": layer input size ["<< p <<"] = " << layer_sizes.back() << "; not valid " << std::endl;
-                        return false;
-                    }
-                    //jump space
-                    conf_skip_line_space_and_comments(line, ptr);
+					//eval
+					ConfExpParser exp_eval(context, line, ptr);
+					//error test
+					if (exp_eval.errors().size())
+					{
+						for(const auto& error : exp_eval.errors())
+							std::cerr << error << std::endl;
+						return false;
+					}
+					//update
+					ptr = exp_eval.get_ptr();
+					line = exp_eval.get_line();
+					//test result
+					if (exp_eval.result().is_number())
+					{
+						//wrong state
+						if (state != S_READ_INPUT)
+						{
+							std::cerr << line << ": can\'t write a input after activation function" << std::endl;
+							return false;
+						}
+						//add
+						sizes.push_back((long)exp_eval.result().number());
+						//update state
+						if (sizes.size() == max_n_input) { state = S_READ_ACTIVATIONS; }
+					}
+					else if(exp_eval.result().is_string())
+					{
+						//read af state
+						state = S_READ_ACTIVATIONS;
+						//get
+						auto function = exp_eval.result().str();
+						//to lower
+						std::transform(function.begin(), function.end(), function.begin(), ::tolower);
+						//test
+						if (!ActivationFunctionFactory::exists(function))
+						{
+							std::cerr << line << ": activation function (" << function << ") not exists " << std::endl;
+							return false;
+						}
+						//push
+						functions.push_back(function);
+					}
+					//next
+					conf_skip_line_space_and_comments(line, ptr);
+					//at the end
+					if (*ptr == '\r' || *ptr == '\n' || *ptr == '}')
+					{
+						//jump space/comment and lines
+						size_t l_line = line;
+						const char* l_ptr = ptr;						
+						conf_skip_space_and_comments(l_line, l_ptr);
+						//test if is the last
+						bool is_the_last = *l_ptr == '}';
+						//flags
+						auto min_i = LayerFactory::min_input_size(type);
+						auto max_i = LayerFactory::max_input_size(type);
+						auto min_f = LayerFactory::min_input_size(type);
+						auto max_f = LayerFactory::max_input_size(type);
+						auto c_out = LayerFactory::can_be_output(type);
+						//if is the last, a paramater must to be omittet
+						if (is_the_last)
+						{
+							min_i = LayerFactory::min_output_size(type);
+							max_i = LayerFactory::max_output_size(type);
+						}
+						//test
+						if (is_the_last && !c_out)
+						{
+							std::cerr << line << ": the " << type << " layer can't to be the last layer" << std::endl;
+							return false;
+						}
+						if (sizes.size() < min_i)
+						{
+							std::cerr << line << ": the " << type << " layer need at least " << min_i << " parameter/s" << std::endl;
+							return false;
+						}
+						if (sizes.size() > max_i)
+						{
+							std::cerr << line << ": the " << type << " layer not need more than " << max_i << " parameter/s" << std::endl;
+							return false;
+						}
+						if (functions.size() < min_f)
+						{
+							std::cerr << line << ": the " << type << " layer need at least " << min_f << " activation function/s" << std::endl;
+							return false;
+						}
+						if (functions.size() > max_f)
+						{
+							std::cerr << line << ": the " << type << " layer not need more than " << max_f << " activation function/s" << std::endl;
+							return false;
+						}
+						//add
+						for (auto s : sizes)      params.m_layers.get().push_back(s);
+						for (auto& f : functions) params.m_activation_functions.get().push_back(f);
+						//add void
+						for (int v = sizes.size(); v < max_i; ++v) params.m_layers.get().push_back(0);
+						for (int v = functions.size(); v < max_f; ++v) params.m_activation_functions.get().push_back("-");
+						//add type
+						params.m_layers_types.get().push_back(type);
+						//add string to network arg
+						if (is_the_last) get_string_from_args(params.m_network.get(), params.m_layers.get(), params.m_activation_functions.get(), params.m_layers_types.get());
+						//ok
+						type.clear();
+						sizes.clear();
+						functions.clear();
+						//add break loop
+						break;
+					}
                 }
-                //activation function (default linear)
-                std::string layer_af;
-                //is not a variable?
-                if(!conf_is_variable(*ptr))
-                {
-                    layer_af = conf_name(ptr);
-                }
-                else
-                {
-                    //next
-                    ++ptr;
-                    //varname
-                    std::string varname = conf_name(ptr);
-                    //find
-                    if(!context.exists(varname))
-                    {
-                        std::cerr << line << ": \'" << varname << "\' is not valid variable" << std::endl;
-                        return false;
-                    }
-                    //parse
-                    layer_af = context.get(varname);
-                }
-                //test
-                if (!layer_af.size()) layer_af = "linear";
-                //test
-                if (!ActivationFunctionFactory::exists(layer_af))
-                {
-                    std::cerr << line << ": activation function (" << layer_af << ") not exists " << std::endl;
-                    return false;
-                }
-                //add
-                params.m_hidden_layers_types.get().push_back(layer_type);
-                for(size_t size : layer_sizes) params.m_hidden_layers.get().push_back(size);
-                params.m_activation_functions.get().push_back(layer_af);
-            }
-            else if (layer_type == "out" || layer_type == "output")
-            {
-                //jump space
-                conf_skip_line_space_and_comments(line, ptr);
-                //activation function (default linear)
-                std::string layer_af;
-                //is not a variable?
-                if(!conf_is_variable(*ptr))
-                {
-                    layer_af = conf_name(ptr);
-                }
-                else
-                {
-                    //next
-                    ++ptr;
-                    //varname
-                    std::string varname = conf_name(ptr);
-                    //find
-                    if(!context.exists(varname))
-                    {
-                        std::cerr << line << ": \'" << varname << "\' is not valid variable" << std::endl;
-                        return false;
-                    }
-                    //parse
-                    layer_af = context.get(varname);
-                }
-                //test
-                if (!layer_af.size()) layer_af = "linear";
-                //test
-                if (!ActivationFunctionFactory::exists(layer_af))
-                {
-                    std::cerr << line << ": activation function (" << layer_af << ") not exists " << std::endl;
-                    return false;
-                }
-                //add
-                params.m_output_activation_function = layer_af;
             }
             else
             {
-                std::cerr << line << ": layer " << layer_type << " is unsupported" << std::endl;
+                std::cerr << line << ": layer " << type << " is unsupported" << std::endl;
                 return false;
             }
-            //jump spaces
+			//jump spaces
             conf_skip_space_and_comments(line, ptr);
             return true;
         }
@@ -1336,6 +1379,7 @@ namespace Denn
             }
             //update ptr
             ptr = exp.get_ptr();
+			line = exp.get_line();
             //set
             if(!context.exists(variable_name))
             {
@@ -1468,6 +1512,11 @@ namespace Denn
             }
             else if (command == "network")
             {
+				//clear
+				m_layers.get().clear();
+				m_activation_functions.get().clear();
+				m_layers_types.get().clear();
+				//parsing
                 do
                 {
                     if (!ParametersParseHelp::conf_parse_net(*this, context, line, ptr)) return false;

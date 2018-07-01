@@ -356,9 +356,6 @@
     <ClCompile Include="source\DennInstanceUtils.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="source\DennInstance\DennDefaultInstance.cpp">
-      <Filter>Source\DennInstance</Filter>
-    </ClCompile>
     <ClCompile Include="source\DennNRamDatasetTask.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -416,7 +413,7 @@
     <ClCompile Include="source\DennRecurrentLayer.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="source\DennInstance\DennDefaultInstance2.cpp">
+    <ClCompile Include="source\DennInstance\DennDefaultInstance.cpp">
       <Filter>Source\DennInstance</Filter>
     </ClCompile>
   </ItemGroup>

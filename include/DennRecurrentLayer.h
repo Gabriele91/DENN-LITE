@@ -18,8 +18,8 @@ namespace Denn
 		);
 
 		RecurrentLayer
-		(
-			  ActivationFunction active_function
+		(     
+			  ActivationFunction active_function_output
 			, size_t features
 			, size_t iweight
 			, size_t output
@@ -27,13 +27,18 @@ namespace Denn
 
 		RecurrentLayer
 		(
-			  ActivationFunction active_function
-			, const std::vector< size_t >& input_output
-		)
-		: RecurrentLayer(active_function, input_output[0], input_output[1], input_output[2])
-		{
+			  ActivationFunction active_function_inside
+			, ActivationFunction active_function_output
+			, size_t features
+			, size_t iweight
+			, size_t output
+		);
 
-		}
+		RecurrentLayer
+		(
+			  const std::vector< ActivationFunction >& active_function
+			, const std::vector< size_t >& input_output
+		);
 		//////////////////////////////////////////////////
 		Matrix& U();
 		Matrix& W();
@@ -56,8 +61,8 @@ namespace Denn
 		virtual Matrix  backpropagate_derive(const Matrix& delta, const Matrix& linear_out)       			               override;
 		virtual VMatrix backpropagate_gradient(const Matrix& delta, const Matrix& linear_inpu, Scalar regular=Scalar(0.0)) override;
 		//////////////////////////////////////////////////
-		virtual ActivationFunction get_activation_function()							       override;
-		virtual void               set_activation_function(ActivationFunction active_function) override;
+		virtual VActivationFunction get_activation_functions()										     override;
+		virtual void                set_activation_functions(const VActivationFunction& active_function) override;
 		//////////////////////////////////////////////////
 		virtual VMatrix  apply(const VMatrix& input) const														  			   override;
 		virtual VMatrix  feedforward(const VMatrix& input, VMatrix& linear_out)				  							       override;
@@ -65,7 +70,8 @@ namespace Denn
 		virtual VMatrix  backpropagate_derive(const VMatrix& delta, const VMatrix& linear_out)       			               override;
 		virtual VVMatrix backpropagate_gradient(const VMatrix& delta, const VMatrix& linear_input, Scalar regular=Scalar(0.0)) override;
 		//////////////////////////////////////////////////
-		virtual size_t size() const operator_override;		
+		virtual size_t size() const override;
+		virtual size_t size_ouput() const override;
 		virtual Matrix& operator[](size_t i) operator_override;
 		virtual const Matrix& operator[](size_t i) const operator_override;
 		//////////////////////////////////////////////////
@@ -78,7 +84,8 @@ namespace Denn
 		Matrix             m_V;
 		Matrix             m_C;
         //function
-		ActivationFunction m_activation_function{ nullptr };
+		ActivationFunction m_activation_function_inside{ nullptr };
+		ActivationFunction m_activation_function_output{ nullptr };
 	};
-	REGISTERED_LAYER(RecurrentLayer, "recurrent", 2)
+	REGISTERED_LAYER(RecurrentLayer, "recurrent", LayerMinMax(1, 2), LayerMinMax(1, 2), LayerMinMax(1, 1))
 }

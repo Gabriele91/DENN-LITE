@@ -75,10 +75,11 @@ namespace Denn
 		//network
 		ReadOnly<Scalar>					   m_learning_rate		   { "learning_rate", Scalar(0.05) };
 		ReadOnly<Scalar>					   m_regularize			   { "regularize", Scalar(0.0) };
-		ReadOnly< std::vector<unsigned int> > m_hidden_layers             { "hidden_layers"            /* , none */ };
-		ReadOnly< std::vector<std::string> >  m_activation_functions      { "activation_functions"      /* , none */ };
-		ReadOnly< std::string >               m_output_activation_function{ "output_activation_function" ,  "linear" };
-	    ReadOnly< std::vector<std::string> >  m_hidden_layers_types       { "hidden_layers_types" /* , none */ };
+
+		ReadOnly< std::string >   m_network                            { "network"                 , "perceptron(linear)", true  };
+		ReadOnly< std::vector<long> >          m_layers                { "layers"                  , std::vector<long>{},        false };
+		ReadOnly< std::vector<std::string> >   m_activation_functions  { "activation_functions"    , std::vector<std::string>{"linear"}, false };
+	    ReadOnly< std::vector<std::string> >   m_layers_types          { "layers_types"            , std::vector<std::string>{"perceptron"}, false };
 		//nram attribute
 		ReadOnly< size_t >					  m_max_int			       { "max_int"                  , size_t(10) };
 		ReadOnly< size_t >					  m_n_registers		       { "n_registers"              , size_t(4) };

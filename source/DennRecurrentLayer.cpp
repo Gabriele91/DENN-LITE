@@ -13,7 +13,8 @@ namespace Denn
 		, size_t weights
 		, size_t output
 	)
-	{		
+	{
+		m_activation_function_inside = ActivationFunctionFactory::get("tanh");
         U().resize(features, weights);
 		W().resize(weights, weights);
 		B().resize(1, weights);
@@ -29,8 +30,55 @@ namespace Denn
 		, size_t output
 	)
 	{
-		set_activation_function(active_function);
+		m_activation_function_inside = ActivationFunctionFactory::get("tanh");
+		m_activation_function_output = ActivationFunctionFactory::name_of(active_function) == "linear" ? nullptr : active_function;
         U().resize(features, weights);
+		W().resize(weights, weights);
+		B().resize(1, weights);
+		V().resize(weights, output);
+		C().resize(1, output);
+	}
+
+	RecurrentLayer::RecurrentLayer
+	(
+		  ActivationFunction active_function_inside
+		, ActivationFunction active_function_output
+		, size_t features
+		, size_t weights
+		, size_t output
+	)
+	{
+		m_activation_function_inside = ActivationFunctionFactory::name_of(active_function_inside) == "linear" ? nullptr : active_function_inside;
+		m_activation_function_output = ActivationFunctionFactory::name_of(active_function_output) == "linear" ? nullptr : active_function_output;
+		U().resize(features, weights);
+		W().resize(weights, weights);
+		B().resize(1, weights);
+		V().resize(weights, output);
+		C().resize(1, output);
+	}
+
+	RecurrentLayer::RecurrentLayer
+	(
+		  const std::vector< ActivationFunction >& active_functions
+		, const std::vector< size_t >&			   input_output
+	)
+	{
+		size_t features = input_output[0];
+		size_t weights  = input_output[1];
+		size_t output   = input_output.size() > 2 ? input_output[2] : features;
+
+		if (active_functions.size() > 1)
+		{
+			m_activation_function_inside = ActivationFunctionFactory::name_of(active_functions[0]) == "linear" ? nullptr : active_functions[0];
+			m_activation_function_output = ActivationFunctionFactory::name_of(active_functions[1]) == "linear" ? nullptr : active_functions[1];
+		}
+		else
+		{
+			m_activation_function_inside = ActivationFunctionFactory::get("tanh");
+			m_activation_function_output = ActivationFunctionFactory::name_of(active_functions[0]) == "linear" ? nullptr : active_functions[0];
+		}
+
+		U().resize(features, weights);
 		W().resize(weights, weights);
 		B().resize(1, weights);
 		V().resize(weights, output);
@@ -49,13 +97,21 @@ namespace Denn
 	const Matrix& RecurrentLayer::V() const { return m_V; }	
 	const Matrix& RecurrentLayer::C() const { return m_C; }	
     //////////////////////////////////////////////////
-	ActivationFunction RecurrentLayer::get_activation_function() 
+	Layer::VActivationFunction RecurrentLayer::get_activation_functions()
 	{
-		return m_activation_function;
+		return { m_activation_function_inside, m_activation_function_output };
 	}
-	void RecurrentLayer::set_activation_function(ActivationFunction active_function)
+	void RecurrentLayer::set_activation_functions(const Layer::VActivationFunction& active_functions)
 	{
-		m_activation_function = ActivationFunctionFactory::name_of(active_function) == "linear" ? nullptr : active_function;
+		if (active_functions.size() > 1)
+		{
+			m_activation_function_inside = ActivationFunctionFactory::name_of(active_functions[0]) == "linear" ? nullptr : active_functions[0];
+			m_activation_function_output = ActivationFunctionFactory::name_of(active_functions[1]) == "linear" ? nullptr : active_functions[1];
+		}
+		else
+		{
+			m_activation_function_output = ActivationFunctionFactory::name_of(active_functions[0]) == "linear" ? nullptr : active_functions[0];
+		}
 	}
 	//////////////////////////////////////////////////
 	Layer::SPtr RecurrentLayer::copy() const
@@ -84,14 +140,10 @@ namespace Denn
             //get state
 			auto hW = h * W();
 			h = (inputs[t] * U() + hW).rowwise() + b_bais_r;
-			#if 0
-            	if (m_activation_function) h = m_activation_function(h);
-			#else
-            	h = h.unaryExpr(&Denn::PointFunction::tanh<typename Matrix::Scalar>);
-			#endif
+            if (m_activation_function_inside) h = m_activation_function_inside(h);
             //output
 			Matrix out = (h * V()).rowwise() + c_bais_r;
-			if (m_activation_function) out = m_activation_function(out);
+			if (m_activation_function_output) out = m_activation_function_output(out);
             o.push_back(out);
         }
         return o;
@@ -100,6 +152,10 @@ namespace Denn
     size_t RecurrentLayer::size() const
 	{
 		return 5;
+	}
+	size_t RecurrentLayer::size_ouput() const
+	{
+		return V().cols();
 	}
 	Matrix& RecurrentLayer::operator[](size_t i)
 	{

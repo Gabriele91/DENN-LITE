@@ -21,7 +21,7 @@ namespace Denn
 		, size_t clazz
 	)
 	{
-		set_activation_function(active_function);
+		set_activation_functions({ active_function });
 		m_weights.resize(features, clazz);
 		m_baias.resize(1, clazz);
 	}
@@ -101,18 +101,22 @@ namespace Denn
 		};
     }
 	//////////////////////////////////////////////////
-	ActivationFunction PerceptronLayer::get_activation_function() 
+	Layer::VActivationFunction PerceptronLayer::get_activation_functions() 
 	{
-		return m_activation_function;
+		return { m_activation_function };
 	}
-	void PerceptronLayer::set_activation_function(ActivationFunction active_function)
+	void PerceptronLayer::set_activation_functions(const Layer::VActivationFunction& active_functions)
 	{
-		m_activation_function = ActivationFunctionFactory::name_of(active_function) == "linear" ? nullptr : active_function;
+		m_activation_function = ActivationFunctionFactory::name_of(active_functions[0]) == "linear" ? nullptr : active_functions[0];
 	}
     //////////////////////////////////////////////////
 	size_t PerceptronLayer::size() const
 	{
 		return 2;
+	}
+	size_t PerceptronLayer::size_ouput() const 
+	{
+		return m_weights.cols();
 	}
 	Matrix& PerceptronLayer::operator[](size_t i)
 	{

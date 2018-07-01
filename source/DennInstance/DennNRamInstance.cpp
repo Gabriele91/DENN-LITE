@@ -80,9 +80,9 @@ namespace NRam
 			//Dataset
 			m_dataset = *m_task;
 			//network
-			m_network = build_mlp_network(m_nram.m_n_regs, m_nram.m_nn_output, parameters);
+			m_network = build_network(m_nram.m_n_regs, m_nram.m_nn_output, parameters);
 			//last layer must to be "linear"
-			m_network[m_network.size()-1].set_activation_function(ActivationFunctionFactory::get("linear"));
+			m_network[m_network.size() - 1].set_activation_functions({ ActivationFunctionFactory::get("linear") });
 			////////////////////////////////////////////////////////////////////////////////////////////////
 			m_success_init = true;
 		}

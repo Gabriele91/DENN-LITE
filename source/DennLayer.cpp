@@ -28,7 +28,7 @@ namespace Denn
 	// Factory
 	struct LayerInfoLayer
 	{
-		size_t m_n_input{0};
+		LayerDescription m_description;
 		LayerFactory::CreateObject m_create;
 	}; 
 	static std::map< std::string, LayerInfoLayer >& lr_map()
@@ -38,24 +38,66 @@ namespace Denn
 	}
 	
 	//public
-	Layer::SPtr LayerFactory::create(const std::string& name, ActivationFunction active_function, const std::vector<size_t>& input_output)
+	Layer::SPtr LayerFactory::create(const std::string& name, const std::vector<ActivationFunction>& active_functions, const std::vector<size_t>& inputs)
 	{
 		//find
 		auto it = lr_map().find(name);
 		//return
-		return it == lr_map().end() ? nullptr : it->second.m_create(active_function,input_output);
+		return it == lr_map().end() ? nullptr : it->second.m_create(active_functions,inputs);
 	}
-	void LayerFactory::append(const std::string& name, CreateObject fun, size_t ninput, size_t size)
+	void LayerFactory::append(const std::string& name, CreateObject fun, const LayerDescription& ninput, size_t size)
 	{
 		//add
 		lr_map()[name] = LayerInfoLayer{ ninput, fun };
-	}		
-	size_t LayerFactory::input_size(const std::string& name)
+	}
+	int LayerFactory::min_input_size(const std::string& name)
 	{
 		//find
 		auto it = lr_map().find(name);
 		//return
-		return it == lr_map().end() ? 0 : it->second.m_n_input;
+		return it == lr_map().end() ? 0 : it->second.m_description.m_input.m_min;
+	}
+	int LayerFactory::max_input_size(const std::string& name)
+	{
+		//find
+		auto it = lr_map().find(name);
+		//return
+		return it == lr_map().end() ? 0 : it->second.m_description.m_input.m_max;
+	}
+	int LayerFactory::min_output_size(const std::string& name)
+	{
+		//find
+		auto it = lr_map().find(name);
+		//return
+		return it == lr_map().end() ? 0 : it->second.m_description.m_output.m_min;
+	}
+	int LayerFactory::max_output_size(const std::string& name)
+	{
+		//find
+		auto it = lr_map().find(name);
+		//return
+		return it == lr_map().end() ? 0 : it->second.m_description.m_output.m_max;
+	}
+	int LayerFactory::min_activation_size(const std::string& name)
+	{
+		//find
+		auto it = lr_map().find(name);
+		//return
+		return it == lr_map().end() ? 0 : it->second.m_description.m_function.m_min;
+	}
+	int LayerFactory::max_activation_size(const std::string& name)
+	{
+		//find
+		auto it = lr_map().find(name);
+		//return
+		return it == lr_map().end() ? 0 : it->second.m_description.m_function.m_max;
+	}
+	bool LayerFactory::can_be_output(const std::string& name)
+	{
+		//find
+		auto it = lr_map().find(name);
+		//return
+		return it == lr_map().end() ? 0 : it->second.m_description.m_can_be_output;
 	}
 	//list of methods
 	std::vector< std::string > LayerFactory::list_of_layers()

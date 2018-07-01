@@ -154,20 +154,28 @@ namespace NRam
 				return; //exit
 			}
 			//network
-			std::vector<unsigned int> hl_size;
+			std::vector<long> hl_size;
 			std::vector<std::string> hl_afun;
-			auto& jhl_size = jarguments["hidden_layers"];
-			auto& jhl_afun = jarguments["activation_functions"];
-			bool  parser_network_success =  jhl_size.is_array() 
-			                             && jhl_afun.is_array() 
-									     && jhl_size.array().size() == jhl_afun.array().size();
-			for (size_t l = 0; l != jhl_size.array().size() && parser_network_success; ++l)
+			std::vector<std::string> hl_atype;
+			auto& jhl_size   = jarguments["layers"];
+			auto& jhl_afun   = jarguments["activation_functions"];
+			auto& jhl_atypes = jarguments["layers_types"];
+			for (size_t l = 0; l != jhl_size.array().size(); ++l)
 			{
 				hl_size.push_back(jhl_size.array()[l].number());
+			}
+			for (size_t l = 0; l != jhl_afun.array().size(); ++l)
+			{
 				hl_afun.push_back(jhl_afun.array()[l].string());
 			}
-			//
-			if(!parser_network_success)
+			for (size_t l = 0; l != jhl_atypes.array().size(); ++l)
+			{
+				hl_atype.push_back(jhl_atypes.array()[l].string());
+			}
+			//build
+			m_network = build_network(m_nram.m_n_regs, m_nram.m_nn_output, hl_size, hl_afun, hl_atype);
+			//fail
+			if(!m_network.size())
 			{
 				//error to parsing
 				std::cerr << "network configuration is wrong" << std::endl;
@@ -175,7 +183,6 @@ namespace NRam
 				return; //exit
 			}
 			//build network
-			m_network = build_mlp_network(m_nram.m_n_regs, m_nram.m_nn_output, hl_size, hl_afun, "linear");
 			////////////////////////////////////////////////////////////////////////////////////////////////
 			// Network
 			if (m_jdata.document().object().find("network") == m_jdata.document().object().end())
