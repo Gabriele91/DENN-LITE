@@ -119,11 +119,12 @@ namespace Denn
 		{
 		}
 
-		LayerDescription(LayerMinMax min_max)
+		LayerDescription(LayerMinMax min_max, bool can_be_output = true)
 		{
 			m_input    = min_max;
 			m_function = min_max;
 			m_output   = min_max;
+			m_can_be_output = can_be_output;
 		}
 
 		LayerDescription(LayerMinMax input, LayerMinMax output, bool can_be_output = true)
