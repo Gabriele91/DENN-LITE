@@ -11,7 +11,8 @@
                 "template/ShaDE_2.config",
                 "gens=100",
                 "batch=50",
-                "sub_gens=3"         
+                "sub_gens=3",
+                "input=test.gz"        
             ],
             "stopAtEntry": false,
             "cwd": "${workspaceRoot}",
