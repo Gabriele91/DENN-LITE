@@ -102,5 +102,5 @@ namespace Denn
         //function
 		ActivationFunction m_activation_function[FuncType::NFUC]{ nullptr,nullptr };
 	};
-	REGISTERED_LAYER(LSTMLayer, "lstm", LayerMinMax(1), LayerMinMax(1,3), LayerMinMax(0))
+	REGISTERED_LAYER(LSTMLayer, "lstm", LayerMinMax(1), LayerMinMax(1, 3), LayerMinMax(0))
 }
