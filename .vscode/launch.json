@@ -8,7 +8,7 @@
             "program": "${workspaceRoot}/Debug/DENN-float",
             "args": 
             [
-                "template/ShaDE_2.config",
+                "template/ShaDE_RL.config",
                 "gens=100",
                 "batch=50",
                 "sub_gens=3",
