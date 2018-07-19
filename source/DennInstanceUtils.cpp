@@ -88,6 +88,7 @@ namespace Denn
 					//more then min?
 						 if (!exists && cfuncs < min_f)  return nullptr;
 					else if (exists) l_functions.push_back(ActivationFunctionFactory::get(functions[f]));
+					else break;
 				}
 				//add output size
 				if (is_the_last) l_inputs.push_back(n_class);

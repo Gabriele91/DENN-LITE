@@ -191,7 +191,7 @@ namespace Denn
 			c = F.cwiseProduct(c)  + I.cwiseProduct(Fc( Cv ));
             //output
 			h = O.cwiseProduct(Fh(c));
-			//push to utput
+			//push to output
             o.push_back(h);
         }
         return o;

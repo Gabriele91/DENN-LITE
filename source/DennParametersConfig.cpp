@@ -1291,8 +1291,8 @@ namespace Denn
 						//flags
 						auto min_i = LayerFactory::min_input_size(type);
 						auto max_i = LayerFactory::max_input_size(type);
-						auto min_f = LayerFactory::min_input_size(type);
-						auto max_f = LayerFactory::max_input_size(type);
+						auto min_f = LayerFactory::min_activation_size(type);
+						auto max_f = LayerFactory::max_activation_size(type);
 						auto c_out = LayerFactory::can_be_output(type);
 						//if is the last, a paramater must to be omittet
 						if (is_the_last)
@@ -1330,8 +1330,8 @@ namespace Denn
 						for (auto s : sizes)      params.m_layers.get().push_back(s);
 						for (auto& f : functions) params.m_activation_functions.get().push_back(f);
 						//add void
-						for (int v = sizes.size(); v < max_i; ++v) params.m_layers.get().push_back(0);
-						for (int v = functions.size(); v < max_f; ++v) params.m_activation_functions.get().push_back("-");
+						if (sizes.size() < max_i)     params.m_layers.get().push_back(0);
+						if (functions.size() < max_f) params.m_activation_functions.get().push_back("-");
 						//add type
 						params.m_layers_types.get().push_back(type);
 						//add string to network arg
