@@ -108,38 +108,43 @@ namespace Denn
 		}
 	};
 
+	enum LayerDefaultArguments
+	{
+		DENN_CAN_GET_THE_INPUT	= 0b0001,
+		DENN_CAN_RETURN_OUTPUT	= 0b0010,
+		DENN_PASS_TROUGHT		= 0b0100,
+	};
+
 	struct LayerDescription
 	{
-		LayerMinMax m_input;
-		LayerMinMax m_function;
-		LayerMinMax m_output;
-		bool m_can_be_output{ true };
+		LayerMinMax  m_input;
+		LayerMinMax  m_function;
+		LayerMinMax  m_output;
+		unsigned int m_flags { DENN_CAN_GET_THE_INPUT | DENN_CAN_RETURN_OUTPUT };
 
-		LayerDescription()
-		{
-		}
+		LayerDescription() = default;
 
-		LayerDescription(LayerMinMax min_max, bool can_be_output = true)
+		LayerDescription(LayerMinMax min_max, unsigned int flags =  DENN_CAN_GET_THE_INPUT | DENN_CAN_RETURN_OUTPUT)
 		{
 			m_input    = min_max;
 			m_function = min_max;
 			m_output   = min_max;
-			m_can_be_output = can_be_output;
+			m_flags    = flags;
 		}
 
-		LayerDescription(LayerMinMax input, LayerMinMax output, bool can_be_output = true)
+		LayerDescription(LayerMinMax input, LayerMinMax output, unsigned int flags =  DENN_CAN_GET_THE_INPUT | DENN_CAN_RETURN_OUTPUT)
 		{
 			m_input    = input;
 			m_function = input;
 			m_output   = output;
-			m_can_be_output = can_be_output;
+			m_flags    = flags;
 		}
-		LayerDescription(LayerMinMax input, LayerMinMax function, LayerMinMax output, bool can_be_output = true)
+		LayerDescription(LayerMinMax input, LayerMinMax function, LayerMinMax output, unsigned int flags =  DENN_CAN_GET_THE_INPUT | DENN_CAN_RETURN_OUTPUT)
 		{
 			m_input    = input;
 			m_function = function;
 			m_output   = output;
-			m_can_be_output = can_be_output;
+			m_flags    = flags;
 		}
 
 	};
@@ -165,7 +170,7 @@ namespace Denn
 		static int min_activation_size(const std::string& name);
 		static int max_activation_size(const std::string& name);
 
-		static bool can_be_output(const std::string& name);
+		static unsigned int flags(const std::string& name);
 
 		//list of methods
 		static std::vector< std::string > list_of_layers();

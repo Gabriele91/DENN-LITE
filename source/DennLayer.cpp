@@ -92,12 +92,12 @@ namespace Denn
 		//return
 		return it == lr_map().end() ? 0 : it->second.m_description.m_function.m_max;
 	}
-	bool LayerFactory::can_be_output(const std::string& name)
+	unsigned int LayerFactory::flags(const std::string& name)
 	{
 		//find
 		auto it = lr_map().find(name);
 		//return
-		return it == lr_map().end() ? 0 : it->second.m_description.m_can_be_output;
+		return it == lr_map().end() ? 0 : it->second.m_description.m_flags;
 	}
 	//list of methods
 	std::vector< std::string > LayerFactory::list_of_layers()

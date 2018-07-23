@@ -1286,6 +1286,8 @@ namespace Denn
 						size_t l_line = line;
 						const char* l_ptr = ptr;						
 						conf_skip_space_and_comments(l_line, l_ptr);
+						//is the first
+						bool is_the_first = !params.m_layers_types.get().size();
 						//test if is the last
 						bool is_the_last = *l_ptr == '}';
 						//flags
@@ -1293,7 +1295,6 @@ namespace Denn
 						auto max_i = LayerFactory::max_input_size(type);
 						auto min_f = LayerFactory::min_activation_size(type);
 						auto max_f = LayerFactory::max_activation_size(type);
-						auto c_out = LayerFactory::can_be_output(type);
 						//if is the last, a paramater must to be omittet
 						if (is_the_last)
 						{
@@ -1301,7 +1302,12 @@ namespace Denn
 							max_i = LayerFactory::max_output_size(type);
 						}
 						//test
-						if (is_the_last && !c_out)
+						if (is_the_first && !( LayerFactory::flags(type) & DENN_CAN_GET_THE_INPUT ))
+						{
+							std::cerr << line << ": the " << type << " layer can't to be the first layer" << std::endl;
+							return false;
+						}
+						if (is_the_last && !( LayerFactory::flags(type) & DENN_CAN_RETURN_OUTPUT ))
 						{
 							std::cerr << line << ": the " << type << " layer can't to be the last layer" << std::endl;
 							return false;

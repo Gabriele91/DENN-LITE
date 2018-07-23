@@ -46,15 +46,19 @@ namespace Denn
 			if(t < types.size())
 			{
 				//is the last	
-				bool is_the_last = t == (types.size()-1);
+				bool is_the_first = t == 0;
+				bool is_the_last  = t == (types.size()-1);
 				//get size
 				int  min_i = LayerFactory::min_input_size(types[t]);
 				int  max_i = LayerFactory::max_input_size(types[t]);
 				int  min_f = LayerFactory::min_activation_size(types[t]);
 				int  max_f = LayerFactory::max_activation_size(types[t]);
-				bool c_out = LayerFactory::can_be_output(types[t]);
+				int  flags = LayerFactory::flags(types[t]);
+				//pass
+			    bool not_pass_trought = !(flags & DENN_PASS_TROUGHT);
 				//failed
-				if (is_the_last && !c_out) return nullptr;
+				if (is_the_first && !( flags & DENN_CAN_GET_THE_INPUT )) return nullptr;
+				if (is_the_last && !( flags & DENN_CAN_RETURN_OUTPUT ))  return nullptr;
 				//
 				if (is_the_last)
 				{
@@ -65,7 +69,7 @@ namespace Denn
 				std::vector<size_t>			    l_inputs;
 				std::vector<ActivationFunction> l_functions;
 				//add first input
-				l_inputs.push_back(input_size);
+				if(not_pass_trought) l_inputs.push_back(input_size);
 				//add inputs
 				for(int cargs=0; cargs != max_i; ++cargs, ++a)
 				{	
@@ -99,7 +103,7 @@ namespace Denn
 					, l_inputs
 				);
 				//update
-				input_size = layer->size_ouput();
+				if(not_pass_trought)  input_size = layer->size_ouput();
 				//go to next layer
 				++t;
 				//return
@@ -311,6 +315,8 @@ namespace Denn
 			{
 				//get if is the last
 				while (std::isspace(*ptr)) ++ptr;
+				//is first
+				bool is_the_first = layers_types.size();
 				//last == '\0'
 				bool is_the_last = *ptr == '\0';
 				//flags
@@ -318,7 +324,10 @@ namespace Denn
 				auto max_i = LayerFactory::max_input_size(type);
 				auto min_f = LayerFactory::min_input_size(type);
 				auto max_f = LayerFactory::max_input_size(type);
-				auto c_out = LayerFactory::can_be_output(type);
+				int  flags = LayerFactory::flags(type);
+				//pass
+			    bool can_input = (flags & DENN_CAN_GET_THE_INPUT);
+			    bool can_output = (flags & DENN_CAN_RETURN_OUTPUT);
 				//if is the last, a paramater must to be omittet
 				if (is_the_last)
 				{
@@ -326,7 +335,8 @@ namespace Denn
 					max_i = LayerFactory::max_output_size(type);
 				}
 				//test
-				if (is_the_last && !c_out) return false;
+				if (is_the_first && !can_input) return false;
+				if (is_the_last && !can_output) return false;
 
 				if (sizes.size() < min_i) return false;
 				if (sizes.size() > max_i) return false;
@@ -365,16 +375,24 @@ namespace Denn
 
 		for (size_t t = 0; t != layers_types.size(); ++t)
 		{
+			//is first
+			bool is_the_first = t == 0;
 			//last == '\0'
 			bool is_the_last = t == (layers_types.size() - 1);
 			//get size
 			int  max_i = LayerFactory::max_input_size(layers_types[t]);
 			int  max_f = LayerFactory::max_activation_size(layers_types[t]);
-			bool c_out = LayerFactory::can_be_output(layers_types[t]);
+			int  flags = LayerFactory::flags(layers_types[t]);
+			//pass
+			bool pass_trought = (flags & DENN_PASS_TROUGHT);
+			bool can_input = (flags & DENN_CAN_GET_THE_INPUT);
+			bool can_output = (flags & DENN_CAN_RETURN_OUTPUT);
 			//failed
-			if (is_the_last && !c_out) return false;
+			if (is_the_first && !can_input) return false;
+			//failed
+			if (is_the_last && !can_output) return false;
 			//
-			if (is_the_last)
+			if (is_the_last && !pass_trought)
 			{
 				max_i = LayerFactory::max_output_size(layers_types[t]);
 			}
