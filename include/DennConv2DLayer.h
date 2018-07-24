@@ -10,14 +10,42 @@ namespace Denn
 	{
 	public:
 		//size
-		struct Size 
+		struct KernelsShape
 		{
 			size_t m_weight{3};
 			size_t m_height{3};
 			size_t m_count{1};
-			Size() = default;
-			Size(size_t weight, size_t height): m_weight(weight), m_height(height) {}
-			Size(size_t weight, size_t height, size_t num): m_weight(weight), m_height(height), m_count(num) {}
+			KernelsShape() = default;
+			
+			KernelsShape(size_t weight, size_t height)
+			: m_weight(weight)
+			, m_height(height) 
+			{}
+
+			KernelsShape(size_t weight, size_t height, size_t num)
+			: m_weight(weight)
+			, m_height(height)
+			, m_count(num) 
+			{}
+		};
+		//Shape
+		struct InputShape 
+		{
+			size_t m_weight{3};
+			size_t m_height{3};
+			size_t m_channels{1};
+			InputShape() = default;
+			
+			InputShape(size_t weight, size_t height)
+			: m_weight(weight)
+			, m_height(height) 
+			{}
+
+			InputShape(size_t weight, size_t height, size_t channels)
+			: m_weight(weight)
+			, m_height(height)
+			, m_channels(channels) 
+			{}
 		};
 		//stride
 		struct Stride
@@ -25,20 +53,29 @@ namespace Denn
 			size_t m_x{ 1 };
 			size_t m_y{ 1 };
 			Stride() = default;
-			Stride(size_t xy) : m_x(xy), m_y(xy) {}
-			Stride(size_t x, size_t y) : m_x(x), m_y(x) {}
+			
+			Stride(size_t xy) 
+			: m_x(xy)
+			, m_y(xy) {}
+
+			Stride(size_t x, size_t y) 
+			: m_x(x)
+			, m_y(x) 
+			{}
 		};
 		///////////////////////////////////////
 		DennConv2DLayer
 		(
-			  Size size
+			  InputShape in_shape
+			, KernelsShape k_size
 			, Stride strides = Stride(1)
 		);
 
 		DennConv2DLayer
 		(
 			  ActivationFunction active_function_c_h
-			, Size size
+			, InputShape in_shape
+			, KernelsShape k_size
 			, Stride strides = Stride(1)
 		);
 
@@ -79,17 +116,18 @@ namespace Denn
 	protected:  
         //parameters
 		std::vector<Matrix> m_kernels;
-		Size   m_kernel_size;
-		Stride m_stride;
+		InputShape     m_input_shape;
+		KernelsShape   m_kernel_shape;
+		Stride         m_stride;
         //function
 		ActivationFunction m_activation_function{ nullptr };
 	};
 	REGISTERED_LAYER(
 		  DennConv2DLayer
 		, "conv2D"
-		, LayerMinMax(1,5) 		  /* number of hyper parameters as hidden layer */
+		, LayerMinMax(2+1,3+3+2)  /* number of hyper parameters as hidden layer */
 		, LayerMinMax(1)   		  /* number of activation functions */
-		, LayerMinMax(1,5)		  /* number of hyper parameters as output layer */
+		, LayerMinMax(2+1,3+3+2)  /* number of hyper parameters as output layer */
 		, DENN_CAN_GET_THE_INPUT  /* input/output mode, can be first layer, same input/output */ 
 		| DENN_PASS_TROUGHT
 	)

@@ -41,21 +41,61 @@ namespace Denn
 			break;
 		}
 	}
+		
+	static Matrix ImageSetConvolution
+	(
+		  const DennConv2DLayer::InputShape& in_shape
+		, const Matrix& input
+		, const Matrix& conv
+		, const ActivationFunction& function
+		, CONV_MODE mode = CONV2D_FULL
+	)
+	{
+		//assert
+		denn_assert( input.cols() == in_shape.m_height*in_shape.m_weight );
+		//output matrix
+		Matrix output; 
+		//allocs
+		output.resize(input.rows(),input.cols()) ;
+		/* The actual formulation can be seen in .md file */
+		for(size_t i = 0; i != input.rows(); ++i)
+		{
+			//Cast to matrix
+			Matrix row = input.row(i);
+			//auto pass = Eigen::Stride<Eigen::Dynamic, 1>(Index(in_shape.m_channels)); //todo
+			auto image = MapMatrix(row.data(), Index(in_shape.m_height),  Index(in_shape.m_weight));
+			//execute
+			auto example = Convolution(image, conv, function, CONV2D_FULL);
+			//out size
+			if( example.size() != input.cols() )
+			{
+				Index cols = std::max( example.size(), input.cols() );
+				output.conservativeResize(input.rows(), cols);
+			}
+			//vector
+			auto rowend = MapRowVector(example.array().data(), example.size());
+			//save
+			output.row(i) = rowend;
+		}
+		return output;
+	}
 	///////////////////////////////////////	
 	DennConv2DLayer::DennConv2DLayer
 	(
-		  Size size
+		  InputShape in_shape
+		, KernelsShape k_shape
 		, Stride strides
 	)
 	{
 		m_activation_function = ActivationFunctionFactory::get("sigmoid");
-		m_kernel_size = size;
+		m_input_shape = in_shape;
+		m_kernel_shape = k_shape;
 		m_stride = strides;
 		//build
-		m_kernels.resize(size.m_count);
-		for(size_t i = 0; i != size.m_count; ++i)
+		m_kernels.resize(m_kernel_shape.m_count);
+		for(size_t i = 0; i != m_kernel_shape.m_count; ++i)
 		{
-			m_kernels[i].resize(size.m_height, size.m_weight);
+			m_kernels[i].resize(m_kernel_shape.m_height, m_kernel_shape.m_weight);
 		}
 
 	}
@@ -63,18 +103,20 @@ namespace Denn
 	DennConv2DLayer::DennConv2DLayer
 	(
 		  ActivationFunction active_function
-		, Size size
+		, InputShape in_shape
+		, KernelsShape k_shape
 		, Stride strides
 	)
 	{
 		m_activation_function = active_function;
-		m_kernel_size = size;
+		m_input_shape = in_shape;
+		m_kernel_shape = k_shape;
 		m_stride = strides;
 		//build
-		m_kernels.resize(size.m_count);
-		for(size_t i = 0; i != size.m_count; ++i)
+		m_kernels.resize(m_kernel_shape.m_count);
+		for(size_t i = 0; i != m_kernel_shape.m_count; ++i)
 		{
-			m_kernels[i].resize(size.m_height, size.m_weight);
+			m_kernels[i].resize(m_kernel_shape.m_height, m_kernel_shape.m_weight);
 		}
 	}
 
@@ -91,43 +133,69 @@ namespace Denn
 
 		switch(input_output.size())
 		{
-			default:
-			case 5:
-				m_kernel_size.m_weight = active_functions[0];
-				m_kernel_size.m_height = active_functions[1];
-				m_kernel_size.m_count  = active_functions[2];
-				m_stride.m_x 		   = active_functions[3];
-				m_stride.m_y 		   = active_functions[4];
+			case 8:
+				m_input_shape.m_weight = input_output[0];
+				m_input_shape.m_height = input_output[1];
+				m_input_shape.m_channels = input_output[2];
+				m_kernel_shape.m_weight = input_output[3];
+				m_kernel_shape.m_height = input_output[4];
+				m_kernel_shape.m_count  = input_output[5];
+				m_stride.m_x 		   = input_output[6];
+				m_stride.m_y 		   = input_output[7];
 			break;
-			case 4:
-				m_kernel_size.m_weight = active_functions[0];
-				m_kernel_size.m_height = active_functions[1];
-				m_kernel_size.m_count  = active_functions[2];
+
+			case 7:
+				m_input_shape.m_weight = input_output[0];
+				m_input_shape.m_height = input_output[1];
+				m_input_shape.m_channels = input_output[2];
+				m_kernel_shape.m_weight = input_output[3];
+				m_kernel_shape.m_height = input_output[4];
+				m_kernel_shape.m_count  = input_output[5];
 				m_stride.m_x 		   = 
-				m_stride.m_y 		   = active_functions[3];
+				m_stride.m_y 		   = input_output[6];
 			break;
+
+			case 6:
+				m_input_shape.m_weight = input_output[0];
+				m_input_shape.m_height = input_output[1];
+				m_input_shape.m_channels = input_output[2];
+				m_kernel_shape.m_weight = input_output[3];
+				m_kernel_shape.m_height = input_output[4];
+				m_kernel_shape.m_count  = input_output[5];
+			break;
+
+			case 5:
+				m_input_shape.m_weight = input_output[0];
+				m_input_shape.m_height = input_output[1];
+				m_input_shape.m_channels = input_output[2];
+				m_kernel_shape.m_weight = input_output[3];
+				m_kernel_shape.m_height = input_output[4];
+			break;
+
+			case 4:
+				m_input_shape.m_weight = input_output[0];
+				m_input_shape.m_height = input_output[1];
+				m_kernel_shape.m_weight = input_output[2];
+				m_kernel_shape.m_height = input_output[3];
+			break;
+
 			case 3:
-				m_kernel_size.m_weight = active_functions[0];
-				m_kernel_size.m_height = active_functions[1];
-				m_kernel_size.m_count  = active_functions[2];
+				m_input_shape.m_weight = input_output[0];
+				m_input_shape.m_height = input_output[1];
+				m_kernel_shape.m_weight = 
+				m_kernel_shape.m_height = input_output[3];
 			break;
-			case 2:
-				m_kernel_size.m_weight = active_functions[0];
-				m_kernel_size.m_height = active_functions[1];
-			break;
-			case 1:
-				m_kernel_size.m_weight =
-				m_kernel_size.m_height = active_functions[1];
-			break;
+
+			default:
 			case 0:
-				denn_assert(active_functions.size());
+				denn_assert(input_output.size());
 			break;
 		}
 		//build
-		m_kernels.resize(m_kernel_size.m_count);
-		for(size_t i = 0; i != m_kernel_size.m_count; ++i)
+		m_kernels.resize(m_kernel_shape.m_count);
+		for(size_t i = 0; i != m_kernel_shape.m_count; ++i)
 		{
-			m_kernels[i].resize(m_kernel_size.m_height, m_kernel_size.m_weight);
+			m_kernels[i].resize(m_kernel_shape.m_height, m_kernel_shape.m_weight);
 		}
 	}
     //////////////////////////////////////////////////
@@ -162,7 +230,7 @@ namespace Denn
  		for(size_t k = 0; k != m_kernels.size(); ++k)
 		{
 			//apply kernel
-			o.push_back(Convolution(inputs[i], m_kernels[k], m_activation_function));
+			o.push_back(ImageSetConvolution(m_input_shape, inputs[i], m_kernels[k], m_activation_function));
 		}
 		//ok
         return o;
