@@ -60,6 +60,9 @@ namespace Denn
 	using Scalar	 = float;
 	#endif
 
+	//index type (alias int)
+	using Index = typename Eigen::Index;
+
 	template < typename T >
 	using RowVectorT  = typename Eigen::Matrix<T, 1, Eigen::Dynamic>;
 	using RowVectorLD = typename Eigen::Matrix<long double, 1, Eigen::Dynamic>;

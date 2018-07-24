@@ -27,14 +27,12 @@ namespace Denn
 			default:
 			case CONV2D_VALID:
 				output.resize(input.rows() - conv.rows() + 1, input.cols() - conv.cols() + 1);
-				for (int i = 0; i < output.rows(); i++)
+				for (Index i = 0; i < output.rows(); i++)
+				for (Index j = 0; j < output.cols(); j++)
 				{
-					for (int j = 0; j < output.cols(); j++)
-					{
-						output(i, j) = (input.block(i, j, conv.rows(), conv.cols()).array() * conv.array()).sum();
-					}
+					output(i, j) = (input.block(i, j, conv.rows(), conv.cols()).array() * conv.array()).sum();
 				}
-				return function.apply(output);
+				return std::move(function.apply(output));
 			break;
 			case CONV2D_FULL:
 				output = Matrix::Zero(input.rows() + 2 * conv.rows() - 2, input.cols() + 2 * conv.cols() - 2);
@@ -160,13 +158,11 @@ namespace Denn
         Layer::VMatrix o;
 		//for each input
 		for(size_t i = 0; i != inputs.size(); ++i)
+		//for each kernels
+ 		for(size_t k = 0; k != m_kernels.size(); ++k)
 		{
-			//for each kernels
-			for(size_t k = 0; k != m_kernels.size(); ++k)
-			{
-				//apply kernel
-				o.push_back(Convolution(inputs[i], m_kernels[k], m_activation_function));
-			}
+			//apply kernel
+			o.push_back(Convolution(inputs[i], m_kernels[k], m_activation_function));
 		}
 		//ok
         return o;
