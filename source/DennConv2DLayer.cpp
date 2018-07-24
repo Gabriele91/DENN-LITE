@@ -69,8 +69,14 @@ namespace Denn
 			//out size
 			if( example.size() != input.cols() )
 			{
-				Index cols = std::max( example.size(), input.cols() );
-				output.conservativeResize(input.rows(), cols);
+				#if 0
+				//todo, return size during build of DNN
+				//Index cols = std::max( example.size(), input.cols() );
+				//output.conservativeResize(input.rows(), cols);
+				#else 
+				//force to have same shape of input
+				example.conservativeResize(in_shape.m_height,in_shape.m_weight);
+				#endif
 			}
 			//vector
 			auto rowend = MapRowVector(example.array().data(), example.size());
