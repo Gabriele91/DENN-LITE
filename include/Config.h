@@ -61,7 +61,7 @@ namespace Denn
 	#endif
 
 	//index type (alias int)
-	using Index = typename Eigen::Index;
+	using Index = EIGEN_DEFAULT_DENSE_INDEX_TYPE;
 
 	template < typename T >
 	using RowVectorT  = typename Eigen::Matrix<T, 1, Eigen::Dynamic>;
