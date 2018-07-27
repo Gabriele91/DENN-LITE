@@ -135,19 +135,7 @@
     <ClInclude Include="include\DennEvaluation.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\DennNRam.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\DennNRamTask.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\DennNRamGate.h">
-      <Filter>Include</Filter>
-    </ClInclude>
     <ClInclude Include="include\DennInstance.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\DennNRamDatasetTask.h">
       <Filter>Include</Filter>
     </ClInclude>
     <ClInclude Include="include\DennInstanceUtils.h">
@@ -293,9 +281,6 @@
     <ClCompile Include="source\DennEvaluationFactory.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="source\DennNRam.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="source\DennGates\DennGateAdd.cpp">
       <Filter>Source\DennGate</Filter>
     </ClCompile>
@@ -338,25 +323,10 @@
     <ClCompile Include="source\DennGates\DennGateZero.cpp">
       <Filter>Source\DennGate</Filter>
     </ClCompile>
-    <ClCompile Include="source\DennNRamTask.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennNRamTaskItems.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennNRamGate.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="source\DennInstance.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="source\DennInstance\DennNRamInstance.cpp">
-      <Filter>Source\DennInstance</Filter>
-    </ClCompile>
     <ClCompile Include="source\DennInstanceUtils.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennNRamDatasetTask.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="source\DennEvaluation\DennAccuracy.cpp">
@@ -367,9 +337,6 @@
     </ClCompile>
     <ClCompile Include="source\DennJson.cpp">
       <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennInstance\DennNRamTestInstance.cpp">
-      <Filter>Source\DennInstance</Filter>
     </ClCompile>
     <ClCompile Include="source\DennMutation\DennMutationTrigonometric.cpp">
       <Filter>Source</Filter>

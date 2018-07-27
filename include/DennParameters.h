@@ -80,15 +80,6 @@ namespace Denn
 		ReadOnly< std::vector<long> >          m_layers                { "layers"                  , std::vector<long>{},        false };
 		ReadOnly< std::vector<std::string> >   m_activation_functions  { "activation_functions"    , std::vector<std::string>{"linear"}, false };
 	    ReadOnly< std::vector<std::string> >   m_layers_types          { "layers_types"            , std::vector<std::string>{"perceptron"}, false };
-		//nram attribute
-		ReadOnly< size_t >					  m_max_int			       { "max_int"                  , size_t(10) };
-		ReadOnly< size_t >					  m_n_registers		       { "n_registers"              , size_t(4) };
-		ReadOnly< size_t >					  m_time_steps			   { "time_steps"               , size_t(1) };
-		ReadOnly< std::string >				  m_registers_values_extraction_type { "registers_values_extraction_type", "zero" };
-		ReadOnly< std::string >               m_task				   { "task"                  /* , none */ };
-		ReadOnly< std::vector<std::string> >  m_gates				   { "gates"                 /* , none */ };
-		//nram test 
-		ReadOnly< size_t >					   m_n_test				   { "n_test", size_t(1) };
 		//params info
 		std::vector< ParameterInfo >     m_params_info;
 	

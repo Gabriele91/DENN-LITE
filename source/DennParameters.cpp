@@ -7,14 +7,11 @@
 #include "DennSerializeOutput.h"
 #include "DennInstance.h"
 #include "DennDump.h"
-#include "DennNRamGate.h"
-#include "DennNRamTask.h"
 #include "DennVersion.h"
 #include "DennFilesystem.h"
 #include "DennInstanceUtils.h"
 #include <sstream>
 #include <iostream>
-#include <DennNRam.h>
 #include <cstdlib>
 namespace Denn
 {     
@@ -311,72 +308,6 @@ namespace Denn
             }
 			,{ "string" }
         },
-		ParameterInfo{
-			m_max_int, "Max int of nram's registers",{ "-nrmi" }
-		},
-		ParameterInfo{
-			m_n_registers, "Number of nram's registers",{ "-nrr" }
-		},
-		ParameterInfo{
-			m_time_steps, "Time steps of nram machine",{ "-nrts" }
-		},
-        ParameterInfo{
-			m_task, "Task of nram machine", { "-nrtk"  },
-            [this](Arguments& args) -> bool 
-            { 
-                std::string str_c_type = args.get_string();
-                //all lower case
-                std::transform(str_c_type.begin(),str_c_type.end(), str_c_type.begin(), ::tolower);
-                //test
-                if(!NRam::TaskFactory::exists(str_c_type)) return false;
-                //save
-				m_task = str_c_type;
-                //ok
-                return true;
-            }
-			,{ "string",  NRam::TaskFactory::list_of_tasks() }
-        }, 
-        ParameterInfo{
-			m_gates, "List of gates of nram machine", { "-nrg"  },
-            [this](Arguments& args) -> bool 
-            {
-				//clear
-				m_gates.get().clear();
-				//ok
-                while(!args.end_vals())
-                {
-                    std::string str_c_type = args.get_string();
-                    //all lower case
-                    std::transform(str_c_type.begin(),str_c_type.end(), str_c_type.begin(), ::tolower);
-                    //test
-                    if(!NRam::GateFactory::exists(str_c_type)) return false;
-                    //push
-					m_gates.get().push_back(str_c_type);
-                }
-                //ok
-                return m_gates.get().size() != 0;
-            }
-			,{ "list(string)",  NRam::GateFactory::list_of_gates() }
-        },
-		ParameterInfo{
-			m_n_test, "Number of test of nram", { "-nrnt" }
-		},
-		ParameterInfo{
-			m_registers_values_extraction_type, "Type of extraction to apply to NRAM registers [\"zero\", \"defuzzyed\"]", { "-nrrvet" },
-            [this](Arguments& args) -> bool
-            {
-                std::string type = args.get_string();
-                //all lower case
-                std::transform(type.begin(),type.end(), type.begin(), ::tolower);
-                //testk
-                if (type != "zero" && type != "defuzzyed") return false;
-                //write
-                m_registers_values_extraction_type = type;
-                //Ok
-                return true;
-            },
-            { "string", std::vector<std::string> {"zero", "defuzzyed"} }
-		},
         ParameterInfo{
             m_dataset_filename, "Path of dataset file (gz) or network file input (json)", { "-d", "-i" }
         },
@@ -390,7 +321,7 @@ namespace Denn
 				m_runtime_output_type = args.get_string() ; 
 				return true;
 			}
-			,{ "string",  NRam::TaskFactory::list_of_tasks() }
+			,{ "string",  RuntimeOutputFactory::list_of_runtime_outputs() }
         },
         ParameterInfo{
             m_runtime_output_file, "Write the runtime output to stream [::cout, ::cerr, <file>]", { "-rof"  }
@@ -427,14 +358,6 @@ namespace Denn
         ParameterInfo{
             "Print list of activation functions", { "--active_functions-list", "--activation_functions-list",    "-aflist"  }, 
             [this](Arguments& args) -> bool { std::cout << ActivationFunctionFactory::names_of_activation_functions() << std::endl; return true; } 
-        },
-        ParameterInfo{
-            "Print list of nram's tasks", { "--nram-task-list", "--task-list", "-nrtlist"  },
-            [this](Arguments& args) -> bool { std::cout << NRam::TaskFactory::names_of_tasks() << std::endl; return true; }
-        },
-        ParameterInfo{
-            "Print list of nram's gates", { "--nram-gates-list", "--gates-list", "-nrglist"  },
-            [this](Arguments& args) -> bool { std::cout << NRam::GateFactory::names_of_gates() << std::endl; return true; }
         },
         ParameterInfo{
             "Print list of runtime output", { "--runtime_output-list",    "-rolist"  }, 

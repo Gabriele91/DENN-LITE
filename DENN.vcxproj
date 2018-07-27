@@ -48,10 +48,6 @@
     <ClInclude Include="include\DennDataSet.h" />
     <ClInclude Include="include\DennEvaluation.h" />
     <ClInclude Include="include\DennJson.h" />
-    <ClInclude Include="include\DennNRamDatasetTask.h" />
-    <ClInclude Include="include\DennNRamGate.h" />
-    <ClInclude Include="include\DennNRam.h" />
-    <ClInclude Include="include\DennNRamTask.h" />
     <ClInclude Include="include\DennRecurrentLayer.h" />
     <ClInclude Include="include\DennTestSetStream.h" />
     <ClInclude Include="include\DennDump.h" />
@@ -125,8 +121,6 @@
     <ClCompile Include="source\DennInstance.cpp" />
     <ClCompile Include="source\DennInstance\DennDBTestInstance.cpp" />
     <ClCompile Include="source\DennInstance\DennDefaultInstance.cpp" />
-    <ClCompile Include="source\DennInstance\DennNRamInstance.cpp" />
-    <ClCompile Include="source\DennInstance\DennNRamTestInstance.cpp" />
     <ClCompile Include="source\DennJson.cpp" />
     <ClCompile Include="source\DennLayer.cpp" />
     <ClCompile Include="source\DennInstanceUtils.cpp" />
@@ -139,11 +133,6 @@
     <ClCompile Include="source\DennMutation\DennMutationCurrentToRand.cpp" />
     <ClCompile Include="source\DennMutation\DennMutationTrigonometric.cpp" />
     <ClCompile Include="source\DennNeuralNetwork.cpp" />
-    <ClCompile Include="source\DennNRam.cpp" />
-    <ClCompile Include="source\DennNRamDatasetTask.cpp" />
-    <ClCompile Include="source\DennNRamGate.cpp" />
-    <ClCompile Include="source\DennNRamTask.cpp" />
-    <ClCompile Include="source\DennNRamTaskItems.cpp" />
     <ClCompile Include="source\DennParameterInfo.cpp" />
     <ClCompile Include="source\DennParameters.cpp" />
     <ClCompile Include="source\DennParametersArgs.cpp" />
