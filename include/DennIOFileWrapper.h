@@ -179,8 +179,12 @@ public:
     
     void seek_end(size_t pos = 0)
     {
+#if 0
         denn_assert(0);
         gzseek(m_file, (int)pos, SEEK_END);
+#else
+		seek_set(std::max(0, size() - pos));
+#endif
     }
     
     void seek_cur(size_t pos = 0)
