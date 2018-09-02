@@ -34,9 +34,6 @@
     <Filter Include="Resources\tests">
       <UniqueIdentifier>{8fee7666-dbb8-4e29-b354-8a53b15d5f26}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\DennGate">
-      <UniqueIdentifier>{2af22b56-0cf8-4831-8751-f9f2aca0d640}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\DennInstance">
       <UniqueIdentifier>{bd407b0c-884a-4b44-8679-704c594dbd1e}</UniqueIdentifier>
     </Filter>
@@ -165,6 +162,12 @@
     <ClInclude Include="include\DennUtilitiesVector.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="include\DennConv2DLayer.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DennLSTMLayer.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\DennIndividual.cpp">
@@ -281,48 +284,6 @@
     <ClCompile Include="source\DennEvaluationFactory.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateAdd.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateDec.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateEquality.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateInc.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateLessEqualThan.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateLessThan.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateMax.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateMin.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateOne.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateRead.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateSub.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateTwo.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateWrite.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateZero.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
     <ClCompile Include="source\DennInstance.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -382,6 +343,12 @@
     </ClCompile>
     <ClCompile Include="source\DennInstance\DennDefaultInstance.cpp">
       <Filter>Source\DennInstance</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennConv2DLayer.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennLSTMLayer.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

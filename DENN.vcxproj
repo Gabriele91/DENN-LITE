@@ -40,6 +40,7 @@
     <ClInclude Include="include\DennActivationFunction.h" />
     <ClInclude Include="include\DennArguments.h" />
     <ClInclude Include="include\DennConstants.h" />
+    <ClInclude Include="include\DennConv2DLayer.h" />
     <ClInclude Include="include\DennInstance.h" />
     <ClInclude Include="include\DennCostFunction.h" />
     <ClInclude Include="include\DennDatasetLoader.h" />
@@ -48,6 +49,7 @@
     <ClInclude Include="include\DennDataSet.h" />
     <ClInclude Include="include\DennEvaluation.h" />
     <ClInclude Include="include\DennJson.h" />
+    <ClInclude Include="include\DennLSTMLayer.h" />
     <ClInclude Include="include\DennRecurrentLayer.h" />
     <ClInclude Include="include\DennTestSetStream.h" />
     <ClInclude Include="include\DennDump.h" />
@@ -81,6 +83,7 @@
     <ClCompile Include="source\DennActivationFunctionItems.cpp" />
     <ClCompile Include="source\DennAlgorithm.cpp" />
     <ClCompile Include="source\DennArguments.cpp" />
+    <ClCompile Include="source\DennConv2DLayer.cpp" />
     <ClCompile Include="source\DennCrossoverFactory.cpp" />
     <ClCompile Include="source\DennCrossover\DennCrossoverBin.cpp" />
     <ClCompile Include="source\DennCrossover\DennCrossoverExp.cpp" />
@@ -103,20 +106,6 @@
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodShaDE.cpp" />
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodTDE.cpp" />
     <ClCompile Include="source\DennFilesystem.cpp" />
-    <ClCompile Include="source\DennGates\DennGateAdd.cpp" />
-    <ClCompile Include="source\DennGates\DennGateDec.cpp" />
-    <ClCompile Include="source\DennGates\DennGateEquality.cpp" />
-    <ClCompile Include="source\DennGates\DennGateInc.cpp" />
-    <ClCompile Include="source\DennGates\DennGateLessEqualThan.cpp" />
-    <ClCompile Include="source\DennGates\DennGateLessThan.cpp" />
-    <ClCompile Include="source\DennGates\DennGateMax.cpp" />
-    <ClCompile Include="source\DennGates\DennGateMin.cpp" />
-    <ClCompile Include="source\DennGates\DennGateOne.cpp" />
-    <ClCompile Include="source\DennGates\DennGateRead.cpp" />
-    <ClCompile Include="source\DennGates\DennGateSub.cpp" />
-    <ClCompile Include="source\DennGates\DennGateTwo.cpp" />
-    <ClCompile Include="source\DennGates\DennGateWrite.cpp" />
-    <ClCompile Include="source\DennGates\DennGateZero.cpp" />
     <ClCompile Include="source\DennIndividual.cpp" />
     <ClCompile Include="source\DennInstance.cpp" />
     <ClCompile Include="source\DennInstance\DennDBTestInstance.cpp" />
@@ -124,6 +113,7 @@
     <ClCompile Include="source\DennJson.cpp" />
     <ClCompile Include="source\DennLayer.cpp" />
     <ClCompile Include="source\DennInstanceUtils.cpp" />
+    <ClCompile Include="source\DennLSTMLayer.cpp" />
     <ClCompile Include="source\DennMutationFactory.cpp" />
     <ClCompile Include="source\DennMutation\DennMutationBest.cpp" />
     <ClCompile Include="source\DennMutation\DennMutationCurrentToBest.cpp" />
