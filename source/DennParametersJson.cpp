@@ -20,7 +20,7 @@ namespace Denn
         return out;
     }
 
-    bool Parameters::from_json(const std::string& source)
+    Parameters::ReturnType Parameters::from_json(const std::string& source)
     {
         //init json parse 
         Json json_input(source);
@@ -29,13 +29,13 @@ namespace Denn
         {
             std::cerr << "json\'s errors:" << std::endl;
             std::cerr << json_input.errors() << std::endl;
-            return false;
+            return FAIL;
         }
         //test: is a object
         if (!json_input.document().is_object())
         {
             std::cerr << "json not valid" << std::endl;
-            return false;
+            return FAIL;
         }
         //find arguments
         auto& jobject = json_input.document().object();
@@ -43,14 +43,14 @@ namespace Denn
         if (jargs_it == jobject.end())
         {
             std::cerr << "arguments not found" << std::endl;
-            return false;
+            return FAIL;
         }
         //test, arguments is a object
         auto& jargs_value = jargs_it->second;
         if (!jargs_value.is_object())
         {
             std::cerr << "arguments isn't a json object" << std::endl;
-            return false;
+            return FAIL;
         }
         //ref to args
         auto& jargs = jargs_value.object();
@@ -82,7 +82,7 @@ namespace Denn
                          else
                          {
                              std::cerr << "the argument \'" << info.m_associated_variable->name() << "\' has an unsupported type value (bool)" << std::endl;
-                             return false;
+                             return FAIL;
                          }
                     case JsonValue::Type::IS_NUMBER:
                         switch (type)
@@ -105,7 +105,7 @@ namespace Denn
                             default:
                             {
                                 std::cerr << "the argument \'" << info.m_associated_variable->name() << "\' has an unsupported type value (number)" << std::endl;
-                                return false;
+                                return FAIL;
                             }
                         }
                     break;
@@ -121,7 +121,7 @@ namespace Denn
                         else
                         {
                             std::cerr << "the argument \'" << info.m_associated_variable->name() << "\' has an unsupported type value (string)" << std::endl;
-                            return false;
+                            return FAIL;
                         }
                     break;
                     //Array int/string
@@ -169,7 +169,7 @@ namespace Denn
                         default:
                         {
                             std::cerr << "the argument \'" << info.m_associated_variable->name() << "\' has an unsupported array value (array)" << std::endl;
-                            return false;
+                            return FAIL;
                         }
                         break;
                         }
@@ -178,13 +178,13 @@ namespace Denn
                     default:
                     {
                         std::cerr << "the argument \'" << info.m_associated_variable->name() << "\' has an unsupported value (object)" << std::endl;
-                        return false;
+                        return FAIL;
                     }
                     break;
                     }
                 }
             }
         }
-        return true;
+        return SUCCESS;
     }
 }

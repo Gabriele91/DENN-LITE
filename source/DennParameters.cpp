@@ -388,10 +388,10 @@ namespace Denn
 		if (!get_params(nargs, vargs, jump_first)) throw std::runtime_error("fail to parse parameters");
     }
 
-	bool Parameters::get_params(int nargs, const char **vargs, bool jump_first)
+	Parameters::ReturnType Parameters::get_params(int nargs, const char **vargs, bool jump_first)
 	{
 		//args
-		if (!nargs || (nargs <= 1 && jump_first)) return true;
+		if (!nargs || (nargs <= 1 && jump_first)) return ONLYINFO;
 		//config
         if (Denn::Filesystem::get_extension(vargs[jump_first]) == ".config")
         {

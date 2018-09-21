@@ -1473,7 +1473,7 @@ namespace Denn
 		}
     };
     //////////////////////////////////////////////////////////////////////////////////
-    bool Parameters::from_config(const std::string& source, int nargs, const char **vargs)
+    Parameters::ReturnType Parameters::from_config(const std::string& source, int nargs, const char **vargs)
     {
         //ptr
         const char* ptr = source.c_str();
@@ -1484,7 +1484,7 @@ namespace Denn
         VariableTable context;
         //parse variables from comand line
 		if (!ParametersParseHelp::conf_parse_cline_args(context, nargs, vargs))
-			return false;
+			return FAIL;
         //parsing
         while (*ptr)
         {
@@ -1494,7 +1494,7 @@ namespace Denn
             if (!command.size())
             {
                 std::cerr << line << ": command not valid" << std::endl;
-                return false;
+                return FAIL;
             }
             //find '{'
             conf_skip_space_and_comments(line, ptr);
@@ -1502,7 +1502,7 @@ namespace Denn
             if (*ptr != '{')
             {
                 std::cerr << line << ": { not found" << std::endl;
-                return false;
+                return FAIL;
             }
             //jump {
             ++ptr;
@@ -1512,7 +1512,7 @@ namespace Denn
             {
                 do
                 {
-                    if (!ParametersParseHelp::conf_parse_variable(*this, context, line, ptr)) return false;
+                    if (!ParametersParseHelp::conf_parse_variable(*this, context, line, ptr)) return FAIL;
                 }
                 while (*ptr && (*ptr) != '}');
             }
@@ -1525,7 +1525,7 @@ namespace Denn
 				//parsing
                 do
                 {
-                    if (!ParametersParseHelp::conf_parse_net(*this, context, line, ptr)) return false;
+                    if (!ParametersParseHelp::conf_parse_net(*this, context, line, ptr)) return FAIL;
                 }
                 while (*ptr && (*ptr) != '}');
             }
@@ -1533,7 +1533,7 @@ namespace Denn
             {
                 do
                 {
-                    if (!ParametersParseHelp::conf_parse_arg(m_params_info, context, line, ptr)) return false;
+                    if (!ParametersParseHelp::conf_parse_arg(m_params_info, context, line, ptr)) return FAIL;
                 }
                 while (*ptr && (*ptr) != '}');
             }
@@ -1541,13 +1541,13 @@ namespace Denn
             if (*ptr != '}')
             {
                 std::cerr << line << ": } not found" << std::endl;
-                return false;
+                return FAIL;
             }
             //jump }
             ++ptr;
             conf_skip_space_and_comments(line, ptr);
             //loop
         }
-        return true;
+        return SUCCESS;
     }
 }

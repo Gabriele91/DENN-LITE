@@ -2,9 +2,11 @@
 
 namespace Denn
 {
-	bool Parameters::from_args(int nargs, const char **vargs)
+	Parameters::ReturnType Parameters::from_args(int nargs, const char **vargs)
 	{
 		MainArguments args(nargs, vargs);
+		//only inf?
+		bool only_info = true;
 		//start
 		while (!args.eof())
 		{
@@ -17,20 +19,21 @@ namespace Denn
 				{
 					parameters_arguments_are_correct = action.m_action(args);
 					is_a_valid_arg = true;
+					only_info &= !action.has_an_associated_variable();
 					break;
 				}
 			}
 			if (!is_a_valid_arg)
 			{
 				std::cerr << "parameter " << p << " not found" << std::endl;
-				return false;
+				return FAIL;
 			}
 			else if (!parameters_arguments_are_correct)
 			{
 				std::cerr << "arguments of parameter " << p << " are not correct" << std::endl;
-				return false;
+				return FAIL;
 			}
 		}
-		return true;
+		return only_info ? ONLYINFO : SUCCESS;
 	}
 }

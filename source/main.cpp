@@ -16,12 +16,20 @@ int main(int argc,const char** argv)
     ////////////////////////////////////////////////////////////////////////////////////////////////
     using namespace Denn;
     ////////////////////////////////////////////////////////////////////////////////////////////////
+    if(argc == 1) return 0;
+    ////////////////////////////////////////////////////////////////////////////////////////////////
     Parameters parameters;
     //parsing
-    if (!parameters.get_params(argc, argv))
+    switch(parameters.get_params(argc, argv))
     {
-        std::cout << "Parameter error" << std::endl;
-        return 64;
+        default:   
+        case Parameters::SUCCESS:
+            break;
+        case Parameters::ONLYINFO:
+            return 0;   
+        case Parameters::FAIL:
+            std::cout << "Parameter error" << std::endl;
+            return 64; 
     }
     ////////////////////////////////////////////////////////////////////////////////////////////////
     Instance::SPtr instance = InstanceFactory::create(parameters.m_instance, parameters);

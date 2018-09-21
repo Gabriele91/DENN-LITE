@@ -16,6 +16,13 @@ namespace Denn
 	{
 	public:
 
+		enum ReturnType
+		{
+			FAIL,
+			SUCCESS,
+			ONLYINFO
+		};
+
 		ReadOnly<std::string>			m_dataset_filename        { "dataset" };
 		ReadOnly<size_t>			    m_batch_size			  { "batch_size", size_t(100) };
 		ReadOnly<size_t>			    m_batch_offset			  { "batch_offset", size_t(0) };
@@ -85,13 +92,13 @@ namespace Denn
 	
 		Parameters();
 		Parameters(int nargs, const char **vargs, bool jump_first = true);
-		bool get_params(int nargs, const char **vargs, bool jump_first = true);
+		ReturnType get_params(int nargs, const char **vargs, bool jump_first = true);
 
 	private:
 
-		bool from_args(int nargs, const char **vargs);
-        bool from_config(const std::string& source, int nargs, const char **vargs);
-        bool from_json(const std::string& source);
+		ReturnType from_args(int nargs, const char **vargs);
+        ReturnType from_config(const std::string& source, int nargs, const char **vargs);
+        ReturnType from_json(const std::string& source);
 
 		static bool compare_n_args(const std::vector< std::string >& keys, const char* arg);
 		static std::string return_n_space(size_t n);
