@@ -1,7 +1,4 @@
 cmake_minimum_required(VERSION 3.8)
-project(DENN_LITE)
-
-set(CMAKE_CXX_STANDARD 14)
 
 #scaler
 if(NOT SCALAR)
@@ -12,16 +9,23 @@ endif()
 string(TOUPPER ${SCALAR} SCALAR_UPPER)
 string(TOLOWER ${SCALAR} SCALAR_LOWER)
 
+#Project/exe name
+set(DENN_EXECUTABLE "DENN-${SCALAR_LOWER}")
+
+#project name
+project(${DENN_EXECUTABLE})
+
+#C++14
+set(CMAKE_CXX_STANDARD 14)
+
 #flag for all types
 set(CMAKE_CXX_FLAGS "-D${SCALAR_UPPER} -fPIC -D_FORCE_INLINES")
 set(CMAKE_POSITION_INDEPENDENT_CODE TRUE)
 
-#POSTFIX FOR DEBUG
-if(NOT CMAKE_DEBUG_POSTFIX)
-    set(CMAKE_DEBUG_POSTFIX d)
-endif()
+#Postfix (DEBUG)
+set(CMAKE_DEBUG_POSTFIX "d")
 
-#flags
+#Flags
 if(MSVC)
   set(CMAKE_CXX_FLAGS_RELEASE "/O3")
 else()
@@ -29,36 +33,33 @@ else()
   set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 endif()
 
-#DENN FILES
+#DENN Files
 file(GLOB_RECURSE SOURCE_FILES "source/*.cpp")
 file(GLOB_RECURSE HEDAER_FILES "include/*.h")
 
-#DENN DIPS
+#DENN Dips
 find_package(ZLIB REQUIRED)
 find_package(BLAS)
 find_library(M_LIB m)
 find_library(UTIL_LIB util)
 
-#SET OUTPUT NAME
-set(DENN_EXECUTABLE "DENN-${SCALAR_LOWER}")
-
-#ADD SOUCE TO DENN TARGET
+#Add source to target
 add_executable(${DENN_EXECUTABLE} ${SOURCE_FILES})
 
-#ADD INCLUDE TO DENN TARGET
+#Add include to target
 include_directories(include/)
 include_directories(dips/include/)
 
-#ADD DIPS INCLUDE
+#Add dips' include to target
 include_directories(${ZLIB_INCLUDE_DIRS})
 include_directories(${BLAS_INCLUDE_DIRS})
 
-#LIKING DIPS
+#Liking
 target_link_libraries(${DENN_EXECUTABLE} ${ZLIB_LIBRARIES})
 target_link_libraries(${DENN_EXECUTABLE} ${M_LIB})
 target_link_libraries(${DENN_EXECUTABLE} ${UTIL_LIB})
 
-#OPTIONAL LIKING
+#Optional liking
 if(BLAS_FOUND)
 target_link_libraries(${DENN_EXECUTABLE} ${BLAS_LIBRARIES})
 endif()

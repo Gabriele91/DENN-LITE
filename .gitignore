@@ -7,6 +7,9 @@
 #remove result files
 *.json
 
+#cmake build
+[Bb]uild*/**
+
 #remove caffe2 
 [lib]caffe2.a
 caffe2/**
