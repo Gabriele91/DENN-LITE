@@ -209,9 +209,6 @@
     <ClCompile Include="source\DennSerializeOutputItems.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="source\DennActivationFunctionFactory.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="source\DennActivationFunctionItems.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -349,6 +346,9 @@
     </ClCompile>
     <ClCompile Include="source\DennLSTMLayer.cpp">
       <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennActivationFunctionFactory.cpp">
+      <Filter>Source\DennMutation</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

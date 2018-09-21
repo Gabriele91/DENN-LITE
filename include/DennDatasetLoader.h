@@ -378,7 +378,7 @@ namespace Denn
 				t_out.features(d).transposeInPlace();
 			}
 			//alloc output
-			//data are in row-major layour then the shape is traspose
+			//data are in row-major layout then the shape is traspose
 			t_out.labels().resize(m_header.m_n_classes, size);
 			//read labels
 			m_file.read
