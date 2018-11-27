@@ -1210,8 +1210,10 @@ namespace Denn
             //layer type
             std::string type = conf_name(ptr);
             //short cust
-            if(type == "lp"  || type == "layer_perceptron") type = "perceptron";
-            if(type == "lr"  || type == "layer_recurrent")  type = "recurrent";
+			if (type == "lp" || type == "fc" || type == "layer_perceptron")
+				type = "perceptron";
+			if (type == "lr"  || type == "layer_recurrent")  
+				type = "recurrent";
             //exits
             bool exists= LayerFactory::exists(type);
             //type
