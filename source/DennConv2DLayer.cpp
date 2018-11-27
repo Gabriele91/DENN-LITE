@@ -13,38 +13,56 @@ namespace Denn
 
 	static Matrix Convolution
 	(
-		  const Matrix& input
-		, const Matrix& conv
+		  const DennConv2DLayer::Stride& strides
+		, const Matrix& input
+		, const Matrix& kernel
 		, const ActivationFunction& function
-		, CONV_MODE mode = CONV2D_FULL
 	)
 	{
 		//output matrix
 		Matrix output;
-		/* The actual formulation can be seen in .md file */
-		switch(mode)
+
+		//info
+		Index input_w = input.cols();
+		Index input_h = input.rows();
+		Index kernel_w = kernel.cols();
+		Index kernel_h = kernel.rows();
+
+		//output
+		Index output_width = Index(std::ceil(float(input_w) / float(strides.m_x)));
+		Index output_height = Index(std::ceil(float(input_h) / float(strides.m_y)));
+
+		// Calculate the number of zeros which are needed to add as padding
+		Index pad_along_width  = std::max<Index>((output_width - 1) * strides.m_x + kernel_w - input_w, 0);
+		Index pad_along_height = std::max<Index>((output_height - 1) * strides.m_y + kernel_h - input_h, 0);
+		Index pad_top      = std::floor(pad_along_height / 2);// amount of zero padding on the top
+		Index pad_bottom   = pad_along_height - pad_top;      // amount of zero padding on the bottom
+		Index pad_left     = std::floor(pad_along_width / 2); // amount of zero padding on the left
+		Index pad_right    = pad_along_width - pad_left;      // amount of zero padding on the right
+		//output
+		output.resize(output_height, output_width);
+		//input padded
+		Matrix input_padded(input.rows() + pad_along_height, input.cols() + pad_along_width);
+		input_padded.setZero();
+		input_padded.block(pad_top, pad_left, input_h, input_w) = input;
+		
+		for (Index i = 0; i < output.rows(); i++)
+		for (Index j = 0; j < output.cols(); j++)
 		{
-			default:
-			case CONV2D_VALID:
-				output.resize(input.rows() - conv.rows() + 1, input.cols() - conv.cols() + 1);
-				for (Index i = 0; i < output.rows(); i++)
-				for (Index j = 0; j < output.cols(); j++)
-				{
-					output(i, j) = (input.block(i, j, conv.rows(), conv.cols()).array() * conv.array()).sum();
-				}
-				return std::move(function.apply(output));
-			break;
-			case CONV2D_FULL:
-				output = Matrix::Zero(input.rows() + 2 * conv.rows() - 2, input.cols() + 2 * conv.cols() - 2);
-				output.block(conv.rows() - 1, conv.cols() - 1, input.rows(), input.cols()) = input;
-				return Convolution(output, conv, function, CONV2D_VALID);
-			break;
+			output(i, j) = (input_padded.block(
+				  i *  strides.m_y
+				, j * strides.m_x
+				, kernel.rows()
+				, kernel.cols()
+			).array() * kernel.array()).sum();
 		}
+		return std::move(function.apply(output));
 	}
 		
 	static Matrix ImageSetConvolution
 	(
 		  const DennConv2DLayer::InputShape& in_shape
+		, const DennConv2DLayer::Stride& in_stride
 		, const Matrix& input
 		, const Matrix& conv
 		, const ActivationFunction& function
@@ -65,19 +83,7 @@ namespace Denn
 			//auto pass = Eigen::Stride<Eigen::Dynamic, 1>(Index(in_shape.m_channels)); //todo
 			auto image = MapMatrix(row.data(), Index(in_shape.m_height),  Index(in_shape.m_weight));
 			//execute
-			auto example = Convolution(image, conv, function, CONV2D_FULL);
-			//out size
-			if( example.size() != input.cols() )
-			{
-				#if 0
-				//todo, return size during build of DNN
-				//Index cols = std::max( example.size(), input.cols() );
-				//output.conservativeResize(input.rows(), cols);
-				#else 
-				//force to have same shape of input
-				example.conservativeResize(in_shape.m_height,in_shape.m_weight);
-				#endif
-			}
+			auto example = Convolution(in_stride, image, conv, function);
 			//vector
 			auto rowend = MapRowVector(example.array().data(), example.size());
 			//save
@@ -236,7 +242,7 @@ namespace Denn
  		for(size_t k = 0; k != m_kernels.size(); ++k)
 		{
 			//apply kernel
-			o.push_back(ImageSetConvolution(m_input_shape, inputs[i], m_kernels[k], m_activation_function));
+			o.push_back(ImageSetConvolution(m_input_shape, m_stride, inputs[i], m_kernels[k], m_activation_function));
 		}
 		//ok
         return o;
