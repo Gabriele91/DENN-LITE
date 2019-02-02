@@ -12,26 +12,10 @@ namespace Denn
 		///////////////////////////////////////
 		PerceptronLayer
 		(
-			  int features
-			, int clazz
+			  const Layer::Shape&			    shape
+			, const Layer::Input&			    input
+			, const Layer::VActivationFunction& active_function
 		);
-
-		PerceptronLayer
-		(
-			  ActivationFunction active_function
-			, size_t features
-			, size_t clazz
-		);
-
-		PerceptronLayer
-		(
-			  const std::vector< ActivationFunction >& active_function
-			, const std::vector< size_t >&			   input_output
-		)
-		: PerceptronLayer(active_function[0], input_output[0], input_output[1])
-		{
-
-		}
 		//////////////////////////////////////////////////
 		Matrix& weights();
 		Matrix& baias();
@@ -41,27 +25,23 @@ namespace Denn
 		//////////////////////////////////////////////////
 		virtual Layer::SPtr copy() const override;
 		//////////////////////////////////////////////////
-		virtual Matrix  apply(const Matrix& input) const override;
-		//////////////////////////////////////////////////
-		virtual Matrix  feedforward(const Matrix& input, Matrix& linear_out)				                               override;
-		virtual Matrix  backpropagate_delta(const Matrix& loss)       			               							   override;
-		virtual Matrix  backpropagate_derive(const Matrix& delta, const Matrix& linear_out)       			               override;
-		virtual VMatrix backpropagate_gradient(const Matrix& delta, const Matrix& linear_inpu, Scalar regular=Scalar(0.0)) override;
-		//////////////////////////////////////////////////
 		virtual VActivationFunction get_activation_functions()                                           override;
 		virtual void                set_activation_functions(const VActivationFunction& active_function) override;
 		//////////////////////////////////////////////////
-		virtual VMatrix  apply(const VMatrix& input) const														  			   override;
-		virtual VMatrix  feedforward(const VMatrix& input, VMatrix& linear_out)				  							       override;
-		virtual VMatrix  backpropagate_delta(const VMatrix& loss)     							                               override;		
-		virtual VMatrix  backpropagate_derive(const VMatrix& delta, const VMatrix& linear_out)       			               override;
-		virtual VVMatrix backpropagate_gradient(const VMatrix& delta, const VMatrix& linear_input, Scalar regular=Scalar(0.0)) override;
-		//////////////////////////////////////////////////
 		virtual size_t size() const override;
-		virtual size_t size_ouput() const override;
+		virtual size_t ouput_paramters() const override;
+		virtual size_t input_shape_dims() const override;
+		virtual Layer::Shape output_shape() const override;
 		virtual Matrix& operator[](size_t i) operator_override;
 		virtual const Matrix& operator[](size_t i) const operator_override;
 		//////////////////////////////////////////////////
+		virtual VMatrix   apply(const std::vector<Matrix>& input) const;
+		///////////////////////////////////////////////////////////////////////////
+		//Backpropagation stuff
+		virtual VMatrix   feedforward(const VMatrix& input);
+		virtual VMatrix   backpropagate(const VMatrix& input);
+		virtual void      optimizer(BPOptimizer& optimizer);
+		///////////////////////////////////////////////////////////////////////////
 
 	protected:
 
@@ -69,5 +49,17 @@ namespace Denn
 		Matrix         m_baias;
 		ActivationFunction m_activation_function{ nullptr };
 	};
-	REGISTERED_LAYER(PerceptronLayer, "perceptron", LayerMinMax(1), LayerMinMax(0))
+	REGISTERED_LAYER
+	(
+		  PerceptronLayer
+		, LAYER_NAMES(
+		      "perceptron"
+			, "lp"
+			, "fullconnected"
+		    , "fc"
+	      )
+		, LayerMinMax(0,1)
+		, LayerMinMax(1)
+		, LayerMinMax(0)
+	)
 }

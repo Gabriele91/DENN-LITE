@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
-#include "DennInstanceUtils.h"
+#include "DennUtilitiesNetworks.h"
 #include "DennLayer.h"
 
 namespace Denn
@@ -18,27 +18,38 @@ namespace Denn
 		//mlp network
 		NeuralNetwork mlp_nn;
 		//hidden layer list
-		const auto& hidden_layers = (*parameters.m_layers);
+		const auto& shape_layers  = (*parameters.m_shape);
+		const auto& input_layers = (*parameters.m_layers);
 		const auto& active_layers = (*parameters.m_activation_functions);
-		const auto& hidden_types  = (*parameters.m_layers_types);
+		const auto& type_layers  = (*parameters.m_layers_types);
 		//return NeuralNetwork
-		return build_network(n_features,n_class, hidden_layers, active_layers, hidden_types);
+		return build_network
+		(
+			  n_features
+			, n_class
+			, shape_layers
+			, input_layers
+			, active_layers
+			, type_layers
+		);
 	}
 	//build a mlp network from parameters
 	NeuralNetwork build_network
 	(
 		  size_t n_features
 		, size_t n_class
-		,       std::vector<long>         layers
+		, Layer::Shape shape
+		, Layer::Input layers
 		, const std::vector<std::string>& functions
 		, const std::vector<std::string>& types
 	)
 	{ 
 		//input of next layer
-		size_t input_size = n_features;
-		size_t t= 0;
+		size_t t = 0;
 		size_t a = 0;
 		size_t f = 0;
+		//network
+		NeuralNetwork nn;
 		//layer gen
 		auto new_layer = [&]() -> Layer::SPtr 
 		{ 
@@ -46,30 +57,43 @@ namespace Denn
 			if(t < types.size())
 			{
 				//is the last	
-				bool is_the_first = t == 0;
-				bool is_the_last  = t == (types.size()-1);
+				bool is_input  = t == 0;
+				bool is_output = t == (types.size()-1);
+				bool is_hidden = t > 0 && t < (types.size() - 1);
 				//get size
+				int  min_s = LayerFactory::min_shape_size(types[t]);
+				int  max_s = LayerFactory::max_shape_size(types[t]);
 				int  min_i = LayerFactory::min_input_size(types[t]);
 				int  max_i = LayerFactory::max_input_size(types[t]);
 				int  min_f = LayerFactory::min_activation_size(types[t]);
 				int  max_f = LayerFactory::max_activation_size(types[t]);
 				int  flags = LayerFactory::flags(types[t]);
 				//pass
-			    bool not_pass_trought = !(flags & DENN_PASS_TROUGHT);
-				//failed
-				if (is_the_first && !( flags & DENN_CAN_GET_THE_INPUT )) return nullptr;
-				if (is_the_last && !( flags & DENN_CAN_RETURN_OUTPUT ))  return nullptr;
-				//
-				if (is_the_last)
-				{
-					min_i = LayerFactory::min_output_size(types[t]);
-					max_i = LayerFactory::max_output_size(types[t]);
-				}
+				if (is_input  && !(flags & DENN_CAN_BE_AN_INPUT_LAYER )) return nullptr;
+				if (is_output && !(flags & DENN_CAN_BE_AN_OUTPUT_LAYER)) return nullptr;
+				if (is_hidden && !(flags & DENN_CAN_BE_AN_HIDDEN_LAYER)) return nullptr;
 				//build input
-				std::vector<size_t>			    l_inputs;
+				Layer::Shape					l_shape;
+				Layer::Input			        l_inputs;
 				std::vector<ActivationFunction> l_functions;
 				//add first input
-				if(not_pass_trought) l_inputs.push_back(input_size);
+				if (is_input && !shape.size())
+				{
+					if (!shape.size())
+					{
+						shape.push_back(n_features);
+					}
+					else
+					{
+						long shape_size = 0;
+						for (auto d : shape) shape_size += d;
+						if (shape_size == n_features) return nullptr;
+					}
+				}
+				else
+				{
+					shape = (*nn.back())->output_shape();
+				}
 				//add inputs
 				for(int cargs=0; cargs != max_i; ++cargs, ++a)
 				{	
@@ -78,32 +102,40 @@ namespace Denn
 					//get size
 					long size = layers[a];
 					//more then min?
-					     if (size <= 0 && cargs < min_i) return nullptr;
-					else if (size > 0)					 l_inputs.push_back(size);
+					     if (size <= 0 && cargs < min_i) 
+							 return nullptr;
+					else if (size > 0)					 
+							 l_inputs.push_back(size);
 					else break;
 				}
 				//add functions
 				for (int cfuncs = 0; cfuncs != max_f; ++cfuncs, ++f)
 				{
 					//args in pool
-					if (functions.size() <= f) return nullptr;
+					if (functions.size() <= f) 
+						return nullptr;
 					//exits
 					bool exists = ActivationFunctionFactory::exists(functions[f]);
 					//more then min?
-						 if (!exists && cfuncs < min_f)  return nullptr;
-					else if (exists) l_functions.push_back(ActivationFunctionFactory::get(functions[f]));
+						 if (!exists && cfuncs < min_f) 
+							 return nullptr;
+					else if (exists) 
+							 l_functions.push_back(ActivationFunctionFactory::get(functions[f]));
 					else break;
 				}
 				//add output size
-				if (is_the_last) l_inputs.push_back(n_class);
+				if (is_output)
+				{
+					l_inputs.push_back(n_class);
+				}
 				//build input
-				auto layer = LayerFactory::create(
+				auto layer = LayerFactory::create
+				(
 					  types[t]
-					, l_functions
+					, l_shape
 					, l_inputs
+					, l_functions
 				);
-				//update
-				if(not_pass_trought)  input_size = layer->size_ouput();
 				//go to next layer
 				++t;
 				//return
@@ -111,8 +143,6 @@ namespace Denn
 			}
 			return nullptr; 
 		};
-		//network
-		NeuralNetwork nn;
 		//push all hidden layers
 		if (types.size())
 		{
@@ -210,12 +240,14 @@ namespace Denn
 		}
 		return true;
 	}
+	
 	//parser network arg
 	bool get_network_from_string
 	(
 		  const std::string&		network
-		, std::vector<long>&        layers
-		, std::vector<std::string>& activation_functions
+		, std::vector<long>&        l_shape
+		, std::vector<long>&        l_inputs
+		, std::vector<std::string>& l_activation_functions
 		, std::vector<std::string>& layers_types
 	)
 	{	
@@ -223,7 +255,8 @@ namespace Denn
 		enum State
 		{
 			S_READ_TYPE,
-			S_READ_INPUT,
+			S_READ_SHAPE,
+			S_READ_INPUTS,
 			S_READ_ACTIVATIONS,
 			S_FINALIZE
 		};
@@ -233,7 +266,8 @@ namespace Denn
 		State state{ S_READ_TYPE };
 		std::string type;
 		std::string function;
-		std::vector< long > sizes;
+		Layer::Shape shape;
+		Layer::Input inputs;
 		std::vector< std::string > functions;
 		//ptr
 		while (*ptr)
@@ -243,13 +277,14 @@ namespace Denn
 			//change parse state
 			if (state == S_READ_TYPE)
 			{
-				if (std::isalpha(*ptr))
+				if ( (!type.size() && std::isalpha(*ptr)) ||
+					 ( type.size() && (std::isalnum(*ptr) || *ptr == '_' )) )
 				{
 					type += *ptr;
 				}
 				else if (*ptr == '(')
 				{
-					state = S_READ_INPUT;
+					state = S_READ_SHAPE;
 					//all lower case
 					std::transform(type.begin(), type.end(), type.begin(), ::tolower);
 					//test
@@ -258,13 +293,37 @@ namespace Denn
 				//next
 				++ptr; continue;
 			}
-			else if (state == S_READ_INPUT)
+			else if (state == S_READ_SHAPE)
 			{
 				if (std::isdigit(*ptr))
 				{
 					//parse
 					char *outptr = nullptr;
-					sizes.push_back(std::strtol(ptr, &outptr, 10));
+					shape.push_back(std::strtol(ptr, &outptr, 10));
+					if (ptr == outptr) return false;
+					//next
+					ptr = outptr; continue;
+				}
+				else if (',')
+				{
+					state = S_READ_INPUTS;
+					//next
+					++ptr; continue;
+				}
+				else if (*ptr == ')')
+				{
+					state = S_FINALIZE;
+					//next
+					++ptr; continue;
+				}
+			}
+			else if (state == S_READ_INPUTS)
+			{
+				if (std::isdigit(*ptr))
+				{
+					//parse
+					char *outptr = nullptr;
+					inputs.push_back(std::strtol(ptr, &outptr, 10));
 					if (ptr == outptr) return false;
 					//next
 					ptr = outptr; continue;
@@ -273,18 +332,19 @@ namespace Denn
 				{
 					state = S_READ_ACTIVATIONS;
 					//next
-					continue; ++ptr;
+					++ptr; continue;
 				}
 				else if (*ptr == ')')
 				{
 					state = S_FINALIZE;
 					//next
-					continue; ++ptr;
+					++ptr; continue;
 				}
 			}
 			else if (state == S_READ_ACTIVATIONS)
 			{
-				if (std::isalpha(*ptr))
+				if ((!type.size() && std::isalpha(*ptr)) ||
+					 (type.size() && (std::isalnum(*ptr) || *ptr == '_')))
 				{
 					function += *ptr;
 				}
@@ -292,7 +352,7 @@ namespace Denn
 				{
 					state = S_FINALIZE;
 					//next
-					continue; ++ptr;
+					++ptr; continue;
 				}
 				//next
 				++ptr;
@@ -320,14 +380,18 @@ namespace Denn
 				//last == '\0'
 				bool is_the_last = *ptr == '\0';
 				//flags
+				auto min_s = LayerFactory::min_shape_size(type);
+				auto max_s = LayerFactory::max_shape_size(type);
+				
 				auto min_i = LayerFactory::min_input_size(type);
 				auto max_i = LayerFactory::max_input_size(type);
-				auto min_f = LayerFactory::min_input_size(type);
-				auto max_f = LayerFactory::max_input_size(type);
+
+				auto min_f = LayerFactory::min_activation_size(type);
+				auto max_f = LayerFactory::max_activation_size(type);
 				int  flags = LayerFactory::flags(type);
 				//pass
-			    bool can_input = (flags & DENN_CAN_GET_THE_INPUT);
-			    bool can_output = (flags & DENN_CAN_RETURN_OUTPUT);
+			    bool can_input = (flags & DENN_CAN_BE_AN_INPUT_LAYER);
+			    bool can_output = (flags & DENN_CAN_BE_AN_OUTPUT_LAYER);
 				//if is the last, a paramater must to be omittet
 				if (is_the_last)
 				{
@@ -338,29 +402,36 @@ namespace Denn
 				if (is_the_first && !can_input) return false;
 				if (is_the_last && !can_output) return false;
 
-				if (sizes.size() < min_i) return false;
-				if (sizes.size() > max_i) return false;
+				if (shape.size() < min_s) return false;
+				if (shape.size() > max_s) return false;
+
+				if (inputs.size() < min_i) return false;
+				if (inputs.size() > max_i) return false;
 
 				if (functions.size() < min_f) return false;
 				if (functions.size() > max_f) return false;
 				//add
-				for (auto s : sizes) layers.push_back(s);
-				for (auto& f : functions) activation_functions.push_back(f);
+				for (auto s : shape)  l_shape.push_back(s);
+				for (auto i : inputs) l_inputs.push_back(i);
+				for (auto& f : functions) l_activation_functions.push_back(f);
 				//add void
-				for (int v = sizes.size(); v < max_i; ++v) layers.push_back(0);
-				for (int v = functions.size(); v < max_f; ++v) activation_functions.push_back("-");
+				for (int v = shape.size();  v < max_s; ++v)    l_shape.push_back(0);
+				for (int v = inputs.size(); v < max_i; ++v)    l_inputs.push_back(0);
+				for (int v = functions.size(); v < max_f; ++v) l_activation_functions.push_back("-");
 				//add type
 				layers_types.push_back(type);
 				//ok
 				type.clear();
 				function.clear();
-				sizes.clear();
+				inputs.clear();
+				shape.clear();
 				functions.clear();
 			}
 		}
 		//ok
 		return true;
 	}
+
 	bool get_string_from_args
 	(
 				std::string&			  network
@@ -384,15 +455,15 @@ namespace Denn
 			int  max_f = LayerFactory::max_activation_size(layers_types[t]);
 			int  flags = LayerFactory::flags(layers_types[t]);
 			//pass
-			bool pass_trought = (flags & DENN_PASS_TROUGHT);
-			bool can_input = (flags & DENN_CAN_GET_THE_INPUT);
-			bool can_output = (flags & DENN_CAN_RETURN_OUTPUT);
+			bool can_hidden = (flags & DENN_CAN_BE_AN_HIDDEN_LAYER);
+			bool can_input = (flags & DENN_CAN_BE_AN_INPUT_LAYER);
+			bool can_output = (flags & DENN_CAN_BE_AN_OUTPUT_LAYER);
 			//failed
 			if (is_the_first && !can_input) return false;
 			//failed
 			if (is_the_last && !can_output) return false;
 			//
-			if (is_the_last && !pass_trought)
+			if (is_the_last && !can_hidden)
 			{
 				max_i = LayerFactory::max_output_size(layers_types[t]);
 			}

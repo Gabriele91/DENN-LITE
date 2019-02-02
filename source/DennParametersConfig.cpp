@@ -1,7 +1,7 @@
 #include "DennParameters.h"
 #include "DennConstants.h"
 #include "DennLayer.h"
-#include "DennInstanceUtils.h"
+#include "DennUtilitiesNetworks.h"
 #include <string>
 #include <cctype>
 #include <unordered_map>
@@ -1304,12 +1304,12 @@ namespace Denn
 							max_i = LayerFactory::max_output_size(type);
 						}
 						//test
-						if (is_the_first && !( LayerFactory::flags(type) & DENN_CAN_GET_THE_INPUT ))
+						if (is_the_first && !( LayerFactory::flags(type) & DENN_CAN_BE_AN_INPUT_LAYER ))
 						{
 							std::cerr << line << ": the " << type << " layer can't to be the first layer" << std::endl;
 							return false;
 						}
-						if (is_the_last && !( LayerFactory::flags(type) & DENN_CAN_RETURN_OUTPUT ))
+						if (is_the_last && !( LayerFactory::flags(type) & DENN_CAN_BE_AN_OUTPUT_LAYER ))
 						{
 							std::cerr << line << ": the " << type << " layer can't to be the last layer" << std::endl;
 							return false;

@@ -34,4 +34,62 @@ namespace Denn
 			p[current] = current;
 		}
 	}
+
+	template<typename T>
+	inline std::vector< std::vector< T > > multi_split(std::vector< T >& vin, std::vector< size_t > idxs)
+	{
+		if (idxs.size())
+		{
+			//push back last
+			idxs.push_back(0);
+			idxs.push_back(vin.size());
+			//filter
+			std::sort(idxs.begin(), idxs.begin());
+			std::set<size_t> set_idxs(idxs.begin(), idxs.end());
+			//split
+			std::vector< std::vector< T > > out;
+			auto first = set_idxs.begin();
+			auto second = ++set_idxs.begin();
+
+			while (second != set_idxs.end())
+			{
+				//test
+				if (*first >= vin.size()) break;
+				if (*second > vin.size()) break;
+				//copy
+				out.push_back(std::vector< T >(vin.begin() + *first, vin.begin() + *second));
+				//next
+				first = second;
+				++second;
+			}
+
+			return out;
+		}
+		return {};
+	}
+
+
+	template<typename T>
+	inline std::tuple< std::vector< T >, std::vector< T > > split(std::vector< T > vin, size_t idx)
+	{
+		//split 1
+		if (!idx)
+			return std::make_tuple< std::vector< T >, std::vector< T > >
+			(
+				std::vector< T >{},
+				std::move(vin)
+			);
+		else if (vin.size() <= idx)
+			return std::make_tuple< std::vector< T >, std::vector< T > >
+			(
+				std::move(vin),
+				std::vector< T >{}
+			);
+		else
+			return std::make_tuple< std::vector< T >, std::vector< T > >
+			(
+				std::vector< T >{ vin.begin(), vin.begin() + idx },
+				std::vector< T >{ vin.begin() + idx, vin.end() }
+			);
+	}
 }

@@ -3,7 +3,7 @@
 #include "DennEvaluation.h"
 #include "DennRuntimeOutput.h"
 #include "DennSerializeOutput.h"
-#include "DennInstanceUtils.h"
+#include "DennUtilitiesNetworks.h"
 #include "DennDataset.h"
 #include "DennDatasetLoader.h"
 #include "DennTestSetStream.h"

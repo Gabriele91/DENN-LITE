@@ -135,9 +135,6 @@
     <ClInclude Include="include\DennInstance.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\DennInstanceUtils.h">
-      <Filter>Include</Filter>
-    </ClInclude>
     <ClInclude Include="include\DennJson.h">
       <Filter>Include</Filter>
     </ClInclude>
@@ -166,6 +163,12 @@
       <Filter>Include</Filter>
     </ClInclude>
     <ClInclude Include="include\DennLSTMLayer.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DennPoolLayer.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DennUtilitiesNetworks.h">
       <Filter>Include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -284,9 +287,6 @@
     <ClCompile Include="source\DennInstance.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="source\DennInstanceUtils.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="source\DennEvaluation\DennAccuracy.cpp">
       <Filter>Source\DennEvaluation</Filter>
     </ClCompile>
@@ -349,6 +349,9 @@
     </ClCompile>
     <ClCompile Include="source\DennActivationFunctionFactory.cpp">
       <Filter>Source\DennMutation</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennUtilitiesNetworks.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

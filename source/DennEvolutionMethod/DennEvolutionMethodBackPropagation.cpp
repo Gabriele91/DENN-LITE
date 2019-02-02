@@ -27,12 +27,11 @@ namespace Denn
 		override
 		{
 			//apply on parent
-			dpopulation.parents()[i_target]->m_network.backpropagation_gradient_descent
+			dpopulation.parents()[i_target]->m_network.backpropagation
 			(
-				  m_algorithm.current_batch().features()
-				, m_algorithm.current_batch().labels()
-				, m_learning_rate
-				, m_regularize
+				 { m_algorithm.current_batch().features() }
+				,{ m_algorithm.current_batch().labels()   }
+				, GDOptimizer(m_learning_rate /*, m_regularize*/)
 			);
 		}
 

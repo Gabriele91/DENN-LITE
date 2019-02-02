@@ -6,10 +6,13 @@
 #include <cctype>
 //default CPP include
 #include <limits>
+#include <set>
 #include <map>
+#include <array>
 #include <queue>
 #include <vector>
 #include <string>
+#include <algorithm>
 #include <numeric>
 #include <algorithm>
 #include <functional>

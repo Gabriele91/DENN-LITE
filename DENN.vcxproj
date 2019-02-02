@@ -50,6 +50,7 @@
     <ClInclude Include="include\DennEvaluation.h" />
     <ClInclude Include="include\DennJson.h" />
     <ClInclude Include="include\DennLSTMLayer.h" />
+    <ClInclude Include="include\DennPoolLayer.h" />
     <ClInclude Include="include\DennRecurrentLayer.h" />
     <ClInclude Include="include\DennTestSetStream.h" />
     <ClInclude Include="include\DennDump.h" />
@@ -57,7 +58,7 @@
     <ClInclude Include="include\DennFilesystem.h" />
     <ClInclude Include="include\DennIndividual.h" />
     <ClInclude Include="include\DennLayer.h" />
-    <ClInclude Include="include\DennInstanceUtils.h" />
+    <ClInclude Include="include\DennUtilitiesNetworks.h" />
     <ClInclude Include="include\DennMutation.h" />
     <ClInclude Include="include\DennNeuralNetwork.h" />
     <ClInclude Include="include\DennParameters.h" />
@@ -112,7 +113,7 @@
     <ClCompile Include="source\DennInstance\DennDefaultInstance.cpp" />
     <ClCompile Include="source\DennJson.cpp" />
     <ClCompile Include="source\DennLayer.cpp" />
-    <ClCompile Include="source\DennInstanceUtils.cpp" />
+    <ClCompile Include="source\DennUtilitiesNetworks.cpp" />
     <ClCompile Include="source\DennLSTMLayer.cpp" />
     <ClCompile Include="source\DennMutationFactory.cpp" />
     <ClCompile Include="source\DennMutation\DennMutationBest.cpp" />

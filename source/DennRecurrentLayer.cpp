@@ -9,63 +9,18 @@ namespace Denn
 	///////////////////////////////////////	
 	RecurrentLayer::RecurrentLayer
 	(
-		  size_t features
-		, size_t weights
-		, size_t output
+		  const Layer::Shape&			    shape
+		, const Layer::Input&			    input
+		, const Layer::VActivationFunction& active_functions
 	)
 	{
-		m_activation_function_inside = ActivationFunctionFactory::get("tanh");
-        U().resize(features, weights);
-		W().resize(weights, weights);
-		B().resize(1, weights);
-		V().resize(weights, output);
-		C().resize(1, output);
-	}
 
-	RecurrentLayer::RecurrentLayer
-	(
-		  ActivationFunction active_function
-		, size_t features
-		, size_t weights
-		, size_t output
-	)
-	{
-		m_activation_function_inside = ActivationFunctionFactory::get("tanh");
-		m_activation_function_output = ActivationFunctionFactory::name_of(active_function) == "linear" ? nullptr : active_function;
-        U().resize(features, weights);
-		W().resize(weights, weights);
-		B().resize(1, weights);
-		V().resize(weights, output);
-		C().resize(1, output);
-	}
+		//get layout
+		size_t features = shape[0];
 
-	RecurrentLayer::RecurrentLayer
-	(
-		  ActivationFunction active_function_inside
-		, ActivationFunction active_function_output
-		, size_t features
-		, size_t weights
-		, size_t output
-	)
-	{
-		m_activation_function_inside = ActivationFunctionFactory::name_of(active_function_inside) == "linear" ? nullptr : active_function_inside;
-		m_activation_function_output = ActivationFunctionFactory::name_of(active_function_output) == "linear" ? nullptr : active_function_output;
-		U().resize(features, weights);
-		W().resize(weights, weights);
-		B().resize(1, weights);
-		V().resize(weights, output);
-		C().resize(1, output);
-	}
-
-	RecurrentLayer::RecurrentLayer
-	(
-		  const std::vector< ActivationFunction >& active_functions
-		, const std::vector< size_t >&			   input_output
-	)
-	{
-		size_t features = input_output[0];
-		size_t weights  = input_output[1];
-		size_t output   = input_output.size() > 2 ? input_output[2] : features;
+		//info
+		size_t weights  = input[0];
+		size_t output   = input.size() > 1 ? input[1] : features;
 
 		if (active_functions.size() > 1)
 		{
@@ -119,10 +74,6 @@ namespace Denn
 		return std::static_pointer_cast<Layer>(std::make_shared<RecurrentLayer>(*this));
 	}
 	//////////////////////////////////////////////////    
-	Matrix  RecurrentLayer::apply(const Matrix& input) const
-	{
-		return apply(VMatrix{input}).back();
-	}
     Layer::VMatrix  RecurrentLayer::apply(const VMatrix& inputs) const
     {
 		//alias		
@@ -153,9 +104,17 @@ namespace Denn
 	{
 		return 5;
 	}
-	size_t RecurrentLayer::size_ouput() const
+	size_t RecurrentLayer::ouput_paramters() const
 	{
 		return V().cols();
+	}
+	size_t RecurrentLayer::input_shape_dims() const
+	{
+		return 1;
+	}
+	Layer::Shape RecurrentLayer::output_shape() const
+	{
+		return Layer::Shape{ long(V().cols()) };
 	}
 	Matrix& RecurrentLayer::operator[](size_t i)
 	{
@@ -182,60 +141,6 @@ namespace Denn
             case 3: return V();
             case 4: return C();
         }
-	}
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    /// TODO
-    /////////////////////////////////////////////////////////////////////////////////////////////
-	Matrix RecurrentLayer::feedforward(const Matrix& input, Matrix& l_out)
-	{
-        denn_assert(false);
-		//return
-		return {};
-	}
-	Matrix RecurrentLayer::backpropagate_delta(const Matrix& loss)
-    {
-        denn_assert(false);
-		//return
-		return {};
-    }
-    Matrix RecurrentLayer::backpropagate_derive(const Matrix& delta, const Matrix& l_out)
-    {
-        denn_assert(false);
-		//return
-		return {};
-    }
-    Layer::VMatrix RecurrentLayer::backpropagate_gradient(const Matrix& delta, const Matrix& l_in, Scalar regular)
-    {
-        denn_assert(false);
-		//return
-		return {};
-    }
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    /// TODO
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    Layer::VMatrix RecurrentLayer::feedforward(const VMatrix& inputs, VMatrix& linear_outs)
-	{
-        denn_assert(false);
-		//return
-		return {};
-	}
-	Layer::VMatrix RecurrentLayer::backpropagate_delta(const VMatrix& vloss)
-	{
-        denn_assert(false);
-		//return
-		return {};
-	}
-	Layer::VMatrix RecurrentLayer::backpropagate_derive(const VMatrix& deltas, const VMatrix& linear_outs)
-	{
-        denn_assert(false);
-		//return
-		return {};
-	}
-	Layer::VVMatrix RecurrentLayer::backpropagate_gradient(const VMatrix& deltas, const VMatrix& linear_inputs, Scalar regular)
-	{
-        denn_assert(false);
-		//return
-		return {};
-	}
+	}    
     /////////////////////////////////////////////////////////////////////////////////////////////
 }

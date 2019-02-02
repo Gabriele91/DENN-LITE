@@ -5,41 +5,61 @@
 namespace Denn
 {
 
+	class BPOptimizer
+	{
+	public:
+	
+		virtual void operator () (const Matrix& gradient, Matrix& matrix) = 0;
+	
+	};
+
+	class GDOptimizer : public BPOptimizer
+	{
+
+		Scalar m_alpha;
+
+	public:
+
+		GDOptimizer(Scalar alpha = 0.01) : m_alpha(alpha) {}
+
+		void operator () (const Matrix& gradient, Matrix& matrix) override
+		{
+			matrix += (matrix*gradient)*m_alpha;
+		}
+	};
+
 	class Layer : public std::enable_shared_from_this< Layer >
 	{ 
 	public:
 		//ref to Layer
-		using VActivationFunction = std::vector< ActivationFunction >;
-		using VMatrix  = std::vector<Matrix>;
-		using VVMatrix = std::vector<VMatrix>;
 		using Scalar   = Denn::Scalar;
 		using SPtr     = std::shared_ptr<Layer>;
+		using Shape    = std::vector< long >;
+		using Input	   = std::vector< long >;
+		using VMatrix  = std::vector<Matrix>;
+		using VVMatrix = std::vector<VMatrix>;
+		using VActivationFunction = std::vector< ActivationFunction >;
 		//return ptr
 		SPtr get_ptr();
 		///////////////////////////////////////////////////////////////////////////
 		//EIGEN_MAKE_ALIGNED_OPERATOR_NEW	
 		///////////////////////////////////////////////////////////////////////////
-		virtual Layer::SPtr copy() const  				                                                 = 0;
-		virtual Matrix apply(const Matrix& input) const								                     = 0;
-		virtual size_t size() const                                                                      = 0;
-		virtual size_t size_ouput() const											                     = 0;
-		virtual Matrix& operator[](size_t i)								                             = 0;
-		virtual const Matrix& operator[](size_t i) const						                         = 0;
-		virtual VActivationFunction get_activation_functions()										     = 0;
+		virtual Layer::SPtr copy() const = 0;
+		virtual size_t size() const  = 0;
+		virtual size_t ouput_paramters() const = 0;
+		virtual size_t input_shape_dims() const = 0;
+		virtual Shape  output_shape() const = 0;
+		virtual Matrix& operator[](size_t i) = 0;
+		virtual const Matrix& operator[](size_t i) const = 0;
+		virtual VActivationFunction get_activation_functions() = 0;
 		virtual void                set_activation_functions(const VActivationFunction& active_function) = 0;
 		///////////////////////////////////////////////////////////////////////////
-		//Backpropagation stuff
-		virtual Matrix    feedforward(const Matrix& input, Matrix& linear_out)				  							     = 0;
-		virtual Matrix    backpropagate_delta(const Matrix& loss)     							                             = 0;		
-		virtual Matrix    backpropagate_derive(const Matrix& delta, const Matrix& linear_out)       			             = 0;
-		virtual VMatrix   backpropagate_gradient(const Matrix& delta, const Matrix& linear_input, Scalar regular=Scalar(0.0))= 0;
+		virtual VMatrix   apply(const std::vector<Matrix>& input) const { return {}; }
 		///////////////////////////////////////////////////////////////////////////
-		//Recurrent network
-		virtual VMatrix apply(const std::vector<Matrix>& input) const					     							     = 0;
-		virtual VMatrix feedforward(const VMatrix& input, VMatrix& linear_out)				  							     = 0;
-		virtual VMatrix backpropagate_delta(const VMatrix& loss)     							                             = 0;		
-		virtual VMatrix backpropagate_derive(const VMatrix& delta, const VMatrix& linear_out)       			             = 0;
-		virtual VVMatrix backpropagate_gradient(const VMatrix& delta, const VMatrix& linear_input, Scalar regular=Scalar(0.0))= 0;
+		//Backpropagation stuff
+		virtual VMatrix   feedforward(const VMatrix& input)   { assert(0); return {}; }
+		virtual VMatrix   backpropagate(const VMatrix& input) { assert(0); return {}; }
+		virtual void      optimizer(BPOptimizer& optimizer)   { assert(0); }
 		///////////////////////////////////////////////////////////////////////////
 		class Iterator 
 		{
@@ -64,7 +84,6 @@ namespace Denn
 			Layer* m_layer;
 			size_t m_index;
 		};
-
 		Iterator begin();
 		Iterator end();
 		const Iterator begin() const;
@@ -87,8 +106,8 @@ namespace Denn
 
 	struct LayerMinMax
 	{
-		int  m_min{ 1 };
-		int  m_max{ 1 };
+		int  m_min{ 0 };
+		int  m_max{ 0 };
 
 		LayerMinMax() 
 		{
@@ -110,37 +129,69 @@ namespace Denn
 
 	enum LayerDefaultArguments
 	{
-		DENN_CAN_GET_THE_INPUT	= 0b0001,
-		DENN_CAN_RETURN_OUTPUT	= 0b0010,
-		DENN_PASS_TROUGHT		= 0b0100,
+		DENN_CAN_BE_AN_INPUT_LAYER	= 0b0001,
+		DENN_CAN_BE_AN_OUTPUT_LAYER	= 0b0010,
+		DENN_CAN_BE_AN_HIDDEN_LAYER	= 0b0100,
+		DENN_CAN_BE_ALL_TYPE_LAYER  = 0b0111,
 	};
 
 	struct LayerDescription
 	{
+		LayerMinMax  m_shape;
 		LayerMinMax  m_input;
 		LayerMinMax  m_function;
 		LayerMinMax  m_output;
-		unsigned int m_flags { DENN_CAN_GET_THE_INPUT | DENN_CAN_RETURN_OUTPUT };
+		unsigned int m_flags { DENN_CAN_BE_ALL_TYPE_LAYER };
 
 		LayerDescription() = default;
 
-		LayerDescription(LayerMinMax min_max, unsigned int flags =  DENN_CAN_GET_THE_INPUT | DENN_CAN_RETURN_OUTPUT)
+		LayerDescription
+		(
+			  LayerMinMax shape
+			, unsigned int flags = DENN_CAN_BE_ALL_TYPE_LAYER
+		)
 		{
+			m_shape = shape;
+			m_flags = flags;
+		}
+
+		LayerDescription
+		(
+			  LayerMinMax shape
+			, LayerMinMax min_max
+			, unsigned int flags = DENN_CAN_BE_ALL_TYPE_LAYER
+		)
+		{
+			m_shape    = shape;
 			m_input    = min_max;
 			m_function = min_max;
 			m_output   = min_max;
 			m_flags    = flags;
 		}
 
-		LayerDescription(LayerMinMax input, LayerMinMax output, unsigned int flags =  DENN_CAN_GET_THE_INPUT | DENN_CAN_RETURN_OUTPUT)
+		LayerDescription
+		(
+			  LayerMinMax shape
+			, LayerMinMax input
+			, LayerMinMax output
+			, unsigned int flags = DENN_CAN_BE_ALL_TYPE_LAYER
+		)
 		{
 			m_input    = input;
 			m_function = input;
 			m_output   = output;
 			m_flags    = flags;
 		}
-		LayerDescription(LayerMinMax input, LayerMinMax function, LayerMinMax output, unsigned int flags =  DENN_CAN_GET_THE_INPUT | DENN_CAN_RETURN_OUTPUT)
+		LayerDescription
+		(
+			  LayerMinMax shape
+			, LayerMinMax input
+			, LayerMinMax function
+			, LayerMinMax output
+			, unsigned int flags = DENN_CAN_BE_ALL_TYPE_LAYER
+		)
 		{
+			m_shape    = shape;
 			m_input    = input;
 			m_function = function;
 			m_output   = output;
@@ -155,12 +206,28 @@ namespace Denn
 
 	public:
 		//LayerItemFactory classes map
-		typedef Layer::SPtr(*CreateObject)(const std::vector<ActivationFunction>& active_function, const std::vector<size_t>& input_output);
+		typedef Layer::SPtr(*CreateObject)(
+			  const Layer::Shape& shape
+			, const Layer::Input& inputs
+			, const Layer::VActivationFunction& active_functions
+		);
 
 		//public
-		static Layer::SPtr create(const std::string& name, const std::vector<ActivationFunction>& active_functions, const std::vector<size_t>& inputs);
+		static Layer::SPtr create(
+			  const std::string& name
+			, const Layer::Shape& shape
+			, const Layer::Input& inputs
+			, const Layer::VActivationFunction& active_functions
+		);
 		static void append(const std::string& name, CreateObject fun, const LayerDescription& desc, size_t size);
 		
+		static void append(const std::vector<std::string>& names, CreateObject fun, const LayerDescription& desc, size_t size);
+
+		static LayerDescription* layer_description(const std::string& name);
+
+		static int min_shape_size(const std::string& name);
+		static int max_shape_size(const std::string& name);
+
 		static int min_input_size(const std::string& name);
 		static int max_input_size(const std::string& name);
 
@@ -186,9 +253,14 @@ namespace Denn
 	class LayerItem
 	{
 
-		static Layer::SPtr create(const std::vector<ActivationFunction>&  active_functions, const std::vector<size_t>& inputs)
+		static Layer::SPtr create
+		(
+			  const Layer::Shape& shape
+			, const Layer::Input& inputs
+			, const Layer::VActivationFunction& active_functions
+		)
 		{
-			return (std::make_shared< T >(active_functions, inputs))->get_ptr();
+			return (std::make_shared< T >(shape, inputs, active_functions))->get_ptr();
 		}
 
 		LayerItem(const std::string& name, const LayerDescription& desc, size_t size)
@@ -196,17 +268,39 @@ namespace Denn
 			LayerFactory::append(name, LayerItem<T>::create, desc, size);
 		}
 
+		LayerItem(const std::vector<std::string>& names, const LayerDescription& desc, size_t size)
+		{
+			LayerFactory::append(names, LayerItem<T>::create, desc, size);
+		}
+
 	public:
 
 
-		static LayerItem<T>& instance(const std::string& name, const LayerDescription& desc, size_t size)
+		static LayerItem<T>& instance
+		(
+			  const std::string& name
+			, const LayerDescription& desc
+			, size_t size
+		)
 		{
-			static LayerItem<T> objectItem(name, desc, size);
-			return objectItem;
+			static LayerItem<T> object_item(name, desc, size);
+			return object_item;
+		}
+
+		static LayerItem<T>& instance
+		(
+			  const std::vector<std::string>& names
+			, const LayerDescription& desc
+			, size_t size
+		)
+		{
+			static LayerItem<T> object_item(names, desc, size);
+			return object_item;
 		}
 
 	};
 
+    #define LAYER_NAMES(...) (std::vector<std::string>{ __VA_ARGS__ })
 	#define REGISTERED_LAYER(class_, name_ , ... )\
 	namespace\
 	{\

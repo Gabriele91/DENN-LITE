@@ -4,11 +4,13 @@
 
 namespace Denn
 {
+
 class NeuralNetwork
 {
 public:
 	////////////////////////////////////////////////////////////////
-	using Scalar			 = Denn::Scalar;
+	using Scalar			 = Denn::Scalar;	
+	using VMatrix	         = std::vector < Matrix >;
 	using LayerList			 = std::vector < Layer::SPtr >;
 	using LayerIterator		 = typename LayerList::iterator;
 	using LayerConstIterator = typename LayerList::const_iterator;
@@ -43,21 +45,13 @@ public:
 	}
 	/////////////////////////////////////////////////////////////////////////
 	Matrix apply(const Matrix& input) const;
-	Matrix apply(const std::vector< Matrix >& input) const;
-    //pointer to context
-	using BackpropagationDelta    = std::vector< Matrix >;
-	using BackpropagationGradient = std::vector< std::vector< Matrix > >;
-	using BackpropagationContext  = std::tuple< BackpropagationDelta, BackpropagationGradient >;
-    //backpropagation
-	BackpropagationContext compute_gradient(const Matrix& input, const Matrix& labels, Scalar regular_param = Scalar(0.0)) const;
-	void gradient_descent(BackpropagationContext&& bpcontext, Scalar learn_rate = Scalar(0.5));
-	//compute_gradient + gradient_descent
-	void backpropagation_gradient_descent
+	Matrix apply(const VMatrix& input) const;
+	//backpropagation
+	void backpropagation
     (
-		  const Matrix& input
-        , const Matrix& labels
-		, const Scalar learn_rate    		 = Scalar(0.5)
-	    , const Scalar regular_param 		 = Scalar(1.0)
+		  const VMatrix& input
+        , const VMatrix& labels
+		, BPOptimizer&  optimizer = GDOptimizer()
 	);
 	/////////////////////////////////////////////////////////////////////////
 	size_t size() const;
@@ -70,9 +64,13 @@ public:
 
 	LayerIterator end();
 
+	LayerIterator back();
+
 	LayerConstIterator begin() const;
 
 	LayerConstIterator end() const;
+
+	LayerConstIterator back() const;
 	/////////////////////////////////////////////////////////////////////////
 protected:
 
@@ -92,14 +90,5 @@ inline NeuralNetwork::Scalar distance_pow2<NeuralNetwork>(const NeuralNetwork& a
 	//return 
 	return dpow2;
 } 
-
-NeuralNetwork::BackpropagationDelta operator + (  const NeuralNetwork::BackpropagationDelta& left
-											    , const NeuralNetwork::BackpropagationDelta& right);
-
-NeuralNetwork::BackpropagationGradient operator + (  const NeuralNetwork::BackpropagationGradient& left
-											       , const NeuralNetwork::BackpropagationGradient& right);
-
-NeuralNetwork::BackpropagationContext operator + (  const NeuralNetwork::BackpropagationContext& left
-											      , const NeuralNetwork::BackpropagationContext& right);
 
 }

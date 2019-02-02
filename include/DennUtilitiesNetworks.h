@@ -10,7 +10,8 @@ namespace Denn
 	(
 		  size_t n_features
 		, size_t n_class
-		,       std::vector<long>         layers
+		, Layer::Shape shape
+		, Layer::Input layers
 		, const std::vector<std::string>& activation_functions
 		, const std::vector<std::string>& layers_types
 	);
@@ -24,6 +25,7 @@ namespace Denn
 	bool get_network_from_string
 	(
 		  const std::string&		network
+		, std::vector<long>&        shape
 		, std::vector<long>&        layers
 		, std::vector<std::string>& activation_functions
 		, std::vector<std::string>& layers_types

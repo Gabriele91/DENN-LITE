@@ -9,7 +9,7 @@
 #include "DennDump.h"
 #include "DennVersion.h"
 #include "DennFilesystem.h"
-#include "DennInstanceUtils.h"
+#include "DennUtilitiesNetworks.h"
 #include <sstream>
 #include <iostream>
 #include <cstdlib>
@@ -290,21 +290,32 @@ namespace Denn
             [this](Arguments& args) -> bool 
             {
 				//clear
+				m_shape.get().clear();
 				m_layers.get().clear();
 				m_activation_functions.get().clear();
 				m_layers_types.get().clear();
 				m_network = "";
+				int loop_count = 0;
 				//ok
-				while (!args.end_vals())
+				for (int count = 0; !args.end_vals(); ++count)
 				{
 					std::string str_c_type = args.get_string();
 					//all lower case
 					std::transform(str_c_type.begin(),str_c_type.end(), str_c_type.begin(), ::tolower);
+					//add space
+					if(count) m_network.get() += " ";
 					//append
 					m_network.get() += str_c_type;
 				}
                 //ok
-				return get_network_from_string(m_network.get(), m_layers.get(), m_activation_functions.get(), m_layers_types.get());
+				return get_network_from_string
+				(
+					m_network.get(),
+					m_shape.get(),
+					m_layers.get(),
+					m_activation_functions.get(), 
+					m_layers_types.get()
+				);
             }
 			,{ "string" }
         },

@@ -84,6 +84,7 @@ namespace Denn
 		ReadOnly<Scalar>					   m_regularize			   { "regularize", Scalar(0.0) };
 
 		ReadOnly< std::string >   m_network                            { "network"                 , "perceptron(linear)", true  };
+		ReadOnly< std::vector<long> >          m_shape                 { "shape"                   , std::vector<long>{},        false };
 		ReadOnly< std::vector<long> >          m_layers                { "layers"                  , std::vector<long>{},        false };
 		ReadOnly< std::vector<std::string> >   m_activation_functions  { "activation_functions"    , std::vector<std::string>{"linear"}, false };
 	    ReadOnly< std::vector<std::string> >   m_layers_types          { "layers_types"            , std::vector<std::string>{"perceptron"}, false };

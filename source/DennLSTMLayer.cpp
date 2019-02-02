@@ -9,90 +9,13 @@ namespace Denn
 	///////////////////////////////////////	
 	LSTMLayer::LSTMLayer
 	(
-		  size_t features
-		, size_t weights
+		  const Layer::Shape&			    shape
+		, const Layer::Input&			    input
+		, const Layer::VActivationFunction& active_functions
 	)
 	{
-		m_activation_function[FuncType::G] = ActivationFunctionFactory::get("sigmoid");
-		m_activation_function[FuncType::C] = ActivationFunctionFactory::get("tanh");
-		m_activation_function[FuncType::H] = ActivationFunctionFactory::get("tanh");
-		for(size_t i = 0; i!=GateType::NGATE; ++i)
-		{
-			m_W[i].resize(features, weights);
-			m_U[i].resize(weights,weights);
-			m_B[i].resize(1, weights);
-		}
-	}
-
-	LSTMLayer::LSTMLayer
-	(
-		  ActivationFunction active_function
-		, size_t features
-		, size_t weights
-	)
-	{
-		m_activation_function[FuncType::G] = ActivationFunctionFactory::get("sigmoid");
-		m_activation_function[FuncType::C] = active_function;
-		m_activation_function[FuncType::H] = active_function;
-		for(size_t i = 0; i!=GateType::NGATE; ++i)
-		{
-			m_W[i].resize(features, weights);
-			m_U[i].resize(weights,weights);
-			m_B[i].resize(1, weights);
-		}
-	}
-
-	LSTMLayer::LSTMLayer
-	(
-		  ActivationFunction active_function_g
-		, ActivationFunction active_function_c_h
-		, size_t features
-		, size_t weights
-	)
-	{
-		//g
-		m_activation_function[FuncType::G] = active_function_g;
-		//h/c
-		m_activation_function[FuncType::C] = active_function_c_h;
-		m_activation_function[FuncType::H] = active_function_c_h;
-
-		for(size_t i = 0; i!=GateType::NGATE; ++i)
-		{
-			m_W[i].resize(features, weights);
-			m_U[i].resize(weights,weights);
-			m_B[i].resize(1, weights);
-		}
-	}
-
-
-	LSTMLayer::LSTMLayer
-	(
-		  ActivationFunction active_function_g
-		, ActivationFunction active_function_c
-		, ActivationFunction active_function_h
-		, size_t features
-		, size_t weights
-	)
-	{
-		m_activation_function[FuncType::G] = active_function_g;
-		m_activation_function[FuncType::C] = active_function_c;
-		m_activation_function[FuncType::H] = active_function_h;
-		for(size_t i = 0; i!=GateType::NGATE; ++i)
-		{
-			m_W[i].resize(features, weights);
-			m_U[i].resize(weights,weights);
-			m_B[i].resize(1, weights);
-		}
-	}
-
-	LSTMLayer::LSTMLayer
-	(
-		  const std::vector< ActivationFunction >& active_functions
-		, const std::vector< size_t >&			   input_output
-	)
-	{
-		size_t features = input_output[0];
-		size_t weights  = input_output[1];
+		size_t features = shape[0];
+		size_t weights  = input[1];
 
 		if (active_functions.size() >= 3)
 		{
@@ -150,10 +73,6 @@ namespace Denn
 		return std::static_pointer_cast<Layer>(std::make_shared<LSTMLayer>(*this));
 	}
 	//////////////////////////////////////////////////    
-	Matrix  LSTMLayer::apply(const Matrix& input) const
-	{
-		return apply(VMatrix{input}).back();
-	}
     Layer::VMatrix  LSTMLayer::apply(const VMatrix& inputs) const
     {
 		//alias		
@@ -201,10 +120,18 @@ namespace Denn
 	{
 		return GateType::NGATE * 3;
 	}
-	size_t LSTMLayer::size_ouput() const
+	size_t LSTMLayer::ouput_paramters() const
 	{
 		//output = weights
 		return m_U[0].cols();
+	}
+	size_t LSTMLayer::input_shape_dims() const
+	{
+		return 1;
+	}
+	Layer::Shape LSTMLayer::output_shape() const
+	{
+		return Layer::Shape{ long(m_U[0].cols()) };
 	}
 	Matrix& LSTMLayer::operator[](size_t i)
 	{
@@ -232,59 +159,5 @@ namespace Denn
 			case 2: return m_B[id];
 		}
 	}
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    /// TODO
-    /////////////////////////////////////////////////////////////////////////////////////////////
-	Matrix LSTMLayer::feedforward(const Matrix& input, Matrix& l_out)
-	{
-        denn_assert(false);
-		//return
-		return {};
-	}
-	Matrix LSTMLayer::backpropagate_delta(const Matrix& loss)
-    {
-        denn_assert(false);
-		//return
-		return {};
-    }
-    Matrix LSTMLayer::backpropagate_derive(const Matrix& delta, const Matrix& l_out)
-    {
-        denn_assert(false);
-		//return
-		return {};
-    }
-    Layer::VMatrix LSTMLayer::backpropagate_gradient(const Matrix& delta, const Matrix& l_in, Scalar regular)
-    {
-        denn_assert(false);
-		//return
-		return {};
-    }
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    /// TODO
-    /////////////////////////////////////////////////////////////////////////////////////////////
-    Layer::VMatrix LSTMLayer::feedforward(const VMatrix& inputs, VMatrix& linear_outs)
-	{
-        denn_assert(false);
-		//return
-		return {};
-	}
-	Layer::VMatrix LSTMLayer::backpropagate_delta(const VMatrix& vloss)
-	{
-        denn_assert(false);
-		//return
-		return {};
-	}
-	Layer::VMatrix LSTMLayer::backpropagate_derive(const VMatrix& deltas, const VMatrix& linear_outs)
-	{
-        denn_assert(false);
-		//return
-		return {};
-	}
-	Layer::VVMatrix LSTMLayer::backpropagate_gradient(const VMatrix& deltas, const VMatrix& linear_inputs, Scalar regular)
-	{
-        denn_assert(false);
-		//return
-		return {};
-	}
-    /////////////////////////////////////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////
 }
