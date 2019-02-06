@@ -49,6 +49,7 @@
     <ClInclude Include="include\DennEvaluation.h" />
     <ClInclude Include="include\DennJson.h" />
     <ClInclude Include="include\DennOptimizer.h" />
+    <ClInclude Include="include\DennShape.h" />
     <ClInclude Include="include\DennTestSetStream.h" />
     <ClInclude Include="include\DennDump.h" />
     <ClInclude Include="include\DennEvolutionMethod.h" />

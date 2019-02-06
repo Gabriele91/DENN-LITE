@@ -28,7 +28,7 @@ namespace Denn
 		{
 			//update
 			dpopulation.parents()[i_target]->m_network.fit(
-				m_algorithm.current_batch().m_features,
+				m_algorithm.current_batch().features(),
 				m_algorithm.current_batch().m_labels,
 				SGD(m_learning_rate, m_regularize)
 			);

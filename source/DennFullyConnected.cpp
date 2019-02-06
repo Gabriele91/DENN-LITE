@@ -7,8 +7,8 @@ namespace Denn
 	FullyConnected::FullyConnected
 	(
 		  ActivationFunction active_function
-		, Layer::Shape inshape
-		, Layer::Shape outshape
+		, Shape inshape
+		, Shape outshape
 	)
 	: Layer(inshape, outshape)
 	, m_activation_function(active_function)

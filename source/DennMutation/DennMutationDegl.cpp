@@ -289,15 +289,15 @@ namespace Denn
 			{
 				nn_g.fit
 				(	
-					  m_algorithm.current_batch().m_features
-					, m_algorithm.current_batch().m_labels
+					  m_algorithm.current_batch().features()
+					, m_algorithm.current_batch().labels()
 					, SGD(*parameters().m_learning_rate
 						 , *parameters().m_regularize)
 				);
 				nn_l.fit
 				(	
-					  m_algorithm.current_batch().m_features
-					, m_algorithm.current_batch().m_labels
+					  m_algorithm.current_batch().features()
+					, m_algorithm.current_batch().labels()
 					, SGD( *parameters().m_learning_rate
 					      ,*parameters().m_regularize)
 				);

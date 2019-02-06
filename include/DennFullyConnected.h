@@ -13,8 +13,8 @@ namespace Denn
 		FullyConnected
 		(
 			  ActivationFunction active_function
-			, Layer::Shape inshape
-			, Layer::Shape outshape
+			, Shape inshape
+			, Shape outshape
 		);
 		FullyConnected
 		(

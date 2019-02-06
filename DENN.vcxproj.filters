@@ -150,6 +150,9 @@
     <ClInclude Include="include\DennOptimizer.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="include\DennShape.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\DennIndividual.cpp">

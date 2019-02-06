@@ -12,19 +12,13 @@ namespace Denn
 		m_dataset->start_read_batch();
 		//init batch
 		//int features
-		m_batch.m_features.conservativeResize
+		m_batch.features().conservativeResize
 		(
 			  m_dataset->get_main_header_info().m_n_features
 			, m_batch_size
 		);
-		//mask
-		m_batch.m_mask.conservativeResize
-		(
-			  m_dataset->get_main_header_info().m_n_features
-			, 1
-		);
 		//init labels
-		m_batch.m_labels.conservativeResize
+		m_batch.labels().conservativeResize
 		(
 			  m_dataset->get_main_header_info().m_n_classes
 			, m_batch_size
@@ -57,11 +51,12 @@ namespace Denn
 		//shift (not equal)
 		if (n_cols_update && n_cols_update < m_batch_size)
 		{
+			//put the last N values on the top (for all features)
+			m_batch.features() = Denn::shift_left(m_batch.features(), n_cols_update);
 			//put the last N values on the top
-			m_batch.m_features = Denn::shift_left(m_batch.m_features, n_cols_update);
-			m_batch.m_labels = Denn::shift_left(m_batch.m_labels, n_cols_update);
+			m_batch.labels() = Denn::shift_left(m_batch.labels(), n_cols_update);
 			//start to n_rows
-			offset = m_batch.m_features.cols() - n_cols_update;
+			offset = m_batch.features().cols() - n_cols_update;
 		}
 		//copy next
 		while (n_read < n_cols_update)
@@ -69,16 +64,17 @@ namespace Denn
 			//get remaning
 			size_t read_remaning = n_cols_update - n_read;
 			//restart
-			if (m_cache_cols_read >= m_cache_batch.m_features.cols())
+			if (m_cache_cols_read >= m_cache_batch.features().cols())
 				m_cache_cols_read = 0;
 			//init case
 			if(!m_cache_cols_read)
 				m_dataset->read_batch(m_cache_batch);
 			//compute n rows to read
-			size_t to_read = std::min<size_t>(m_cache_batch.m_features.cols(), read_remaning);
-			//read
-			m_batch.m_features.block(0, offset, c_features, to_read) = m_cache_batch.m_features.block(0, m_cache_cols_read, c_features, to_read);
-			m_batch.m_labels.block(0, offset, c_labels, to_read) = m_cache_batch.labels().block(0, m_cache_cols_read, c_labels, to_read);
+			size_t to_read = std::min<size_t>(m_cache_batch.features().cols(), read_remaning);
+			//copy all features
+			m_batch.features().block(0, offset, c_features, to_read) = m_cache_batch.features().block(0, m_cache_cols_read, c_features, to_read);
+			//copy all labels
+			m_batch.labels().block(0, offset, c_labels, to_read) = m_cache_batch.labels().block(0, m_cache_cols_read, c_labels, to_read);
 			//move
 			n_read += to_read;
 			offset += to_read;

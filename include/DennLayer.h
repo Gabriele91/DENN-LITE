@@ -1,5 +1,6 @@
 #pragma once
 #include "Config.h"
+#include "DennShape.h"
 #include "DennOptimizer.h"
 #include "DennActivationFunction.h"
 
@@ -10,26 +11,6 @@ class Layer : public std::enable_shared_from_this< Layer >
 {
 public:
 
-	class Shape
-	{
-	public:
-
-		Shape(int width, int height = 1, int channels = 1)
-		: m_width(width), m_height(height), m_channels(channels)
-		{
-		}
-
-		explicit operator int () const { return m_width * m_height * m_channels; }
-		int width() const { return m_width; }
-		int height() const { return m_height; }
-		int channels() const { return m_channels; }
-
-	protected:
-
-		int m_width;
-		int m_height;
-		int m_channels;
-	};
 
 	class Iterator
 	{
