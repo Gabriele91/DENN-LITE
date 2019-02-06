@@ -34,9 +34,6 @@
     <Filter Include="Resources\tests">
       <UniqueIdentifier>{8fee7666-dbb8-4e29-b354-8a53b15d5f26}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source\DennGate">
-      <UniqueIdentifier>{2af22b56-0cf8-4831-8751-f9f2aca0d640}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source\DennInstance">
       <UniqueIdentifier>{bd407b0c-884a-4b44-8679-704c594dbd1e}</UniqueIdentifier>
     </Filter>
@@ -117,9 +114,6 @@
     <ClInclude Include="include\DennNeuralNetwork.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\DennPerceptronLayer.h">
-      <Filter>Include</Filter>
-    </ClInclude>
     <ClInclude Include="include\DennPointFunction.h">
       <Filter>Include</Filter>
     </ClInclude>
@@ -135,19 +129,7 @@
     <ClInclude Include="include\DennEvaluation.h">
       <Filter>Include</Filter>
     </ClInclude>
-    <ClInclude Include="include\DennNRam.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\DennNRamTask.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\DennNRamGate.h">
-      <Filter>Include</Filter>
-    </ClInclude>
     <ClInclude Include="include\DennInstance.h">
-      <Filter>Include</Filter>
-    </ClInclude>
-    <ClInclude Include="include\DennNRamDatasetTask.h">
       <Filter>Include</Filter>
     </ClInclude>
     <ClInclude Include="include\DennInstanceUtils.h">
@@ -160,6 +142,12 @@
       <Filter>Include</Filter>
     </ClInclude>
     <ClInclude Include="include\DennParameterInfo.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DennFullyConnected.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DennOptimizer.h">
       <Filter>Include</Filter>
     </ClInclude>
   </ItemGroup>
@@ -213,9 +201,6 @@
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="source\DennNeuralNetwork.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennPerceptronLayer.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="source\main.cpp">
@@ -278,74 +263,14 @@
     <ClCompile Include="source\DennEvaluationFactory.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="source\DennNRam.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateAdd.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateDec.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateEquality.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateInc.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateLessEqualThan.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateLessThan.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateMax.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateMin.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateOne.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateRead.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateSub.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateTwo.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateWrite.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennGates\DennGateZero.cpp">
-      <Filter>Source\DennGate</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennNRamTask.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennNRamTaskItems.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennNRamGate.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
     <ClCompile Include="source\DennInstance.cpp">
       <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennInstance\DennNRamInstance.cpp">
-      <Filter>Source\DennInstance</Filter>
     </ClCompile>
     <ClCompile Include="source\DennInstanceUtils.cpp">
       <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="source\DennInstance\DennDefaultInstance.cpp">
       <Filter>Source\DennInstance</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennNRamDatasetTask.cpp">
-      <Filter>Source</Filter>
     </ClCompile>
     <ClCompile Include="source\DennEvaluation\DennAccuracy.cpp">
       <Filter>Source\DennEvaluation</Filter>
@@ -355,9 +280,6 @@
     </ClCompile>
     <ClCompile Include="source\DennJson.cpp">
       <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="source\DennInstance\DennNRamTestInstance.cpp">
-      <Filter>Source\DennInstance</Filter>
     </ClCompile>
     <ClCompile Include="source\DennMutation\DennMutationTrigonometric.cpp">
       <Filter>Source</Filter>
@@ -397,6 +319,9 @@
     </ClCompile>
     <ClCompile Include="source\DennEvolutionMethod\DennEvolutionMethodMABaioShaDE.cpp">
       <Filter>Source\DennEvolutionMethod</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennFullyConnected.cpp">
+      <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

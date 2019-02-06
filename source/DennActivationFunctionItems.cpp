@@ -6,54 +6,46 @@
 
 namespace Denn
 {
-    //ActivationFunction linear (none)
-	template < typename Matrix >
-	Matrix& linear(Matrix& inout_matrix)
+	void identity_activate(const Matrix& Z, Matrix& A)
 	{
-		return inout_matrix;
+		A.noalias() = Z;
 	}
-	template < typename Matrix >
-	Matrix& dx_linear(Matrix& inout_matrix)
+	void identity_jacobian(const Matrix& Z, const Matrix& A, const Matrix& F, Matrix& G)
 	{
-		inout_matrix.fill(1.0);
-		return inout_matrix;
+		G.noalias() = F;
 	}
-	REGISTERED_ACTIVATION_FUNCTION("linear", linear<Matrix>, dx_linear<Matrix>)
+	REGISTERED_ACTIVATION_FUNCTION("linear", identity_activate, identity_jacobian)
 
-	//ActivationFunction (local)
-	//Now it is used to the loss function, it is unnecessary (only for back compatibility)
-	REGISTERED_ACTIVATION_FUNCTION("softmax", CostFunction::implace_softmax_row_samples<Matrix>) 
-
-	//ActivationFunction (point)
-	#define POINTF_AS_ACTIVEF(ufunc)\
-    template < typename Matrix >\
-    Matrix& ufunc(Matrix& inout_matrix)\
-	{\
-		inout_matrix = inout_matrix.unaryExpr(&Denn::PointFunction:: ufunc <typename Matrix::Scalar>);\
-        return inout_matrix;\
+	void softmax_activate(const Matrix& Z, Matrix& A)
+	{
+		A.array() = (Z.rowwise() - Z.colwise().maxCoeff()).array().exp();
+		RowArray colsums = A.colwise().sum();
+		A.array().rowwise() /= colsums;
 	}
-
-	POINTF_AS_ACTIVEF(sigmoid)
-	POINTF_AS_ACTIVEF(dx_sigmoid)
-	REGISTERED_ACTIVATION_FUNCTION("sigmoid", sigmoid<Matrix>, dx_sigmoid<Matrix>)
-
-	POINTF_AS_ACTIVEF(logit)
-	POINTF_AS_ACTIVEF(dx_logit)
-    REGISTERED_ACTIVATION_FUNCTION("logit", logit<Matrix>, dx_logit<Matrix>)
-
-	POINTF_AS_ACTIVEF(log)
-	POINTF_AS_ACTIVEF(dx_log)
-	REGISTERED_ACTIVATION_FUNCTION("log", log<Matrix>, dx_log<Matrix>)
-
-	POINTF_AS_ACTIVEF(relu)
-	POINTF_AS_ACTIVEF(dx_relu)
-	REGISTERED_ACTIVATION_FUNCTION("relu", relu<Matrix>, dx_relu<Matrix>)
+	void softmax_jacobian(const Matrix& Z, const Matrix& A, const Matrix& F, Matrix& G)
+	{
+		RowArray a_dot_f = A.cwiseProduct(F).colwise().sum();
+		G.array() = A.array() * (F.array().rowwise() - a_dot_f);
+	}
+	REGISTERED_ACTIVATION_FUNCTION("softmax", softmax_activate, softmax_jacobian)
 		
-	POINTF_AS_ACTIVEF(tanh)
-	POINTF_AS_ACTIVEF(dx_tanh)
-	REGISTERED_ACTIVATION_FUNCTION("tanh", tanh<Matrix>, dx_tanh<Matrix>)
-
-	POINTF_AS_ACTIVEF(binary)
-    REGISTERED_ACTIVATION_FUNCTION("binary", binary<Matrix>)
+	void sigmoid_activate(const Matrix& Z, Matrix& A)
+	{
+		A.array() = Scalar(1) / (Scalar(1) + (-Z.array()).exp());
+	}
+	void sigmoid_jacobian(const Matrix& Z, const Matrix& A, const Matrix& F, Matrix& G)
+	{
+		G.array() = A.array() * (Scalar(1) - A.array()) * F.array();
+	}
+	REGISTERED_ACTIVATION_FUNCTION("sigmoid", sigmoid_activate, sigmoid_jacobian)
 		
+	void relu_activate(const Matrix& Z, Matrix& A)
+	{
+		A.array() = Z.array().cwiseMax(Scalar(0));
+	}
+	void relu_jacobian(const Matrix& Z, const Matrix& A, const Matrix& F, Matrix& G)
+	{
+		G.array() = (A.array() > Scalar(0)).select(F, Scalar(0));
+	}
+	REGISTERED_ACTIVATION_FUNCTION("relu", relu_activate, relu_jacobian)
 }

@@ -13,6 +13,13 @@ public:
 	using LayerIterator		 = typename LayerList::iterator;
 	using LayerConstIterator = typename LayerList::const_iterator;
 	////////////////////////////////////////////////////////////////
+	enum OutputLoss
+	{
+		MSE,
+		MULTICLASS_CROSS_ENTROPY,
+		BINARY_CROSS_ENTROPY
+	};
+	////////////////////////////////////////////////////////////////
 	//  default constructor 
 	NeuralNetwork();
 	//  default copy constructor  and assignment operator
@@ -25,11 +32,6 @@ public:
 	{
 		add_layer(layers...);
 	}
-	template < typename DerivateLayer >
-	void add_layer(const DerivateLayer& layer)
-	{
-		m_layers.push_back(std::static_pointer_cast<Layer>(std::make_shared<DerivateLayer>(layer)));
-	}
 	template < typename ...Layers >
 	void add_layer(const Layer& layer, Layers ...layers)
 	{
@@ -37,22 +39,18 @@ public:
 		add_layer(layers...);
 	}
 	/////////////////////////////////////////////////////////////////////////
-	Matrix apply(const Matrix& input) const;
-    //pointer to context
-	using BackpropagationDelta    = std::vector< Matrix >;
-	using BackpropagationGradient = std::vector< std::vector< Matrix > >;
-	using BackpropagationContext  = std::tuple< BackpropagationDelta, BackpropagationGradient >;
-    //backpropagation
-	BackpropagationContext compute_gradient(const Matrix& input, const Matrix& labels, Scalar regular_param = Scalar(0.0)) const;
-	void gradient_descent(BackpropagationContext&& bpcontext, Scalar learn_rate = Scalar(0.5));
-	//compute_gradient + gradient_descent
-	void backpropagation_gradient_descent
-    (
-		  const Matrix& input
-        , const Matrix& labels
-		, const Scalar learn_rate    		 = Scalar(0.5)
-	    , const Scalar regular_param 		 = Scalar(1.0)
-	);
+	template < typename DerivateLayer >
+	void add_layer(const DerivateLayer& layer)
+	{
+		m_layers.push_back(std::static_pointer_cast<Layer>(std::make_shared<DerivateLayer>(layer)));
+	}
+	/////////////////////////////////////////////////////////////////////////
+	const Matrix& feedforward(const Matrix& input) const;
+	void backpropagate(const Matrix& input, OutputLoss type = MSE);
+	void fit(const Matrix& input, 
+			 const Matrix& output,
+			 const Optimizer& opt = SGD(),
+			 OutputLoss type = MSE);
 	/////////////////////////////////////////////////////////////////////////
 	size_t size() const;
 
@@ -87,13 +85,5 @@ inline NeuralNetwork::Scalar distance_pow2<NeuralNetwork>(const NeuralNetwork& a
 	return dpow2;
 } 
 
-NeuralNetwork::BackpropagationDelta operator + (  const NeuralNetwork::BackpropagationDelta& left
-											    , const NeuralNetwork::BackpropagationDelta& right);
-
-NeuralNetwork::BackpropagationGradient operator + (  const NeuralNetwork::BackpropagationGradient& left
-											       , const NeuralNetwork::BackpropagationGradient& right);
-
-NeuralNetwork::BackpropagationContext operator + (  const NeuralNetwork::BackpropagationContext& left
-											      , const NeuralNetwork::BackpropagationContext& right);
 
 }

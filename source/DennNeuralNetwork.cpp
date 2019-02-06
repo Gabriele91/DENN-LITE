@@ -31,145 +31,96 @@ namespace Denn
 		return *this;
 	}
 	/////////////////////////////////////////////////////////////////////////
-	Matrix NeuralNetwork::apply(const Matrix& input) const
+	const Matrix& NeuralNetwork::feedforward(const Matrix& input) const
 	{
 		//no layer?
 		denn_assert(m_layers.size());
 		//input layer
-		Matrix output = m_layers[0]->apply(input);
+		const Matrix* output = &m_layers[0]->feedforward(input);
 		//hidden layers
 		for (size_t i = 1; i < m_layers.size(); ++i)
 		{
-			output = m_layers[i]->apply(output);
+			output = &m_layers[i]->feedforward(*output);
 		}
 		//return
-		return output;
+		return *output;
 	}	
-	/////////////////////////////////////////////////////////////////////////
-	NeuralNetwork::BackpropagationDelta operator + (  const NeuralNetwork::BackpropagationDelta& left
-													, const NeuralNetwork::BackpropagationDelta& right)
+	void NeuralNetwork::backpropagate(const Matrix& input, OutputLoss oltype)
 	{
-        denn_assert(left.size()==right.size());
-        NeuralNetwork::BackpropagationDelta output(left.size());
-        for(size_t i = 0; i != left.size(); ++i) output[i] = left[i] + right[i];
-        return output;		
-	}
+		//ptrs
+		Layer::SPtr first_layer = m_layers[0];
+		Layer::SPtr last_layer = m_layers[size() - 1];
 
-	NeuralNetwork::BackpropagationGradient operator + (  const NeuralNetwork::BackpropagationGradient& left
-													   , const NeuralNetwork::BackpropagationGradient& right)
-	{
-        denn_assert(left.size()==right.size());
-		//alloc
-        NeuralNetwork::BackpropagationGradient output(left.size());
-		//compute
-        for(size_t i = 0; i != left.size(); ++i)
+		// Let output layer compute back-propagation data
+		// MSE
+		Matrix eval;
+		switch (oltype)
 		{
-			denn_assert(left[i].size()==right[i].size());
-			//alloc
-			output[i].resize(left[i].size());
-			//compute
-			for(size_t j = 0; j != left[i].size(); ++j)
-			{
-				output[i][j] = left[i][j] + right[i][j];
-			} 
-		}
-        return output;		
-	}
-
-	NeuralNetwork::BackpropagationContext operator + ( const NeuralNetwork::BackpropagationContext& left
-											       	 , const NeuralNetwork::BackpropagationContext& right)
-	{
-		NeuralNetwork::BackpropagationDelta    left_delta;
-		NeuralNetwork::BackpropagationGradient left_gradient;
-		NeuralNetwork::BackpropagationDelta    right_delta;
-		NeuralNetwork::BackpropagationGradient right_gradient;
-		std::tie(left_delta, left_gradient) = left;
-		std::tie(right_delta, right_gradient) = left;
-		return std::make_tuple( left_delta+right_delta, left_gradient+right_gradient );
-		
-	}
-
-	NeuralNetwork::BackpropagationContext NeuralNetwork::compute_gradient(  const Matrix& input 
-																		  , const Matrix& labels
-																		  , Scalar regular_param) const
-	{
-		//////////////////////////////////////////////////////////////////////
-		BackpropagationDelta    deltas(m_layers.size());
-		BackpropagationGradient gradients(m_layers.size());
-		//////////////////////////////////////////////////////////////////////
-		//FEED-FORWAORD PROPAGATION
-		//output of layers
-		std::vector< Matrix > z(m_layers.size());
-		std::vector< Matrix > s(m_layers.size());
-		//output
-		z[0] = m_layers[0]->feedforward(input, s[0]);
-		//hidden layers
-		for (size_t i = 1; i < m_layers.size(); ++i)
+		default:
+		case Denn::NeuralNetwork::MSE:
+			eval.noalias() = last_layer->ff_output() - input;
+		break;
+		case Denn::NeuralNetwork::MULTICLASS_CROSS_ENTROPY:
 		{
-			z[i] = m_layers[i]->feedforward(z[i-1], s[i]);
+			// Compute the derivative of the input of this layer
+			// L = -sum(log(phat) * y)
+			// in = phat
+			// d(L) / d(in)= -y / phat
+			const int nobs = last_layer->ff_output().cols();
+			const int nclass = last_layer->ff_output().rows();
+			eval.resize(nclass, nobs);
+			eval.noalias() = -input.cwiseQuotient(last_layer->ff_output());
 		}
-		//////////////////////////////////////////////////////////////////////
-		//BACK-PROPAGATION
-		Matrix        output_nn = CostFunction::softmax_row_samples(z.back());
-		Matrix::Index nsamples  = input.rows();
-		//compute delta	
-		for (long i = 0, j = m_layers.size()-1; i < m_layers.size(); ++i, --j)
+		break;
+		case Denn::NeuralNetwork::BINARY_CROSS_ENTROPY:
 		{
-			if(!i)
-			{
-				deltas[j] = m_layers[j]->backpropagate_derive( ( output_nn-labels ).transpose(), s[j] ) / nsamples;
-			}
-			else
-			{
-				deltas[j] = m_layers[j]->backpropagate_derive(m_layers[j+1]->backpropagate_delta( deltas[j+1] ), s[j]);
-			}
+			// Compute the derivative of the input of this layer
+			// L = -y * log(phat) - (1 - y) * log(1 - phat)
+			// in = phat
+			// d(L) / d(in)= -y / phat + (1 - y) / (1 - phat), y is either 0 or 1
+#if 0
+			const int nobs = last_layer->ff_output().cols();
+			const int nclass = last_layer->ff_output().rows();
+			eval.resize(nclass, nobs);
+			eval.noalias() = (input.array() < Scalar(0.5)).select(
+				(Scalar(1) - last_layer->ff_output().array()).cwiseInverse(),
+				-last_layer->ff_output().cwiseInverse()
+			);
+#endif
 		}
-		//compute gradient
-		for (long i = 0, j = -1; i < m_layers.size(); ++i, ++j)
-		{	
-			if(!i)
-			{
-				gradients[i] = m_layers[i]->backpropagate_gradient(deltas[i], input);
-			}
-			else
-			{
-				gradients[i] = m_layers[i]->backpropagate_gradient(deltas[i], z[j]);
-			}
+		break;
 		}
-		//////////////////////////////////////////////////////////////////////
-		//get values
-		return std::make_tuple(deltas, gradients);
-	}
 
-	void NeuralNetwork::gradient_descent(BackpropagationContext&& bpcontext, Scalar learn_rate)
-	{
-		//////////////////////////////////////////////////////////////////////
-		BackpropagationDelta    deltas;
-		BackpropagationGradient gradients;
-		//////////////////////////////////////////////////////////////////////
-		std::tie(deltas,gradients) = bpcontext;
-		//////////////////////////////////////////////////////////////////////
-		//Mu
-		Scalar mu = Scalar(-1.0) * learn_rate;
-		//////////////////////////////////////////////////////////////////////
-		//GD
-		for (size_t i = 0; i < m_layers.size(); ++i)
-		for (size_t m = 0; m < m_layers[i]->size(); ++m)
+		// If there is only one hidden layer, "prev_layer_data" will be the input data
+		if (size() == 1)
 		{
-			(*m_layers[i])[m] += mu * gradients[i][m];
+			first_layer->backpropagate(input, eval);
+			return;
 		}
-	}
 
-	void NeuralNetwork::backpropagation_gradient_descent
-    (
-		  const Matrix& input
-        , const Matrix& labels
-		, const Scalar learn_rate  
-	    , const Scalar regular_param
-	)
+		// Compute gradients for the last hidden layer
+		last_layer->backpropagate(m_layers[size() - 2]->ff_output(), eval);
+
+		// Compute gradients for all the hidden layers except for the first one and the last one
+		for (int i = size() - 2; i > 0; i--)
+		{
+			m_layers[i]->backpropagate(m_layers[i - 1]->ff_output(), m_layers[i + 1]->bp_output());
+		}
+
+		// Compute gradients for the first layer
+		first_layer->backpropagate(input, m_layers[1]->bp_output());
+	}
+	void NeuralNetwork::fit(const Matrix& input, const Matrix& output, 
+							const Optimizer& opt, OutputLoss type)
 	{
-		gradient_descent(compute_gradient(input, labels, regular_param), learn_rate);
-	}	
+		//->
+		feedforward(input);
+		//<-
+		backpropagate(output, type);
+		//update
+		for (auto layer : *this) 
+			layer->update(opt);
+	}
 	/////////////////////////////////////////////////////////////////////////
 	size_t NeuralNetwork::size() const
 	{

@@ -34,7 +34,7 @@ namespace Denn
 		size_t          m_batch_size  { 0 };	//< virtual batch size
 		size_t          m_batch_offset{ 0 };	//< next rows for next batch
 
-		size_t			m_cache_rows_read;		//< ptr last row in cache
+		size_t			m_cache_cols_read;		//< ptr last row in cache
 		DataSetScalar	m_cache_batch;			//< cache 
 		DataSetScalar	m_batch;
 

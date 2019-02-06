@@ -31,28 +31,29 @@ namespace Denn
 		, const std::string& active_output
 	)
 	{
+		auto linear_activation = ActivationFunctionFactory::get("linear");
 		//mlp network
 		NeuralNetwork mlp_nn;
 		//push all hidden layers
 		if (hidden_layers.size())
 		{
 			//add first layer
-			mlp_nn.add_layer(PerceptronLayer(
-				active_layers.size() ? ActivationFunctionFactory::get(active_layers[0]) : nullptr
+			mlp_nn.add_layer(FullyConnected(
+				active_layers.size() ? ActivationFunctionFactory::get(active_layers[0]) : linear_activation
 				, n_features
 				, hidden_layers[0]
 			));
 			//add next layers
 			for (size_t i = 0; i != hidden_layers.size() - 1; ++i)
 			{
-				mlp_nn.add_layer(PerceptronLayer(
-					(i + 1 < active_layers.size()) ? ActivationFunctionFactory::get(active_layers[i + 1]) : nullptr
+				mlp_nn.add_layer(FullyConnected(
+					(i + 1 < active_layers.size()) ? ActivationFunctionFactory::get(active_layers[i + 1]) : linear_activation
 					, hidden_layers[i]
 					, hidden_layers[i + 1]
 				));
 			}
 			//add last layer
-			mlp_nn.add_layer(PerceptronLayer(
+			mlp_nn.add_layer(FullyConnected(
 				ActivationFunctionFactory::get(active_output)
 				, hidden_layers[hidden_layers.size() - 1]
 				, n_class
@@ -61,7 +62,7 @@ namespace Denn
 		//else add only input layer
 		else
 		{
-			mlp_nn.add_layer(PerceptronLayer(ActivationFunctionFactory::get(active_output), n_features, n_class));
+			mlp_nn.add_layer(FullyConnected(ActivationFunctionFactory::get(active_output), n_features, n_class));
 		}
 		//return NeuralNetwork
 		return mlp_nn;

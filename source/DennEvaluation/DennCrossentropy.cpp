@@ -12,28 +12,14 @@ namespace Denn
         virtual bool minimize() const { return true; }
         virtual Scalar operator () (const Individual& individual, const DataSet& dataset)
         {
-			return CostFunction::cross_entropy(
+			Matrix output = individual.m_network.feedforward(dataset.features());
+			return CostFunction::cross_entropy_logistic_by_cols(
                   dataset.labels()
-                , individual.m_network.apply(dataset.features())
-			);
+                , output
+			).mean();
         }
     };
     REGISTERED_EVALUATION(CrossEntropy,"cross_entropy")
-
-	class SoftmaxCrossEntropy : public Evaluation
-	{
-	public:
-        //methods
-        virtual bool minimize() const { return true; }
-        virtual Scalar operator () (const Individual& individual, const DataSet& dataset)
-        {
-			return CostFunction::cross_entropy(
-                  dataset.labels()
-                , CostFunction::softmax_row_samples<Matrix>(individual.m_network.apply(dataset.features()))
-			);
-        }
-    };
-    REGISTERED_EVALUATION(SoftmaxCrossEntropy,"softmax_cross_entropy")
 
 	class CrossEntropyLogistic : public Evaluation
 	{
@@ -42,27 +28,14 @@ namespace Denn
         virtual bool minimize() const { return true; }
         virtual Scalar operator () (const Individual& individual, const DataSet& dataset)
         {
-			return CostFunction::cross_entropy_logistic_regression(
+			Matrix output = individual.m_network.feedforward(dataset.features());
+			return CostFunction::cross_entropy_logistic_by_cols(
 					  dataset.labels()
-					, individual.m_network.apply(dataset.features())
-			);
+					, output
+			).mean();
         }
     };
     REGISTERED_EVALUATION(CrossEntropyLogistic,"cross_entropy_logistic")
 
-    class SoftmaxCrossEntropyLogistic : public Evaluation
-	{
-	public:
-        //methods
-        virtual bool minimize() const { return true; }
-        virtual Scalar operator () (const Individual& individual, const DataSet& dataset)
-        {
-			return CostFunction::cross_entropy_logistic_regression(
-					  dataset.labels()
-					, CostFunction::softmax_row_samples<Matrix>(individual.m_network.apply(dataset.features()))
-			);
-        }
-    };
-    REGISTERED_EVALUATION(SoftmaxCrossEntropyLogistic,"softmax_cross_entropy_logistic")
     
 }

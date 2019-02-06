@@ -11,16 +11,14 @@
 //NeuralNetwork includes
 #include  "DennActivationFunction.h"
 #include  "DennLayer.h"
-#include  "DennPerceptronLayer.h"
+#include  "DennFullyConnected.h"
 #include  "DennNeuralNetwork.h"
 #include  "DennCostFunction.h"
 #include  "DennEvaluation.h"
-#include  "DennNRamTask.h"
 
 //Dataset includes
 #include  "DennDatasetLoader.h"
 #include  "DennDataset.h"
-#include  "DennNRamDatasetTask.h"
 
 //Denn
 #include  "DennInstance.h"

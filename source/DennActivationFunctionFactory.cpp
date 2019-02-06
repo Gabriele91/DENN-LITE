@@ -16,7 +16,7 @@ namespace Denn
 		//find
 		auto it =  a_map().find(name);
 		//return
-		return it != a_map().end() ? it->second : nullptr;
+		return it != a_map().end() ? it->second : ActivationFunction();
 	}
 	void ActivationFunctionFactory::append(const std::string& name,const ActivationFunction& fun)
 	{

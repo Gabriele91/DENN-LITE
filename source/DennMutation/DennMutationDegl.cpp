@@ -287,19 +287,19 @@ namespace Denn
 			//backpropagation
 			for(short nbp=0; nbp!=2; ++nbp)
 			{
-				nn_g.backpropagation_gradient_descent
+				nn_g.fit
 				(	
 					  m_algorithm.current_batch().m_features
 					, m_algorithm.current_batch().m_labels
-					, *parameters().m_learning_rate
-					, *parameters().m_regularize
+					, SGD(*parameters().m_learning_rate
+						 , *parameters().m_regularize)
 				);
-				nn_l.backpropagation_gradient_descent
+				nn_l.fit
 				(	
 					  m_algorithm.current_batch().m_features
 					, m_algorithm.current_batch().m_labels
-					, *parameters().m_learning_rate
-					, *parameters().m_regularize
+					, SGD( *parameters().m_learning_rate
+					      ,*parameters().m_regularize)
 				);
 			}
 			//lerp

@@ -85,7 +85,7 @@ namespace Denn
 
 		Evaluation::SPtr loss_function() const override
 		{
-			return EvaluationFactory::get("softmax_cross_entropy_logistic");
+			return EvaluationFactory::get("cross_entropy_logistic");
 		}
 
 		Evaluation::SPtr validation_function() const override

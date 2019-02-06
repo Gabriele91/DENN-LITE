@@ -258,12 +258,38 @@ namespace CostFunction
 		return output/Scalar(x.rows());
 		#endif
 	}
+	template < typename Matrix >
+	typename Matrix::Scalar accuracy_cols(const Matrix& x, const Matrix& y)
+	{
+		using Index = typename Matrix::Index;
+		using Scalar = typename Matrix::Scalar;
+		//output
+		Scalar output = Scalar(0.0);;
+		//values
+		Index  max_index_x, max_index_y, i;
+		//max-max
+		for (Index j = 0; j < x.cols(); ++j)
+		{
+			x.col(j).maxCoeff(&max_index_x, &i);
+			y.col(j).maxCoeff(&max_index_y, &i);
+			output += Scalar(max_index_x == max_index_y);
+		}
+		//
+		return output / Scalar(x.cols());
+	}
 
 	template < typename Matrix >
 	typename Matrix::Scalar inverse_accuracy(const Matrix& x, const Matrix& y)
 	{
 		using Scalar = typename Matrix::Scalar;
 		return Scalar(1.0) - accuracy<Matrix>(x,y);
+	}
+
+	template < typename Matrix >
+	typename Matrix::Scalar inverse_accuracy_cols(const Matrix& x, const Matrix& y)
+	{
+		using Scalar = typename Matrix::Scalar;
+		return Scalar(1.0) - accuracy_cols<Matrix>(x, y);
 	}
 }
 }

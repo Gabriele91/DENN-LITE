@@ -1,35 +1,37 @@
 #pragma once
 #include "Config.h"
+#include "DennOptimizer.h"
 #include "DennActivationFunction.h"
 
 namespace Denn
 {
+
 class Layer : public std::enable_shared_from_this< Layer >
-{ 
+{
 public:
-	//ref to Layer
-	using Scalar = Denn::Scalar;
-	using SPtr   = std::shared_ptr<Layer>;
-	//return ptr
-	SPtr get_ptr();
-	///////////////////////////////////////////////////////////////////////////
-	//EIGEN_MAKE_ALIGNED_OPERATOR_NEW	
-	///////////////////////////////////////////////////////////////////////////
-	virtual Layer::SPtr copy() const  				                                                 = 0;
-	virtual Matrix apply(const Matrix& input) const								                     = 0;
-	virtual size_t size() const											                             = 0;
-	virtual Matrix& operator[](size_t i)								                             = 0;
-	virtual const Matrix& operator[](size_t i) const						                         = 0;		
-	virtual ActivationFunction get_activation_function()											 = 0;
-	virtual void           set_activation_function(ActivationFunction active_function)				 = 0;
-	///////////////////////////////////////////////////////////////////////////
-	//Backpropagation stuff
-	virtual Matrix              feedforward(const Matrix& input, Matrix& linear_out)				  							   = 0;
-	virtual Matrix              backpropagate_delta(const Matrix& loss)     							                           = 0;		
-	virtual Matrix              backpropagate_derive(const Matrix& delta, const Matrix& linear_out)       			               = 0;
-	virtual std::vector<Matrix> backpropagate_gradient(const Matrix& delta, const Matrix& linear_input, Scalar regular=Scalar(0.0))= 0;
-	///////////////////////////////////////////////////////////////////////////
-	class Iterator 
+
+	class Shape
+	{
+	public:
+
+		Shape(int width, int height = 1, int channels = 1)
+		: m_width(width), m_height(height), m_channels(channels)
+		{
+		}
+
+		explicit operator int () const { return m_width * m_height * m_channels; }
+		int width() const { return m_width; }
+		int height() const { return m_height; }
+		int channels() const { return m_channels; }
+
+	protected:
+
+		int m_width;
+		int m_height;
+		int m_channels;
+	};
+
+	class Iterator
 	{
 	public:
 
@@ -39,7 +41,7 @@ public:
 
 		Iterator& operator++();
 		Iterator operator++(int);
-		
+
 		bool operator==(const Iterator& rhs) const;
 		bool operator!=(const Iterator& rhs) const;
 
@@ -53,11 +55,46 @@ public:
 		size_t m_index;
 	};
 
+	//alias
+	using Matrix = Denn::Matrix;
+	using Scalar = Denn::Scalar;
+	using SPtr = std::shared_ptr<Layer>;
+	//Costructor
+	Layer(Shape in, Shape out): m_in_size(in), m_out_size(out) {}
+	//info shape
+	virtual Shape in_size() const { return m_in_size; }
+	virtual Shape out_size() const { return m_in_size; }
+	///////////////////////////////////////////////////////////////////////////
+	virtual void activation(ActivationFunction) = 0;
+	virtual ActivationFunction activation() const = 0;
+	///////////////////////////////////////////////////////////////////////////
+	//return ptr
+	SPtr get_ptr();
+	virtual SPtr copy()   const = 0;
+	///////////////////////////////////////////////////////////////////////////
+	virtual const Matrix& feedforward(const Matrix& prev_layer_data)								  = 0;
+	virtual const Matrix& backpropagate(const Matrix& prev_layer_data, const Matrix& next_layer_data) = 0;
+	///////////////////////////////////////////////////////////////////////////
+	virtual void update(const Optimizer& optimize) = 0;
+	///////////////////////////////////////////////////////////////////////////
+	virtual const Matrix& ff_output() = 0;
+	virtual const Matrix& bp_output() = 0;
+	///////////////////////////////////////////////////////////////////////////
+	virtual size_t        size()  const              = 0;
+	virtual Matrix&       operator[](size_t i)       = 0;
+	virtual const Matrix& operator[](size_t i) const = 0;
+	///////////////////////////////////////////////////////////////////////////
 	Iterator begin();
 	Iterator end();
 	const Iterator begin() const;
 	const Iterator end()   const;
 	///////////////////////////////////////////////////////////////////////////
+
+protected:
+
+	const Shape m_in_size;  // Size of input units
+	const Shape m_out_size; // Size of output units 
+
 };
 
 template <>

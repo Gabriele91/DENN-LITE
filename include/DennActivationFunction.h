@@ -6,38 +6,34 @@ namespace Denn
 	//type
 	struct ActivationFunction 
 	{
-		typedef Matrix& (*Function)(Matrix& input);
-		typedef Matrix& (*FunctionDerivate)(Matrix& input);
+		using Activation = void (*)(const Matrix& Z, Matrix& A);
+		using Jacobian = void (*)(const Matrix& Z, const Matrix& A, const Matrix& F, Matrix& G);
 		//functions
-		Function         m_function         { nullptr };
-		FunctionDerivate m_function_derivate{ nullptr };
+		Activation   m_activation{ nullptr };
+		Jacobian	 m_jacobian{ nullptr };
 		//init
 		ActivationFunction()
 		{
 		}
-		ActivationFunction(Function function)
-		: m_function(function)
-		, m_function_derivate(nullptr)
-		{
-		}
-		ActivationFunction(Function function, FunctionDerivate function_derivate)
-		: m_function(function)
-		, m_function_derivate(function_derivate)
+		ActivationFunction(Activation activation, Jacobian jacobian)
+		: m_activation(activation)
+		, m_jacobian(jacobian)
 		{
 		}
 		//actions
-		const Matrix& operator() (Matrix& input) const { return m_function(input); }
-		const Matrix& apply(Matrix& input)       const { return m_function(input); }
-		const Matrix& derive(Matrix& input)      const { return m_function_derivate(input); }
+		void activate(const Matrix& Z, Matrix& A) const
+		{ 
+			m_activation(Z, A);
+		}
+		void jacobian(const Matrix& Z, const Matrix& A, const Matrix& F, Matrix& G)  const 
+		{ 
+			m_jacobian(Z, A, F, G);
+		}
 		//operation
 		bool operator == (const ActivationFunction& right) const
 		{
-			return m_function == right.m_function && m_function_derivate == right.m_function_derivate;
+			return m_activation == right.m_activation && m_jacobian == right.m_jacobian;
 		}
-		//helps
-		operator bool() const                 { return exists_function(); }
-		bool exists_function() const		  { return m_function != nullptr; }
-		bool exists_function_derivate() const { return m_function_derivate != nullptr; }
 	};
 
 

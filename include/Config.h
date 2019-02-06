@@ -61,6 +61,20 @@ namespace Denn
 	#endif
 
 	template < typename T >
+	using RowArrayT = Eigen::Array<T, 1, Eigen::Dynamic>;
+	using RowArrayLD = Eigen::Array<long double, 1, Eigen::Dynamic>;
+	using RowArrayD = Eigen::Array<double, 1, Eigen::Dynamic>;
+	using RowArrayF = Eigen::Array<float, 1, Eigen::Dynamic>;
+	using RowArray = Eigen::Array<Scalar, 1, Eigen::Dynamic>;
+
+	template < typename T >
+	using ColArrayT = Eigen::Array<T, Eigen::Dynamic, 1>;
+	using ColArrayLD = Eigen::Array<long double, Eigen::Dynamic, 1>;
+	using ColArrayD = Eigen::Array<double, Eigen::Dynamic, 1>;
+	using ColArrayF = Eigen::Array<float, Eigen::Dynamic, 1>;
+	using ColArray = Eigen::Array<Scalar, Eigen::Dynamic, 1>;
+
+	template < typename T >
 	using RowVectorT  = typename Eigen::Matrix<T, 1, Eigen::Dynamic>;
 	using RowVectorLD = typename Eigen::Matrix<long double, 1, Eigen::Dynamic>;
 	using RowVectorD  = typename Eigen::Matrix<double, 1, Eigen::Dynamic>;

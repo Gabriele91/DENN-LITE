@@ -324,8 +324,6 @@ namespace Denn
 				, t_out.features_rows()*t_out.features_cols() * sizeof(ScalarType)
 				, 1
 			);
-			//to column-major
-			t_out.m_features.transposeInPlace();
 			//alloc output
 			//data are in row-major layour then the shape is traspose
 			t_out.m_labels.resize(m_header.m_n_classes, size);
@@ -336,8 +334,6 @@ namespace Denn
 				, t_out.labels_rows()*t_out.labels_cols() * sizeof(ScalarType)
 				, 1
 			);
-			//to column-major
-			t_out.m_labels.transposeInPlace();
 			//
 			return true;
 		}
