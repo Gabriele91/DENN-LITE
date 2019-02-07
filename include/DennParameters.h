@@ -68,16 +68,15 @@ namespace Denn
 		ReadOnly<size_t>	             m_history_size  { "history_size", size_t(1) };
 		//type of DE
 		ReadOnly<std::string>                m_mutation_type { "mutation","rand/1" };
-		ReadOnly< std::vector<std::string> > m_mutations_list_type { "mutations_list", std::vector<std::string>{ "degl", "curr_p_best" } };
+		ReadOnly<std::vector<std::string> >  m_mutations_list_type { "mutations_list", std::vector<std::string>{ "degl", "curr_p_best" } };
 		ReadOnly<std::string>                m_crossover_type{ "crossover","bin" };
 		ReadOnly<std::string>                m_evolution_type    { "evolution_method","JDE" };
 		ReadOnly<std::string>                m_sub_evolution_type{ "sub_evolution_method","JDE" };
-		//network
-		ReadOnly<Scalar>					   m_learning_rate		   { "learning_rate", Scalar(0.05) };
-		ReadOnly<Scalar>					   m_regularize			   { "regularize", Scalar(0.0) };
-		ReadOnly< std::vector<unsigned int> > m_hidden_layers         { "hidden_layers"         /* , none */ };
-		ReadOnly< std::vector<std::string> >  m_activation_functions      { "activation_functions"      /* , none */ };
-		ReadOnly< std::string >               m_output_activation_function{ "output_activation_function" ,  "linear" };
+		//backpropagation + SGD
+		ReadOnly<Scalar>					 m_learning_rate{ "learning_rate", Scalar(0.05) };
+		ReadOnly<Scalar>					 m_regularize	{ "regularize", Scalar(0.0) };
+		//NN	
+		ReadOnly< std::string >				 m_network { "network" , "fully_connected(linear)", true };
 		//params info
 		std::vector< ParameterInfo >     m_params_info;
 	

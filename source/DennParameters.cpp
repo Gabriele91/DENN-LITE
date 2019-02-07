@@ -9,6 +9,7 @@
 #include "DennDump.h"
 #include "DennVersion.h"
 #include "DennFilesystem.h"
+#include "DennUtilitiesNetworks.h"
 #include <sstream>
 #include <iostream>
 
@@ -283,60 +284,30 @@ namespace Denn
 				m_regularize = args.get_double() ;
                 return Scalar(0.0) <= *m_regularize;
             } 
-        },
-        ParameterInfo{
-            m_hidden_layers, "Size of hidden layers", { "-hl"  },
+        },       
+		ParameterInfo{
+            m_network, "network layout", { "-nn"  },
             [this](Arguments& args) -> bool 
             {
 				//clear
-				m_hidden_layers.get().clear();
+				m_network = "";
 				//ok
-                while(!args.end_vals())
-                {
-                    m_hidden_layers.get().push_back(args.get_int());
-                }
-                //ok
-                return m_hidden_layers.get().size() != 0; 
-            }
-        },
-        ParameterInfo{
-            m_activation_functions, "Activation functions of hidden layers", {  "-hlaf"  },
-            [this](Arguments& args) -> bool 
-            {
-				//clear
-				m_activation_functions.get().clear();
-				//ok
-                while(!args.end_vals())
-                {
-                    std::string str_c_type = args.get_string();
-                    //all lower case
-                    std::transform(str_c_type.begin(),str_c_type.end(), str_c_type.begin(), ::tolower);
-                    //test
-                    if(!ActivationFunctionFactory::exists(str_c_type)) return false;
-                    //push
-                    m_activation_functions.get().push_back(str_c_type);
-                }
-                //ok
-                return m_activation_functions.get().size() != 0; 
-            }
-			,{ "list(string)",  ActivationFunctionFactory::list_of_activation_functions() }
-        },
-        ParameterInfo{
-			m_output_activation_function, "Activation function of output layer", { "-oaf"  },
-            [this](Arguments& args) -> bool 
-            { 
-                std::string str_c_type = args.get_string();
-                //all lower case
-                std::transform(str_c_type.begin(),str_c_type.end(), str_c_type.begin(), ::tolower);
+				for (int count = 0; !args.end_vals(); ++count)
+				{
+					std::string str_c_type = args.get_string();
+					//all lower case
+					std::transform(str_c_type.begin(),str_c_type.end(), str_c_type.begin(), ::tolower);
+					//add space
+					if(count) m_network.get() += " ";
+					//append
+					m_network.get() += str_c_type;
+				}
                 //test
-                if(!ActivationFunctionFactory::exists(str_c_type)) return false;
-                //save
-				m_output_activation_function = str_c_type;
-                //ok
-                return true;
+				auto net_err_succ = get_network_from_string(m_network.get());
+				return std::get<2>(net_err_succ);
             }
-			,{ "string",  ActivationFunctionFactory::list_of_activation_functions() }
-        },
+			,{ "string" }
+		},
         ParameterInfo{
             m_dataset_filename, "Path of dataset file (gz) or network file input (json)", { "-d", "-i" }
         },

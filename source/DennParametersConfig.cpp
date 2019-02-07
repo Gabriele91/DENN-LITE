@@ -1,5 +1,6 @@
 #include "DennParameters.h"
 #include "DennConstants.h"
+#include "DennUtilitiesNetworks.h"
 #include <string>
 #include <cctype>
 #include <unordered_map>
@@ -171,6 +172,13 @@ namespace Denn
             || conf_skip_multilines_comment(line, source)) eat = true;
         return eat;
     }
+	static bool conf_skip_comments(size_t& line, const char*& source)
+	{
+		bool eat = false;
+		while (conf_skip_line_comment(line, source)
+			|| conf_skip_multilines_comment(line, source)) eat = true;
+		return eat;
+	}
     static bool conf_skip_line_space(const char*& source)
     {
         bool a_space_is_skipped = false;
@@ -1178,125 +1186,29 @@ namespace Denn
             , const char*& ptr
         )
         {
+			//jump
+			conf_skip_space_and_comments(line, ptr);
             //it's close
             if((*ptr) == '}') return true;
-            //layer type
-            std::string layer_type = conf_name(ptr);
-            //type
-            if (layer_type == "lp" || layer_type == "layer_perceptron")
-            {
-                //jump space
-                conf_skip_line_space_and_comments(line, ptr);
-                //get int
-                long layer_size;
-                //is not a variable?
-                if(!conf_is_variable(*ptr))
-                {
-                    layer_size = conf_string_to_int(ptr);
-                }
-                else
-                {
-                    //next
-                    ++ptr;
-                    //varname
-                    std::string varname = conf_name(ptr);
-                    //find
-                    if(!context.exists(varname))
-                    {
-                        std::cerr << line << ": \'" << varname << "\' is not valid variable" << std::endl;
-                        return false;
-                    }
-                    //value
-                    std::string value = context.get(varname);
-                    //parse
-                    layer_size = conf_string_to_int_no_skip(value.c_str());
-                }
-                //more than 0
-                if (layer_size <= 0)
-                {
-                    std::cerr << line << ": layer size (" << layer_size << ") not valid " << std::endl;
-                    return false;
-                }
-                //jump space
-                conf_skip_line_space_and_comments(line, ptr);
-                //activation function (default linear)
-                std::string layer_af;
-                //is not a variable?
-                if(!conf_is_variable(*ptr))
-                {
-                    layer_af = conf_name(ptr);
-                }
-                else
-                {
-                    //next
-                    ++ptr;
-                    //varname
-                    std::string varname = conf_name(ptr);
-                    //find
-                    if(!context.exists(varname))
-                    {
-                        std::cerr << line << ": \'" << varname << "\' is not valid variable" << std::endl;
-                        return false;
-                    }
-                    //parse
-                    layer_af = context.get(varname);
-                }
-                //test
-                if (!layer_af.size()) layer_af = "linear";
-                //test
-                if (!ActivationFunctionFactory::exists(layer_af))
-                {
-                    std::cerr << line << ": activation function (" << layer_af << ") not exists " << std::endl;
-                    return false;
-                }
-                //add
-                params.m_hidden_layers.get().push_back(layer_size);
-                params.m_activation_functions.get().push_back(layer_af);
-            }
-            else if (layer_type == "out" || layer_type == "output")
-            {
-                //jump space
-                conf_skip_line_space_and_comments(line, ptr);
-                //activation function (default linear)
-                std::string layer_af;
-                //is not a variable?
-                if(!conf_is_variable(*ptr))
-                {
-                    layer_af = conf_name(ptr);
-                }
-                else
-                {
-                    //next
-                    ++ptr;
-                    //varname
-                    std::string varname = conf_name(ptr);
-                    //find
-                    if(!context.exists(varname))
-                    {
-                        std::cerr << line << ": \'" << varname << "\' is not valid variable" << std::endl;
-                        return false;
-                    }
-                    //parse
-                    layer_af = context.get(varname);
-                }
-                //test
-                if (!layer_af.size()) layer_af = "linear";
-                //test
-                if (!ActivationFunctionFactory::exists(layer_af))
-                {
-                    std::cerr << line << ": activation function (" << layer_af << ") not exists " << std::endl;
-                    return false;
-                }
-                //add
-                params.m_output_activation_function = layer_af;
-            }
-            else
-            {
-                std::cerr << line << ": layer " << layer_type << " is unsupported" << std::endl;
-                return false;
-            }
-            //jump spaces
-            conf_skip_space_and_comments(line, ptr);
+			//buffer
+			std::string nnlayout;
+            //from { to }
+			while (*ptr && ((*ptr) != '}'))
+			{
+				//jump spaces
+				nnlayout += (*ptr);
+				++ptr;
+				conf_skip_comments(line, ptr);
+			}
+			//test
+			auto net_err_succ = get_network_from_string(nnlayout);
+			if (!std::get<2>(net_err_succ))
+			{
+				std::cerr << line << ": network layout error: \'" << std::get<1>(net_err_succ) << std::endl;
+				return false;
+			}
+			//save
+			params.m_network = nnlayout;
             return true;
         }
         //////////////////////////////////////////////////////////////////////////////////

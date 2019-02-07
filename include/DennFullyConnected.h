@@ -2,6 +2,7 @@
 #include "Config.h"
 #include "DennLayer.h"
 #include "DennActivationFunction.h"
+#include "DennUtilitiesConvolution.h"
 
 namespace Denn
 {
@@ -10,23 +11,30 @@ namespace Denn
 	{
 	public:
 		///////////////////////////////////////
-		FullyConnected
-		(
-			  ActivationFunction active_function
-			, Shape inshape
-			, Shape outshape
-		);
+		/// FullyConnected
+		///
+		/// \param features      Width of the input.
+		/// \param clazz         Width of the output.
+		///
 		FullyConnected
 		(
 			  ActivationFunction active_function
 			, int features
 			, int clazz
 		);
+		FullyConnected
+		(
+			  const ActivationFunctions& active_function
+			, const Shape& in
+			, const Inputs& metadata
+		);
 		//////////////////////////////////////////////////
 		virtual Layer::SPtr copy() const override;
 		//////////////////////////////////////////////////
-		virtual void activation(ActivationFunction) override;
-		virtual ActivationFunction activation() const override;
+		virtual const Inputs inputs() const override;
+		//////////////////////////////////////////////////
+		virtual void activations(ActivationFunctions) override;
+		virtual ActivationFunctions activations() const override;
 		//////////////////////////////////////////////////
 		virtual const Matrix& feedforward(const Matrix& input) override;
 		virtual const Matrix& backpropagate(const Matrix& prev_layer_data, const Matrix& next_layer_data) override;
@@ -54,4 +62,12 @@ namespace Denn
 		//activation
 		ActivationFunction m_activation_function;
 	};
+
+	REGISTERED_LAYER(
+		FullyConnected,
+		LAYER_NAMES("fully_connected", "fc"),
+		LayerShapeType(SHAPE_1D),		//shape type
+		LayerDescription::MinMax { 1 },	//1 argument
+		LayerDescription::MinMax { 1 }	//1 activation
+	)
 }

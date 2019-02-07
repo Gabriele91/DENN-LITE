@@ -40,6 +40,7 @@
     <ClInclude Include="include\DennActivationFunction.h" />
     <ClInclude Include="include\DennArguments.h" />
     <ClInclude Include="include\DennConstants.h" />
+    <ClInclude Include="include\DennConvolutional.h" />
     <ClInclude Include="include\DennInstance.h" />
     <ClInclude Include="include\DennCostFunction.h" />
     <ClInclude Include="include\DennDatasetLoader.h" />
@@ -65,6 +66,12 @@
     <ClInclude Include="include\DennPopulation.h" />
     <ClInclude Include="include\DennRuntimeOutput.h" />
     <ClInclude Include="include\DennSerializeOutput.h" />
+    <ClInclude Include="include\DennUtilitiesConvolution.h" />
+    <ClInclude Include="include\DennUtilitiesMath.h" />
+    <ClInclude Include="include\DennUtilitiesMatrix.h" />
+    <ClInclude Include="include\DennUtilitiesNetworks.h" />
+    <ClInclude Include="include\DennUtilitiesString.h" />
+    <ClInclude Include="include\DennUtilitiesVector.h" />
     <ClInclude Include="include\DennVariant.h" />
     <ClInclude Include="include\DennVersion.h" />
     <ClInclude Include="include\DennIOFileWrapper.h" />
@@ -78,6 +85,7 @@
     <ClCompile Include="source\DennActivationFunctionItems.cpp" />
     <ClCompile Include="source\DennAlgorithm.cpp" />
     <ClCompile Include="source\DennArguments.cpp" />
+    <ClCompile Include="source\DennConvolutional.cpp" />
     <ClCompile Include="source\DennCrossoverFactory.cpp" />
     <ClCompile Include="source\DennCrossover\DennCrossoverBin.cpp" />
     <ClCompile Include="source\DennCrossover\DennCrossoverExp.cpp" />
@@ -129,6 +137,7 @@
     <ClCompile Include="source\DennSerializeOutputItems.cpp" />
     <ClCompile Include="source\DennTestSetStream.cpp" />
     <ClCompile Include="source\DennTicksTime.cpp" />
+    <ClCompile Include="source\DennUtilitiesNetworks.cpp" />
     <ClCompile Include="source\main.cpp" />
     <ClCompile Include="source\DennRandom.cpp" />
   </ItemGroup>

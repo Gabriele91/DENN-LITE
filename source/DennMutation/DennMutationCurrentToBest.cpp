@@ -84,6 +84,7 @@ namespace Denn
 			auto& rand_deck = random(id_target).deck();
 			//set population size in deck
 			rand_deck.reinit(current_np());
+			rand_deck.reset();
 			//for each layers
 			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
 			{

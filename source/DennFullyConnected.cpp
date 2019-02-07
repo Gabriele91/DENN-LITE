@@ -1,4 +1,3 @@
-#include "DennActivationFunction.h"
 #include "DennFullyConnected.h"
 
 namespace Denn
@@ -7,10 +6,10 @@ namespace Denn
 	FullyConnected::FullyConnected
 	(
 		  ActivationFunction active_function
-		, Shape inshape
-		, Shape outshape
+		, int features
+		, int clazz
 	)
-	: Layer(inshape, outshape)
+	: Layer("fully_connected",{ features }, { clazz })
 	, m_activation_function(active_function)
 	{
 		//weight
@@ -22,28 +21,26 @@ namespace Denn
 	}
 	FullyConnected::FullyConnected
 	(
-		  ActivationFunction active_function
-		, int features
-		, int clazz
+		  const ActivationFunctions& active_function
+		, const Shape& in
+		, const Inputs& metadata
 	)
-	: Layer({ features }, { clazz })
-	, m_activation_function(active_function)
+	: FullyConnected(active_function[0], in.size3D(), metadata[0])
 	{
-		//weight
-		m_weight.resize(int(this->m_in_size), int(this->m_out_size));
-		m_bias.resize(int(this->m_out_size), 1);
-		//derivate
-		m_dw.resize(int(this->m_in_size), int(this->m_out_size));
-		m_db.resize(int(this->m_out_size), 1);
 	}
 	//////////////////////////////////////////////////
-	void FullyConnected::activation(ActivationFunction active_function)
+	const Inputs FullyConnected::inputs() const
 	{
-		m_activation_function = active_function;
+		return { out_size().width() };
 	}
-	ActivationFunction FullyConnected::activation() const
+	//////////////////////////////////////////////////
+	void FullyConnected::activations(ActivationFunctions active_function)
 	{
-		return m_activation_function;
+		m_activation_function = active_function[0];
+	}
+	ActivationFunctions FullyConnected::activations() const
+	{
+		return { m_activation_function };
 	}
 	//////////////////////////////////////////////////
 	Layer::SPtr FullyConnected::copy() const

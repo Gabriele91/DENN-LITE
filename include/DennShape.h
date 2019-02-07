@@ -18,6 +18,8 @@ public:
 	int size3D() const  { return m_width * m_height * m_channels; }
 	int size2D() const { return  m_width * m_height; }
 	bool is3D() { return m_channels > 1; }
+	bool is2D() { return m_channels == 1; }
+	bool is1D() { return m_height == 1 && m_channels == 1; }
 
 protected:
 

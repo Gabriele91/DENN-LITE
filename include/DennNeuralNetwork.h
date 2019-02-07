@@ -39,6 +39,10 @@ public:
 		add_layer(layers...);
 	}
 	/////////////////////////////////////////////////////////////////////////
+	void add_layer(const Layer::SPtr& layer)
+	{
+		m_layers.push_back(layer->copy());
+	}
 	template < typename DerivateLayer >
 	void add_layer(const DerivateLayer& layer)
 	{

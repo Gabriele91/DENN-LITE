@@ -136,6 +136,7 @@ namespace Denn
 			auto& rand_deck_ring_segment = random(id_target).deck_ring_segment();
 			//set population size in deck
 			rand_deck_ring_segment.reinit(population.size(), id_target, neighborhood);
+			rand_deck_ring_segment.reset();
 			//for each layers
 			for (size_t i_layer = 0; i_layer != i_target.size(); ++i_layer)
 			{
@@ -250,6 +251,8 @@ namespace Denn
 			//set population size in deck
 			rand_deck.reinit(population.size());
 			rand_deck_ring_segment.reinit(population.size(), id_target, neighborhood);
+			rand_deck.reset();
+			rand_deck_ring_segment.reset();
 			//local / global network
 			NeuralNetwork nn_l(i_final.m_network);
 			NeuralNetwork nn_g(i_final.m_network);

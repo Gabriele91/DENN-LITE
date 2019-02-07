@@ -6,6 +6,7 @@
 #include "DennInstanceUtils.h"
 #include "DennDataset.h"
 #include "DennDatasetLoader.h"
+#include "DennUtilitiesNetworks.h"
 #include <fstream>
 
 namespace Denn
@@ -58,7 +59,8 @@ namespace Denn
 			//network	
 			size_t n_features = m_dataset->get_main_header_info().m_n_features;
 			size_t n_class = m_dataset->get_main_header_info().m_n_classes;
-			m_network = build_mlp_network(n_features, n_class, parameters);
+			m_network = std::get<0>(get_network_from_string(parameters.m_network));
+			//build_mlp_network(n_features, n_class, parameters);
 			////////////////////////////////////////////////////////////////////////////////////////////////
 			m_success_init = true;
 		}

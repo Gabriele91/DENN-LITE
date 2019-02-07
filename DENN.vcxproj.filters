@@ -153,6 +153,27 @@
     <ClInclude Include="include\DennShape.h">
       <Filter>Include</Filter>
     </ClInclude>
+    <ClInclude Include="include\DennConvolutional.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DennUtilitiesConvolution.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DennUtilitiesMath.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DennUtilitiesMatrix.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DennUtilitiesString.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DennUtilitiesVector.h">
+      <Filter>Include</Filter>
+    </ClInclude>
+    <ClInclude Include="include\DennUtilitiesNetworks.h">
+      <Filter>Include</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="source\DennIndividual.cpp">
@@ -324,6 +345,12 @@
       <Filter>Source\DennEvolutionMethod</Filter>
     </ClCompile>
     <ClCompile Include="source\DennFullyConnected.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennConvolutional.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="source\DennUtilitiesNetworks.cpp">
       <Filter>Source</Filter>
     </ClCompile>
   </ItemGroup>
