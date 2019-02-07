@@ -1201,10 +1201,10 @@ namespace Denn
 				conf_skip_comments(line, ptr);
 			}
 			//test
-			auto net_err_succ = get_network_from_string(nnlayout);
-			if (!std::get<2>(net_err_succ))
+			auto test_err_succ = get_network_from_string_test(nnlayout);
+			if (!std::get<1>(test_err_succ))
 			{
-				std::cerr << line << ": network layout error: \'" << std::get<1>(net_err_succ) << std::endl;
+				std::cerr << line << ": network layout error: \'" << std::get<0>(test_err_succ) << std::endl;
 				return false;
 			}
 			//save

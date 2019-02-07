@@ -7,7 +7,9 @@ namespace Denn
 {
 	NNFromStringOut  get_network_from_string
 	(
-		const std::string& network_string
+		const std::string& network_string,
+		const int in_shape1D,
+		const int out_shape1D
 	)
 	{
 		//parser state
@@ -190,6 +192,15 @@ namespace Denn
 						}
 						in_shape = Shape(shape[0], shape[1], shape[2]);
 					break;
+					//0 input, default
+					case 0:
+						if ((0 < in_shape1D) 
+						&&  first 
+						&&  (description->shape_type() & SHAPE_1D))
+						{
+							in_shape = Shape(in_shape1D);
+							break;
+						}
 					default:
 						err += "Shape must to be 1D/2D/3D";
 						return std::make_tuple(nn, err, false);
@@ -246,6 +257,12 @@ namespace Denn
 		return std::make_tuple(nn, err, true);
 	}
 
+
+	TestNNStringOut  get_network_from_string_test(const std::string& network_string)
+	{
+		auto value = get_network_from_string(network_string, 1);
+		return { std::get<1>(value), std::get<2>(value) };
+	}
 
 	std::string  get_string_from_network
 	(

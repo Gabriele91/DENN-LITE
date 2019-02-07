@@ -303,8 +303,7 @@ namespace Denn
 					m_network.get() += str_c_type;
 				}
                 //test
-				auto net_err_succ = get_network_from_string(m_network.get());
-				return std::get<2>(net_err_succ);
+				return std::get<1>(get_network_from_string_test(m_network.get()));
             }
 			,{ "string" }
 		},

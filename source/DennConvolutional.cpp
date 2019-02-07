@@ -1,5 +1,5 @@
 #include "DennConvolutional.h"
-
+#define _metadata(_x, _default) (_x < metadata.size() ? metadata[_x] : _default)
 namespace Denn
 {
 	///////////////////////////////////////	
@@ -32,8 +32,10 @@ namespace Denn
 	: Convolutional
 	(
 	  active_function[0]
+	//shapes
 	, in.width(), in.height(), in.channels()
-	, metadata[0], metadata[1], metadata[2]
+	//inputs
+	, metadata[0], metadata[1], _metadata(2, 1)
 	)
 	{
 	}
