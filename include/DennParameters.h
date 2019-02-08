@@ -73,7 +73,7 @@ namespace Denn
 		ReadOnly<std::string>                m_evolution_type    { "evolution_method","JDE" };
 		ReadOnly<std::string>                m_sub_evolution_type{ "sub_evolution_method","JDE" };
 		//backpropagation + SGD
-		ReadOnly<Scalar>					 m_learning_rate{ "learning_rate", Scalar(0.05) };
+		ReadOnly<Scalar>					 m_learning_rate{ "learning_rate", Scalar(0.01) };
 		ReadOnly<Scalar>					 m_regularize	{ "regularize", Scalar(0.0) };
 		//NN	
 		ReadOnly< std::string >				 m_network { "network" , "fully_connected(linear)", true };

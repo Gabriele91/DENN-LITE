@@ -117,7 +117,8 @@ namespace Denn
 
 		// Derivative for weights
 		internal::ConvDims back_conv_dim(
-			nobs, m_dim.out_channels, m_dim.channel_rows, m_dim.channel_cols,
+			nobs, m_dim.out_channels,
+			m_dim.channel_rows, m_dim.channel_cols,
 			m_dim.conv_rows, m_dim.conv_cols
 		);
 		internal::convolve_valid(
@@ -135,7 +136,7 @@ namespace Denn
 		m_db.noalias() = dLb_by_obs.rowwise().mean();
 
 		// Compute d(L) / d_in = conv_full(d(L) / d(z), w_rotate)
-		m_din.resize(int(out_size()), nobs);
+		m_din.resize(int(in_size()), nobs);
 		internal::ConvDims conv_full_dim(m_dim.out_channels, m_dim.in_channels, m_dim.conv_rows, m_dim.conv_cols, m_dim.filter_rows, m_dim.filter_cols);
 		internal::convolve_full(
 			conv_full_dim, dLz.data(), nobs,

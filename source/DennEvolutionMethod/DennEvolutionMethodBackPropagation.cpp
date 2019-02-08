@@ -6,6 +6,7 @@
 #include "DennMutation.h"
 #include "DennCrossover.h"
 #include "DennCostFunction.h"
+#include "DennDump.h"
 namespace Denn
 {
 	class BACKPROPAGATIONMethod : public EvolutionMethod
@@ -27,15 +28,21 @@ namespace Denn
 		override
 		{
 			//update
-			dpopulation.parents()[i_target]->m_network.fit(
+			i_output.m_network.fit(
 				m_algorithm.current_batch().features(),
-				m_algorithm.current_batch().m_labels,
+				m_algorithm.current_batch().labels(),
 				SGD(m_learning_rate, m_regularize)
 			);
+			//std::cout << Dump::json_matrix(m_algorithm.current_batch().features().leftCols(1)) << std::endl;
+			//std::cout << Dump::json_matrix(m_algorithm.current_batch().labels().leftCols(1)) << std::endl;
+			//std::cout << Dump::json_matrix(i_output.m_network[i_output.m_network.size()-1].ff_output().leftCols(1)) << std::endl;
+			//fake swap 
+			dpopulation.swap(i_target);
 		}
 
 		virtual	void selection(DoubleBufferPopulation& dpopulation) override
 		{
+			dpopulation.swap_all();
 			//none
 		}
 

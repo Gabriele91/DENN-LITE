@@ -50,7 +50,7 @@ public:
 	}
 	/////////////////////////////////////////////////////////////////////////
 	const Matrix& feedforward(const Matrix& input) const;
-	void backpropagate(const Matrix& input, OutputLoss type = MSE);
+	void backpropagate(const Matrix& input, const Matrix& output, OutputLoss type = MSE);
 	void fit(const Matrix& input, 
 			 const Matrix& output,
 			 const Optimizer& opt = SGD(),

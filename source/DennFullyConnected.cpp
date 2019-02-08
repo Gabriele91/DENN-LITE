@@ -80,7 +80,7 @@ namespace Denn
 		m_db.noalias() = dLz.rowwise().mean();
 
 		// Compute d(L) / d_in = W * [d(L) / d(z)]
-		m_din.resize((int)this->m_in_size, nobs);
+		m_din.resize(int(in_size()), nobs);
 		m_din.noalias() = m_weight * dLz;
 
 		//return gradient

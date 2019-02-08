@@ -248,6 +248,13 @@ namespace Denn
 		parents()[i] = sons()[i];
 		sons()[i] = individual_tmp;
 	}
+
+	void DoubleBufferPopulation::swap_all()
+	{
+		for (size_t i = 0; i != parents().size(); ++i)
+			swap(i);
+	}
+
 	//restart
 	void DoubleBufferPopulation::restart
 	(

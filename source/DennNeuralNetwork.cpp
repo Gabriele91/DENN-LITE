@@ -45,7 +45,7 @@ namespace Denn
 		//return
 		return *output;
 	}	
-	void NeuralNetwork::backpropagate(const Matrix& input, OutputLoss oltype)
+	void NeuralNetwork::backpropagate(const Matrix& input, const Matrix& output, OutputLoss oltype)
 	{
 		//ptrs
 		Layer::SPtr first_layer = m_layers[0];
@@ -58,7 +58,12 @@ namespace Denn
 		{
 		default:
 		case Denn::NeuralNetwork::MSE:
-			eval.noalias() = last_layer->ff_output() - input;
+		{
+			const int nobs = last_layer->ff_output().cols();
+			const int nclass = last_layer->ff_output().rows();
+			eval.resize(nclass, nobs);
+			eval.noalias() = last_layer->ff_output() - output;
+		}
 		break;
 		case Denn::NeuralNetwork::MULTICLASS_CROSS_ENTROPY:
 		{
@@ -69,7 +74,7 @@ namespace Denn
 			const int nobs = last_layer->ff_output().cols();
 			const int nclass = last_layer->ff_output().rows();
 			eval.resize(nclass, nobs);
-			eval.noalias() = -input.cwiseQuotient(last_layer->ff_output());
+			eval.noalias() = -output.cwiseQuotient(last_layer->ff_output());
 		}
 		break;
 		case Denn::NeuralNetwork::BINARY_CROSS_ENTROPY:
@@ -82,7 +87,7 @@ namespace Denn
 			const int nobs = last_layer->ff_output().cols();
 			const int nclass = last_layer->ff_output().rows();
 			eval.resize(nclass, nobs);
-			eval.noalias() = (input.array() < Scalar(0.5)).select(
+			eval.noalias() = (output.array() < Scalar(0.5)).select(
 				(Scalar(1) - last_layer->ff_output().array()).cwiseInverse(),
 				-last_layer->ff_output().cwiseInverse()
 			);
@@ -116,7 +121,7 @@ namespace Denn
 		//->
 		feedforward(input);
 		//<-
-		backpropagate(output, type);
+		backpropagate(input, output, type);
 		//update
 		for (auto layer : *this) 
 			layer->update(opt);

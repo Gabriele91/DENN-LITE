@@ -105,6 +105,7 @@ namespace Denn
 		//swap
 		void the_best_sons_become_parents();
 		void swap(size_t i);
+		void swap_all();
 		//restart
 		void restart
 		(
