@@ -31,7 +31,8 @@ namespace Denn
 			i_output.m_network.fit(
 				m_algorithm.current_batch().features(),
 				m_algorithm.current_batch().labels(),
-				SGD(m_learning_rate, m_regularize)
+				SGD(m_learning_rate, m_regularize),
+				NeuralNetwork::MULTICLASS_CROSS_ENTROPY
 			);
 			//std::cout << Dump::json_matrix(m_algorithm.current_batch().features().leftCols(1)) << std::endl;
 			//std::cout << Dump::json_matrix(m_algorithm.current_batch().labels().leftCols(1)) << std::endl;
