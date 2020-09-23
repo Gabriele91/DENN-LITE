@@ -119,7 +119,7 @@
                 "sha256:326420cbb492172dec84b0f65c80942de6cedb5233c413dd824483989c000608",
                 "sha256:5ac82e411044fb129bae5cfbeb3ba626acb2af31a8d17d175004b70862a741a7"
             ],
-            "version": "==3.12"
+            "version": "==4.2b1"
         },
         "singledispatch": {
             "hashes": [
